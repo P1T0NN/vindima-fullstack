@@ -7,10 +7,16 @@
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 
 	// COMPONENTS
+	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
 </script>
+
+<SvelteHead
+	title="Bebidas"
+	description="Selección de bodega por copa y botella. Vinos de autor y maridajes de Vindima."
+/>
 
 <Section
 	contain={false}
@@ -39,26 +45,26 @@
 			href="{resolve('/')}#shop"
 			class="mb-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-primary uppercase no-underline transition-colors hover:text-accent-foreground"
 		>
-			← Back to shop
+			← Volver a la tienda
 		</a>
 
 		<div class="mb-8 flex flex-wrap items-center gap-7">
 			<img
 				src={ASSETS_DATA.GLASS}
-				alt="Drinks"
+				alt="Bebidas"
 				class="h-32 shrink-0"
 				loading="lazy"
 				decoding="async"
 			/>
 			<div>
-				<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Author wine</p>
+				<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Vino de autor</p>
 				<h1
 					class="font-display text-4xl leading-none font-semibold tracking-wide text-background uppercase sm:text-5xl"
 				>
-					Drinks
+					Bebidas
 				</h1>
 				<p class="mt-3.5 max-w-md text-sm leading-relaxed text-accent-surface-muted">
-					Cellar selection by the glass and bottle. Ask about today's pairing.
+					Selección de bodega por copa y botella. Pregunta por el maridaje del día.
 				</p>
 			</div>
 		</div>
@@ -69,7 +75,7 @@
 			class="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/35 bg-primary/10 px-5 py-5"
 		>
 			<p class="text-sm leading-snug text-background">
-				Want a private tasting or bottles for your event?
+				¿Quieres una cata privada o botellas para tu evento?
 			</p>
 			<Button
 				href={COMPANY_DATA.WHATSAPP_CONTACT_URL}
@@ -78,7 +84,7 @@
 				variant="whatsapp"
 				class="h-auto px-6 py-4 text-xs tracking-wider uppercase"
 			>
-				Order via WhatsApp
+				Pedir por WhatsApp
 			</Button>
 		</div>
 	</div>

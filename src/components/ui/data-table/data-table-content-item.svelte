@@ -44,7 +44,7 @@
 			<Checkbox
 				checked={isSelected}
 				onCheckedChange={() => onToggle?.()}
-				aria-label={isSelected ? 'Deselect row' : 'Select row'}
+				aria-label={isSelected ? 'Quitar selección de fila' : 'Seleccionar fila'}
 			/>
 		</TableCell>
 	{/if}

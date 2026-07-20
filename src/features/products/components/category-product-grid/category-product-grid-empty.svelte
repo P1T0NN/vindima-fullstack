@@ -13,8 +13,8 @@
 
 	let {
 		class: className,
-		title = 'No products available right now',
-		description = 'Check back soon — we update the menu regularly.',
+		title = 'No hay productos disponibles por ahora',
+		description = 'Vuelve pronto — actualizamos el menú con frecuencia.',
 		showShopLink = true
 	}: {
 		class?: string;
@@ -45,7 +45,7 @@
 			variant="outline"
 			class="mt-1 h-auto px-5 py-3 text-xs tracking-wider uppercase"
 		>
-			Browse other categories
+			Ver otras categorías
 		</Button>
 	{/if}
 </div>

@@ -1,6 +1,4 @@
 <script lang="ts">
-	// LIBRARIES
-
 	// CONFIG
 	import { COMPANY_DATA } from '@/shared/config.js';
 
@@ -15,33 +13,35 @@
 	yPadding="none"
 	surface="background"
 	class="py-16 pb-24 sm:pb-28"
-	containerClass="max-w-6xl"
+	containerClass="max-w-270"
 >
-	<div class="mb-12 text-center">
+	<div class="mb-12.5 text-center">
 		<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">
-			We are here for you
+			Estamos para atenderte
 		</p>
 		<h2
 			class="font-display text-4xl leading-none font-semibold tracking-wide text-accent uppercase sm:text-5xl"
 		>
-			Contact
+			Contacto
 		</h2>
 	</div>
 
-	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-stretch">
-		<Card class="gap-0 rounded-xl border-0 bg-accent px-8 py-12 text-accent-surface-muted sm:px-11">
-			<p class="mb-2.5 text-xs font-medium tracking-widest text-primary uppercase">
-				Write to us directly
+	<div class="grid grid-cols-1 gap-6.5 lg:grid-cols-2 lg:items-stretch">
+		<Card
+			class="gap-0 justify-center rounded-xl border-0 bg-accent px-11 py-12 text-accent-surface-muted"
+		>
+			<p class="mb-2.5 text-[11px] font-medium tracking-[0.24em] text-primary uppercase">
+				Escríbenos directo
 			</p>
 			<h3
-				class="mb-3.5 font-display text-3xl leading-tight font-semibold text-background uppercase sm:text-4xl"
+				class="mb-3.5 font-display text-3xl leading-tight font-semibold text-accent-foreground uppercase sm:text-[34px] sm:leading-[1.04]"
 			>
-				Reserve or<br />
-				place your order
+				Reserva o haz<br />
+				tu pedido
 			</h3>
-			<p class="mb-7 max-w-sm text-sm leading-relaxed">
-				The fastest way to reserve a table, order boards or ask about wine is on WhatsApp. We reply
-				within minutes.
+			<p class="mb-7 max-w-85 text-sm leading-relaxed">
+				La forma más rápida de reservar mesa, ordenar tablas o preguntar por vino es por WhatsApp.
+				Te respondemos en minutos.
 			</p>
 			<Button
 				href={COMPANY_DATA.WHATSAPP_CONTACT_URL}
@@ -66,34 +66,38 @@
 			</Button>
 		</Card>
 
-		<Card class="gap-7 rounded-xl border border-accent/10 bg-card px-8 py-12 sm:px-11">
+		<Card class="gap-6.5 justify-center rounded-xl border border-accent/12 bg-card px-11 py-12">
 			<div>
-				<p class="mb-2 text-xs font-semibold tracking-widest text-chart-2 uppercase">
-					Where we are
+				<p class="mb-2 text-[10.5px] font-semibold tracking-[0.18em] text-chart-2 uppercase">
+					Dónde estamos
 				</p>
-				<p class="text-sm leading-relaxed text-foreground">
-					Downtown, Aguascalientes<br />
-					Aguascalientes, Mexico
-				</p>
-			</div>
-
-			<div class="h-px bg-accent/10" aria-hidden="true"></div>
-
-			<div>
-				<p class="mb-2 text-xs font-semibold tracking-widest text-chart-2 uppercase">Hours</p>
-				<p class="text-sm leading-relaxed text-foreground">
-					Tuesday to Sunday<br />
-					1:00 PM – 11:00 PM
+				<p class="text-[14.5px] leading-relaxed text-foreground">
+					Centro, Aguascalientes<br />
+					Aguascalientes, México
 				</p>
 			</div>
 
 			<div class="h-px bg-accent/10" aria-hidden="true"></div>
 
 			<div>
-				<p class="mb-2 text-xs font-semibold tracking-widest text-chart-2 uppercase">Contact</p>
-				<p class="text-sm leading-relaxed text-foreground">
+				<p class="mb-2 text-[10.5px] font-semibold tracking-[0.18em] text-chart-2 uppercase">
+					Horario
+				</p>
+				<p class="text-[14.5px] leading-relaxed text-foreground">
+					Martes a Domingo<br />
+					13:00 – 23:00
+				</p>
+			</div>
+
+			<div class="h-px bg-accent/10" aria-hidden="true"></div>
+
+			<div>
+				<p class="mb-2 text-[10.5px] font-semibold tracking-[0.18em] text-chart-2 uppercase">
+					Contacto
+				</p>
+				<p class="text-[14.5px] leading-relaxed text-foreground">
 					{COMPANY_DATA.EMAIL}<br />
-					449 000 0000
+					{COMPANY_DATA.PHONE}
 				</p>
 			</div>
 		</Card>

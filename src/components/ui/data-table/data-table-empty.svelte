@@ -22,8 +22,8 @@
 
 	let {
 		class: className,
-		title = 'No results',
-		description = 'Nothing to show yet. Try adjusting filters or add new data.',
+		title = 'Sin resultados',
+		description = 'Aún no hay nada que mostrar. Prueba a ajustar los filtros o añade datos nuevos.',
 		children
 	}: Props = $props();
 </script>

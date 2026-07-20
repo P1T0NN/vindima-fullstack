@@ -38,6 +38,13 @@ export const AUDIT_ACTIONS = {
 	CATEGORY_RENAME: 'product.category.rename',
 	CATEGORY_DELETE: 'product.category.delete',
 
+	// Orders
+	ORDER_REFUND: 'order.refund',
+
+	// Rewards
+	REWARD_ADJUST: 'reward.adjust',
+	REWARD_ACCOUNT_REBUILD: 'reward.account.rebuild',
+
 	// Files
 	FILE_UPLOAD: 'file.upload',
 	FILE_DELETE: 'file.delete'

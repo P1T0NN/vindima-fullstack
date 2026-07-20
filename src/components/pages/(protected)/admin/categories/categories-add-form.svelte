@@ -27,7 +27,7 @@
 		try {
 			const res = await safeMutation(
 				convex,
-				api.tables.products.mutations.createCategory.createCategory,
+				api.tables.productCategories.mutations.createCategory.createCategory,
 				{ name }
 			);
 			if (toastResult(res)) name = '';
@@ -39,17 +39,17 @@
 
 <form onsubmit={add} class="flex items-end gap-3">
 	<div class="flex max-w-xs flex-1 flex-col gap-1.5">
-		<label for="category-name-{id}" class="text-sm font-medium">Category name</label>
+		<label for="category-name-{id}" class="text-sm font-medium">Nombre de categoría</label>
 		<Input
 			id="category-name-{id}"
 			bind:value={name}
-			placeholder="e.g. Cheese Boards"
+			placeholder="p. ej. Tablas de queso"
 			required
 			disabled={busy}
 		/>
 	</div>
 	<Button type="submit" disabled={busy || !name.trim()}>
 		<PlusIcon class="size-4" />
-		Add category
+		Agregar categoría
 	</Button>
 </form>

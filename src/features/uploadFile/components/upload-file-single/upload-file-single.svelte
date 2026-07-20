@@ -7,23 +7,29 @@
 	import { cn } from '@/utils/utils.js';
 	import { useFileUpload } from '../../utils/useFileUpload.svelte';
 
+	// TYPES
+	import type { UploadFileEntry } from '@/features/uploadFile/types/uploadFileTypes';
+
 	type Props = {
 		class?: string;
 		file?: File | null;
 		/** Kept empty in single mode; bind for API symmetry with multiple. */
-		files?: File[];
+		files?: UploadFileEntry[];
 		accept?: string;
 		disabled?: boolean;
 		id?: string;
+		/** Validation failed for this field — paints the dropzone destructive. */
+		invalid?: boolean;
 	};
 
 	let {
 		class: className,
 		file = $bindable<File | null>(null),
-		files = $bindable<File[]>([]),
+		files = $bindable<UploadFileEntry[]>([]),
 		accept,
 		disabled = false,
-		id: inputId
+		id: inputId,
+		invalid = false
 	}: Props = $props();
 
 	const pickerInputId = $derived(inputId ?? 'upload-file-input-single');
@@ -57,6 +63,7 @@
 			{disabled}
 			multipleFiles={false}
 			dragOver={upload.dragOver}
+			{invalid}
 			bind:fileInputRef={upload.inputRef}
 			onFileInputChange={upload.handleInputChange}
 			onDragEnter={() => {

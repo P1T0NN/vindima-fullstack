@@ -45,8 +45,8 @@
 	const canPickup = CHECKOUT_CONFIG.FULFILLMENT.PICKUP;
 	const canDeliver = CHECKOUT_CONFIG.FULFILLMENT.DELIVERY !== null;
 	const modeOptions = [
-		...(canPickup ? [{ value: 'pickup', label: 'Pickup in store' }] : []),
-		...(canDeliver ? [{ value: 'delivery', label: 'Delivery' }] : [])
+		...(canPickup ? [{ value: 'pickup', label: 'Recoger en tienda' }] : []),
+		...(canDeliver ? [{ value: 'delivery', label: 'Entrega a domicilio' }] : [])
 	];
 
 	// Prefill source, read once at init. The two cover each other's blind spot: `authClass` is live

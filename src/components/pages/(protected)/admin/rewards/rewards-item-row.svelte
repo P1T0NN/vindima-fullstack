@@ -7,7 +7,7 @@
 	import { CART_CONFIG } from '@/shared/config';
 
 	// COMPONENTS
-	import { Button } from '@/components/ui/button/index.js';
+	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 
 	// UTILS
 	import { safeMutation } from '@/utils/convexHelpers';
@@ -15,22 +15,26 @@
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 
 	// TYPES
-	import type { Doc } from '@/convex/_generated/dataModel';
+	import type { RewardItemRow } from '@/shared/features/productVariants/types/productVariantsTypes';
 
 	// LUCIDE ICONS
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
-	let { variant, product }: { variant: Doc<'productVariants'>; product: Doc<'products'> } =
-		$props();
+	// Rendered inside ConvexDataList's <li> (see /admin/rewards).
+	let { item }: { item: RewardItemRow } = $props();
 
 	const convex = useConvexClient();
 	let busy = $state(false);
 
 	const displayName = $derived(
-		variant.label ? `${product.name} · ${variant.label}` : product.name
+		item.product
+			? item.label
+				? `${item.product.name} · ${item.label}`
+				: item.product.name
+			: item.ref
 	);
 	// Customers only see redeemable items — flag anything the snapshot is hiding right now.
-	const notPurchasable = $derived(product.status !== 'active' || !variant.available);
+	const notPurchasable = $derived(item.product?.status !== 'active' || !item.available);
 
 	async function remove() {
 		if (busy) return;
@@ -38,8 +42,8 @@
 		try {
 			const res = await safeMutation(
 				convex,
-				api.tables.products.mutations.setVariantRewardEligible.setVariantRewardEligible,
-				{ variantId: variant._id, eligible: false }
+				api.tables.productVariants.mutations.setVariantRewardEligible.setVariantRewardEligible,
+				{ variantId: item._id, eligible: false }
 			);
 			toastResult(res);
 		} finally {
@@ -48,34 +52,37 @@
 	}
 </script>
 
-<li class="flex items-center justify-between gap-3 py-3">
+<div class="flex items-center justify-between gap-3 py-3">
 	<div class="flex min-w-0 items-center gap-3">
 		<span class="size-9 shrink-0 overflow-hidden rounded-md bg-muted">
-			{#if product.images[0]}
-				<img src={product.images[0]} alt="" class="size-full object-cover" />
+			{#if item.product?.images[0]}
+				<img src={item.product.images[0]} alt="" class="size-full object-cover" />
 			{/if}
 		</span>
 		<div class="min-w-0">
 			<p class="truncate font-medium">{displayName}</p>
 			<p class="text-xs text-muted-foreground">
-				{formatMoneyMinor(variant.priceMinor, CART_CONFIG.CURRENCY)}
+				{formatMoneyMinor(item.priceMinor, CART_CONFIG.CURRENCY)}
 				{#if notPurchasable}
-					<span class="text-destructive"> · Not currently purchasable — hidden from customers</span>
+					<span class="text-destructive">
+						· No disponible para compra — oculto para los clientes</span
+					>
 				{/if}
 			</p>
 		</div>
 	</div>
 
-	<Button
-		type="button"
+	<ActionButton
+		function={remove}
 		variant="ghost"
 		size="sm"
 		class="shrink-0 text-destructive hover:text-destructive"
-		onclick={remove}
-		disabled={busy}
-		aria-label={`Remove ${displayName} from reward items`}
+		isDestructive
+		isPending={busy}
+		title={`¿Quitar ${displayName} de las recompensas?`}
+		description={`Los clientes ya no pueden elegir ${displayName} como artículo gratis. Si alguien ya lo tiene reservado, la reserva sigue siendo válida — la eliminación solo impide nuevos canjes.`}
 	>
 		<Trash2Icon class="size-4" />
-		Remove
-	</Button>
-</li>
+		Eliminar
+	</ActionButton>
+</div>

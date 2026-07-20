@@ -13,7 +13,7 @@
 		class?: string;
 	};
 
-	let { value, label = 'Copy', class: className }: Props = $props();
+	let { value, label = 'Copiar', class: className }: Props = $props();
 
 	let copied = $state(false);
 	let timer: ReturnType<typeof setTimeout> | null = null;
@@ -47,8 +47,8 @@
 	variant="ghost"
 	size="icon-sm"
 	class={className}
-	aria-label={copied ? 'Copied' : label}
-	title={copied ? 'Copied' : label}
+	aria-label={copied ? 'Copiado' : label}
+	title={copied ? 'Copiado' : label}
 	onclick={handleCopy}
 >
 	{#if copied}

@@ -96,9 +96,9 @@
 <div class="flex flex-col gap-4">
 	<header class="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
 		<div class="flex flex-col gap-0.5">
-			<h2 class="text-base font-semibold">Active sessions</h2>
+			<h2 class="text-base font-semibold">Sesiones activas</h2>
 			<p class="text-sm text-muted-foreground">
-				Devices currently signed in. Revoking signs the device out immediately.
+				Dispositivos con sesión iniciada. Revocar cierra la sesión de inmediato.
 			</p>
 		</div>
 		<Button
@@ -106,19 +106,19 @@
 			onclick={revokeAll}
 			disabled={isRevokingAll || sessions.length === 0}
 		>
-			Revoke all
+			Revocar todas
 		</Button>
 	</header>
 
 	{#if sessionsQuery.error}
-		<p class="text-sm text-destructive">Failed to load sessions.</p>
+		<p class="text-sm text-destructive">No se pudieron cargar las sesiones.</p>
 	{:else if sessionsQuery.data === undefined}
 		<div class="flex flex-col gap-2">
 			<Skeleton class="h-16 w-full" />
 			<Skeleton class="h-16 w-full" />
 		</div>
 	{:else if sessions.length === 0}
-		<p class="text-sm text-muted-foreground">No active sessions.</p>
+		<p class="text-sm text-muted-foreground">Sin sesiones activas.</p>
 	{:else}
 		<ul class="flex flex-col gap-2">
 			{#each sessions as session (session.token)}
@@ -127,13 +127,13 @@
 				>
 					<div class="flex min-w-0 flex-1 flex-col gap-1">
 						<span class="text-sm font-medium break-all" title={session.userAgent ?? ''}>
-							{session.userAgent || 'Unknown device'}
+							{session.userAgent || 'Dispositivo desconocido'}
 						</span>
 
 						<div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
 							<span>IP: {session.ipAddress || '—'}</span>
-							<span>Created: {formatTs(session.createdAt)}</span>
-							<span>Expires: {formatTs(session.expiresAt)}</span>
+							<span>Creado: {formatTs(session.createdAt)}</span>
+							<span>Expira: {formatTs(session.expiresAt)}</span>
 						</div>
 					</div>
 
@@ -143,7 +143,7 @@
 						onclick={() => revokeOne(session)}
 						disabled={revokingTokens.has(session.token)}
 					>
-						Revoke
+						Revocar
 					</Button>
 				</li>
 			{/each}

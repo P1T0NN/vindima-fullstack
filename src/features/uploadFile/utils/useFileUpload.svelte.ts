@@ -2,7 +2,7 @@
 import { SvelteSet } from 'svelte/reactivity';
 
 // TYPES
-import type { UploadFileRow } from '../types/uploadFileTypes';
+import type { UploadFileEntry, UploadFileRow } from '../types/uploadFileTypes';
 
 export type UseFileUploadMode = 'single' | 'multiple';
 
@@ -10,23 +10,24 @@ export type UseFileUploadArgs = {
 	mode: UseFileUploadMode;
 	getFile: () => File | null;
 	setFile: (f: File | null) => void;
-	getFiles: () => File[];
-	setFiles: (f: File[]) => void;
+	getFiles: () => UploadFileEntry[];
+	setFiles: (f: UploadFileEntry[]) => void;
 	getDisabled: () => boolean;
 };
 
 /**
- * Stable key for a File, used for dedup and preview map lookups.
+ * Stable key for a list entry, used for dedup and preview map lookups. Existing-image
+ * entries (strings) key by their URL/ref; Files by name+size+mtime.
  * Re-exported so sub-components can reference the same key logic.
  */
-export function fileKey(f: File): string {
-	return `${f.name}-${f.size}-${f.lastModified}`;
+export function fileKey(f: UploadFileEntry): string {
+	return typeof f === 'string' ? f : `${f.name}-${f.size}-${f.lastModified}`;
 }
 
 /**
- * Per-row key combining file identity and positional index.
+ * Per-row key combining entry identity and positional index.
  */
-export function previewKey(f: File, index: number): string {
+export function previewKey(f: UploadFileEntry, index: number): string {
 	return `${fileKey(f)}#${index}`;
 }
 
@@ -46,7 +47,9 @@ export function useFileUpload(args: UseFileUploadArgs) {
 	// --- derived -----------------------------------------------------------
 
 	const displayList = $derived(
-		mode === 'single' ? ((f: File | null): File[] => (f ? [f] : []))(getFile()) : getFiles()
+		mode === 'single'
+			? ((f: File | null): UploadFileEntry[] => (f ? [f] : []))(getFile())
+			: getFiles()
 	);
 
 	const isEmpty = $derived(mode === 'single' ? getFile() === null : getFiles().length === 0);
@@ -66,15 +69,21 @@ export function useFileUpload(args: UseFileUploadArgs) {
 	$effect(() => {
 		const list = displayList;
 		const next: Record<string, string> = {};
+		// Only object URLs created here need revoking — existing-image entries preview
+		// with their own URL untouched.
+		const created: string[] = [];
 		list.forEach((f, index) => {
-			if (f.type.startsWith('image/')) {
-				next[previewKey(f, index)] = URL.createObjectURL(f);
+			if (typeof f === 'string') {
+				next[previewKey(f, index)] = f;
+			} else if (f.type.startsWith('image/')) {
+				const url = URL.createObjectURL(f);
+				next[previewKey(f, index)] = url;
+				created.push(url);
 			}
 		});
-		const revoke = next;
 		previewUrls = next;
 		return () => {
-			for (const u of Object.values(revoke)) URL.revokeObjectURL(u);
+			for (const u of created) URL.revokeObjectURL(u);
 		};
 	});
 

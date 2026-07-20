@@ -9,7 +9,8 @@ export const ADMIN_PAGE_ENDPOINTS = {
 	ADD_PRODUCT: resolve('/admin/products/add-product'),
 	EDIT_PRODUCT: resolve('/admin/products/edit-product/:id'),
 	CATEGORIES: resolve('/admin/categories'),
-	REWARDS: resolve('/admin/rewards')
+	REWARDS: resolve('/admin/rewards'),
+	ORDERS: resolve('/admin/orders')
 } as const;
 
 export const PROTECTED_PAGE_ENDPOINTS = {
@@ -29,6 +30,6 @@ export const UNPROTECTED_PAGE_ENDPOINTS = {
 	CONTACT: '#contact',
 	SHOP: '#shop',
 	ABOUT: '#about',
-	EVENTS: '#events',
-	NEWS: '#news'
+	MARIDAJES: '#maridajes',
+	EVENTS: '#events'
 } as const;

@@ -87,7 +87,7 @@ export function createPasswordResetForm() {
 
 		if (submittedNewPassword !== confirmPassword) {
 			fieldErrors = {
-				confirmPassword: 'Passwords must match.'
+				confirmPassword: 'Las contraseñas deben coincidir.'
 			};
 			errorMessage = null;
 			return;
@@ -107,12 +107,12 @@ export function createPasswordResetForm() {
 				console.error('Password reset: verification failed:', error);
 				if (/password/i.test(error.message ?? '')) {
 					fieldErrors = {
-						newPassword: error.message ?? 'Invalid or expired code. Please try again.'
+						newPassword: error.message ?? 'Código inválido o expirado. Inténtalo de nuevo.'
 					};
 				} else {
 					errorMessage = rateLimitMessage(
 						error.message,
-						'Invalid or expired code. Please try again.'
+						'Código inválido o expirado. Inténtalo de nuevo.'
 					);
 				}
 				busy = false;
@@ -120,12 +120,12 @@ export function createPasswordResetForm() {
 			}
 		} catch (error) {
 			console.error('Password reset: verification failed:', error);
-			errorMessage = 'Invalid or expired code. Please try again.';
+			errorMessage = 'Código inválido o expirado. Inténtalo de nuevo.';
 			busy = false;
 			return;
 		}
 
-		toast.success('Password reset successfully.');
+		toast.success('Contraseña restablecida correctamente.');
 		await appGoto(UNPROTECTED_PAGE_ENDPOINTS.ROOT);
 		busy = false;
 	}

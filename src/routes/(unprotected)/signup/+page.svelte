@@ -11,6 +11,7 @@
 	import { BirthdayInput } from '@/components/ui/birthday-input/index.js';
 	import { Label } from '@/components/ui/label/index.js';
 	import Link from '@/components/ui/link/link.svelte';
+	import Logo from '@/components/ui/logo/logo.svelte';
 	import Section from '@/components/ui/section/section.svelte';
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import GoogleLoginButton from '@/features/auth/components/google-login-button/google-login-button.svelte';
@@ -22,20 +23,24 @@
 	const id = $props.id();
 
 	const benefits = [
-		() => '10% off the entire shop',
-		() => 'Birthday gift',
-		() => '5 purchases = 1 reward',
-		() => 'Early access to events'
+		() => '10% de descuento en toda la tienda',
+		() => 'Regalo de cumpleaños',
+		() => '5 compras = 1 recompensa',
+		() => 'Maridajes pensados para tu mesa'
 	] as const;
 
 	const form = createSignUpPageForm({
 		signUpFailed: () =>
-			"We couldn't create your account. Check your details and try again, or sign in if you already have one.",
-		accountCreatedToast: () => 'Account created successfully.'
+			'No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo, o inicia sesión si ya tienes una.',
+		accountCreatedToast: () => 'Cuenta creada correctamente.'
 	});
 </script>
 
-<SvelteHead title="Create account" />
+<SvelteHead
+	title="Crear cuenta"
+	noindex
+	description="Únete al club Vindima para obtener recompensas, ahorros para miembros y maridajes pensados para tu mesa."
+/>
 
 <Section yPadding="none" class="bg-secondary py-16 pb-24 sm:pb-28">
 	<Card
@@ -44,18 +49,9 @@
 		<div
 			class="flex flex-col justify-center bg-accent px-8 py-12 text-accent-surface-muted sm:px-11"
 		>
-			<div
-				class="mb-8 flex size-36 flex-col items-center justify-center self-start rounded-full border-2 border-primary"
-			>
-				<span class="font-display text-4xl leading-none font-semibold text-primary sm:text-5xl">
-					10%
-				</span>
-				<span class="mt-1 text-xs font-medium tracking-widest text-accent-surface-muted uppercase">
-					off
-				</span>
-			</div>
+			<Logo size="lg" class="mb-8 self-start" />
 
-			<p class="mb-3 text-xs font-medium tracking-widest text-primary uppercase">Membership</p>
+			<p class="mb-3 text-xs font-medium tracking-widest text-primary uppercase">Membresía</p>
 			<h1
 				class="mb-6 font-display text-4xl leading-none font-semibold tracking-wide text-background uppercase"
 			>
@@ -76,10 +72,10 @@
 		<div class="bg-card px-8 py-12 sm:px-11">
 			{#if form.step === 'signUp'}
 				<h2 class="mb-1.5 font-display text-3xl font-semibold tracking-wide text-accent uppercase">
-					Create my account
+					Crear mi cuenta
 				</h2>
 				<p class="mb-6 text-sm leading-relaxed text-muted-foreground">
-					Join in one minute and start earning rewards.
+					Regístrate en un minuto y empieza a ganar recompensas.
 				</p>
 
 				<form class="flex flex-col gap-4" onsubmit={form.onSignUpSubmit}>
@@ -89,7 +85,7 @@
 								for="signup-first-name-{id}"
 								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 							>
-								First name
+								Nombre
 							</Label>
 							<Input
 								id="signup-first-name-{id}"
@@ -111,7 +107,7 @@
 								for="signup-last-name-{id}"
 								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 							>
-								Last name
+								Apellido
 							</Label>
 							<Input
 								id="signup-last-name-{id}"
@@ -132,7 +128,7 @@
 								for="signup-email-{id}"
 								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 							>
-								Email
+								Correo electrónico
 							</Label>
 							<Input
 								id="signup-email-{id}"
@@ -154,7 +150,7 @@
 								for="signup-password-{id}"
 								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 							>
-								Password
+								Contraseña
 							</Label>
 							<PasswordInput
 								id="signup-password-{id}"
@@ -174,7 +170,7 @@
 								for="signup-confirm-password-{id}"
 								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 							>
-								Confirm password
+								Confirmar contraseña
 							</Label>
 							<PasswordInput
 								id="signup-confirm-password-{id}"
@@ -194,7 +190,7 @@
 								for="signup-phone-{id}"
 								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 							>
-								Phone (optional)
+								Teléfono (opcional)
 							</Label>
 							<Input
 								id="signup-phone-{id}"
@@ -215,7 +211,7 @@
 								for="signup-birthday-{id}"
 								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 							>
-								Birthday (DD/MM)
+								Cumpleaños (DD/MM)
 							</Label>
 							<BirthdayInput
 								id="signup-birthday-{id}"
@@ -241,7 +237,7 @@
 						disabled={form.busy}
 						class="mt-2 h-auto w-full justify-center px-6 py-3.5 text-sm tracking-wider uppercase"
 					>
-						Create my account
+						Crear mi cuenta
 					</Button>
 
 					<div class="relative my-2">
@@ -251,7 +247,7 @@
 						<p
 							class="relative mx-auto w-fit bg-card px-3 text-xs tracking-wide text-muted-foreground uppercase"
 						>
-							Or continue with
+							O continúa con
 						</p>
 					</div>
 
@@ -260,12 +256,12 @@
 					/>
 
 					<p class="text-center text-xs leading-snug text-muted-foreground/80">
-						Already a member?
+						¿Ya eres miembro?
 						<Link
 							href={UNPROTECTED_PAGE_ENDPOINTS.LOGIN}
 							class="text-chart-2 no-underline hover:underline"
 						>
-							Sign in
+							Iniciar sesión
 						</Link>
 					</p>
 				</form>

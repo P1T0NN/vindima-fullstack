@@ -26,8 +26,8 @@
 	function removeWithUndo() {
 		const { productRef, qty } = line;
 		cart.remove(productRef);
-		toast('Removed from cart', {
-			action: { label: 'Undo', onClick: () => cart.add(productRef, qty) }
+		toast('Eliminado del carrito', {
+			action: { label: 'Deshacer', onClick: () => cart.add(productRef, qty) }
 		});
 	}
 </script>
@@ -46,7 +46,7 @@
 				<p class="truncate text-sm font-medium text-foreground">{product.name}</p>
 				{#if available && line.qty > 1}
 					<p class="mt-0.5 text-xs text-muted-foreground">
-						{`${money(product.unitPriceMinor!)} each`}
+						{`${money(product.unitPriceMinor!)} c/u`}
 					</p>
 				{/if}
 			</div>
@@ -66,14 +66,14 @@
 						class="inline-flex size-9 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
 						onclick={() => cart.setQty(line.productRef, line.qty - 1)}
 						disabled={line.qty <= 1}
-						aria-label={`Decrease quantity of ${product.name}`}
+						aria-label={`Disminuir cantidad de ${product.name}`}
 					>
 						<MinusIcon class="size-4" />
 					</button>
 					<output
 						class="min-w-8 px-1 text-center text-sm font-medium tabular-nums"
 						aria-live="polite"
-						aria-label={`Quantity of ${product.name}`}
+						aria-label={`Cantidad de ${product.name}`}
 					>
 						{line.qty}
 					</output>
@@ -82,13 +82,13 @@
 						class="inline-flex size-9 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
 						onclick={() => cart.setQty(line.productRef, line.qty + 1)}
 						disabled={line.qty >= CART_CONFIG.MAX_QTY_PER_LINE}
-						aria-label={`Increase quantity of ${product.name}`}
+						aria-label={`Aumentar cantidad de ${product.name}`}
 					>
 						<PlusIcon class="size-4" />
 					</button>
 				</div>
 			{:else}
-				<span class="text-xs font-medium text-muted-foreground">No longer available</span>
+				<span class="text-xs font-medium text-muted-foreground">Ya no está disponible</span>
 			{/if}
 
 			<button
@@ -96,7 +96,7 @@
 				class="text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
 				onclick={removeWithUndo}
 			>
-				Remove
+				Eliminar
 			</button>
 		</div>
 	</div>

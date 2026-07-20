@@ -24,39 +24,39 @@ export function editProductSections(
 	return [
 		{
 			id: 'details',
-			title: 'Product details',
-			description: 'What shoppers see on the card and in the cart.',
+			title: 'Detalles del producto',
+			description: 'Lo que ven los clientes en la ficha y en el carrito.',
 			fields: [
 				{
 					id: 'name',
-					label: 'Name',
+					label: 'Nombre',
 					kind: 'input',
 					required: true,
-					placeholder: 'e.g. Cheese board'
+					placeholder: 'p. ej. Tabla de quesos'
 				},
 				{
 					id: 'description',
-					label: 'Description',
+					label: 'Descripción',
 					kind: 'textarea',
 					rows: 2,
-					placeholder: 'Short text shown on the product card…'
+					placeholder: 'Texto breve que aparece en la ficha del producto…'
 				},
 				{
 					id: 'slug',
 					label: 'Slug',
 					kind: 'input',
 					disabled: true,
-					description: 'Permanent ID — cannot be changed after creation.',
+					description: 'Identificador permanente — no se puede cambiar tras la creación.',
 					colSpan: 1
 				},
 				{
 					id: 'category',
-					label: 'Category',
+					label: 'Categoría',
 					kind: 'select',
 					required: true,
 					options: categoryOptions,
-					selectPlaceholder: 'Choose a category',
-					description: 'Shop pages group and filter by this.',
+					selectPlaceholder: 'Elige una categoría',
+					description: 'La tienda agrupa y filtra por esta categoría.',
 					colSpan: 1
 				}
 			]
@@ -64,22 +64,23 @@ export function editProductSections(
 		{
 			id: 'merchandising',
 			title: 'Merchandising',
-			description: 'Image, ordering, and highlighting in listings.',
+			description: 'Imagen, orden y destacado en los listados.',
 			fields: [
 				{
 					id: 'images',
-					label: 'Replace images',
+					label: 'Imágenes',
 					kind: 'upload-multiple',
 					accept: 'image/*',
+					hasCoverImage: true,
 					description:
-						'Optional — upload to replace the current images; leave empty to keep them. First image is the cover.'
+						'Marca una como portada; añade o quita libremente (no hace falta volver a subir). Se requiere al menos una imagen.'
 				},
 				// Toggles get their own full-width row — never inline with inputs.
 				{
 					id: 'featured',
-					label: 'Featured',
+					label: 'Destacado',
 					kind: 'switch',
-					description: 'Shows the highlight badge.'
+					description: 'Muestra la insignia de destacado.'
 				}
 			]
 		}

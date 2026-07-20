@@ -21,14 +21,14 @@
 	</div>
 
 	<div class="flex flex-col gap-1">
-		<h2 class="text-lg font-semibold">Product not found</h2>
+		<h2 class="text-lg font-semibold">Producto no encontrado</h2>
 		<p class="max-w-sm text-sm text-muted-foreground">
-			The product you're looking for doesn't exist or may have been deleted.
+			El producto que buscas no existe o pudo haber sido eliminado.
 		</p>
 	</div>
 
 	<Button variant="outline" size="sm" onclick={() => appGoto(ADMIN_PAGE_ENDPOINTS.PRODUCTS)}>
 		<ArrowLeftIcon class="size-4" />
-		Back to products
+		Volver a productos
 	</Button>
 </div>

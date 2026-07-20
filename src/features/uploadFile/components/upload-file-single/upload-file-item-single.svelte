@@ -1,6 +1,4 @@
 <script lang="ts">
-	// LIBRARIES
-
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
 
@@ -10,10 +8,13 @@
 	// LUCIDE ICONS
 	import FileTextIcon from '@lucide/svelte/icons/file-text';
 
+	// TYPES
+	import type { UploadFileEntry } from '@/features/uploadFile/types/uploadFileTypes';
+
 	type Props = {
 		class?: string;
-		file: File;
-		files?: File[];
+		file: UploadFileEntry;
+		files?: UploadFileEntry[];
 		selectedFile?: File | null;
 		pickerInputId: string;
 		previewUrl?: string | null;
@@ -22,7 +23,7 @@
 	let {
 		class: className,
 		file,
-		files = $bindable<File[]>([]),
+		files = $bindable<UploadFileEntry[]>([]),
 		selectedFile = $bindable<File | null>(null),
 		pickerInputId,
 		previewUrl = null
@@ -36,6 +37,13 @@
 		return `${parseFloat((bytes / Math.pow(k, i)).toFixed(i > 0 ? 1 : 0))} ${sizes[i]}`;
 	}
 
+	// Existing-image entries are URL/ref strings; display their last path segment.
+	const displayName = $derived(
+		typeof file === 'string'
+			? (decodeURIComponent(file.split('/').pop()?.split('?')[0] ?? '') || 'Imagen')
+			: file.name
+	);
+
 	function replace() {
 		document.getElementById(pickerInputId)?.click();
 	}
@@ -45,32 +53,41 @@
 	}
 </script>
 
-<div class={cn('flex gap-3 rounded-xl border border-input bg-card p-3 shadow-sm', className)}>
+<div
+	class={cn(
+		'border-input bg-card flex gap-3 rounded-xl border p-3 shadow-sm',
+		className
+	)}
+>
 	{#if previewUrl}
-		<div class="relative size-20 shrink-0 overflow-hidden rounded-lg border bg-muted/40">
+		<div class="bg-muted/40 relative size-20 shrink-0 overflow-hidden rounded-lg border">
 			<img src={previewUrl} alt="" class="size-full object-cover" draggable="false" />
 		</div>
 	{:else}
 		<div
-			class="flex size-20 shrink-0 items-center justify-center rounded-lg border bg-muted/50 text-muted-foreground"
+			class="bg-muted/50 text-muted-foreground flex size-20 shrink-0 items-center justify-center rounded-lg border"
 		>
 			<FileTextIcon class="size-8" aria-hidden="true" />
 		</div>
 	{/if}
 
 	<div class="min-w-0 flex-1 py-0.5">
-		<p class="truncate text-sm font-medium text-foreground" title={file.name}>
-			{file.name}
+		<p class="text-foreground truncate text-sm font-medium" title={displayName}>
+			{displayName}
 		</p>
 
-		<p class="mt-0.5 text-xs text-muted-foreground">
-			{file.type || 'Unknown type'} · {formatBytes(file.size)}
+		<p class="text-muted-foreground mt-0.5 text-xs">
+			{#if typeof file === 'string'}
+				Imagen existente
+			{:else}
+				{file.type || 'Tipo desconocido'} · {formatBytes(file.size)}
+			{/if}
 		</p>
 
 		<div class="mt-3 flex flex-wrap items-center gap-2">
-			<Button type="button" variant="outline" size="sm" onclick={replace}>Replace</Button>
+			<Button type="button" variant="outline" size="sm" onclick={replace}>Reemplazar</Button>
 
-			<Button type="button" variant="destructive" size="sm" onclick={remove}>Remove</Button>
+			<Button type="button" variant="destructive" size="sm" onclick={remove}>Eliminar</Button>
 		</div>
 	</div>
 </div>

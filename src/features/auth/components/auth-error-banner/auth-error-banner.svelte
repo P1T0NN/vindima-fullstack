@@ -21,15 +21,15 @@
 
 	/** Map of known BA error codes → human-readable titles. Unknown codes fall back to a generic title. */
 	const TITLES: Record<string, string> = {
-		banned: 'Account banned',
-		access_denied: 'Access denied',
-		unauthorized: 'Sign-in required'
+		banned: 'Cuenta suspendida',
+		access_denied: 'Acceso denegado',
+		unauthorized: 'Se requiere iniciar sesión'
 	};
 
 	const error = $derived(page.url.searchParams.get('error'));
 	const description = $derived(page.url.searchParams.get('error_description'));
 	const open = $derived(error !== null);
-	const title = $derived(error ? (TITLES[error] ?? 'Sign-in error') : '');
+	const title = $derived(error ? (TITLES[error] ?? 'Error al iniciar sesión') : '');
 
 	function dismiss() {
 		const url = new URL(page.url);
@@ -63,7 +63,7 @@
 		</AlertDialog.Header>
 
 		<AlertDialog.Footer>
-			<AlertDialog.Action onclick={dismiss}>Got it</AlertDialog.Action>
+			<AlertDialog.Action onclick={dismiss}>Entendido</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

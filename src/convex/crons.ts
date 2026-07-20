@@ -8,7 +8,8 @@ import { internal } from './_generated/api';
 import { analytics } from './analytics/analytics';
 import { registerStorageCrons } from './storage/registerStorageCrons';
 import { registerAuditLogCrons } from './tables/auditLog/registerAuditLogCrons';
-import { registerRewardsCrons } from './tables/rewards/registerRewardsCrons';
+import { registerRewardAccountsCrons } from './tables/rewardAccounts/registerRewardAccountsCrons';
+import { registerRewardLedgerCrons } from './tables/rewardLedger/registerRewardLedgerCrons';
 import { registerOrdersCrons } from './tables/orders/registerOrdersCrons';
 
 /**
@@ -19,7 +20,8 @@ const crons = cronJobs();
 
 registerStorageCrons(crons, internal);
 registerAuditLogCrons(crons, internal);
-registerRewardsCrons(crons, internal);
+registerRewardAccountsCrons(crons, internal);
+registerRewardLedgerCrons(crons, internal);
 registerOrdersCrons(crons, internal);
 
 // Analytics maintenance (high-volume rollup batching + raw event/rollup retention).

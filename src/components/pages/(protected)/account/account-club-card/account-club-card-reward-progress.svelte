@@ -33,11 +33,11 @@
 	<div class="border-b border-accent/10 px-8 py-9 sm:px-10">
 		<div class="mb-5 flex flex-wrap items-center justify-between gap-4">
 			<p class="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">
-				Your reward · {stamps} of {stampsPerReward} purchases
+				Tu recompensa · {stamps} de {stampsPerReward} compras
 			</p>
 
 			<p class="text-sm text-chart-2">
-				{remaining} purchases to go
+				Te faltan {remaining} compras
 			</p>
 		</div>
 
@@ -81,7 +81,7 @@
 
 		{#if pending > 0}
 			<p class="mt-3 text-xs text-muted-foreground/70">
-				{pending} on the way · confirms after delivery
+				{pending} en camino · se confirma después de la entrega
 			</p>
 		{/if}
 	</div>

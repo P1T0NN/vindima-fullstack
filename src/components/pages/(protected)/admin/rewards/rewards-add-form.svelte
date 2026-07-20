@@ -36,9 +36,9 @@
 		addableVariants.length === 1 ? addableVariants[0]._id : variantId
 	);
 
-	const productLabel = $derived(selectedProduct?.name ?? 'Choose a product');
+	const productLabel = $derived(selectedProduct?.name ?? 'Elige un producto');
 	const variantLabel = $derived(
-		addableVariants.find((v) => v._id === resolvedVariantId)?.label ?? 'Choose a variant'
+		addableVariants.find((v) => v._id === resolvedVariantId)?.label ?? 'Elige una variante'
 	);
 
 	async function add() {
@@ -47,7 +47,7 @@
 		try {
 			const res = await safeMutation(
 				convex,
-				api.tables.products.mutations.setVariantRewardEligible.setVariantRewardEligible,
+				api.tables.productVariants.mutations.setVariantRewardEligible.setVariantRewardEligible,
 				{ variantId: resolvedVariantId as Id<'productVariants'>, eligible: true }
 			);
 			if (toastResult(res)) {
@@ -62,7 +62,7 @@
 
 <div class="flex flex-wrap items-end gap-3">
 	<div class="flex w-full max-w-xs flex-col gap-1.5">
-		<span class="text-sm font-medium">Product</span>
+		<span class="text-sm font-medium">Producto</span>
 		<Select.Root
 			type="single"
 			bind:value={() => productId, (v) => ((productId = v), (variantId = ''))}
@@ -79,7 +79,7 @@
 
 	{#if selectedProduct && addableVariants.length > 1}
 		<div class="flex w-full max-w-45 flex-col gap-1.5">
-			<span class="text-sm font-medium">Variant</span>
+			<span class="text-sm font-medium">Variante</span>
 			<Select.Root type="single" bind:value={variantId} disabled={busy}>
 				<Select.Trigger class="w-full">{variantLabel}</Select.Trigger>
 				<Select.Content>
@@ -93,6 +93,6 @@
 
 	<Button type="button" onclick={add} disabled={busy || !resolvedVariantId}>
 		<PlusIcon class="size-4" />
-		Add reward item
+		Agregar artículo de recompensa
 	</Button>
 </div>

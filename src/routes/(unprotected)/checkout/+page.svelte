@@ -40,7 +40,11 @@
 	const cartEmpty = $derived(cart.lines.length === 0);
 </script>
 
-<SvelteHead title="Checkout" />
+<SvelteHead
+	title="Finalizar compra"
+	noindex
+	description="Completa tu pedido de Vindima para recoger en tienda o entrega a domicilio."
+/>
 
 <Section
 	yPadding="none"
@@ -52,8 +56,8 @@
 		<!-- Checkout switched off in config (`FEATURES.CHECKOUT`) — not a transient failure, so no retry. -->
 		<ErrorComponent
 			variant="alert"
-			title="Checkout unavailable"
-			description="Checkout is currently unavailable. Please try again later."
+			title="Pago no disponible"
+			description="El pago no está disponible en este momento. Intenta de nuevo más tarde."
 			showRetry={false}
 		/>
 	{:else if loading}
@@ -64,11 +68,11 @@
 		<!-- Guest checkout is off — prompt sign-in up front (cart is preserved). Retry wouldn't help. -->
 		<ErrorComponent
 			variant="alert"
-			title="Sign in to continue"
-			description="Please sign in to place your order — your cart is saved."
+			title="Inicia sesión para continuar"
+			description="Inicia sesión para hacer tu pedido — tu carrito está guardado."
 			showRetry={false}
 		>
-			<Button href={UNPROTECTED_PAGE_ENDPOINTS.LOGIN}>Log in</Button>
+			<Button href={UNPROTECTED_PAGE_ENDPOINTS.LOGIN}>Iniciar sesión</Button>
 		</ErrorComponent>
 	{:else}
 		<CheckoutForm />

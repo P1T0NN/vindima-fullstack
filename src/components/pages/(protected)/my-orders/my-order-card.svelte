@@ -1,8 +1,15 @@
 <script lang="ts">
+	// LIBRARIES
+	import { api } from '@/convex/_generated/api';
+	import { useConvexClient } from 'convex-svelte';
+
 	// COMPONENTS
 	import { Card } from '@/components/ui/card/index.js';
+	import { Button } from '@/components/ui/button/index.js';
 
 	// UTILS
+	import { safeMutation } from '@/utils/convexHelpers';
+	import { toastResult } from '@/utils/toastResult';
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { formatOrderDate } from '@/features/orders/utils/ordersUtils.js';
 	import { ORDER_STATUS_STYLES } from '@/features/orders/data/ordersData.js';
@@ -24,9 +31,9 @@
 
 	// Fulfillment moves processing → shipped → delivered; `cancelled` is off the track.
 	const STEPS = [
-		{ key: 'processing', label: 'Processing' },
-		{ key: 'shipped', label: 'Shipped' },
-		{ key: 'delivered', label: 'Delivered' }
+		{ key: 'processing', label: 'En proceso' },
+		{ key: 'shipped', label: 'Enviado' },
+		{ key: 'delivered', label: 'Entregado' }
 	] as const;
 
 	const isCancelled = $derived(status === 'cancelled');
@@ -34,6 +41,31 @@
 	// Fill runs from the first node centre to the current node centre (0 / 50 / 100%).
 	const fillPct = $derived(isCancelled ? 0 : (currentStep / (STEPS.length - 1)) * 100);
 	const itemCount = $derived(order.lines.reduce((n, line) => n + line.qty, 0));
+
+	// Self-serve cancel — only while still `pending` (paid orders are refund territory).
+	const convex = useConvexClient();
+	let cancelBusy = $state(false);
+	let cancelArmed = $state(false);
+
+	async function cancelOrder() {
+		if (cancelBusy) return;
+		if (!cancelArmed) {
+			cancelArmed = true;
+			return;
+		}
+		cancelBusy = true;
+		try {
+			const res = await safeMutation(
+				convex,
+				api.tables.orders.mutations.cancelMyOrder.cancelMyOrder,
+				{ orderId: order._id }
+			);
+			toastResult(res);
+			cancelArmed = false;
+		} finally {
+			cancelBusy = false;
+		}
+	}
 </script>
 
 <Card
@@ -54,7 +86,7 @@
 				{order.number}
 			</p>
 			<p class="mt-1.5 text-xs tracking-wide text-muted-foreground">
-				{formatOrderDate(order._creationTime)} · {itemCount} item{itemCount === 1 ? '' : 's'}
+				{formatOrderDate(order._creationTime)} · {itemCount} artículo{itemCount === 1 ? '' : 's'}
 			</p>
 		</div>
 		<span
@@ -72,7 +104,7 @@
 			class="mx-6 mb-5 flex items-center gap-2.5 rounded-lg border border-border bg-muted/40 px-4 py-3 text-muted-foreground"
 		>
 			<XIcon class="size-4 shrink-0" strokeWidth={1.6} />
-			<span class="text-xs tracking-wide">This order was cancelled.</span>
+			<span class="text-xs tracking-wide">Este pedido fue cancelado.</span>
 		</div>
 	{:else}
 		<div class="relative mx-6 mt-1 mb-6">
@@ -137,7 +169,7 @@
 						? 'text-chart-2 italic'
 						: 'text-foreground'}"
 				>
-					{line.isRewardLine ? 'Free' : money(line.unitPriceMinor * line.qty)}
+					{line.isRewardLine ? 'Gratis' : money(line.unitPriceMinor * line.qty)}
 				</span>
 			</li>
 		{/each}
@@ -150,6 +182,21 @@
 			{money(order.amounts.totalMinor)}
 		</span>
 	</div>
+
+	{#if order.status === 'pending'}
+		<div class="flex justify-end border-t border-accent/10 px-6 py-3">
+			<Button
+				type="button"
+				variant={cancelArmed ? 'destructive' : 'ghost'}
+				size="sm"
+				onclick={cancelOrder}
+				onmouseleave={() => (cancelArmed = false)}
+				disabled={cancelBusy}
+			>
+				{cancelArmed ? 'Confirmar cancelación' : 'Cancelar pedido'}
+			</Button>
+		</div>
+	{/if}
 </Card>
 
 <style>

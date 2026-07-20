@@ -1,6 +1,4 @@
 <script lang="ts">
-	// LIBRARIES
-
 	// UTILS
 	import { cn } from '@/utils/utils.js';
 
@@ -14,6 +12,8 @@
 		disabled?: boolean;
 		multipleFiles?: boolean;
 		dragOver?: boolean;
+		/** Validation failed for this field — paints the dropzone destructive. */
+		invalid?: boolean;
 		fileInputRef?: HTMLInputElement | null;
 		onFileInputChange?: (e: Event) => void;
 		onDragEnter?: (e: DragEvent) => void;
@@ -29,6 +29,7 @@
 		disabled = false,
 		multipleFiles = false,
 		dragOver = false,
+		invalid = false,
 		fileInputRef = $bindable<HTMLInputElement | null>(null),
 		onFileInputChange,
 		onDragEnter,
@@ -39,9 +40,11 @@
 </script>
 
 <label
+	data-invalid={invalid ? 'true' : undefined}
 	class={cn(
-		'block cursor-pointer rounded-xl border border-dashed border-input bg-muted/15 p-6 transition-colors outline-none focus-within:ring-[3px] focus-within:ring-ring/50 hover:bg-muted/25',
-		dragOver && 'border-primary/60 bg-primary/5 ring-[3px] ring-primary/20',
+		'border-input bg-muted/15 hover:bg-muted/25 focus-within:ring-ring/50 block cursor-pointer rounded-xl border border-dashed p-6 transition-colors outline-none focus-within:ring-[3px]',
+		dragOver && 'border-primary/60 bg-primary/5 ring-primary/20 ring-[3px]',
+		invalid && !dragOver && 'border-destructive bg-destructive/5 ring-destructive/20 ring-[3px]',
 		className
 	)}
 	ondragenter={onDragEnter}
@@ -61,19 +64,19 @@
 	/>
 	<div class="pointer-events-none flex flex-col items-center gap-2 text-center">
 		<span
-			class="inline-flex size-11 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm ring-1 ring-border"
+			class="bg-background text-muted-foreground ring-border inline-flex size-11 items-center justify-center rounded-full shadow-sm ring-1"
 		>
 			<UploadIcon class="size-5" aria-hidden="true" />
 		</span>
 		<div class="space-y-0.5">
-			<p class="text-sm font-medium text-foreground">
-				<span class="text-primary">Choose {multipleFiles ? 'files' : 'file'}</span>
-				<span class="font-normal text-muted-foreground">
-					or drag {multipleFiles ? 'them' : 'it'} here
+			<p class="text-foreground text-sm font-medium">
+				<span class="text-primary">{multipleFiles ? 'Elige archivos' : 'Elige un archivo'}</span>
+				<span class="text-muted-foreground font-normal">
+					{multipleFiles ? 'o arrástralos aquí' : 'o arrástralo aquí'}
 				</span>
 			</p>
 			{#if accept}
-				<p class="text-xs text-muted-foreground">Accepted: {accept}</p>
+				<p class="text-muted-foreground text-xs">Formatos aceptados: {accept}</p>
 			{/if}
 		</div>
 	</div>

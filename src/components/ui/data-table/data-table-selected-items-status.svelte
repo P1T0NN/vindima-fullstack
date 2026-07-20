@@ -53,7 +53,7 @@
 		</span>
 
 		<span class="truncate text-sm font-medium text-foreground tabular-nums">
-			{`${count} selected`}
+			{count === 1 ? '1 seleccionado' : `${count} seleccionados`}
 		</span>
 	</div>
 
@@ -61,14 +61,14 @@
 		{#if canRenderDelete && deleteFunction}
 			<ActionButton function={deleteFunction} variant="destructive" isPending={isDeleting}>
 				<Trash2Icon />
-				<span>Delete</span>
+				<span>Eliminar</span>
 				{#if count > 0}
 					<span class="tabular-nums opacity-80">({count})</span>
 				{/if}
 			</ActionButton>
 		{/if}
 		<Button type="button" variant="ghost" size="sm" disabled={isDeleting} onclick={onClear}>
-			Clear
+			Limpiar
 		</Button>
 	</div>
 </div>

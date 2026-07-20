@@ -1,6 +1,6 @@
 /**
- * Cart display types. Product resolution (ref → name/image/price) lives in the `products`
- * table: the client subscribes to `resolveCartProducts`, which returns this exact shape.
+ * Cart display types. Product resolution (ref → name/image/price) lives in the cart
+ * feature: the client subscribes to `resolveCartProducts`, which returns this exact shape.
  * The catalog itself is DB-only — created and edited entirely in the admin UI.
  */
 

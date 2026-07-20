@@ -18,17 +18,21 @@
 
 	const columns: ColumnDef<Doc<'productCategories'>>[] = [
 		// Single column — the cell carries the whole row UI (name, inline rename, delete).
-		{ id: 'name', header: 'Category', accessor: (r) => r.name, wrap: true }
+		{ id: 'name', header: 'Categoría', accessor: (r) => r.name, wrap: true }
 	];
 </script>
 
-<SvelteHead title="Categories" />
+<SvelteHead
+	title="Categorías"
+	noindex
+	description="Administra las categorías de productos que se usan en la tienda y el catálogo de Vindima."
+/>
 
 <section class="flex w-full flex-col gap-4 p-4 md:p-6">
 	<header class="flex flex-col gap-1">
-		<h1 class="text-2xl font-semibold tracking-tight">Categories</h1>
+		<h1 class="text-2xl font-semibold tracking-tight">Categorías</h1>
 		<p class="text-sm text-muted-foreground">
-			The groups products belong to — shop pages and product forms use these.
+			Los grupos a los que pertenecen los productos — las páginas de la tienda y los formularios de producto las usan.
 		</p>
 	</header>
 
@@ -37,13 +41,13 @@
 	{#if productCategoriesClass.error}
 		<ErrorComponent
 			variant="alert"
-			title="Failed to load categories"
-			description="Something went wrong while fetching categories. Please try again."
+			title="No se pudieron cargar las categorías"
+			description="Algo salió mal al obtener las categorías. Inténtalo de nuevo."
 		/>
 	{:else}
 		<ConvexDataTable
-			caption="Categories"
-			query={api.tables.products.queries.fetchAllCategories.fetchAllCategories}
+			caption="Categorías"
+			query={api.tables.productCategories.queries.fetchAllCategories.fetchAllCategories}
 			optimizationStrategy="offset"
 			{columns}
 			getRowId={(r) => r._id}

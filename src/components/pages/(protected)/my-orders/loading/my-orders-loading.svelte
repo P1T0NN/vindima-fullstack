@@ -7,7 +7,7 @@
 </script>
 
 <!-- Mirrors the order-card layout (masthead → rail → ledger → total) so real cards swap in cleanly. -->
-<div class="flex flex-col gap-4" aria-busy="true" aria-label="Loading your orders">
+<div class="flex flex-col gap-4" aria-busy="true" aria-label="Cargando tus pedidos">
 	{#each cardPlaceholders as index (index)}
 		<div class="overflow-hidden rounded-2xl border border-accent/12 bg-card shadow-brand-subtle">
 			<!-- Masthead -->

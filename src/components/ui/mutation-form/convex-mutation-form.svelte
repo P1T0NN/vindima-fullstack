@@ -2,16 +2,15 @@
 	// LIBRARIES
 	import { useConvexClient } from 'convex-svelte';
 	import { toast } from 'svelte-sonner';
-	import type { ZodType } from 'zod';
+	import type { ZodIssue, ZodType } from 'zod';
 
 	// CONFIG
-	import { FEATURES } from '@/shared/config';
 
 	// COMPONENTS
 	import MutationForm from './mutation-form.svelte';
 
 	// UTILS
-	import { safeMutation, uploadFileToConvexStorage, uploadFileToR2 } from '@/utils/convexHelpers';
+	import { safeMutation, uploadFileToR2 } from '@/utils/convexHelpers';
 	import { translateFromBackend } from '@/utils/translateFromBackend';
 	import { processUploadFields } from './utils.js';
 
@@ -20,6 +19,7 @@
 	import type { FunctionReference } from 'convex/server';
 	import type {
 		MutationFormCustomFields,
+		MutationFormExtraFieldsProps,
 		MutationFormFieldDef,
 		MutationFormPrepareSubmit,
 		MutationFormSection,
@@ -45,7 +45,7 @@
 		onResult,
 		schema,
 		onSuccess,
-		submitLabel = 'Submit',
+		submitLabel = 'Enviar',
 		resetOnSuccess = true,
 		customFields,
 		header,
@@ -72,7 +72,9 @@
 		resetOnSuccess?: boolean;
 		customFields?: MutationFormCustomFields<T>;
 		header?: Snippet;
-		extraFields?: Snippet;
+		/** Rendered after the declared sections; receives the validation state so array editors
+		 *  can show per-row errors (see `MutationForm`). */
+		extraFields?: Snippet<[MutationFormExtraFieldsProps<T>]>;
 		actions?: Snippet<[{ busy: boolean }]>;
 		class?: string;
 	} = $props();
@@ -94,8 +96,7 @@
 			sections,
 			args,
 			progress,
-			uploadOne: (file) =>
-				FEATURES.USE_R2 ? uploadFileToR2(convex, file) : uploadFileToConvexStorage(convex, file)
+			uploadOne: (file) => uploadFileToR2(convex, file)
 		});
 	};
 
@@ -105,7 +106,7 @@
 			result = await safeMutation(convex, runFunction, transformArgs?.(args, values) ?? args);
 		} catch (error) {
 			console.error('[convex-mutation-form] submitMutation failed:', error);
-			toast.error('An unexpected error occurred. Please try again.');
+			toast.error('Ocurrió un error inesperado. Inténtalo de nuevo.');
 			return false;
 		}
 

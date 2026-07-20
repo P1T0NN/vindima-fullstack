@@ -22,26 +22,26 @@
 
 <div class="flex flex-col gap-4 rounded-lg border border-destructive/40 p-4">
 	<header class="flex flex-col gap-1">
-		<h2 class="text-base font-semibold text-destructive">Danger zone</h2>
+		<h2 class="text-base font-semibold text-destructive">Zona de peligro</h2>
 		<p class="text-sm text-muted-foreground">
-			Account-level actions. Changes here are audited and may be irreversible.
+			Acciones a nivel de cuenta. Los cambios aquí se auditan y pueden ser irreversibles.
 		</p>
 	</header>
 
 	<UserDangerZoneItem
-		title={`Role: ${capitalizeFirst(user.role)}`}
+		title={`Rol: ${capitalizeFirst(user.role)}`}
 		description={user.role === 'admin'
-			? 'Remove admin privileges from this account.'
-			: 'Grant admin privileges to this account.'}
+			? 'Quitar los privilegios de admin de esta cuenta.'
+			: 'Otorgar privilegios de admin a esta cuenta.'}
 	>
 		<ChangeRoleButton userId={user._id} userEmail={user.email} role={user.role} />
 	</UserDangerZoneItem>
 
 	<UserDangerZoneItem
-		title={user.banned ? 'Banned' : 'Active'}
+		title={user.banned ? 'Bloqueado' : 'Activo'}
 		description={user.banned
-			? 'Lift the ban so the user can sign in again.'
-			: 'Sign the user out and prevent further sign-ins.'}
+			? 'Levantar el bloqueo para que el usuario pueda iniciar sesión de nuevo.'
+			: 'Cerrar la sesión del usuario y evitar futuros inicios de sesión.'}
 	>
 		{#if user.banned}
 			<UnbanUserButton userId={user._id} />

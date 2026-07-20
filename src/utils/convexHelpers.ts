@@ -28,84 +28,12 @@ import { hasTranslatableMessage, translateFromBackend } from '@/utils/translateF
 // TYPES
 import type { FunctionReference, FunctionArgs, FunctionReturnType } from 'convex/server';
 import type { ConvexClient } from 'convex/browser';
-import type { Id } from '@/convex/_generated/dataModel';
 
 // CONFIG
 import { api } from '@/convex/_generated/api';
 
-type StorageUploadJson = { storageId: Id<'_storage'> };
-
-async function postFileToConvexUploadUrl(url: string, file: File): Promise<StorageUploadJson> {
-	const res = await fetch(url, {
-		method: 'POST',
-		...(file.type ? { headers: { 'Content-Type': file.type } } : {}),
-		body: file
-	});
-
-	if (!res.ok) {
-		throw new Error(`Storage upload failed: ${res.status}`);
-	}
-
-	const text = (await res.text()).trim();
-	if (!text) {
-		throw new Error('Empty storage upload response');
-	}
-
-	let json: StorageUploadJson;
-	try {
-		json = JSON.parse(text) as StorageUploadJson;
-	} catch {
-		throw new Error('Invalid storage upload response');
-	}
-
-	if (!json?.storageId) {
-		throw new Error('Missing storageId in upload response');
-	}
-
-	return json;
-}
-
 /**
- * Upload a browser `File` to Convex file storage and insert an `uploadedFiles` row.
- *
- * Both Convex calls are routed through {@link safeMutation} so any typed backend error
- * (NOT_AUTHENTICATED, STORAGE_URL_UNAVAILABLE, rate limit, etc.) becomes a translated
- * toast and a `null` return — the caller just checks for `null` and bails.
- *
- * The in-between storage POST is a raw `fetch` (not a Convex call): if it throws, we show
- * a generic upload-failed toast and return `null` so the flow matches the Convex paths.
- *
- * @returns the new `uploadedFiles` row id on success, `null` when an error was already toasted.
- */
-export async function uploadFileToConvexStorage(
-	client: ConvexClient,
-	file: File
-): Promise<Id<'uploadedFiles'> | null> {
-	const postUrl = await safeMutation(
-		client,
-		api.storage.convexStorage.storageMutations.generateConvexUploadUrl,
-		{}
-	);
-	if (!postUrl) return null;
-
-	let uploaded: StorageUploadJson;
-	try {
-		uploaded = await postFileToConvexUploadUrl(postUrl, file);
-	} catch (error) {
-		console.error('[uploadFileToConvexStorage] storage POST failed', error);
-		toast.error('Could not save the uploaded file. Please try again.');
-		return null;
-	}
-
-	return await safeMutation(client, api.storage.convexStorage.storageMutations.saveUploadedFile, {
-		storageId: uploaded.storageId
-	});
-}
-
-/**
- * Upload a browser `File` to Cloudflare R2 (via `@convex-dev/r2`).
- *
- * Mirrors {@link uploadFileToConvexStorage} for the R2-backed table:
+ * Upload a browser `File` to Cloudflare R2 (via `@convex-dev/r2`):
  *   1. `generateR2UploadUrl` mints a signed URL + object key (auth-checked before mint).
  *   2. The browser PUTs the file directly to R2.
  *   3. `syncMetadata` triggers the server `onUpload` hook, which charges the rate limit,
@@ -129,7 +57,7 @@ export async function uploadFileToR2(client: ConvexClient, file: File): Promise<
 		if (!res.ok) throw new Error(`R2 upload failed: ${res.status}`);
 	} catch (error) {
 		console.error('[uploadFileToR2] R2 PUT failed', error);
-		toast.error('Could not save the uploaded file. Please try again.');
+		toast.error('No se pudo guardar el archivo subido. Inténtalo de nuevo.');
 		return null;
 	}
 

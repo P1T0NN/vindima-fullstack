@@ -59,17 +59,17 @@
 {#snippet banForm()}
 	<div class="flex flex-col gap-3">
 		<Field>
-			<FieldLabel for="ban-reason">Reason (optional)</FieldLabel>
+			<FieldLabel for="ban-reason">Motivo (opcional)</FieldLabel>
 			<Input
 				id="ban-reason"
 				bind:value={reason}
-				placeholder="Violation of terms…"
+				placeholder="Violación de los términos…"
 				disabled={isPending}
 			/>
 		</Field>
 
 		<Field>
-			<FieldLabel for="ban-expires">Expires</FieldLabel>
+			<FieldLabel for="ban-expires">Expira</FieldLabel>
 			<Select
 				type="single"
 				value={expiresIn}
@@ -79,21 +79,21 @@
 				<SelectTrigger id="ban-expires">
 					<span>
 						{#if expiresIn === ''}
-							Permanent
+							Permanente
 						{:else if expiresIn === '86400'}
-							1 day
+							1 día
 						{:else if expiresIn === '604800'}
-							7 days
+							7 días
 						{:else if expiresIn === '2592000'}
-							30 days
+							30 días
 						{/if}
 					</span>
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value="">Permanent</SelectItem>
-					<SelectItem value="86400">1 day</SelectItem>
-					<SelectItem value="604800">7 days</SelectItem>
-					<SelectItem value="2592000">30 days</SelectItem>
+					<SelectItem value="">Permanente</SelectItem>
+					<SelectItem value="86400">1 día</SelectItem>
+					<SelectItem value="604800">7 días</SelectItem>
+					<SelectItem value="2592000">30 días</SelectItem>
 				</SelectContent>
 			</Select>
 		</Field>
@@ -104,9 +104,9 @@
 	function={confirm}
 	variant="destructive"
 	{isPending}
-	title={`Ban ${userEmail}`}
-	description="The user is signed out and cannot sign in again until unbanned. The optional reason is shown on next sign-in attempt."
+	title={`Bloquear a ${userEmail}`}
+	description="Se cierra la sesión del usuario y no podrá iniciar sesión de nuevo hasta que sea desbloqueado. El motivo opcional se muestra en el siguiente intento de inicio de sesión."
 	body={banForm}
 >
-	Ban
+	Bloquear
 </ActionButton>

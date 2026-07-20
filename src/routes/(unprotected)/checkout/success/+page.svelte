@@ -49,7 +49,7 @@
 		order ? order.lines.map((l: { productRef: string }) => l.productRef) : []
 	);
 	const productsQuery = useQuery(
-		api.tables.products.queries.resolveCartProducts.resolveCartProducts,
+		api.tables.cart.queries.resolveCartProducts.resolveCartProducts,
 		() => (orderRefs.length > 0 ? { refs: orderRefs } : 'skip')
 	);
 	const byRef = $derived.by(() => {
@@ -65,7 +65,11 @@
 	}
 </script>
 
-<SvelteHead title="Order confirmed" />
+<SvelteHead
+	title="Pedido confirmado"
+	noindex
+	description="Tu pedido de Vindima se realizó con éxito."
+/>
 
 <Section
 	yPadding="none"
@@ -76,25 +80,25 @@
 	{:else if !order}
 		<div class="flex flex-col items-start gap-4">
 			<h1 class="font-display text-2xl font-semibold tracking-wide text-accent uppercase">
-				We couldn't find this order.
+				No pudimos encontrar este pedido.
 			</h1>
 			<Button href="{UNPROTECTED_PAGE_ENDPOINTS.ROOT}{UNPROTECTED_PAGE_ENDPOINTS.SHOP}">
-				← Back to shop
+				← Volver a la tienda
 			</Button>
 		</div>
 	{:else}
 		<div class="flex flex-col items-center gap-3 text-center">
 			<CheckCircleIcon class="size-14 text-chart-2" strokeWidth={1.5} />
 			<h1 class="font-display text-3xl font-semibold tracking-wide text-accent uppercase">
-				Order confirmed
+				Pedido confirmado
 			</h1>
 			<p class="text-sm text-muted-foreground">
-				Order <span class="font-medium text-foreground">{order.number}</span>
+				Pedido <span class="font-medium text-foreground">{order.number}</span>
 			</p>
 			<p class="text-sm text-accent">
 				{order.paymentPending
-					? 'Pay when you pick up your order.'
-					: 'Payment received — thank you!'}
+					? 'Paga cuando recojas tu pedido.'
+					: 'Pago recibido — ¡gracias!'}
 			</p>
 		</div>
 
@@ -107,7 +111,7 @@
 								>{lineName(line.productRef, line.name)}</span
 							>
 							<span class="text-xs text-muted-foreground">
-								{line.isRewardLine ? 'Free' : `${line.qty} × ${money(line.unitPriceMinor)}`}
+								{line.isRewardLine ? 'Gratis' : `${line.qty} × ${money(line.unitPriceMinor)}`}
 							</span>
 						</span>
 						<span
@@ -126,14 +130,14 @@
 				</div>
 				{#if order.amounts.welcomeDiscountMinor > 0}
 					<div class="flex justify-between text-chart-2">
-						<span>First-order discount</span>
+						<span>Descuento por primer pedido</span>
 						<span class="tabular-nums">−{money(order.amounts.welcomeDiscountMinor)}</span>
 					</div>
 				{/if}
 				<div class="flex justify-between text-muted-foreground">
-					<span>Shipping</span>
+					<span>Envío</span>
 					<span class="tabular-nums">
-						{order.amounts.shippingMinor === 0 ? 'Free' : money(order.amounts.shippingMinor)}
+						{order.amounts.shippingMinor === 0 ? 'Gratis' : money(order.amounts.shippingMinor)}
 					</span>
 				</div>
 				<div class="mt-1 flex items-baseline justify-between border-t pt-3">
@@ -148,9 +152,9 @@
 
 			<div class="border-t pt-4 text-sm text-muted-foreground">
 				{#if order.delivery.kind === 'pickup'}
-					Pickup in store.
+					Recoger en tienda.
 				{:else}
-					<span class="text-foreground">Delivering to</span><br />
+					<span class="text-foreground">Entregar en</span><br />
 					{order.delivery.address.line1}{#if order.delivery.address.line2}, {order.delivery.address
 							.line2}{/if}<br />
 					{order.delivery.address.city}, {order.delivery.address.postcode}, {order.delivery.address
@@ -164,11 +168,11 @@
 				variant="outline"
 				href="{UNPROTECTED_PAGE_ENDPOINTS.ROOT}{UNPROTECTED_PAGE_ENDPOINTS.SHOP}"
 			>
-				Continue shopping
+				Seguir comprando
 			</Button>
 			{#if order.status === 'pending' && email}
 				<p class="text-center text-xs text-muted-foreground">
-					Create an account to track your orders and earn rewards.
+					Crea una cuenta para rastrear tus pedidos y ganar recompensas.
 				</p>
 			{/if}
 		</div>

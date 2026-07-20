@@ -27,6 +27,7 @@
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import TagIcon from '@lucide/svelte/icons/tag';
 	import GiftIcon from '@lucide/svelte/icons/gift';
+	import ShoppingBagIcon from '@lucide/svelte/icons/shopping-bag';
 
 	let { children } = $props();
 
@@ -34,7 +35,7 @@
 	// `productCategoriesClass` so pages/components read it without re-subscribing
 	// (same pattern as `authClass` in the root layout).
 	const categoriesQuery = useQuery(
-		api.tables.products.queries.fetchAllCategories.fetchAllCategories,
+		api.tables.productCategories.queries.fetchAllCategories.fetchAllCategories,
 		() => ({ paginationOpts: { numItems: PAGINATION_DATA.DEFAULT_PAGE_SIZE, cursor: null } })
 	);
 	$effect(() => {
@@ -48,29 +49,34 @@
 	const navItems: AppSidebarNavItems = {
 		navMain: [
 			{
-				name: 'Dashboard',
+				name: 'Panel',
 				url: ADMIN_PAGE_ENDPOINTS.DASHBOARD,
 				icon: FrameIcon
 			},
 			{
-				name: 'Users',
+				name: 'Usuarios',
 				url: ADMIN_PAGE_ENDPOINTS.USERS,
 				icon: PieChartIcon
 			},
 			{
-				name: 'Products',
+				name: 'Productos',
 				url: ADMIN_PAGE_ENDPOINTS.PRODUCTS,
 				icon: PackageIcon
 			},
 			{
-				name: 'Categories',
+				name: 'Categorías',
 				url: ADMIN_PAGE_ENDPOINTS.CATEGORIES,
 				icon: TagIcon
 			},
 			{
-				name: 'Rewards',
+				name: 'Recompensas',
 				url: ADMIN_PAGE_ENDPOINTS.REWARDS,
 				icon: GiftIcon
+			},
+			{
+				name: 'Pedidos',
+				url: ADMIN_PAGE_ENDPOINTS.ORDERS,
+				icon: ShoppingBagIcon
 			}
 		]
 	};

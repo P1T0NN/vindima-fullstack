@@ -24,7 +24,7 @@
 	<span class="min-w-0">
 		<span class="block truncate text-foreground">{product.name}</span>
 		<span class="text-xs text-muted-foreground">
-			{unavailable ? 'No longer available' : `${line.qty} × ${money(product.unitPriceMinor ?? 0)}`}
+			{unavailable ? 'Ya no está disponible' : `${line.qty} × ${money(product.unitPriceMinor ?? 0)}`}
 		</span>
 	</span>
 	{#if !unavailable}

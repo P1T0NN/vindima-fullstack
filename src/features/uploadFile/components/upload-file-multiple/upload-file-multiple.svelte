@@ -7,23 +7,33 @@
 	import { cn } from '@/utils/utils.js';
 	import { useFileUpload } from '../../utils/useFileUpload.svelte';
 
+	// TYPES
+	import type { UploadFileEntry } from '@/features/uploadFile/types/uploadFileTypes';
+
 	type Props = {
 		class?: string;
 		/** Cleared in multi mode; kept bindable for parity with single. */
 		file?: File | null;
-		files?: File[];
+		/** Mixed list: picked `File`s plus existing-image URL/ref strings (edit flows). */
+		files?: UploadFileEntry[];
 		accept?: string;
 		disabled?: boolean;
 		id?: string;
+		/** Show a star control on each preview; the starred image becomes `files[0]` (the cover). */
+		hasCoverImage?: boolean;
+		/** Validation failed for this field — paints the dropzone destructive. */
+		invalid?: boolean;
 	};
 
 	let {
 		class: className,
 		file = $bindable<File | null>(null),
-		files = $bindable<File[]>([]),
+		files = $bindable<UploadFileEntry[]>([]),
 		accept,
 		disabled = false,
-		id: inputId
+		id: inputId,
+		hasCoverImage = false,
+		invalid = false
 	}: Props = $props();
 
 	const pickerInputId = $derived(inputId ?? 'upload-file-input-multiple');
@@ -57,6 +67,7 @@
 			{disabled}
 			multipleFiles={true}
 			dragOver={upload.dragOver}
+			{invalid}
 			bind:fileInputRef={upload.inputRef}
 			onFileInputChange={upload.handleInputChange}
 			onDragEnter={() => {
@@ -76,6 +87,7 @@
 				bind:selectedFile={file}
 				onDragOver={upload.handleDragOver}
 				onDrop={upload.handleDrop}
+				{hasCoverImage}
 			/>
 		{/if}
 	</div>

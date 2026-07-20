@@ -15,6 +15,7 @@
 	import { appGoto } from '@/utils/app-navigation.js';
 
 	// COMPONENTS
+	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import UserTabs from '@/components/pages/(protected)/admin/users/[id]/user-tabs.svelte';
 	import UserPageLoading from '@/components/pages/(protected)/admin/users/[id]/loading/user-page-loading.svelte';
 	import UserPageEmpty from '@/components/pages/(protected)/admin/users/[id]/empty/user-page-empty.svelte';
@@ -57,12 +58,18 @@
 	});
 </script>
 
+<SvelteHead
+	title="Detalles del usuario"
+	noindex
+	description="Consulta y administra una cuenta de usuario de Vindima."
+/>
+
 <section class="flex w-full flex-col gap-4 p-4 md:p-6">
 	{#if userQuery.error}
 		<ErrorComponent
 			variant="alert"
-			title="Failed to load user"
-			description="Something went wrong while fetching this user. Please try again."
+			title="No se pudo cargar el usuario"
+			description="Algo salió mal al obtener este usuario. Inténtalo de nuevo."
 		/>
 	{:else if user === null}
 		<UserPageEmpty />

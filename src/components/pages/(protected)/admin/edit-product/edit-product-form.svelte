@@ -14,7 +14,7 @@
 
 	// COMPONENTS
 	import ConvexMutationForm from '@/components/ui/mutation-form/convex-mutation-form.svelte';
-	import EditProductVariantCard from './edit-product-variant-card.svelte';
+	import VariantFormCard from '@/features/productVariants/components/variant-form-card.svelte';
 	import EditProductAddVariant from './edit-product-add-variant.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 	import {
@@ -27,16 +27,20 @@
 
 	// SCHEMAS
 	import {
-		editProductSchema,
+		editProductFormSchema,
 		type EditProductInput
 	} from '@/shared/features/products/schemas/editProductSchemas';
 
 	// FORMS
 	import { editProductSections } from '@/shared/features/products/forms/editProductForm';
 
+	// UTILS
+	import { zodIssuesForArrayItem } from '@/shared/utils/validationUtils';
+
 	// TYPES
 	import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
 	import type { Id } from '@/convex/_generated/dataModel';
+	import type { MutationFormExtraFieldsProps } from '@/components/ui/mutation-form/types';
 
 	let { product }: { product: AdminProductRow } = $props();
 
@@ -52,7 +56,8 @@
 		slug: seed.slug,
 		name: seed.name,
 		description: seed.description ?? '',
-		images: [],
+		// Existing images ride along as URL strings — starrable/removable without re-upload.
+		images: [...seed.images],
 		category: seed.category,
 		featured: seed.featured ?? false,
 		sortOrder: seed.sortOrder,
@@ -106,45 +111,53 @@
 
 <ConvexMutationForm
 	bind:values
-	schema={editProductSchema}
+	schema={editProductFormSchema}
 	{sections}
 	runFunction={api.tables.products.mutations.editProduct.editProduct}
 	{transformArgs}
-	submitLabel="Save changes"
+	submitLabel="Guardar cambios"
 	resetOnSuccess={false}
 	onSuccess={() => goto(ADMIN_PAGE_ENDPOINTS.PRODUCTS)}
 	{extraFields}
 />
 
-{#snippet extraFields()}
+{#snippet extraFields({ errors, issues }: MutationFormExtraFieldsProps<EditProductInput>)}
 	<!-- Variants — an array editor, so it can't be a declared section; styled as one. -->
 	<Card>
 		<CardHeader>
-			<CardTitle>Variants</CardTitle>
+			<CardTitle>Variantes</CardTitle>
 			<CardDescription>
-				What you sell — at least one. Saved references are locked; new ones must be unique.
+				Lo que vendes — al menos una. Las referencias guardadas están bloqueadas; las nuevas deben
+				ser únicas.
 			</CardDescription>
 		</CardHeader>
 		
 		<CardContent class="flex flex-col gap-3">
 			{#each variantIndexes as i (i)}
-				<EditProductVariantCard
+				<VariantFormCard
 					index={i}
 					bind:variant={values.variants[i]}
 					canRemove={values.variants.length > 1}
 					onRemove={() => removeVariant(i)}
+					errors={zodIssuesForArrayItem(issues, 'variants', i)}
+					refBase={seed.slug}
 				/>
 			{/each}
+
+			<!-- Array-level rule (needs ≥ 1 variant, refs must be unique) — no single row owns it. -->
+			{#if errors.variants}
+				<p class="text-sm text-destructive">{errors.variants}</p>
+			{/if}
 
 			{#if removedVariantIds.length > 0}
 				<!-- Pending only — nothing is written until Save changes. -->
 				<div class="flex items-center gap-2 text-sm text-muted-foreground">
 					<span>
 						{removedVariantIds.length === 1
-							? '1 variant will be removed when you save.'
-							: `${removedVariantIds.length} variants will be removed when you save.`}
+							? '1 variante se eliminará al guardar.'
+							: `${removedVariantIds.length} variantes se eliminarán al guardar.`}
 					</span>
-					<Button type="button" variant="ghost" size="sm" onclick={undoRemovals}>Undo</Button>
+					<Button type="button" variant="ghost" size="sm" onclick={undoRemovals}>Deshacer</Button>
 				</div>
 			{/if}
 

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#F2F1ED;color:#1c1418;font-family:"Century Gothic","Jost",system-ui,sans-serif}
+  img{display:block}
+  .nav{position:sticky;top:0;z-index:50;background:rgba(242,241,237,.93);backdrop-filter:blur(10px);border-bottom:1px solid rgba(81,1,40,.13)}
+  .navlink{font:400 11.5px/1 "Century Gothic","Jost",sans-serif;letter-spacing:.085em;text-transform:uppercase;color:#510128;text-decoration:none;white-space:nowrap;opacity:.7;transition:opacity .2s;padding:6px 0;border-bottom:2px solid transparent;flex:0 0 auto}
+  .navlink:hover{opacity:1}
+  .navlink[data-active="true"]{opacity:1;border-bottom-color:#D9AF50}
+  .btn-gold{font:600 12px/1 "Century Gothic","Jost",sans-serif;letter-spacing:.13em;text-transform:uppercase;background:#D9AF50;color:#510128;border:1px solid #D9AF50;padding:12px 20px;border-radius:2px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:.2s;white-space:nowrap}
+  .btn-gold:hover{background:#e7c069;border-color:#e7c069}
+  .btn-ghost{font:500 12px/1 "Century Gothic","Jost",sans-serif;letter-spacing:.13em;text-transform:uppercase;background:transparent;color:#510128;border:1px solid rgba(81,1,40,.4);padding:12px 20px;border-radius:2px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:.2s;white-space:nowrap}
+  .btn-ghost:hover{border-color:#510128;background:rgba(81,1,40,.05)}
+  .btn-wa{font:600 12.5px/1 "Century Gothic","Jost",sans-serif;letter-spacing:.1em;text-transform:uppercase;background:#1f7a4d;color:#F2F1ED;border:1px solid #1f7a4d;padding:15px 26px;border-radius:3px;text-decoration:none;display:inline-flex;align-items:center;gap:10px;cursor:pointer;transition:.2s;white-space:nowrap}
+  .btn-wa:hover{background:#23895a}
+  .cat-card{background:#FBFAF7;border:1px solid #D9AF50;border-radius:7px;padding:26px 24px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;text-decoration:none;transition:.22s;box-shadow:0 1px 0 rgba(81,1,40,.04)}
+  .cat-card:hover{transform:translateY(-5px);box-shadow:0 22px 40px -22px rgba(81,1,40,.45)}
+  .seg{display:inline-flex;border:1px solid #D9AF50;border-radius:4px;overflow:hidden}
+  .seg input{position:absolute;width:0;height:0;opacity:0;pointer-events:none}
+  .seg label{padding:9px 20px;font:600 12px/1 "Century Gothic","Jost",sans-serif;letter-spacing:.12em;color:#510128;cursor:pointer;user-select:none;transition:.15s;border-right:1px solid rgba(217,175,80,.45)}
+  .seg label:last-of-type{border-right:none}
+  .seg label:hover{background:rgba(217,175,80,.14)}
+  .seg input:checked + label{background:#510128;color:#F2F1ED}
+  .seg-dark input:checked + label{background:#D9AF50;color:#510128 !important}
+  .fld{display:flex;flex-direction:column;gap:7px}
+  .fld span{font:500 10.5px/1 "Century Gothic","Jost",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(28,20,24,.6)}
+  .fld input,.fld select,.fld textarea{font:400 14px/1.3 "Jost",sans-serif;color:#1c1418;background:#fff;border:1px solid rgba(81,1,40,.22);border-radius:3px;padding:12px 13px;transition:.18s;width:100%}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:#D9AF50;box-shadow:0 0 0 3px rgba(217,175,80,.16)}
+  .tapa-li{display:flex;align-items:flex-start;gap:9px;font:400 16px/1.45 "Jost",sans-serif;font-size:var(--tapa-fs,16px);color:#C8C8C8}
+  .tapa-li::before{content:"";flex:none;width:5px;height:5px;border-radius:50%;background:#D9AF50;margin-top:7px}
+  .tapa-chip{font:400 11px/1 "Jost",sans-serif;color:#C8C8C8;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.3);border-radius:20px;padding:5px 10px}
+  .pagewrap{max-width:1080px;margin:0 auto;padding:0 40px}
+  .back{display:inline-flex;align-items:center;gap:8px;font:500 11px/1 "Jost",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#b8902f;text-decoration:none;cursor:pointer;margin-bottom:30px;transition:.2s}
+  .back:hover{color:#510128}
+  .eyebrow{font:500 11px/1 "Jost",sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#b8902f;margin-bottom:15px}
+  .ptitle{font-family:"Cormorant Garamond",Georgia,serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:52px;line-height:1;margin:0;letter-spacing:.01em}
+  .menu-row{display:flex;align-items:flex-start;gap:24px;padding:20px 0;border-top:1px solid rgba(81,1,40,.12)}
+  .m-main{flex:1;min-width:0}
+  .m-name{font-family:"Cormorant Garamond",serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:23px;letter-spacing:.02em;margin:0}
+  .m-desc{font:400 12.5px/1.55 "Jost",sans-serif;color:rgba(28,20,24,.6);margin:5px 0 0;max-width:440px}
+  .m-price{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:27px;color:#b8902f;white-space:nowrap;line-height:1}
+  .m-unit{font:400 10px/1 "Jost",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(28,20,24,.45);margin-top:5px;text-align:right}
+  .dark .eyebrow{color:#D9AF50}
+  .dark .ptitle{color:#F2F1ED}
+  .dark .back{color:#D9AF50}
+  .dark .back:hover{color:#fff}
+  .dark .menu-row{border-top-color:rgba(217,175,80,.22)}
+  .dark .m-name{color:#F2F1ED}
+  .dark .m-desc{color:#C8C8C8}
+  .dark .m-price{color:#D9AF50}
+  .dark .m-unit{color:rgba(200,200,200,.55)}
+  .news-card{background:#FBFAF7;border:1px solid rgba(81,1,40,.12);border-radius:9px;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;transition:.22s;box-shadow:0 1px 0 rgba(81,1,40,.04)}
+  .news-card:hover{transform:translateY(-5px);box-shadow:0 24px 44px -24px rgba(81,1,40,.42)}
+  .tag{font:600 9.5px/1 "Jost",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f}
+</style>
+</helmet>
+
+<header class="nav" data-screen-label="Navegación">
+  <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:15px 26px">
+    <a href="#inicio" style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;letter-spacing:.18em;text-transform:uppercase;color:#510128;text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;background:#D9AF50;border-radius:50%"></span>Vindima</a>
+    <nav style="display:flex;gap:18px;justify-content:center">
+      <a class="navlink" href="#inicio" data-active="{{ nav_inicio }}">Inicio</a><a class="navlink" href="#tienda" data-active="{{ nav_tienda }}">Tienda</a><a class="navlink" href="#maridajes" data-active="{{ nav_maridajes }}">Maridajes</a><a class="navlink" href="#experiencia" data-active="{{ nav_experiencia }}">Experiencia</a><a class="navlink" href="#eventos" data-active="{{ nav_eventos }}">Eventos</a><a class="navlink" href="#contacto" data-active="{{ nav_contacto }}">Contacto</a>
+    </nav>
+    <div style="display:flex;gap:12px;align-items:center;justify-content:flex-end">
+      <a class="navlink" href="#cuenta" style="letter-spacing:.05em">Iniciar sesión</a>
+      <a class="btn-gold" href="#club" style="padding:10px 14px">✦ Únete al Club</a>
+      <a href="#tienda" style="position:relative;color:#510128;display:flex" aria-label="Carrito">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 7h12l-1 12H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+        <span style="position:absolute;top:-7px;right:-9px;min-width:16px;height:16px;padding:0 3px;background:#510128;color:#D9AF50;border-radius:9px;font:600 9.5px/16px 'Jost',sans-serif;text-align:center">{{ cart }}</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================ POPUP MARIDAJE ============================ -->
+<sc-if value="{{ popupOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Popup Maridaje" onClick="{{ closeOverlay }}" style="position:fixed;inset:0;background:rgba(28,20,24,.58);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:center;justify-content:center;padding:24px">
+  <div style="background:#FBFAF7;border-radius:12px;max-width:600px;width:100%;overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.6)">
+    <div style="background:#510128;padding:26px 30px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div>
+        <div style="font:500 10.5px/1 'Jost',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#D9AF50;margin-bottom:9px">✦ Maridaje recomendado</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:28px;line-height:1.05;margin:0;letter-spacing:.02em">¡Buena elección!</h3>
+        <p style="font:400 13px/1.5 'Jost',sans-serif;color:#C8C8C8;margin:8px 0 0">Agregaste <strong style="color:#F2F1ED;font-weight:600">{{ popupItem }}</strong> — {{ popupLead }}</p>
+      </div>
+      <button onClick="{{ closePopup }}" aria-label="Cerrar" style="flex:none;background:transparent;border:1px solid rgba(217,175,80,.5);color:#D9AF50;width:34px;height:34px;border-radius:50%;font:400 15px/1 'Jost',sans-serif;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:24px 30px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+      <sc-for list="{{ popupRecs }}" as="r" hint-placeholder-count="2">
+        <div style="background:#fff;border:1px solid #D9AF50;border-radius:8px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:19px;color:#510128;line-height:1.1;letter-spacing:.02em">{{ r.name }}</span>
+          <span style="font:400 12px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.62)">{{ r.desc }}</span>
+          <button onClick="{{ r.action }}" style="font:600 10px/1 'Jost',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#b8902f;margin-top:auto;padding-top:4px;background:none;border:none;cursor:pointer;text-align:left">{{ r.actionLabel }}</button>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin:0 30px 26px;padding:14px 16px;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.45);border-radius:7px;display:flex;align-items:center;gap:14px">
+      <span style="flex:none;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:26px;color:#b8902f;line-height:1">−10%</span>
+      <span style="font:400 12.5px/1.55 'Jost',sans-serif;color:#510128">{{ popupPromo }}</span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============================ INICIO ============================ -->
+<sc-if value="{{ is_inicio }}" hint-placeholder-val="{{ true }}">
+<main data-screen-label="Inicio">
+  <section style="background:#F2F1ED;position:relative;overflow:hidden;border-bottom:1px solid rgba(81,1,40,.1)">
+    <div style="max-width:1280px;margin:0 auto;padding:40px 40px 44px">
+      <div style="position:relative;border:1px solid rgba(217,175,80,.6);padding:70px 56px;min-height:500px;display:flex;align-items:center">
+        <span style="position:absolute;top:-1px;left:-1px;width:24px;height:24px;border-top:2px solid #D9AF50;border-left:2px solid #D9AF50"></span>
+        <span style="position:absolute;top:-1px;right:-1px;width:24px;height:24px;border-top:2px solid #D9AF50;border-right:2px solid #D9AF50"></span>
+        <span style="position:absolute;bottom:-1px;left:-1px;width:24px;height:24px;border-bottom:2px solid #D9AF50;border-left:2px solid #D9AF50"></span>
+        <span style="position:absolute;bottom:-1px;right:-1px;width:24px;height:24px;border-bottom:2px solid #D9AF50;border-right:2px solid #D9AF50"></span>
+        <div style="max-width:620px;position:relative;z-index:2">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+            <span style="width:48px;height:1px;background:#D9AF50"></span>
+            <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:#b8902f">Para grandes anfitriones · Desde 2023</span>
+          </div>
+          <h1 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;line-height:.96;letter-spacing:.01em;margin:0;font-size:68px">Vino de autor.<br>Charcutería.<br>Experiencias.</h1>
+          <p style="font:400 15px/1.8 'Jost',sans-serif;color:rgba(28,20,24,.72);max-width:420px;margin:26px 0 36px">Una bodega orgánica en Aguascalientes. Tablas de temporada, tapas y vino seleccionado para reunir a los tuyos alrededor de la mesa.</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <a class="btn-gold" href="#tienda">Ir a la tienda</a>
+            <a class="btn-ghost" href="#tienda">Ver menú</a>
+          </div>
+        </div>
+        <img src="assets/bottle.png" alt="Botella de vino Vindima" style="position:absolute;right:34px;bottom:-44px;height:566px;filter:drop-shadow(0 26px 34px rgba(81,1,40,.28));z-index:2">
+        <img src="assets/glass.png" alt="Copa de vino" style="position:absolute;right:246px;bottom:-30px;height:300px;filter:drop-shadow(0 18px 24px rgba(81,1,40,.24));transform:rotate(-3deg);z-index:1">
+      </div>
+      <div style="position:relative;margin-top:28px;display:flex;align-items:center;gap:16px">
+        <button onClick="{{ heroPrev }}" aria-label="Anterior" style="flex:none;width:40px;height:40px;border-radius:50%;border:1px solid rgba(217,175,80,.6);background:#FBFAF7;color:#510128;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+        <div style="flex:1;overflow:hidden;border:1px solid rgba(217,175,80,.6)">
+          <div style="display:flex;transition:transform .45s ease;transform:{{ heroTrackTransform }}">
+            <image-slot id="hero-carousel-1" style="flex:none;width:100%;height:220px" shape="rect" fit="cover" placeholder="Foto del lugar 1"></image-slot>
+            <image-slot id="hero-carousel-2" style="flex:none;width:100%;height:220px" shape="rect" fit="cover" placeholder="Foto del lugar 2"></image-slot>
+            <image-slot id="hero-carousel-3" style="flex:none;width:100%;height:220px" shape="rect" fit="cover" placeholder="Foto del lugar 3"></image-slot>
+            <image-slot id="hero-carousel-4" style="flex:none;width:100%;height:220px" shape="rect" fit="cover" placeholder="Foto del lugar 4"></image-slot>
+            <image-slot id="hero-carousel-5" style="flex:none;width:100%;height:220px" shape="rect" fit="cover" placeholder="Foto del lugar 5"></image-slot>
+          </div>
+        </div>
+        <button onClick="{{ heroNext }}" aria-label="Siguiente" style="flex:none;width:40px;height:40px;border-radius:50%;border:1px solid rgba(217,175,80,.6);background:#FBFAF7;color:#510128;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
+      </div>
+      <div style="display:flex;justify-content:center;gap:8px;margin-top:16px">
+        <sc-for list="{{ heroDots }}" as="dot" hint-placeholder-count="5">
+          <span onClick="{{ dot.onClick }}" style="width:8px;height:8px;border-radius:50%;cursor:pointer;background:{{ dot.bg }}"></span>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+</main>
+</sc-if>
+
+<!-- ============================ TIENDA ============================ -->
+<sc-if value="{{ is_tienda }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Tienda" style="background:#EDEBE3;padding:64px 0 100px">
+  <div style="max-width:1180px;margin:0 auto;padding:0 40px">
+    <div style="text-align:center;margin-bottom:54px">
+      <div class="eyebrow">Explora la carta</div>
+      <h2 class="ptitle">De la bodega a tu mesa</h2>
+      <p style="font:400 14.5px/1.7 'Jost',sans-serif;color:rgba(28,20,24,.66);max-width:520px;margin:16px auto 0">Seis categorías para armar tu mesa. Toca una para ver el menú completo y ordenar.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <a class="cat-card" href="#vinos">
+        <div style="height:140px;display:flex;align-items:flex-end;justify-content:center"><img src="assets/bottle.png" alt="Vinos de Autor" style="height:138px"></div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:25px;margin:6px 0 0;letter-spacing:.04em">Vinos de Autor</h3>
+        <p style="font:400 12.5px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0">Nuestra selección, solo por botella</p>
+        <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;color:#b8902f">$560 – $1,200</span>
+      </a>
+      <a class="cat-card" href="#tablas">
+        <div style="height:140px;display:flex;align-items:flex-end;justify-content:center"><img src="assets/board.png" alt="Tablas" style="height:130px"></div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:25px;margin:6px 0 0;letter-spacing:.04em">Tablas</h3>
+        <p style="font:400 12.5px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0">Charcutería y quesos para compartir</p>
+        <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;color:#b8902f">$650 – $2,380</span>
+      </a>
+      <a class="cat-card" href="#tapas">
+        <div style="height:140px;display:flex;align-items:center;justify-content:center"><img src="assets/tapa.png" alt="Tapas" style="height:128px"></div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:25px;margin:6px 0 0;letter-spacing:.04em">Tapas</h3>
+        <p style="font:400 12.5px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0">Bocados para acompañar la copa</p>
+        <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;color:#b8902f">$55 – $95</span>
+      </a>
+      <a class="cat-card" href="#hogazas">
+        <div style="height:140px;display:flex;align-items:center;justify-content:center"><img src="assets/hogaza.png" alt="Hogazas" style="height:126px"></div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:25px;margin:6px 0 0;letter-spacing:.04em">Hogazas</h3>
+        <p style="font:400 12.5px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0">Pan artesanal de masa madre</p>
+        <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;color:#b8902f">$120 – $260</span>
+      </a>
+      <a class="cat-card" href="#bebidas">
+        <div style="height:140px;display:flex;align-items:flex-end;justify-content:center"><img src="assets/glass-soft.png" alt="Bebidas" style="height:138px"></div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:25px;margin:6px 0 0;letter-spacing:.04em">Bebidas</h3>
+        <p style="font:400 12.5px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0">Vino de autor por copa y botella</p>
+        <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;color:#b8902f">$90 – $1,200</span>
+      </a>
+      <a class="cat-card" href="#bowls">
+        <div style="height:140px;display:flex;align-items:center;justify-content:center"><img src="assets/bowl-platter.png" alt="Bowls" style="height:120px"></div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:25px;margin:6px 0 0;letter-spacing:.04em">Bowls</h3>
+        <p style="font:400 12.5px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0">Frescos, de temporada</p>
+        <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;color:#b8902f">$110 – $190</span>
+      </a>
+    </div>
+    <div style="margin-top:44px;background:#FBFAF7;border:1px solid rgba(217,175,80,.55);border-radius:9px;padding:26px 28px">
+      <div class="eyebrow" style="text-align:center;margin-bottom:18px">Promociones</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="flex:none;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;color:#b8902f;line-height:1">−10%</span><span style="font:400 12.5px/1.55 'Jost',sans-serif;color:rgba(28,20,24,.72)">En la compra de 3 o más botellas de vino</span></div>
+        <div style="display:flex;align-items:center;gap:14px"><span style="flex:none;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;color:#b8902f;line-height:1">−12%</span><span style="font:400 12.5px/1.55 'Jost',sans-serif;color:rgba(28,20,24,.72)">En la caja de 12 botellas</span></div>
+        <div style="display:flex;align-items:center;gap:14px"><span style="flex:none;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;color:#b8902f;line-height:1">−10%</span><span style="font:400 12.5px/1.55 'Jost',sans-serif;color:rgba(28,20,24,.72)">Botella de vino + tabla, hogaza o cualquier alimento</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ TABLAS ============================ -->
+<sc-if value="{{ is_tablas }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Tablas" style="background:#F2F1ED;padding:56px 0 100px;position:relative;overflow:hidden">
+  <img src="assets/board.png" alt="" style="position:absolute;right:-90px;top:120px;width:320px;opacity:.12;pointer-events:none">
+  <div style="max-width:1180px;margin:0 auto;padding:0 40px;position:relative">
+    <a class="back" href="#tienda">← Volver a la tienda</a>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:48px">
+      <div>
+        <div class="eyebrow">Tienda · Para compartir</div>
+        <h2 class="ptitle">Tablas de charcutería</h2>
+      </div>
+      <p style="font:400 14px/1.7 'Jost',sans-serif;color:rgba(28,20,24,.66);max-width:360px;margin:0">Elige tamaño — chica, mediana o grande. Los miembros del Club ahorran 10% en cada tabla.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch">
+      <div style="background:#FBFAF7;border:1px solid #D9AF50;border-radius:9px;padding:30px 28px;display:flex;flex-direction:column;gap:20px">
+        <image-slot id="tabla-foto-estaciones" style="width:100%;height:160px;border-radius:6px" shape="rounded" fit="cover" placeholder="Foto · 4 Estaciones"></image-slot>
+        <div>
+          <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:30px;margin:0 0 8px;letter-spacing:.02em">4 Estaciones</h3>
+          <p style="font:400 13px/1.6 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0">Quesos de temporada, charcutería curada, fruta fresca y pan artesanal.</p>
+        </div>
+        <div class="seg">
+          <input type="radio" name="size0" id="s0ch" onChange="{{ pick.s0CH }}"><label for="s0ch">CH</label>
+          <input type="radio" name="size0" id="s0m" defaultChecked="{{ true }}" onChange="{{ pick.s0M }}"><label for="s0m">M</label>
+          <input type="radio" name="size0" id="s0g" onChange="{{ pick.s0G }}"><label for="s0g">G</label>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:auto">
+          <span style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:#b8902f;line-height:1">{{ price0 }}</span>
+          <span style="background:#510128;color:#D9AF50;padding:6px 11px;border-radius:3px;font:600 10.5px/1 'Century Gothic','Jost',sans-serif;letter-spacing:.05em;white-space:nowrap">✦ Club −10% · {{ club0 }}</span>
+        </div>
+        <button class="btn-gold" style="justify-content:center" onClick="{{ add.estaciones }}">Agregar a la tabla</button>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid #D9AF50;border-radius:9px;padding:30px 28px;display:flex;flex-direction:column;gap:20px">
+        <image-slot id="tabla-foto-envero" style="width:100%;height:160px;border-radius:6px" shape="rounded" fit="cover" placeholder="Foto · Tabla Envero"></image-slot>
+        <div>
+          <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:30px;margin:0 0 8px;letter-spacing:.02em">Envero</h3>
+          <p style="font:400 13px/1.6 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0">Selección de la casa con embutidos ibéricos y quesos madurados.</p>
+        </div>
+        <div class="seg">
+          <input type="radio" name="size1" id="s1ch" onChange="{{ pick.s1CH }}"><label for="s1ch">CH</label>
+          <input type="radio" name="size1" id="s1m" defaultChecked="{{ true }}" onChange="{{ pick.s1M }}"><label for="s1m">M</label>
+          <input type="radio" name="size1" id="s1g" onChange="{{ pick.s1G }}"><label for="s1g">G</label>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:auto">
+          <span style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:#b8902f;line-height:1">{{ price1 }}</span>
+          <span style="background:#510128;color:#D9AF50;padding:6px 11px;border-radius:3px;font:600 10.5px/1 'Century Gothic','Jost',sans-serif;letter-spacing:.05em;white-space:nowrap">✦ Club −10% · {{ club1 }}</span>
+        </div>
+        <button class="btn-gold" style="justify-content:center" onClick="{{ add.envero }}">Agregar a la tabla</button>
+      </div>
+      <div style="background:#510128;border:1px solid #D9AF50;border-radius:9px;padding:30px 28px;display:flex;flex-direction:column;gap:20px;position:relative">
+        <span style="position:absolute;top:18px;right:18px;font:600 9.5px/1 'Century Gothic','Jost',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#510128;background:#D9AF50;padding:5px 9px;border-radius:2px">Insignia</span>
+        <image-slot id="tabla-foto-vindima" style="width:100%;height:160px;border-radius:6px" shape="rounded" fit="cover" placeholder="Foto · Tabla Vindima"></image-slot>
+        <div>
+          <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:30px;margin:0 0 8px;letter-spacing:.02em">Vindima</h3>
+          <p style="font:400 13px/1.6 'Jost',sans-serif;color:#C8C8C8;margin:0">Nuestra tabla insignia: lo mejor de la bodega para una gran mesa.</p>
+        </div>
+        <div class="seg" style="border-color:#D9AF50;background:rgba(255,255,255,.04)">
+          <input type="radio" name="size2" id="s2ch" onChange="{{ pick.s2CH }}"><label for="s2ch" style="color:#F2F1ED;border-right-color:rgba(217,175,80,.4)">CH</label>
+          <input type="radio" name="size2" id="s2m" defaultChecked="{{ true }}" onChange="{{ pick.s2M }}"><label for="s2m" style="color:#F2F1ED;border-right-color:rgba(217,175,80,.4)">M</label>
+          <input type="radio" name="size2" id="s2g" onChange="{{ pick.s2G }}"><label for="s2g" style="color:#F2F1ED">G</label>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:auto">
+          <span style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;color:#D9AF50;line-height:1">{{ price2 }}</span>
+          <span style="background:#D9AF50;color:#510128;padding:6px 11px;border-radius:3px;font:600 10.5px/1 'Century Gothic','Jost',sans-serif;letter-spacing:.05em;white-space:nowrap">✦ Club −10% · {{ club2 }}</span>
+        </div>
+        <button class="btn-gold" style="justify-content:center" onClick="{{ add.vindima }}">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ TAPAS ============================ -->
+<sc-if value="{{ is_tapas }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Tapas" style="background:#510128;padding:56px 0 96px;position:relative;overflow:hidden">
+  <img src="assets/tapa.png" alt="" style="position:absolute;left:-40px;top:90px;width:200px;opacity:.9;transform:rotate(-8deg)">
+  <img src="assets/glass-soft.png" alt="" style="position:absolute;right:30px;bottom:-30px;width:150px;opacity:.5">
+  <img src="assets/olive.png" alt="" style="position:absolute;right:60px;top:70px;width:130px;opacity:.14;transform:rotate(12deg);pointer-events:none">
+  <div style="max-width:1080px;margin:0 auto;padding:0 40px;position:relative;--tapa-fs:{{ tapasFs }}px">
+    <a class="back" href="#tienda" style="color:#D9AF50">← Volver a la tienda</a>
+    <div style="text-align:center;margin-bottom:48px">
+      <div class="eyebrow" style="color:#D9AF50">Para picar</div>
+      <h2 class="ptitle" style="color:#F2F1ED">Tapas</h2>
+      <p style="font:400 14.5px/1.7 'Jost',sans-serif;color:#C8C8C8;max-width:500px;margin:16px auto 0;font-size:var(--tapa-fs,16px)">Tres charolas para acompañar la copa. Elige una o combínalas para la mesa.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="tapa-foto-a" style="width:100%;height:150px" shape="rect" fit="cover" placeholder="Foto · Tapas A"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+            <h4 class="m-name" style="margin:0;color:#F2F1ED">Tapas A</h4>
+            <span style="font:400 10.5px/1 'Jost',sans-serif;color:rgba(200,200,200,.7);white-space:nowrap">3 bocados</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-content:flex-start">
+            <span class="tapa-chip">Jamón serrano con higo</span>
+            <span class="tapa-chip">Brie horneado con miel</span>
+            <span class="tapa-chip">Aceitunas marinadas</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$95</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="tapa-foto-b" style="width:100%;height:150px" shape="rect" fit="cover" placeholder="Foto · Tapas B"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+            <h4 class="m-name" style="margin:0;color:#F2F1ED">Tapas B</h4>
+            <span style="font:400 10.5px/1 'Jost',sans-serif;color:rgba(200,200,200,.7);white-space:nowrap">6 bocados</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-content:flex-start">
+            <span class="tapa-chip">Pan con tomate</span>
+            <span class="tapa-chip">Croquetas de jamón</span>
+            <span class="tapa-chip">Boquerones en vinagre</span>
+            <span class="tapa-chip">Pimientos de Padrón</span>
+            <span class="tapa-chip">Hummus de betabel</span>
+            <span class="tapa-chip">Mini tabla de quesos</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$90</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="tapa-foto-c" style="width:100%;height:150px" shape="rect" fit="cover" placeholder="Foto · Tapas C"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+            <h4 class="m-name" style="margin:0;color:#F2F1ED">Tapas C</h4>
+            <span style="font:400 10.5px/1 'Jost',sans-serif;color:rgba(200,200,200,.7);white-space:nowrap">10 bocados</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-content:flex-start">
+            <span class="tapa-chip">Almendras tostadas</span>
+            <span class="tapa-chip">Aceitunas verdes</span>
+            <span class="tapa-chip">Queso curado</span>
+            <span class="tapa-chip">Chorizo ibérico</span>
+            <span class="tapa-chip">Pan artesanal</span>
+            <span class="tapa-chip">Mantequilla de la casa</span>
+            <span class="tapa-chip">Encurtidos</span>
+            <span class="tapa-chip">Tomatitos cherry</span>
+            <span class="tapa-chip">Uvas de la región</span>
+            <span class="tapa-chip">Nueces caramelizadas</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$55</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="tapa-foto-picoteo" style="width:100%;height:150px" shape="rect" fit="cover" placeholder="Foto · Picoteo"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+            <h4 class="m-name" style="margin:0;color:#F2F1ED">Picoteo</h4>
+            <span style="font:400 10.5px/1 'Jost',sans-serif;color:rgba(200,200,200,.7);white-space:nowrap">Para la copa</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-content:flex-start">
+            <span class="tapa-chip">Aceitunas marinadas</span>
+            <span class="tapa-chip">Almendras tostadas</span>
+            <span class="tapa-chip">Queso curado</span>
+            <span class="tapa-chip">Pan de la casa</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$85</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.picoteo }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="tapa-foto-tortilla" style="width:100%;height:150px" shape="rect" fit="cover" placeholder="Foto · Tortilla Española"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Tortilla Española</h4>
+          <p class="m-desc" style="margin:0;flex:1;color:#C8C8C8">Jugosa y dorada, con papa confitada y cebolla caramelizada. Para compartir.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$95</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.tortilla }}">Agregar</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ HOGAZAS ============================ -->
+<sc-if value="{{ is_hogazas }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Hogazas" style="background:#F2F1ED;padding:56px 0 100px;position:relative;overflow:hidden">
+  <img src="assets/hogaza.png" alt="" style="position:absolute;right:-60px;top:140px;width:280px;opacity:.13;pointer-events:none">
+  <img src="assets/olive.png" alt="" style="position:absolute;left:-30px;bottom:60px;width:150px;opacity:.16;transform:rotate(18deg);pointer-events:none">
+  <div class="pagewrap" style="position:relative">
+    <a class="back" href="#tienda">← Volver a la tienda</a>
+    <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:30px">
+      <img src="assets/hogaza.png" alt="Hogazas" style="height:128px;flex:none">
+      <div>
+        <div class="eyebrow">Horno de la casa</div>
+        <h2 class="ptitle">Hogazas</h2>
+        <p style="font:400 14px/1.7 'Jost',sans-serif;color:rgba(28,20,24,.66);max-width:480px;margin:14px 0 0">Pan de masa madre con fermentación lenta. Horneado cada mañana en Aguascalientes.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="hogaza-foto-masamadre" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Masa madre"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Hogaza de masa madre</h4>
+          <p class="m-desc" style="margin:0;flex:1">Corteza crujiente, miga abierta. Fermentación lenta de 24 horas.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$120</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="hogaza-foto-integral" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Integral de semillas"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Hogaza integral de semillas</h4>
+          <p class="m-desc" style="margin:0;flex:1">Trigo integral con girasol, linaza y ajonjolí.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$150</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="hogaza-foto-brie" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Brie &amp; Romero"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Hogaza Brie &amp; Romero</h4>
+          <p class="m-desc" style="margin:0;flex:1">Brie fundido y romero fresco de la huerta.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$170</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.brie }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="hogaza-foto-vindima" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Hogaza Vindima"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Hogaza Vindima</h4>
+          <p class="m-desc" style="margin:0;flex:1">Higos, nuez y masa madre — la insignia del horno.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$190</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.hogazaVindima }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="hogaza-foto-canasta" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Canasta Vindima"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Canasta Vindima</h4>
+          <p class="m-desc" style="margin:0;flex:1">Tres hogazas surtidas de la semana para la mesa.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$260</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:34px;padding:20px 22px;background:rgba(217,175,80,.12);border:1px solid rgba(217,175,80,.4);border-radius:7px">
+      <span style="font:400 13.5px/1.5 'Jost',sans-serif;color:#510128">Encarga tu hogaza del día — los miembros del Club ahorran <strong>10%</strong>.</span>
+      <a class="btn-wa" href="{{ waContacto }}" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ BEBIDAS ============================ -->
+<sc-if value="{{ is_bebidas }}" hint-placeholder-val="{{ false }}">
+<section class="dark" data-screen-label="Bebidas" style="background:#510128;padding:56px 0 100px;position:relative;overflow:hidden">
+  <img src="assets/glass-soft.png" alt="" style="position:absolute;right:-30px;top:60px;width:230px;opacity:.16;pointer-events:none">
+  <img src="assets/glass-soft.png" alt="" style="position:absolute;left:-30px;bottom:20px;width:150px;opacity:.18;pointer-events:none">
+  <div class="pagewrap" style="position:relative">
+    <a class="back" href="#tienda">← Volver a la tienda</a>
+    <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:30px">
+      <img src="assets/glass.png" alt="Bebidas" style="height:130px;flex:none">
+      <div>
+        <div class="eyebrow">De la casa</div>
+        <h2 class="ptitle">Bebidas</h2>
+        <p style="font:400 14px/1.7 'Jost',sans-serif;color:#C8C8C8;max-width:480px;margin:14px 0 0">Matchas de la casa. ¿Buscas vino? Visita <a href="#vinos" style="color:#D9AF50">Vinos de Autor</a>.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="bebida-foto-caliente" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Matcha latte caliente"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Matcha latte caliente</h4>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto"><span class="m-price" style="color:#D9AF50">$80</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="bebida-foto-fria" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Matcha latte frío"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Matcha latte frío</h4>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto"><span class="m-price" style="color:#D9AF50">$85</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="bebida-foto-tonica" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Matcha tónica con mandarina"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Matcha tónica con mandarina</h4>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto"><span class="m-price" style="color:#D9AF50">$140</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ VINOS DE AUTOR ============================ -->
+<sc-if value="{{ is_vinos }}" hint-placeholder-val="{{ false }}">
+<section class="dark" data-screen-label="Vinos de Autor" style="background:#510128;padding:56px 0 100px;position:relative;overflow:hidden">
+  <img src="assets/bottle.png" alt="" style="position:absolute;right:-30px;top:60px;width:230px;opacity:.16;pointer-events:none">
+  <img src="assets/olives.png" alt="" style="position:absolute;left:-40px;bottom:80px;width:200px;opacity:.15;pointer-events:none">
+  <div class="pagewrap" style="position:relative">
+    <a class="back" href="#tienda">← Volver a la tienda</a>
+    <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:30px">
+      <img src="assets/bottle.png" alt="Vinos de Autor" style="height:130px;flex:none">
+      <div>
+        <div class="eyebrow">Vino de autor</div>
+        <h2 class="ptitle">Vinos de Autor</h2>
+        <p style="font:400 14px/1.7 'Jost',sans-serif;color:#C8C8C8;max-width:480px;margin:14px 0 0">Selección de la bodega, solo por botella. Pregunta por el maridaje del día.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="vino-foto-blanc" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Paradoja Blanc"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Paradoja Blanc</h4>
+          <p class="m-desc" style="margin:0;flex:1;color:#C8C8C8">Blanco de Bodegas de la Parra. Cítricos, flor de azahar y final mineral.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$560</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.blanc }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="vino-foto-piensos" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Piensos"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Piensos</h4>
+          <p class="m-desc" style="margin:0;flex:1;color:#C8C8C8">Tinto joven. Frutos rojos frescos, taninos suaves y paso ligero.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$620</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.piensos }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="vino-foto-postos" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Postos"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Postos</h4>
+          <p class="m-desc" style="margin:0;flex:1;color:#C8C8C8">Tinto con barrica. Fruta negra madura, especias y notas tostadas.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$720</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.postos }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="vino-foto-granreserva" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Paradoja Gran Reserva"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Paradoja Gran Reserva</h4>
+          <p class="m-desc" style="margin:0;flex:1;color:#C8C8C8">Guarda larga: fruta compotada, vainilla y taninos sedosos.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$1,200</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.granreserva }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="vino-foto-clericot" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Clericot de la casa"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0;color:#F2F1ED">Clericot de la casa</h4>
+          <p class="m-desc" style="margin:0;flex:1;color:#C8C8C8">Vino, fruta de temporada y especias, servido muy frío.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price" style="color:#D9AF50">$620</span><button class="btn-gold" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.clericot }}">Agregar</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="eyebrow" style="color:#D9AF50;margin:40px 0 14px">Promociones</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      <div style="border:1px solid rgba(217,175,80,.5);border-radius:8px;padding:18px 20px;display:flex;align-items:center;gap:14px"><span style="flex:none;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;color:#D9AF50;line-height:1">−10%</span><span style="font:400 12.5px/1.5 'Jost',sans-serif;color:#C8C8C8">En la compra de 3 o más botellas</span></div>
+      <div style="border:1px solid rgba(217,175,80,.5);border-radius:8px;padding:18px 20px;display:flex;align-items:center;gap:14px"><span style="flex:none;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;color:#D9AF50;line-height:1">−12%</span><span style="font:400 12.5px/1.5 'Jost',sans-serif;color:#C8C8C8">En la caja de 12 botellas</span></div>
+      <div style="border:1px solid rgba(217,175,80,.5);border-radius:8px;padding:18px 20px;display:flex;align-items:center;gap:14px"><span style="flex:none;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;color:#D9AF50;line-height:1">−10%</span><span style="font:400 12.5px/1.5 'Jost',sans-serif;color:#C8C8C8">Botella + tabla, hogaza o cualquier alimento</span></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:20px;padding:20px 22px;background:rgba(217,175,80,.1);border:1px solid rgba(217,175,80,.35);border-radius:7px">
+      <span style="font:400 13.5px/1.5 'Jost',sans-serif;color:#F2F1ED">¿Quieres una cata privada o botellas para tu evento?</span>
+      <a class="btn-wa" href="{{ waContacto }}" target="_blank" rel="noopener">Ordenar por WhatsApp</a>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ BOWLS ============================ -->
+<sc-if value="{{ is_bowls }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Bowls" style="background:#F2F1ED;padding:56px 0 100px;position:relative;overflow:hidden">
+  <img src="assets/bowl-platter.png" alt="" style="position:absolute;right:-80px;top:120px;width:340px;opacity:.12;pointer-events:none">
+  <img src="assets/olive.png" alt="" style="position:absolute;left:-20px;bottom:70px;width:140px;opacity:.16;transform:rotate(-14deg);pointer-events:none">
+  <div class="pagewrap" style="position:relative">
+    <a class="back" href="#tienda">← Volver a la tienda</a>
+    <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;margin-bottom:30px">
+      <img src="assets/bowl-platter.png" alt="Bowls" style="height:120px;flex:none">
+      <div>
+        <div class="eyebrow">Fresco y de temporada</div>
+        <h2 class="ptitle">Bowls</h2>
+        <p style="font:400 14px/1.7 'Jost',sans-serif;color:rgba(28,20,24,.66);max-width:480px;margin:14px 0 0">Platos ligeros con producto del mercado. Ideales para el mediodía con una copa.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="bowl-foto-quinoa" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Bowl de quinoa y betabel"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Bowl de quinoa y betabel</h4>
+          <p class="m-desc" style="margin:0;flex:1">Quinoa, betabel rostizado y queso de cabra.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$120</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="bowl-foto-mediterraneo" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Bowl mediterráneo"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Bowl mediterráneo</h4>
+          <p class="m-desc" style="margin:0;flex:1">Garbanzo, pepino, hummus y aceitunas.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$140</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="bowl-foto-burrata" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Bowl de burrata"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Bowl de burrata</h4>
+          <p class="m-desc" style="margin:0;flex:1">Burrata, tomate reliquia y albahaca fresca.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$160</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="bowl-foto-temporada" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Bowl de temporada"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Bowl de temporada</h4>
+          <p class="m-desc" style="margin:0;flex:1">Lo que llega fresco del mercado esa semana.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$130</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(217,175,80,.4);border-radius:9px;overflow:hidden;display:flex;flex-direction:column">
+        <image-slot id="bowl-foto-vindima" style="width:100%;height:170px" shape="rect" fit="cover" placeholder="Foto · Bowl Vindima"></image-slot>
+        <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <h4 class="m-name" style="margin:0">Bowl Vindima</h4>
+          <p class="m-desc" style="margin:0;flex:1">Grano, proteína y vegetales de la casa.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="m-price">$190</span><button class="btn-ghost" style="padding:10px 14px;font-size:10.5px;flex:none" onClick="{{ add.simple }}">Agregar</button></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:34px;padding:20px 22px;background:rgba(217,175,80,.12);border:1px solid rgba(217,175,80,.4);border-radius:7px">
+      <span style="font:400 13.5px/1.5 'Jost',sans-serif;color:#510128">Arma tu bowl para llevar.</span>
+      <a class="btn-wa" href="{{ waContacto }}" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ EXPERIENCIA VINDIMA ============================ -->
+<sc-if value="{{ is_experiencia }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Experiencia Vindima" style="background:#F2F1ED;padding:0;position:relative;overflow:hidden">
+  <div style="text-align:center;padding:64px 40px 56px;position:relative">
+    <img src="assets/olive.png" alt="" style="position:absolute;right:50px;top:36px;width:110px;opacity:.14;transform:rotate(14deg);pointer-events:none">
+    <img src="assets/olives.png" alt="" style="position:absolute;left:-40px;top:60px;width:180px;opacity:.13;pointer-events:none">
+    <div class="eyebrow">La casa</div>
+    <h2 class="ptitle">Experiencia Vindima</h2>
+    <p style="font:400 14.5px/1.7 'Jost',sans-serif;color:rgba(28,20,24,.66);max-width:540px;margin:16px auto 0">La historia detrás de la mesa: quién la sirve, dónde nace el vino y por qué existe este lugar.</p>
+  </div>
+
+  <div style="max-width:1180px;margin:0 auto;padding:0 40px 84px">
+    <div style="display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:center">
+      <image-slot id="alby-retrato" style="width:100%;height:480px;border-radius:9px" shape="rounded" fit="cover" placeholder="Retrato de Alby"></image-slot>
+      <div>
+        <div class="eyebrow">La anfitriona</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:44px;line-height:1.02;margin:0 0 22px;letter-spacing:.01em">Conoce a Alby</h3>
+        <p style="font:400 15px/1.85 'Jost',sans-serif;color:rgba(28,20,24,.74);margin:0 0 16px;max-width:480px">Alby fundó Vindima con una convicción: los mejores momentos pasan alrededor de la mesa. Su historia con el vino empezó en casa, sirviendo a los suyos, y creció hasta convertirse en este espacio en Aguascalientes.</p>
+        <p style="font:400 15px/1.85 'Jost',sans-serif;color:rgba(28,20,24,.74);margin:0 0 26px;max-width:480px">Hoy cura cada tabla, elige cada botella y recibe a cada mesa como recibe en su casa.</p>
+        <div style="display:flex;gap:18px;align-items:flex-start;border-left:2px solid #D9AF50;padding-left:22px">
+          <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.5;color:#510128;margin:0;max-width:440px">«Ser una gran anfitriona es hacer que cada persona se sienta esperada. Vindima existe para compartir eso: el vino, el pan y la buena mesa.»</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#510128;padding:84px 40px;position:relative;overflow:hidden">
+    <img src="assets/glass.png" alt="" style="position:absolute;left:-30px;bottom:-20px;width:180px;opacity:.14;pointer-events:none">
+    <img src="assets/bottle.png" alt="" style="position:absolute;right:-20px;top:30px;width:170px;opacity:.13;pointer-events:none">
+    <div style="max-width:720px;margin:0 auto;text-align:center;position:relative">
+      <div class="eyebrow" style="color:#D9AF50">Desde 2023</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:44px;line-height:1.04;margin:0 0 24px;letter-spacing:.01em">La historia de Vindima</h3>
+      <p style="font:400 15px/1.9 'Jost',sans-serif;color:#C8C8C8;margin:0 0 16px">Vindima nació en 2023 en el corazón de Aguascalientes con una idea simple: reunir a la gente alrededor de buen vino y comida hecha con las manos. Trabajamos con productores locales, fermentamos nuestro propio pan y curamos charcutería de temporada.</p>
+      <p style="font:400 15px/1.9 'Jost',sans-serif;color:#C8C8C8;margin:0">Cada tabla, cada copa y cada tapa está pensada para grandes anfitriones — para esos momentos en que la mesa se vuelve el mejor lugar de la casa.</p>
+    </div>
+  </div>
+
+  <div style="max-width:1180px;margin:0 auto;padding:84px 40px">
+    <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center">
+      <div>
+        <div class="eyebrow">El origen</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:44px;line-height:1.04;margin:0 0 22px;letter-spacing:.01em">El viñedo y<br>Bodegas de la Parra</h3>
+        <p style="font:400 15px/1.85 'Jost',sans-serif;color:rgba(28,20,24,.74);margin:0 0 16px;max-width:480px">Nuestro vino nace a unos kilómetros de la mesa, en Bodegas de la Parra: un viñedo orgánico de Aguascalientes donde la uva se trabaja a mano y la vendimia — la vindima — le dio nombre a esta casa.</p>
+        <p style="font:400 15px/1.85 'Jost',sans-serif;color:rgba(28,20,24,.74);margin:0 0 30px;max-width:480px">De sus barricas vienen Paradoja Blanc, Piensos, Postos y Paradoja Gran Reserva: vinos de autor, de producción limitada, que servimos por copa y botella.</p>
+        <a class="btn-ghost" href="#maridajes">Conoce nuestros vinos →</a>
+      </div>
+      <image-slot id="vinedo-foto" style="width:100%;height:440px;border-radius:9px" shape="rounded" fit="cover" placeholder="Foto del viñedo"></image-slot>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ EVENTOS ============================ -->
+<sc-if value="{{ is_eventos }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Eventos" style="background:#510128;padding:70px 0 96px;position:relative;overflow:hidden">
+  <img src="assets/glass.png" alt="" style="position:absolute;left:-30px;top:80px;width:170px;opacity:.16;pointer-events:none">
+  <img src="assets/board.png" alt="" style="position:absolute;right:-70px;bottom:-30px;width:300px;opacity:.12;pointer-events:none">
+  <div style="max-width:680px;margin:0 auto;padding:0 40px;position:relative;text-align:center">
+    <div class="eyebrow" style="color:#D9AF50">Eventos privados</div>
+    <h2 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:46px;line-height:1.04;margin:0 0 14px">¿Estás planeando<br>un evento?</h2>
+    <p style="font:400 14.5px/1.7 'Jost',sans-serif;color:#C8C8C8;max-width:480px;margin:0 auto 36px">Cumpleaños, catas privadas, cenas de empresa o celebraciones íntimas. Cuéntanos qué tienes en mente y te respondemos directo por WhatsApp.</p>
+    <div style="background:#FBFAF7;border-radius:12px;padding:38px 36px;text-align:left;box-shadow:0 30px 70px -34px rgba(0,0,0,.6)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <label class="fld"><span>Nombre</span><input id="ev_nombre" type="text" placeholder="Mariana Reyes"></label>
+        <label class="fld"><span>Tipo de evento</span>
+          <select id="ev_tipo">
+            <option>Cumpleaños</option><option>Cata privada</option><option>Cena de empresa</option><option>Celebración íntima</option><option>Otro</option>
+          </select>
+        </label>
+        <label class="fld"><span>Fecha tentativa</span><input id="ev_fecha" type="text" placeholder="14 / 08 / 2026"></label>
+        <label class="fld"><span>No. de personas</span><input id="ev_personas" type="text" placeholder="12"></label>
+        <label class="fld" style="grid-column:1/3"><span>Cuéntanos más</span><textarea id="ev_msg" rows="3" placeholder="Nos encantaría una tabla Vindima y vino para brindar…"></textarea></label>
+      </div>
+      <button class="btn-wa" style="width:100%;justify-content:center;margin-top:24px;font-size:13px" onClick="{{ sendEvento }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.4.1.1.1.6-.1 1.1Z"/></svg>
+        Enviar por WhatsApp
+      </button>
+      <p style="font:400 11.5px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.5);text-align:center;margin:14px 0 0">Se abrirá WhatsApp con tu mensaje listo para enviar.</p>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ MARIDAJES ============================ -->
+<sc-if value="{{ is_maridajes }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Maridajes" style="background:#F2F1ED;padding:56px 0 0;position:relative;overflow:hidden">
+  <img src="assets/olives.png" alt="" style="position:absolute;right:-50px;top:100px;width:220px;opacity:.14;pointer-events:none">
+  <img src="assets/olive.png" alt="" style="position:absolute;left:-30px;top:560px;width:140px;opacity:.15;transform:rotate(16deg);pointer-events:none">
+  <div style="max-width:1180px;margin:0 auto;padding:0 40px;position:relative">
+    <div style="text-align:center;margin-bottom:50px">
+      <div class="eyebrow">De la copa a la mesa</div>
+      <h2 class="ptitle">Maridajes</h2>
+      <p style="font:400 14.5px/1.7 'Jost',sans-serif;color:rgba(28,20,24,.66);max-width:540px;margin:16px auto 0">Nuestros vinos de Bodegas de la Parra y con qué platillos de la casa brillan. Elige por vino o por platillo.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div style="background:#FBFAF7;border:1px solid #D9AF50;border-radius:9px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:27px;margin:0;letter-spacing:.02em">Paradoja Blanc</h3>
+          <span class="tag" style="background:rgba(217,175,80,.16);padding:6px 10px;border-radius:2px;flex:none">Blanco</span>
+        </div>
+        <div>
+          <div style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:7px">Nota de cata</div>
+          <p style="font:400 13px/1.65 'Jost',sans-serif;color:rgba(28,20,24,.68);margin:0">Cítricos, flor de azahar y un final mineral y fresco.</p>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f">Servicio</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:21px;color:#510128;line-height:1">8–10 °C</span>
+        </div>
+        <div>
+          <div style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:9px">Marida con</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <a href="#tablas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Tabla 4 Estaciones</a>
+            <a href="#hogazas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Hogaza Brie &amp; Romero</a>
+          </div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid #D9AF50;border-radius:9px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:27px;margin:0;letter-spacing:.02em">Piensos</h3>
+          <span class="tag" style="background:rgba(217,175,80,.16);padding:6px 10px;border-radius:2px;flex:none">Tinto joven</span>
+        </div>
+        <div>
+          <div style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:7px">Nota de cata</div>
+          <p style="font:400 13px/1.65 'Jost',sans-serif;color:rgba(28,20,24,.68);margin:0">Frutos rojos frescos, taninos suaves y paso ligero.</p>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f">Servicio</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:21px;color:#510128;line-height:1">14–16 °C</span>
+        </div>
+        <div>
+          <div style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:9px">Marida con</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <a href="#tablas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Tabla 4 Estaciones</a>
+            <a href="#hogazas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Hogaza Vindima</a>
+            <a href="#tapas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Picoteo</a>
+          </div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid #D9AF50;border-radius:9px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:27px;margin:0;letter-spacing:.02em">Postos</h3>
+          <span class="tag" style="background:rgba(217,175,80,.16);padding:6px 10px;border-radius:2px;flex:none">Tinto</span>
+        </div>
+        <div>
+          <div style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:7px">Nota de cata</div>
+          <p style="font:400 13px/1.65 'Jost',sans-serif;color:rgba(28,20,24,.68);margin:0">Fruta negra madura, especias y notas de barrica.</p>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f">Servicio</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:21px;color:#510128;line-height:1">16–18 °C</span>
+        </div>
+        <div>
+          <div style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:9px">Marida con</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <a href="#tablas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Tabla Envero</a>
+            <a href="#tablas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Tabla Vindima</a>
+            <a href="#hogazas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Hogaza Vindima</a>
+            <a href="#tapas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Tortilla Española</a>
+          </div>
+        </div>
+      </div>
+      <div style="background:#510128;border:1px solid #D9AF50;border-radius:9px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:27px;margin:0;letter-spacing:.02em">Paradoja Gran Reserva</h3>
+          <span style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#510128;background:#D9AF50;padding:6px 10px;border-radius:2px;flex:none">Gran Reserva</span>
+        </div>
+        <div>
+          <div style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#D9AF50;margin-bottom:7px">Nota de cata</div>
+          <p style="font:400 13px/1.65 'Jost',sans-serif;color:#C8C8C8;margin:0">Guarda larga: fruta compotada, vainilla y taninos sedosos.</p>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#D9AF50">Servicio</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:21px;color:#F2F1ED;line-height:1">17–18 °C</span>
+        </div>
+        <div>
+          <div style="font:600 9.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#D9AF50;margin-bottom:9px">Marida con</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <a href="#tablas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#F2F1ED;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.55);padding:8px 13px;border-radius:999px;text-decoration:none">Tabla Vindima</a>
+            <a href="#hogazas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#F2F1ED;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.55);padding:8px 13px;border-radius:999px;text-decoration:none">Hogaza Vindima</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;background:#FBFAF7;border:1px solid rgba(217,175,80,.55);border-radius:9px;padding:22px 28px;display:flex;align-items:center;gap:22px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+          <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:24px;margin:0;letter-spacing:.02em">Clericot de la casa</h3>
+          <span class="tag" style="background:rgba(217,175,80,.16);padding:6px 10px;border-radius:2px">De la casa · 6–8 °C</span>
+        </div>
+        <p style="font:400 13px/1.65 'Jost',sans-serif;color:rgba(28,20,24,.68);margin:8px 0 0;max-width:520px">Vino, fruta de temporada y un toque de especias, servido muy frío.</p>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <a href="#tapas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Picoteo</a>
+        <a href="#tapas" style="font:500 11.5px/1 'Jost',sans-serif;letter-spacing:.04em;color:#510128;background:rgba(217,175,80,.14);border:1px solid rgba(217,175,80,.5);padding:8px 13px;border-radius:999px;text-decoration:none">Tortilla Española</a>
+      </div>
+    </div>
+
+    <div style="margin-top:70px;max-width:820px;margin-left:auto;margin-right:auto">
+      <div style="text-align:center;margin-bottom:14px">
+        <div class="eyebrow">Guía rápida</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:36px;margin:0;letter-spacing:.01em">¿Qué pedir con cada platillo?</h3>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px;padding:17px 0;border-bottom:1px solid rgba(81,1,40,.12)">
+        <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:21px;color:#510128;letter-spacing:.02em">Tabla 4 Estaciones</span>
+        <span style="flex:1;border-bottom:1px dotted rgba(81,1,40,.3);transform:translateY(-4px)"></span>
+        <span style="font:400 13.5px/1.4 'Jost',sans-serif;color:#b8902f;text-align:right">Paradoja Blanc o Piensos</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px;padding:17px 0;border-bottom:1px solid rgba(81,1,40,.12)">
+        <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:21px;color:#510128;letter-spacing:.02em">Tabla Envero</span>
+        <span style="flex:1;border-bottom:1px dotted rgba(81,1,40,.3);transform:translateY(-4px)"></span>
+        <span style="font:400 13.5px/1.4 'Jost',sans-serif;color:#b8902f;text-align:right">Postos</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px;padding:17px 0;border-bottom:1px solid rgba(81,1,40,.12)">
+        <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:21px;color:#510128;letter-spacing:.02em">Tabla Vindima</span>
+        <span style="flex:1;border-bottom:1px dotted rgba(81,1,40,.3);transform:translateY(-4px)"></span>
+        <span style="font:400 13.5px/1.4 'Jost',sans-serif;color:#b8902f;text-align:right">Postos o Paradoja Gran Reserva</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px;padding:17px 0;border-bottom:1px solid rgba(81,1,40,.12)">
+        <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:21px;color:#510128;letter-spacing:.02em">Hogaza Brie &amp; Romero</span>
+        <span style="flex:1;border-bottom:1px dotted rgba(81,1,40,.3);transform:translateY(-4px)"></span>
+        <span style="font:400 13.5px/1.4 'Jost',sans-serif;color:#b8902f;text-align:right">Paradoja Blanc</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px;padding:17px 0;border-bottom:1px solid rgba(81,1,40,.12)">
+        <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:21px;color:#510128;letter-spacing:.02em">Hogaza Vindima <span style="text-transform:none;font-family:'Jost',sans-serif;font-weight:400;font-size:12px;color:rgba(28,20,24,.5)">(higos)</span></span>
+        <span style="flex:1;border-bottom:1px dotted rgba(81,1,40,.3);transform:translateY(-4px)"></span>
+        <span style="font:400 13.5px/1.4 'Jost',sans-serif;color:#b8902f;text-align:right">Piensos, Postos o Paradoja Gran Reserva</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px;padding:17px 0;border-bottom:1px solid rgba(81,1,40,.12)">
+        <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:21px;color:#510128;letter-spacing:.02em">Picoteo</span>
+        <span style="flex:1;border-bottom:1px dotted rgba(81,1,40,.3);transform:translateY(-4px)"></span>
+        <span style="font:400 13.5px/1.4 'Jost',sans-serif;color:#b8902f;text-align:right">Piensos o Clericot</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:14px;padding:17px 0">
+        <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:21px;color:#510128;letter-spacing:.02em">Tortilla Española</span>
+        <span style="flex:1;border-bottom:1px dotted rgba(81,1,40,.3);transform:translateY(-4px)"></span>
+        <span style="font:400 13.5px/1.4 'Jost',sans-serif;color:#b8902f;text-align:right">Clericot o cualquiera de nuestros tintos</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#510128;margin-top:70px;padding:64px 0 84px;position:relative;overflow:hidden">
+    <img src="assets/glass-soft.png" alt="" style="position:absolute;right:-20px;bottom:-30px;width:160px;opacity:.16;pointer-events:none">
+    <img src="assets/olive.png" alt="" style="position:absolute;left:30px;top:50px;width:110px;opacity:.13;transform:rotate(-12deg);pointer-events:none">
+    <div style="max-width:1080px;margin:0 auto;padding:0 40px;position:relative;text-align:center">
+      <div class="eyebrow" style="color:#D9AF50">Te recomendamos</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:40px;line-height:1.04;margin:0 0 12px;letter-spacing:.01em">¿Qué vino vas a abrir?</h3>
+      <p style="font:400 14px/1.7 'Jost',sans-serif;color:#C8C8C8;max-width:440px;margin:0 auto 30px">Elige tu botella y te decimos qué pedir de la cocina.</p>
+      <div class="seg seg-dark" style="border-color:#D9AF50;background:rgba(255,255,255,.04);flex-wrap:wrap;justify-content:center">
+        <input type="radio" name="winepick" id="w-blanc" checked="{{ wine_blanc }}" onChange="{{ pickWine.blanc }}"><label for="w-blanc" style="color:#F2F1ED;border-right-color:rgba(217,175,80,.4)">Paradoja Blanc</label>
+        <input type="radio" name="winepick" id="w-piensos" checked="{{ wine_piensos }}" onChange="{{ pickWine.piensos }}"><label for="w-piensos" style="color:#F2F1ED;border-right-color:rgba(217,175,80,.4)">Piensos</label>
+        <input type="radio" name="winepick" id="w-postos" checked="{{ wine_postos }}" onChange="{{ pickWine.postos }}"><label for="w-postos" style="color:#F2F1ED;border-right-color:rgba(217,175,80,.4)">Postos</label>
+        <input type="radio" name="winepick" id="w-granreserva" checked="{{ wine_granreserva }}" onChange="{{ pickWine.granreserva }}"><label for="w-granreserva" style="color:#F2F1ED">Gran Reserva</label>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:36px;text-align:left">
+        <sc-for list="{{ recs }}" as="r" hint-placeholder-count="3">
+          <a href="{{ r.href }}" style="background:#FBFAF7;border:1px solid #D9AF50;border-radius:8px;padding:22px 20px;text-decoration:none;display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;font-weight:600;font-size:22px;color:#510128;line-height:1.08;letter-spacing:.02em">{{ r.name }}</span>
+            <span style="font:400 12.5px/1.55 'Jost',sans-serif;color:rgba(28,20,24,.62)">{{ r.desc }}</span>
+            <span style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#b8902f;margin-top:auto;padding-top:6px">Ver en la tienda →</span>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ CONTACTO ============================ -->
+<sc-if value="{{ is_contacto }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Contacto" style="background:#F2F1ED;padding:64px 0 100px">
+  <div style="max-width:1080px;margin:0 auto;padding:0 40px">
+    <div style="text-align:center;margin-bottom:50px">
+      <div class="eyebrow">Estamos para atenderte</div>
+      <h2 class="ptitle">Contacto</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:stretch">
+      <div style="background:#510128;border-radius:12px;padding:48px 44px;display:flex;flex-direction:column;justify-content:center;color:#C8C8C8">
+        <div style="font:500 11px/1 'Jost',sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#D9AF50;margin-bottom:10px">Escríbenos directo</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:34px;line-height:1.04;margin:0 0 14px">Reserva o haz<br>tu pedido</h3>
+        <p style="font:400 13.5px/1.7 'Jost',sans-serif;color:#C8C8C8;max-width:340px;margin:0 0 28px">La forma más rápida de reservar mesa, ordenar tablas o preguntar por vino es por WhatsApp. Te respondemos en minutos.</p>
+        <a class="btn-wa" href="{{ waContacto }}" target="_blank" rel="noopener" style="align-self:flex-start">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.4.1.1.1.6-.1 1.1Z"/></svg>
+          WhatsApp
+        </a>
+      </div>
+      <div style="background:#FBFAF7;border:1px solid rgba(81,1,40,.12);border-radius:12px;padding:48px 44px;display:flex;flex-direction:column;justify-content:center;gap:26px">
+        <div>
+          <div style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:8px">Dónde estamos</div>
+          <p style="font:400 14.5px/1.6 'Jost',sans-serif;color:#1c1418;margin:0">Centro, Aguascalientes<br>Aguascalientes, México</p>
+        </div>
+        <div style="height:1px;background:rgba(81,1,40,.1)"></div>
+        <div>
+          <div style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:8px">Horario</div>
+          <p style="font:400 14.5px/1.6 'Jost',sans-serif;color:#1c1418;margin:0">Martes a Domingo<br>13:00 – 23:00</p>
+        </div>
+        <div style="height:1px;background:rgba(81,1,40,.1)"></div>
+        <div>
+          <div style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#b8902f;margin-bottom:8px">Contacto</div>
+          <p style="font:400 14.5px/1.6 'Jost',sans-serif;color:#1c1418;margin:0">hola@vindima.mx<br>449 000 0000</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ CLUB ============================ -->
+<sc-if value="{{ is_club }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Vindima Club" style="background:#EDEBE3;padding:64px 0 100px">
+  <div style="max-width:1100px;margin:0 auto;padding:0 40px">
+    <div style="display:grid;grid-template-columns:.92fr 1.08fr;border-radius:12px;overflow:hidden;box-shadow:0 30px 70px -34px rgba(81,1,40,.5)">
+      <div style="background:#510128;padding:52px 44px;display:flex;flex-direction:column;justify-content:center;color:#C8C8C8">
+        <div style="width:150px;height:150px;border:2px solid #D9AF50;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:34px">
+          <span style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:46px;color:#D9AF50;line-height:1">10%</span>
+          <span style="font:500 11px/1 'Jost',sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#C8C8C8;margin-top:4px">off</span>
+        </div>
+        <div style="font:500 11px/1 'Jost',sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#D9AF50;margin-bottom:12px">Membresía</div>
+        <h2 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:42px;line-height:1;margin:0 0 26px;letter-spacing:.02em">Vindima Club</h2>
+        <div style="display:flex;flex-direction:column;gap:15px">
+          <div style="display:flex;gap:12px;align-items:flex-start"><span style="flex:none;width:6px;height:6px;border-radius:50%;background:#D9AF50;margin-top:7px"></span><span style="font:400 14px/1.4 'Jost',sans-serif">10% de descuento en toda la tienda</span></div>
+          <div style="display:flex;gap:12px;align-items:flex-start"><span style="flex:none;width:6px;height:6px;border-radius:50%;background:#D9AF50;margin-top:7px"></span><span style="font:400 14px/1.4 'Jost',sans-serif">Regalo de cumpleaños</span></div>
+          <div style="display:flex;gap:12px;align-items:flex-start"><span style="flex:none;width:6px;height:6px;border-radius:50%;background:#D9AF50;margin-top:7px"></span><span style="font:400 14px/1.4 'Jost',sans-serif">5 compras = 1 recompensa</span></div>
+          <div style="display:flex;gap:12px;align-items:flex-start"><span style="flex:none;width:6px;height:6px;border-radius:50%;background:#D9AF50;margin-top:7px"></span><span style="font:400 14px/1.4 'Jost',sans-serif">Acceso anticipado a eventos</span></div>
+        </div>
+      </div>
+      <div style="background:#FBFAF7;padding:48px 44px">
+        <h3 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#510128;font-weight:600;font-size:28px;margin:0 0 6px;letter-spacing:.02em">Crear mi cuenta</h3>
+        <p style="font:400 13px/1.6 'Jost',sans-serif;color:rgba(28,20,24,.6);margin:0 0 26px">Únete en un minuto y empieza a sumar recompensas.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <label class="fld"><span>Nombre</span><input type="text" placeholder="Mariana"></label>
+          <label class="fld"><span>Apellido</span><input type="text" placeholder="Reyes"></label>
+          <label class="fld" style="grid-column:1/3"><span>Email</span><input type="email" placeholder="mariana@correo.com"></label>
+          <label class="fld" style="grid-column:1/3"><span>Contraseña</span><input type="password" placeholder="••••••••"></label>
+          <label class="fld"><span>Teléfono</span><input type="tel" placeholder="449 000 0000"></label>
+          <label class="fld"><span>Cumpleaños (DD/MM)</span><input type="text" placeholder="14 / 03"></label>
+        </div>
+        <button class="btn-gold" style="width:100%;justify-content:center;margin-top:24px;padding:14px">✦ Crear mi cuenta</button>
+        <p style="font:400 11.5px/1.5 'Jost',sans-serif;color:rgba(28,20,24,.5);text-align:center;margin:14px 0 0">¿Ya eres miembro? <a href="#cuenta" style="color:#b8902f;text-decoration:none">Inicia sesión</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ CUENTA ============================ -->
+<sc-if value="{{ is_cuenta }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Mi cuenta" style="background:#EDEBE3;padding:64px 0 100px">
+  <div style="max-width:980px;margin:0 auto;padding:0 40px">
+    <div style="background:#FBFAF7;border:1px solid rgba(81,1,40,.12);border-radius:12px;overflow:hidden;box-shadow:0 24px 60px -34px rgba(81,1,40,.4)">
+      <div style="background:#510128;padding:34px 40px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div>
+          <div style="font:500 10.5px/1 'Jost',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#D9AF50;margin-bottom:10px">Mi cuenta</div>
+          <h2 style="font-family:'Cormorant Garamond',serif;text-transform:uppercase;color:#F2F1ED;font-weight:600;font-size:38px;line-height:1;margin:0;letter-spacing:.02em">Hola, Mariana</h2>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:9px;background:#D9AF50;color:#510128;padding:9px 16px;border-radius:3px;font:600 11px/1 'Century Gothic','Jost',sans-serif;letter-spacing:.14em;text-transform:uppercase"><span style="width:7px;height:7px;border-radius:50%;background:#510128"></span>Club activo</span>
+      </div>
+      <div style="padding:36px 40px;border-bottom:1px solid rgba(81,1,40,.1)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:20px">
+          <div style="font:500 11px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(28,20,24,.55)">Tu recompensa · 3 de 5 compras</div>
+          <div style="font:400 13px/1 'Jost',sans-serif;color:#b8902f">Te faltan 2 compras</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <span style="width:30px;height:30px;border-radius:50%;background:#510128"></span>
+          <span style="width:30px;height:30px;border-radius:50%;background:#510128"></span>
+          <span style="width:30px;height:30px;border-radius:50%;background:#510128"></span>
+          <span style="width:30px;height:30px;border-radius:50%;border:2px solid #D9AF50;background:transparent"></span>
+          <span style="width:30px;height:30px;border-radius:50%;border:2px solid #D9AF50;background:transparent"></span>
+          <span style="flex:1;height:1px;background:repeating-linear-gradient(90deg,rgba(217,175,80,.55) 0 6px,transparent 6px 12px);min-width:30px"></span>
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:rgba(217,175,80,.16);border:1px solid #D9AF50">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#b8902f" stroke-width="1.4"><rect x="3.5" y="9" width="17" height="11.5" rx="1"/><path d="M3.5 13h17"/><path d="M12 9v11.5"/><path d="M12 9c-1.2-3.4-5.2-2.4-4.4.2.5 1.5 2.6 1.4 4.4-.2Z"/><path d="M12 9c1.2-3.4 5.2-2.4 4.4.2-.5 1.5-2.6 1.4-4.4-.2Z"/></svg>
+          </span>
+        </div>
+      </div>
+      <div style="padding:32px 40px">
+        <div style="font:500 11px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(28,20,24,.55);margin-bottom:18px">Historial de compras</div>
+        <div style="display:grid;grid-template-columns:108px 1fr auto;gap:0;font-size:13.5px">
+          <div style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:rgba(28,20,24,.45);padding:0 0 12px">Fecha</div>
+          <div style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:rgba(28,20,24,.45);padding:0 0 12px">Pedido</div>
+          <div style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:rgba(28,20,24,.45);padding:0 0 12px;text-align:right">Total</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:rgba(28,20,24,.6);font-family:'Jost',sans-serif">12 Jun 2026</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:#1c1418;font-family:'Jost',sans-serif">Tabla Vindima (G) · Tapas B</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:#b8902f;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:17px;text-align:right">$2,470</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:rgba(28,20,24,.6);font-family:'Jost',sans-serif">28 May 2026</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:#1c1418;font-family:'Jost',sans-serif">Tabla Envero (M) · Hogaza</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:#b8902f;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:17px;text-align:right">$1,460</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:rgba(28,20,24,.6);font-family:'Jost',sans-serif">09 May 2026</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:#1c1418;font-family:'Jost',sans-serif">Tabla 4 Estaciones (CH) · 2 copas</div>
+          <div style="padding:13px 0;border-top:1px solid rgba(81,1,40,.1);color:#b8902f;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:17px;text-align:right">$830</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:26px;padding:18px 20px;background:rgba(217,175,80,.12);border:1px solid rgba(217,175,80,.4);border-radius:7px">
+          <span style="font:400 13.5px/1.5 'Jost',sans-serif;color:#510128">Próxima recompensa: <strong style="font-weight:600">tabla de cortesía</strong> al llegar a 5 compras.</span>
+          <a class="btn-gold" href="#tienda">Seguir comprando</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ============================ FOOTER ============================ -->
+<footer style="background:#3a0a22;color:#C8C8C8;padding:54px 0 38px">
+  <div style="max-width:1180px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px;align-items:start">
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:26px;letter-spacing:.22em;text-transform:uppercase;color:#D9AF50;margin-bottom:14px">Vindima</div>
+      <p style="font:400 13px/1.7 'Jost',sans-serif;color:rgba(200,200,200,.75);max-width:300px;margin:0">Bodega orgánica · vino de autor, charcutería y experiencias para grandes anfitriones.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#D9AF50;margin-bottom:4px">Navega</div>
+      <a class="navlink" href="#tienda" style="color:#C8C8C8;opacity:.8;border:none;padding:0">Tienda</a>
+      <a class="navlink" href="#maridajes" style="color:#C8C8C8;opacity:.8;border:none;padding:0">Maridajes</a>
+      <a class="navlink" href="#experiencia" style="color:#C8C8C8;opacity:.8;border:none;padding:0">Experiencia</a>
+      <a class="navlink" href="#eventos" style="color:#C8C8C8;opacity:.8;border:none;padding:0">Eventos</a>
+      <a class="navlink" href="#contacto" style="color:#C8C8C8;opacity:.8;border:none;padding:0">Contacto</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:600 10.5px/1 'Jost',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#D9AF50;margin-bottom:4px">Visítanos</div>
+      <span style="font:400 13px/1.6 'Jost',sans-serif;color:rgba(200,200,200,.8)">Aguascalientes, México</span>
+      <span style="font:400 13px/1.6 'Jost',sans-serif;color:rgba(200,200,200,.8)">Mar – Dom · 13:00 – 23:00</span>
+      <span style="font:400 13px/1.6 'Jost',sans-serif;color:rgba(200,200,200,.8)">hola@vindima.mx</span>
+    </div>
+  </div>
+  <div style="max-width:1180px;margin:34px auto 0;padding:18px 40px 0;border-top:1px solid rgba(217,175,80,.2);font:400 11px/1.5 'Jost',sans-serif;color:rgba(200,200,200,.5)">© 2026 Vindima · Hecho en Aguascalientes</div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;waNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;524491234567&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;WhatsApp&quot;},&quot;tapasTextSize&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:18,&quot;min&quot;:13,&quot;max&quot;:22,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Tapas&quot;},&quot;showClubBand&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Inicio&quot;}}">
+class Component extends DCLogic {
+  state = { cart: 0, sizes: ['M','M','M'], page: 'inicio', wine: 'blanc', popup: null, heroSlide: 0 };
+
+  tablas = [
+    { prices:{CH:650, M:1270, G:1990} },
+    { prices:{CH:670, M:1340, G:2080} },
+    { prices:{CH:795, M:1535, G:2380} },
+  ];
+
+  pages = ['inicio','tienda','tablas','tapas','hogazas','bebidas','vinos','bowls','maridajes','experiencia','eventos','contacto','club','cuenta'];
+
+  wineRecs = {
+    blanc:       { name:'Paradoja Blanc', desc:'Blanco fresco y mineral de Bodegas de la Parra.', href:'#vinos' },
+    piensos:     { name:'Piensos', desc:'Tinto joven de frutos rojos y taninos suaves.', href:'#vinos' },
+    postos:      { name:'Postos', desc:'Tinto con cuerpo, fruta negra y especias.', href:'#vinos' },
+    granreserva: { name:'Paradoja Gran Reserva', desc:'Nuestra guarda más elegante y sedosa.', href:'#vinos' },
+    clericot:    { name:'Clericot de la casa', desc:'Vino con fruta de temporada, servido muy frío.', href:'#vinos' },
+    tintos:      { name:'Nuestros tintos', desc:'Piensos, Postos o Gran Reserva — todos le van.', href:'#vinos' },
+  };
+
+  foodRecs = {
+    estaciones:    { name:'Tabla 4 Estaciones', desc:'Quesos de temporada, charcutería y fruta fresca.', href:'#tablas' },
+    envero:        { name:'Tabla Envero', desc:'Ibéricos y quesos madurados.', href:'#tablas' },
+    vindimaTabla:  { name:'Tabla Vindima', desc:'Nuestra tabla insignia.', href:'#tablas' },
+    brie:          { name:'Hogaza Brie & Romero', desc:'Brie fundido y romero de la huerta.', href:'#hogazas' },
+    hogazaVindima: { name:'Hogaza Vindima', desc:'Higos, nuez y masa madre.', href:'#hogazas' },
+    picoteo:       { name:'Picoteo', desc:'Aceitunas, almendras y queso para la copa.', href:'#tapas' },
+    tortilla:      { name:'Tortilla Española', desc:'Clásico de la casa, jugosa y dorada.', href:'#tapas' },
+  };
+
+  pairings = {
+    estaciones:    { item:'Tabla 4 Estaciones', kind:'food', recs:['blanc','piensos'] },
+    envero:        { item:'Tabla Envero', kind:'food', recs:['postos'] },
+    vindima:       { item:'Tabla Vindima', kind:'food', recs:['postos','granreserva'] },
+    brie:          { item:'Hogaza Brie & Romero', kind:'food', recs:['blanc'] },
+    hogazaVindima: { item:'Hogaza Vindima', kind:'food', recs:['piensos','postos','granreserva'] },
+    picoteo:       { item:'Picoteo', kind:'food', recs:['piensos','clericot'] },
+    tortilla:      { item:'Tortilla Española', kind:'food', recs:['clericot','tintos'] },
+    blanc:         { item:'Paradoja Blanc', kind:'wine', recs:['estaciones','brie'] },
+    piensos:       { item:'Piensos', kind:'wine', recs:['estaciones','hogazaVindima','picoteo'] },
+    postos:        { item:'Postos', kind:'wine', recs:['envero','vindimaTabla','hogazaVindima','tortilla'] },
+    granreserva:   { item:'Paradoja Gran Reserva', kind:'wine', recs:['vindimaTabla','hogazaVindima'] },
+    clericot:      { item:'Clericot de la casa', kind:'wine', recs:['picoteo','tortilla'] },
+  };
+
+  addItem(key){
+    const p = this.pairings[key];
+    const pool = p && (p.kind === 'food' ? this.wineRecs : this.foodRecs);
+    const isWinePool = p && p.kind === 'food';
+    this.setState(s => ({
+      cart: s.cart + 1,
+      popup: p ? { item: p.item, kind: p.kind, recs: p.recs.map(k => ({ ...pool[k], recKey: k, isWine: isWinePool })) } : null,
+    }));
+  }
+
+  vinos = {
+    blanc: [
+      { name:'Tabla 4 Estaciones', desc:'Quesos de temporada y fruta fresca que acompañan su frescura.', href:'#tablas' },
+      { name:'Hogaza Brie & Romero', desc:'El brie fundido y el romero piden un blanco mineral.', href:'#hogazas' },
+    ],
+    piensos: [
+      { name:'Tabla 4 Estaciones', desc:'Su fruta roja ligera va con quesos suaves y charcutería fresca.', href:'#tablas' },
+      { name:'Hogaza Vindima', desc:'Los higos de la hogaza abrazan sus taninos suaves.', href:'#hogazas' },
+      { name:'Picoteo', desc:'Aceitunas, almendras y bocados para una copa relajada.', href:'#tapas' },
+    ],
+    postos: [
+      { name:'Tabla Envero', desc:'Ibéricos y quesos madurados a la altura de su estructura.', href:'#tablas' },
+      { name:'Tabla Vindima', desc:'Nuestra tabla insignia para nuestra etiqueta más versátil.', href:'#tablas' },
+      { name:'Hogaza Vindima', desc:'Higos y masa madre con su fruta negra y especias.', href:'#hogazas' },
+      { name:'Tortilla Española', desc:'Clásico de la casa que pide un tinto con cuerpo.', href:'#tapas' },
+    ],
+    granreserva: [
+      { name:'Tabla Vindima', desc:'Lo mejor de la bodega para una botella de guarda.', href:'#tablas' },
+      { name:'Hogaza Vindima', desc:'Higos, nuez y masa madre para sus taninos sedosos.', href:'#hogazas' },
+    ],
+  };
+
+  money(n){ return '$' + n.toLocaleString('en-US'); }
+
+  componentDidMount(){
+    this._onHash = () => {
+      const h = (window.location.hash || '').replace('#','');
+      if (this.pages.includes(h)) {
+        this.setState({ page: h, popup: null });
+        try { window.scrollTo(0, 0); } catch(e){}
+      }
+    };
+    window.addEventListener('hashchange', this._onHash);
+    this._onHash();
+  }
+  componentWillUnmount(){ window.removeEventListener('hashchange', this._onHash); }
+
+  waLink(text){ const n = String(this.props.waNumber || '524491234567').replace(/[^0-9]/g, ''); return 'https://wa.me/' + n + '?text=' + encodeURIComponent(text); }
+
+  sendEvento(){
+    const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+    const t = 'Hola Vindima! Estoy planeando un evento.\n\n'
+      + 'Nombre: ' + g('ev_nombre') + '\n'
+      + 'Tipo de evento: ' + g('ev_tipo') + '\n'
+      + 'Fecha tentativa: ' + g('ev_fecha') + '\n'
+      + 'No. de personas: ' + g('ev_personas') + '\n'
+      + 'Mensaje: ' + g('ev_msg');
+    window.open(this.waLink(t), '_blank');
+  }
+
+  renderVals(){
+    const p = this.state.page;
+    const out = {
+      cart: this.state.cart,
+      addToCart: () => this.setState(s => ({ cart: s.cart + 1 })),
+      sendEvento: () => this.sendEvento(),
+      waContacto: this.waLink('Hola Vindima! Me gustaria mas informacion.'),
+      tapasFs: this.props.tapasTextSize ?? 16,
+      showClubBand: this.props.showClubBand ?? true,
+      heroPrev: () => this.setState(s => ({ heroSlide: (s.heroSlide + 4) % 5 })),
+      heroNext: () => this.setState(s => ({ heroSlide: (s.heroSlide + 1) % 5 })),
+      heroTrackTransform: `translateX(-${this.state.heroSlide * 100}%)`,
+      heroDots: [0,1,2,3,4].map(i => ({
+        bg: i === this.state.heroSlide ? '#D9AF50' : 'rgba(217,175,80,.3)',
+        onClick: () => this.setState({ heroSlide: i }),
+      })),
+    };
+
+    const add = {};
+    Object.keys(this.pairings).forEach(k => { add[k] = () => this.addItem(k); });
+    add.simple = () => this.setState(s => ({ cart: s.cart + 1 }));
+    out.add = add;
+
+    const pu = this.state.popup;
+    out.popupOpen = !!pu;
+    out.popupItem = pu ? pu.item : '';
+    out.popupLead = pu ? (pu.kind === 'food' ? 'marídalo con estos vinos de la casa:' : 'de la cocina te recomendamos:') : '';
+    out.popupRecs = pu ? pu.recs.map(r => ({
+      ...r,
+      actionLabel: 'Agregar para un buen maridaje →',
+      action: () => { if (this.pairings[r.recKey]) this.addItem(r.recKey); else this.setState(s => ({ cart: s.cart + 1 })); },
+    })) : [];
+    out.popupPromo = pu
+      ? (pu.kind === 'food'
+        ? 'de descuento al agregar una botella de vino a tu pedido. Y además: −10% desde 3 botellas · −12% en caja de 12.'
+        : 'de descuento al agregar una tabla, hogaza o cualquier alimento. Y además: −10% desde 3 botellas · −12% en caja de 12.')
+      : '';
+    out.closePopup = () => this.setState({ popup: null });
+    out.closeOverlay = (e) => { if (e && e.target === e.currentTarget) this.setState({ popup: null }); };
+
+    out.recs = this.vinos[this.state.wine] || [];
+    const pickWine = {};
+    Object.keys(this.vinos).forEach(k => {
+      pickWine[k] = () => this.setState({ wine: k });
+      out['wine_' + k] = (this.state.wine === k);
+    });
+    out.pickWine = pickWine;
+
+    this.pages.forEach(k => {
+      out['is_' + k]  = (p === k);
+      out['nav_' + k] = (p === k);
+    });
+
+    this.state.sizes.forEach((sz, i) => {
+      const pr = this.tablas[i].prices[sz];
+      out['price' + i] = this.money(pr);
+      out['club' + i]  = this.money(Math.round(pr * 0.9));
+    });
+
+    const pick = {};
+    [0,1,2].forEach(i => {
+      ['CH','M','G'].forEach(sz => {
+        pick['s' + i + sz] = () => this.setState(s => {
+          const a = [...s.sizes]; a[i] = sz; return { sizes: a };
+        });
+      });
+    });
+    out.pick = pick;
+
+    return out;
+  }
+}
+</script>
+</body>
+</html>

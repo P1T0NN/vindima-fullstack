@@ -3,7 +3,7 @@
 	import { Button } from '@/components/ui/button/index.js';
 
 	// TYPES
-	import type { EditProductVariantInput } from '@/shared/features/products/schemas/editProductSchemas';
+	import type { EditProductVariantInput } from '@/shared/features/productVariants/schemas/productVariantsSchemas';
 
 	let { variants = $bindable() }: { variants: EditProductVariantInput[] } = $props();
 
@@ -20,5 +20,5 @@
 </script>
 
 <Button type="button" variant="outline" size="sm" onclick={addVariant} class="self-start">
-	Add variant
+	Agregar variante
 </Button>

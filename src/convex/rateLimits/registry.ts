@@ -113,20 +113,19 @@ export const convexRateLimitRegistry = {
 	revokeAllSessions: limitPresets.interactiveWrite,
 	deleteUser: limitPresets.bulkDelete,
 
-	// Convex storage uploads
-	generateConvexUploadUrl: limitPresets.fileUpload,
-	saveUploadedFile: limitPresets.fileUpload,
-
 	// R2 uploads
 	generateR2UploadUrl: limitPresets.fileUpload,
 
 	// Bulk deletes
-	deleteUploadedFile: limitPresets.bulkDelete,
 	deleteUploadedFileR2: limitPresets.bulkDelete,
 
 	// Rewards (punch card) — user-facing claim lifecycle
 	claimReward: limitPresets.interactiveWrite,
 	cancelRewardClaim: limitPresets.interactiveWrite,
+
+	// Rewards — admin corrections
+	adminAdjustReward: limitPresets.interactiveWrite,
+	rebuildRewardAccount: limitPresets.interactiveWrite,
 
 	// Cart — authenticated cart writes (guest carts hit no backend)
 	addLine: limitPresets.interactiveWrite,
@@ -138,6 +137,7 @@ export const convexRateLimitRegistry = {
 	// by attemptId idempotency + the pending-expiry cron (no per-user key exists for guests).
 	placeOrder: limitPresets.interactiveWrite,
 	cancelMyOrder: limitPresets.interactiveWrite,
+	refundOrder: limitPresets.interactiveWrite,
 
 	// Products catalog — admin-managed writes
 	createProduct: limitPresets.interactiveWrite,

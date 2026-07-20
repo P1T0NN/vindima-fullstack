@@ -11,35 +11,45 @@
 
 	type CategoryCard = {
 		path:
+			| '/shop/vinos-de-autor'
 			| '/shop/tablas'
 			| '/shop/tapas'
 			| '/shop/hogazas'
 			| '/shop/bebidas'
-			| '/shop/postres'
 			| '/shop/bowls';
 		title: () => string;
 		description: () => string;
 		priceRange: () => string;
-		image?: { src: string; alt: () => string; class?: string };
-		placeholder?: () => string;
+		image: { src: string; alt: () => string; class?: string };
 	};
 
 	const categories: CategoryCard[] = [
 		{
+			path: '/shop/vinos-de-autor',
+			title: () => 'Vinos de Autor',
+			description: () => 'Selección de la bodega, solo por botella',
+			priceRange: () => '$560 – $1,200',
+			image: {
+				src: ASSETS_DATA.WINE_BOTTLE,
+				alt: () => 'Vinos de Autor',
+				class: 'h-36'
+			}
+		},
+		{
 			path: '/shop/tablas',
-			title: () => 'Boards',
-			description: () => 'Charcuterie and cheese to share',
+			title: () => 'Tablas',
+			description: () => 'Charcutería y queso para compartir',
 			priceRange: () => '$650 – $2,380',
 			image: {
 				src: ASSETS_DATA.BOARD,
-				alt: () => 'Charcuterie board',
+				alt: () => 'Tabla de charcutería',
 				class: 'h-32 self-end'
 			}
 		},
 		{
 			path: '/shop/tapas',
 			title: () => 'Tapas',
-			description: () => 'Small bites to pair with your glass',
+			description: () => 'Bocados para acompañar tu copa',
 			priceRange: () => '$55 – $95',
 			image: {
 				src: ASSETS_DATA.TAPA,
@@ -49,55 +59,52 @@
 		},
 		{
 			path: '/shop/hogazas',
-			title: () => 'Artisan loaves',
-			description: () => 'Artisan sourdough bread',
+			title: () => 'Hogazas',
+			description: () => 'Pan artesanal de masa madre',
 			priceRange: () => '$120 – $260',
 			image: {
 				src: ASSETS_DATA.CHEESE,
-				alt: () => 'Artisan loaves',
+				alt: () => 'Hogazas',
 				class: 'h-32'
 			}
 		},
 		{
 			path: '/shop/bebidas',
-			title: () => 'Drinks',
-			description: () => 'Author wine by the glass and bottle',
+			title: () => 'Bebidas',
+			description: () => 'Vino de autor por copa y botella',
 			priceRange: () => '$90 – $1,200',
 			image: {
 				src: ASSETS_DATA.GLASS_SOFT,
-				alt: () => 'Drinks',
+				alt: () => 'Bebidas',
 				class: 'h-36 self-end'
 			}
 		},
 		{
-			path: '/shop/postres',
-			title: () => 'Desserts',
-			description: () => 'House sweets to finish',
-			priceRange: () => '$80 – $160',
-			placeholder: () => 'dessert\nillustration'
-		},
-		{
 			path: '/shop/bowls',
 			title: () => 'Bowls',
-			description: () => 'Fresh, seasonal',
+			description: () => 'Frescos, de temporada',
 			priceRange: () => '$110 – $190',
-			placeholder: () => 'bowl\nillustration'
+			image: {
+				src: ASSETS_DATA.BOWL_PLATTER,
+				alt: () => 'Bowls',
+				class: 'h-32'
+			}
 		}
 	];
 </script>
 
 <Section id="shop" yPadding="none" class="bg-secondary py-16 pb-24 sm:pb-28">
 	<div class="mb-14 text-center">
-		<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">Explore the menu</p>
+		<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">Explora el menú</p>
 
 		<h2
 			class="font-display text-4xl leading-none font-semibold tracking-wide text-accent uppercase sm:text-5xl"
 		>
-			From the cellar to your table
+			De la cava a tu mesa
 		</h2>
 
 		<p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
-			Six categories to set your table. Tap one to see the full menu and order.
+			Seis categorías para montar tu mesa. Toca una para ver el menú completo y hacer tu pedido.
 		</p>
 	</div>
 
@@ -108,25 +115,13 @@
 					class="h-full items-center gap-3 rounded-lg border-primary bg-card px-6 py-6 text-center shadow-brand-subtle transition-all duration-200 hover:-translate-y-1 hover:shadow-brand-lift"
 				>
 					<div class="flex h-36 w-full items-center justify-center">
-						{#if category.image}
-							<img
-								src={category.image.src}
-								alt={category.image.alt()}
-								class={category.image.class}
-								loading="lazy"
-								decoding="async"
-							/>
-						{:else if category.placeholder}
-							<div
-								class="flex size-28 shrink-0 items-center justify-center rounded-full border border-dashed border-accent/35 bg-primary/6 text-center"
-							>
-								<span
-									class="font-mono text-xs leading-snug tracking-wider whitespace-pre-line text-accent/60"
-								>
-									{category.placeholder()}
-								</span>
-							</div>
-						{/if}
+						<img
+							src={category.image.src}
+							alt={category.image.alt()}
+							class={category.image.class}
+							loading="lazy"
+							decoding="async"
+						/>
 					</div>
 
 					<CardTitle

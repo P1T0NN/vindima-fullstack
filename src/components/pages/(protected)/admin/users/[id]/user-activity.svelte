@@ -27,18 +27,18 @@
 	const columns: ColumnDef<Doc<'auditLogs'>>[] = [
 		{
 			id: 'action',
-			header: 'Action',
+			header: 'Acción',
 			accessor: (r) => formatAction(r.action)
 		},
 		{
 			id: 'status',
-			header: 'Status',
-			accessor: (r) => (r.status === 'failure' ? 'Failed' : 'Success'),
+			header: 'Estado',
+			accessor: (r) => (r.status === 'failure' ? 'Fallido' : 'Exitoso'),
 			hideBelow: 'md'
 		},
 		{
 			id: 'resource',
-			header: 'Resource',
+			header: 'Recurso',
 			accessor: (r) => (r.resource ? `${r.resource.table}#${r.resource.id}` : '—'),
 			hideBelow: 'lg',
 			cellClass: 'max-w-[16rem]'
@@ -51,7 +51,7 @@
 		},
 		{
 			id: 'createdAt',
-			header: 'When',
+			header: 'Cuándo',
 			accessor: (r) => new Date(r._creationTime).toLocaleString(),
 			sortable: true
 		}
@@ -60,14 +60,14 @@
 
 <div class="flex flex-col gap-4">
 	<header class="flex flex-col gap-0.5">
-		<h2 class="text-base font-semibold">Activity</h2>
+		<h2 class="text-base font-semibold">Actividad</h2>
 		<p class="text-sm text-muted-foreground">
-			Audit log entries scoped to this user. Newest first.
+			Entradas del registro de auditoría de este usuario. Las más recientes primero.
 		</p>
 	</header>
 
 	<DataTable
-		caption="Activity"
+		caption="Actividad"
 		query={api.tables.auditLog.queries.auditLogQueries.fetchAuditLogs}
 		{queryArgs}
 		{columns}
@@ -81,11 +81,11 @@
 {#snippet statusCell({ row }: DataTableCellSnippetProps<Doc<'auditLogs'>>)}
 	{#if row.status === 'failure'}
 		<span class="rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
-			Failed
+			Fallido
 		</span>
 	{:else}
 		<span class="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
-			Success
+			Exitoso
 		</span>
 	{/if}
 {/snippet}

@@ -1,21 +1,20 @@
 <script lang="ts">
-	// LIBRARIES
-
 	// COMPONENTS
 	import UploadFileItemSingle from './upload-file-item-single.svelte';
 
 	// UTILS
 	import { cn } from '@/utils/utils.js';
+	import { previewKey } from '@/features/uploadFile/utils/useFileUpload.svelte';
 
 	// TYPES
-	import type { UploadFileRow } from '@/features/uploadFile/types/uploadFileTypes';
+	import type { UploadFileEntry, UploadFileRow } from '@/features/uploadFile/types/uploadFileTypes';
 
 	type Props = {
 		rows: UploadFileRow[];
 		pickerInputId: string;
 		accept?: string;
 		disabled?: boolean;
-		files?: File[];
+		files?: UploadFileEntry[];
 		selectedFile?: File | null;
 		fileInputRef?: HTMLInputElement | null;
 		onFileInputChange?: (e: Event) => void;
@@ -29,7 +28,7 @@
 		pickerInputId,
 		accept,
 		disabled = false,
-		files = $bindable<File[]>([]),
+		files = $bindable<UploadFileEntry[]>([]),
 		selectedFile = $bindable<File | null>(null),
 		fileInputRef = $bindable<HTMLInputElement | null>(null),
 		onFileInputChange,
@@ -53,17 +52,17 @@
 <div
 	class={cn('flex flex-col gap-3', className)}
 	role="region"
-	aria-label="File preview. Drop a file here to replace."
+	aria-label="Archivo seleccionado"
 	aria-live="polite"
 	ondragover={onDragOver}
 	ondrop={onDrop}
 >
-	{#each rows as row (`${row.file.name}-${row.file.size}-${row.file.lastModified}-${row.index}`)}
+	{#each rows as row (previewKey(row.file, row.index))}
 		<UploadFileItemSingle
 			file={row.file}
 			bind:files
 			bind:selectedFile
-			{pickerInputId}
+			pickerInputId={pickerInputId}
 			previewUrl={row.previewUrl}
 		/>
 	{/each}

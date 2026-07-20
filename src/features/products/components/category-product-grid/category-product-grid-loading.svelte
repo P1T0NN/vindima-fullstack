@@ -11,7 +11,7 @@
 	const placeholders = $derived(Array.from({ length: count }, (_, index) => index));
 </script>
 
-<div class={gridClass} aria-busy="true" aria-label="Loading products">
+<div class={gridClass} aria-busy="true" aria-label="Cargando productos">
 	{#each placeholders as index (index)}
 		<div
 			class="flex flex-col overflow-hidden rounded-xl border border-primary bg-card shadow-brand-subtle"

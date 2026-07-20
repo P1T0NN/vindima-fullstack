@@ -10,6 +10,7 @@
 	import { Input } from '@/components/ui/input/index.js';
 	import { Label } from '@/components/ui/label/index.js';
 	import Link from '@/components/ui/link/link.svelte';
+	import Logo from '@/components/ui/logo/logo.svelte';
 	import Section from '@/components/ui/section/section.svelte';
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import GoogleLoginButton from '@/features/auth/components/google-login-button/google-login-button.svelte';
@@ -21,19 +22,24 @@
 	const id = $props.id();
 
 	const benefits = [
-		() => '10% off the entire shop',
-		() => 'Birthday gift',
-		() => '5 purchases = 1 reward',
-		() => 'Early access to events'
+		() => '10% de descuento en toda la tienda',
+		() => 'Regalo de cumpleaños',
+		() => '5 compras = 1 recompensa',
+		() => 'Maridajes pensados para tu mesa'
 	] as const;
 
 	const form = createLoginForm({
-		signInFailed: () => 'Sign in failed. Please check your credentials and try again.',
-		signedInToast: () => 'Signed in successfully.'
+		signInFailed: () =>
+			'No pudimos iniciar sesión. Revisa tus datos e inténtalo de nuevo.',
+		signedInToast: () => 'Sesión iniciada correctamente.'
 	});
 </script>
 
-<SvelteHead title="Sign in" />
+<SvelteHead
+	title="Iniciar sesión"
+	noindex
+	description="Inicia sesión en tu cuenta de Vindima para guardar tu carrito y ganar recompensas."
+/>
 
 <Section yPadding="none" fillViewport centerContent class="bg-secondary py-16 pb-24 sm:pb-28">
 	<Card
@@ -42,18 +48,9 @@
 		<div
 			class="flex flex-col justify-center bg-accent px-8 py-12 text-accent-surface-muted sm:px-11"
 		>
-			<div
-				class="mb-8 flex size-36 flex-col items-center justify-center self-start rounded-full border-2 border-primary"
-			>
-				<span class="font-display text-4xl leading-none font-semibold text-primary sm:text-5xl">
-					10%
-				</span>
-				<span class="mt-1 text-xs font-medium tracking-widest text-accent-surface-muted uppercase">
-					off
-				</span>
-			</div>
+			<Logo size="lg" class="mb-8 self-start" />
 
-			<p class="mb-3 text-xs font-medium tracking-widest text-primary uppercase">Membership</p>
+			<p class="mb-3 text-xs font-medium tracking-widest text-primary uppercase">Membresía</p>
 			<h1
 				class="mb-6 font-display text-4xl leading-none font-semibold tracking-wide text-background uppercase"
 			>
@@ -74,10 +71,10 @@
 		<div class="bg-card px-8 py-12 sm:px-11">
 			{#if form.step === 'signIn'}
 				<h2 class="mb-1.5 font-display text-3xl font-semibold tracking-wide text-accent uppercase">
-					Sign in
+					Iniciar sesión
 				</h2>
 				<p class="mb-6 text-sm leading-relaxed text-muted-foreground">
-					Welcome back. Sign in to your account and keep earning rewards.
+					¡Bienvenido de nuevo! Inicia sesión en tu cuenta y sigue ganando recompensas.
 				</p>
 
 				<form class="flex flex-col gap-4" onsubmit={form.onSignInSubmit}>
@@ -86,7 +83,7 @@
 							for="login-email-{id}"
 							class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 						>
-							Email
+							Correo electrónico
 						</Label>
 						<Input
 							id="login-email-{id}"
@@ -110,13 +107,13 @@
 								for="login-password-{id}"
 								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 							>
-								Password
+								Contraseña
 							</Label>
 							<Link
 								href={UNPROTECTED_PAGE_ENDPOINTS.FORGOT_PASSWORD}
 								class="text-xs text-chart-2 no-underline hover:underline"
 							>
-								Forgot password?
+								¿Olvidaste tu contraseña?
 							</Link>
 						</div>
 						<PasswordInput
@@ -143,7 +140,7 @@
 						disabled={form.busy}
 						class="mt-2 h-auto w-full justify-center px-6 py-3.5 text-sm tracking-wider uppercase"
 					>
-						Sign in
+						Iniciar sesión
 					</Button>
 
 					<div class="relative my-2">
@@ -153,7 +150,7 @@
 						<p
 							class="relative mx-auto w-fit bg-card px-3 text-xs tracking-wide text-muted-foreground uppercase"
 						>
-							Or continue with
+							O continúa con
 						</p>
 					</div>
 
@@ -162,12 +159,12 @@
 					/>
 
 					<p class="text-center text-xs leading-snug text-muted-foreground/80">
-						Don't have an account?
+						¿No tienes cuenta?
 						<Link
 							href={UNPROTECTED_PAGE_ENDPOINTS.SIGNUP}
 							class="text-chart-2 no-underline hover:underline"
 						>
-							Create account
+							Crear cuenta
 						</Link>
 					</p>
 				</form>

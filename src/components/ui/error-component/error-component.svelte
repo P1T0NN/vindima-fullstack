@@ -35,7 +35,7 @@
 		bodyDescription,
 		variant = 'card',
 		showRetry = true,
-		retryLabel = 'Try again',
+		retryLabel = 'Intentar de nuevo',
 		message,
 		class: className,
 		children

@@ -41,37 +41,37 @@
 	const columns: ColumnDef<Doc<'user'>>[] = [
 		{
 			id: 'name',
-			header: 'User',
+			header: 'Usuario',
 			accessor: (r) => capitalizeFirst(r.name || r.email),
 			sortable: true
 		},
 		{
 			id: 'email',
-			header: 'Email',
+			header: 'Correo',
 			accessor: (r) => r.email,
 			hideBelow: 'md'
 		},
 		{
 			id: 'role',
-			header: 'Role',
+			header: 'Rol',
 			accessor: (r) => capitalizeFirst(r.role),
 			hideBelow: 'md'
 		},
 		{
 			id: 'emailVerified',
-			header: 'Verified',
-			accessor: (r) => (r.emailVerified ? 'Yes' : 'No'),
+			header: 'Verificado',
+			accessor: (r) => (r.emailVerified ? 'Sí' : 'No'),
 			hideBelow: 'lg'
 		},
 		{
 			id: 'banned',
-			header: 'Status',
-			accessor: (r) => (r.banned ? 'Banned' : 'Active'),
+			header: 'Estado',
+			accessor: (r) => (r.banned ? 'Bloqueado' : 'Activo'),
 			hideBelow: 'md'
 		},
 		{
 			id: 'createdAt',
-			header: 'Created',
+			header: 'Creado',
 			accessor: (r) => new Date(r._creationTime).toLocaleDateString(),
 			sortable: true,
 			hideBelow: 'lg'
@@ -79,16 +79,20 @@
 	];
 </script>
 
-<SvelteHead />
+<SvelteHead
+	title="Usuarios"
+	noindex
+	description="Busca, filtra y administra las cuentas de usuario de Vindima."
+/>
 
 <section class="flex w-full flex-col gap-4 p-4 md:p-6">
 	<header class="flex flex-col gap-1">
-		<h1 class="text-2xl font-semibold tracking-tight">Users</h1>
-		<p class="text-sm text-muted-foreground">Search, filter, and manage user accounts.</p>
+		<h1 class="text-2xl font-semibold tracking-tight">Usuarios</h1>
+		<p class="text-sm text-muted-foreground">Busca, filtra y administra las cuentas de usuario.</p>
 	</header>
 
 	<DataTable
-		caption="Users"
+		caption="Usuarios"
 		query={api.tables.users.userQueries.fetchUsers}
 		{queryArgs}
 		{columns}
@@ -98,7 +102,7 @@
 		bind:sortDirection
 		searchable
 		bind:search
-		searchPlaceholder={`Search by ${capitalizeFirst(searchField)}…`}
+		searchPlaceholder={`Buscar por ${searchField === 'name' ? 'nombre' : 'correo'}…`}
 		{filters}
 	/>
 </section>

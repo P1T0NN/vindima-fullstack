@@ -88,7 +88,7 @@ class CartState {
 			);
 		} else {
 			this.#persistGuest();
-			if (overflow) toast.error('Your cart is full. Remove an item before adding another.');
+			if (overflow) toast.error('Tu carrito está lleno. Elimina un producto antes de agregar otro.');
 		}
 	}
 
@@ -112,6 +112,28 @@ class CartState {
 		} else {
 			this.#persistGuest();
 		}
+	}
+
+	/**
+	 * Drop lines whose product no longer resolves as purchasable (removed from the catalog,
+	 * archived, or switched off) and tell the customer once. Called by any consumer already
+	 * subscribed to `resolveCartProducts` with the cart's refs — the resolver returns
+	 * `unitPriceMinor: null` for dead refs. Works identically for guests (localStorage) and
+	 * signed-in users (server write per removed line); refs absent from the payload are left
+	 * alone (a just-added line during the subscription's catch-up window is not "dead").
+	 */
+	pruneUnavailable(resolved: Array<{ productRef: string; unitPriceMinor: number | null }>) {
+		const byRef = new Map(resolved.map((row) => [row.productRef, row]));
+		const dead = this.lines.filter(
+			(line) => byRef.get(line.productRef)?.unitPriceMinor === null
+		);
+		if (dead.length === 0) return;
+		for (const line of dead) this.remove(line.productRef);
+		toast.info(
+			dead.length === 1
+				? 'Uno de tus productos ya no está disponible — revisa tu carrito.'
+				: 'Algunos de tus productos ya no están disponibles — revisa tu carrito.'
+		);
 	}
 
 	/** Empty the cart (e.g. after checkout success). */

@@ -94,7 +94,7 @@
 			class="hidden gap-0 py-0 md:flex md:flex-col"
 			role="region"
 			aria-busy={isLoading}
-			aria-label={caption ?? 'Data table'}
+			aria-label={caption ?? 'Tabla de datos'}
 		>
 			<Table class="min-w-lg">
 				{#if caption}
@@ -113,7 +113,7 @@
 									indeterminate={headerSelectionState === 'some'}
 									disabled={isLoading || data.length === 0}
 									onCheckedChange={() => onToggleAllOnPage?.()}
-									aria-label="Select all rows on this page"
+									aria-label="Seleccionar todas las filas de esta página"
 								/>
 							</TableHead>
 						{/if}
@@ -183,16 +183,16 @@
 		</Card>
 
 		<!-- Mobile: stacked row cards -->
-		<div class="flex flex-col gap-3 md:hidden" role="list" aria-label={caption ?? 'Data rows'}>
+		<div class="flex flex-col gap-3 md:hidden" role="list" aria-label={caption ?? 'Filas de datos'}>
 			{#if selectable && !isLoading && data.length > 0}
 				<div class="flex items-center gap-2 px-1 py-1">
 					<Checkbox
 						checked={headerSelectionState === 'all'}
 						indeterminate={headerSelectionState === 'some'}
 						onCheckedChange={() => onToggleAllOnPage?.()}
-						aria-label="Select all rows on this page"
+						aria-label="Seleccionar todas las filas de esta página"
 					/>
-					<span class="text-xs font-medium text-muted-foreground"> Select all on page </span>
+					<span class="text-xs font-medium text-muted-foreground">Seleccionar todo en la página</span>
 				</div>
 			{/if}
 			{#if isLoading}

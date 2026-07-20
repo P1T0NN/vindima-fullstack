@@ -49,10 +49,10 @@
 	function={confirmRoleChange}
 	variant="outline"
 	{isPending}
-	title={demoting ? `Demote ${userEmail} to user?` : `Promote ${userEmail} to admin?`}
+	title={demoting ? `¿Degradar a ${userEmail} a usuario?` : `¿Promover a ${userEmail} a admin?`}
 	description={demoting
-		? 'Are you sure you want to do this? The user will immediately lose admin privileges.'
-		: 'Are you sure you want to do this? The user will gain full admin privileges, including the ability to ban and delete other accounts.'}
+		? '¿Estás seguro de que quieres hacer esto? El usuario perderá los privilegios de admin de inmediato.'
+		: '¿Estás seguro de que quieres hacer esto? El usuario obtendrá privilegios completos de admin, incluida la capacidad de bloquear y eliminar otras cuentas.'}
 >
-	{demoting ? 'Demote to user' : 'Promote to admin'}
+	{demoting ? 'Degradar a usuario' : 'Promover a admin'}
 </ActionButton>

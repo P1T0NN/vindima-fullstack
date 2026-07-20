@@ -3,14 +3,14 @@ import { CART_CONFIG, FEATURES, REWARDS_CONFIG } from '@/shared/config.js';
 
 // RESOLVER (the products table is the single price/name authority — one indexed point-read per
 // ref, deduped per product. See ProductsTableSystemDesign.md §5.1.)
-import { resolveRefs } from '@/convex/tables/products/helpers/resolveRefs';
+import { resolveRefs } from '@/convex/tables/cart/helpers/resolveRefs';
 
 // PURE MATH
 import { shippingFeeMinor, orderTotalMinor } from '@/shared/features/checkout/utils/checkoutUtils';
 import { welcomeDiscountMinor } from '@/shared/features/rewards/utils/rewardsUtils';
 
 // HELPERS
-import { getWelcomeOfferEligibility } from '@/convex/tables/rewards/helpers/getWelcomeOfferEligibility';
+import { getWelcomeOfferEligibility } from '@/convex/tables/firstPurchases/helpers/getWelcomeOfferEligibility';
 
 // TYPES
 import type { DeliveryKind } from '@/shared/features/checkout/utils/checkoutUtils';

@@ -1,6 +1,9 @@
 // DATA
 import { ORDER_STATUS_STYLES } from '@/features/orders/data/ordersData.js';
 
+// UTILS
+import { INTL_LOCALE } from '@/utils/intlLocale';
+
 // TYPES
 import type { OrderDisplayStatus } from '@/features/orders/types/ordersTypes.js';
 import type { OrderFilter } from '@/features/orders/types/ordersTypes.js';
@@ -13,12 +16,12 @@ export function orderStatusLabel(status: OrderDisplayStatus): string {
 }
 
 export function orderFilterLabel(filter: OrderFilter): string {
-	return filter === 'all' ? 'All' : orderStatusLabel(filter);
+	return filter === 'all' ? 'Todos' : orderStatusLabel(filter);
 }
 
-/** `placedAt` (ms) → "12 Jul 2026" in the viewer's locale. */
+/** `placedAt` (ms) → "12 Jul 2026" in the page's locale. */
 export function formatOrderDate(ms: number): string {
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat(INTL_LOCALE, {
 		day: 'numeric',
 		month: 'short',
 		year: 'numeric'

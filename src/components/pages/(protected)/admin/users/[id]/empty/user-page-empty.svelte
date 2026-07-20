@@ -21,14 +21,14 @@
 	</div>
 
 	<div class="flex flex-col gap-1">
-		<h2 class="text-lg font-semibold">User not found</h2>
+		<h2 class="text-lg font-semibold">Usuario no encontrado</h2>
 		<p class="max-w-sm text-sm text-muted-foreground">
-			The user you're looking for doesn't exist or may have been deleted.
+			El usuario que buscas no existe o pudo haber sido eliminado.
 		</p>
 	</div>
 
 	<Button variant="outline" size="sm" onclick={() => appGoto(ADMIN_PAGE_ENDPOINTS.USERS)}>
 		<ArrowLeftIcon class="size-4" />
-		Back to users
+		Volver a usuarios
 	</Button>
 </div>

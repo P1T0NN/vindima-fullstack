@@ -23,7 +23,7 @@
 {#if expiry}
 	<div class="border-b border-accent/10 bg-destructive/8 px-8 py-3.5 sm:px-10">
 		<p class="text-sm text-destructive">
-			Your rewards expire {formatDate(expiry.expiresAt)}. Keep shopping to save them.
+			Tus recompensas expiran el {formatDate(expiry.expiresAt)}. Sigue comprando para conservarlas.
 		</p>
 	</div>
 {/if}

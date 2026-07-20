@@ -7,9 +7,15 @@
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 
 	// COMPONENTS
+	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
 </script>
+
+<SvelteHead
+	title="Tapas"
+	description="Tres platillos para acompañar tu copa. Elige uno o combínalos para la mesa en Vindima."
+/>
 
 <Section
 	contain={false}
@@ -38,18 +44,18 @@
 			href="{resolve('/')}#shop"
 			class="mb-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-primary uppercase no-underline transition-colors hover:text-accent-foreground"
 		>
-			← Back to shop
+			← Volver a la tienda
 		</a>
 
 		<div class="mb-12 text-center">
-			<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">To nibble</p>
+			<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Para picar</p>
 			<h1
 				class="font-display text-4xl leading-none font-semibold tracking-wide text-background uppercase sm:text-5xl"
 			>
 				Tapas
 			</h1>
 			<p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-accent-surface-muted">
-				Three platters to pair with your glass. Pick one or combine them for the table.
+				Tres platillos para acompañar tu copa. Elige uno o combínalos para la mesa.
 			</p>
 		</div>
 

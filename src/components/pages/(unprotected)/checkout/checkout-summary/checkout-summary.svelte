@@ -56,10 +56,17 @@
 		...(activeClaim ? [activeClaim.itemRef] : [])
 	]);
 	const productsQuery = useQuery(
-		api.tables.products.queries.resolveCartProducts.resolveCartProducts,
+		api.tables.cart.queries.resolveCartProducts.resolveCartProducts,
 		() => (productRefs.length > 0 ? { refs: productRefs } : 'skip')
 	);
 	const loading = $derived(productsQuery.isLoading);
+
+	// Self-healing cart: delisted lines resolve with a null price — drop them automatically
+	// and toast once. Only cart lines are pruned; the reward-claim ref is not a cart line.
+	$effect(() => {
+		const rows = productsQuery.data;
+		if (rows) cart.pruneUnavailable(rows);
+	});
 
 	const findProduct = (ref: string): ResolvedCartProduct | undefined =>
 		productsQuery.data?.find((p: ResolvedCartProduct) => p.productRef === ref);
@@ -100,7 +107,7 @@
 <div class="flex flex-col gap-4">
 	<Card>
 		<CardHeader>
-			<CardTitle>Order summary</CardTitle>
+			<CardTitle>Resumen del pedido</CardTitle>
 		</CardHeader>
 		<CardContent class="flex flex-col gap-4">
 			{#if loading}
@@ -132,9 +139,9 @@
 		class="h-12 w-full justify-center text-sm tracking-wider uppercase"
 		disabled={cantSubmit}
 	>
-		{busy ? 'Placing order…' : loading ? 'Place order' : `Place order — ${money(totalMinor)}`}
+		{busy ? 'Procesando pedido…' : loading ? 'Hacer pedido' : `Hacer pedido — ${money(totalMinor)}`}
 	</Button>
 	<p class="text-center text-xs leading-snug text-muted-foreground">
-		No online payment — pay on pickup or delivery.
+		Sin pago en línea — paga al recoger o en la entrega.
 	</p>
 </div>

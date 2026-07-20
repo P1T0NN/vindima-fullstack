@@ -6,7 +6,7 @@ import { authComponent } from '../auth';
 import { getAuthUserId } from '../helpers/getAuthUserId';
 
 // HELPERS
-import { getRewardsSnapshot } from '@/convex/tables/rewards/helpers/getRewardsSnapshot';
+import { getRewardsSnapshot } from '@/convex/tables/rewardAccounts/helpers/getRewardsSnapshot';
 
 /**
  * The signed-in user plus their per-user app state (`rewards`), in one query. The root layout

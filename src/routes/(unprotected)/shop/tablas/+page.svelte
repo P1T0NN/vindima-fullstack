@@ -7,9 +7,15 @@
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 
 	// COMPONENTS
+	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
 </script>
+
+<SvelteHead
+	title="Tablas de charcutería"
+	description="Elige un tamaño — chica, mediana o grande. Tablas de charcutería distintivas de Vindima."
+/>
 
 <Section
 	yPadding="none"
@@ -30,28 +36,28 @@
 			href="{resolve('/')}#shop"
 			class="mb-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-chart-2 uppercase no-underline transition-colors hover:text-accent"
 		>
-			← Back to shop
+			← Volver a la tienda
 		</a>
 
 		<div class="mb-12 flex flex-wrap items-end justify-between gap-6">
 			<div>
 				<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">
-					Shop · To share
+					Tienda · Para compartir
 				</p>
 				<h1
 					class="font-display text-4xl leading-none font-semibold tracking-wide text-accent uppercase sm:text-5xl"
 				>
-					Charcuterie boards
+					Tablas de charcutería
 				</h1>
 			</div>
 			<p class="max-w-sm text-sm leading-relaxed text-muted-foreground">
-				Choose a size — small, medium or large. Club members save 10% on every board.
+				Elige un tamaño — chica, mediana o grande. Los miembros del Club ahorran 10% en cada tabla.
 			</p>
 		</div>
 
 		<CategoryProductGrid
 			category="boards"
-			featuredBadge="Signature"
+			featuredBadge="Especialidad"
 			class="grid-cols-1 gap-4 sm:grid-cols-2"
 		/>
 	</div>

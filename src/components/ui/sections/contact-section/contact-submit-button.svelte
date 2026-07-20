@@ -60,5 +60,5 @@
 	{#if submitting}
 		<Spinner />
 	{/if}
-	Send message
+	Enviar mensaje
 </Button>

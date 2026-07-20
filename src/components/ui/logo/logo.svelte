@@ -11,8 +11,8 @@
 		imgClass?: string;
 		href?: string;
 		alt?: string;
-		/** Visual size in the header / drawer. */
-		size?: 'sm' | 'md';
+		/** Visual size in the header / drawer / auth panels. */
+		size?: 'sm' | 'md' | 'lg';
 	} & Omit<HTMLAnchorAttributes, 'href' | 'class' | 'children'>;
 
 	let {
@@ -27,7 +27,9 @@
 	const sizeStyles = $derived(
 		size === 'sm'
 			? 'h-7 max-h-7 w-auto max-w-[min(9rem,40vw)]'
-			: 'h-8 max-h-9 w-auto max-w-[min(10rem,45vw)]'
+			: size === 'lg'
+				? 'h-28 max-h-32 w-auto max-w-[min(14rem,55vw)]'
+				: 'h-8 max-h-9 w-auto max-w-[min(10rem,45vw)]'
 	);
 </script>
 

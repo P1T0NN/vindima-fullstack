@@ -24,6 +24,7 @@
 
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
+	import { appGoto } from '@/utils/app-navigation.js';
 
 	// TYPES
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
@@ -35,7 +36,7 @@
 	// edits push in automatically; resolution flows down to each <CartLine> as a prop.
 	const refs = $derived(cart.lines.map((l) => l.productRef));
 	const productsQuery = useQuery(
-		api.tables.products.queries.resolveCartProducts.resolveCartProducts,
+		api.tables.cart.queries.resolveCartProducts.resolveCartProducts,
 		() => (cart.isOpen && refs.length > 0 ? { refs } : 'skip')
 	);
 
@@ -43,6 +44,13 @@
 		const map = new SvelteMap<string, ResolvedCartProduct>();
 		for (const row of productsQuery.data ?? []) map.set(row.productRef, row);
 		return map;
+	});
+
+	// Self-healing cart: lines whose product got delisted resolve with a null price —
+	// drop them automatically (guest + authed) and toast once.
+	$effect(() => {
+		const rows = productsQuery.data;
+		if (rows) cart.pruneUnavailable(rows);
 	});
 
 	/** Locale-agnostic unavailable fallback for a ref not yet in the resolved map. */
@@ -83,15 +91,15 @@
 
 	function browseShop() {
 		cart.close();
-		goto(UNPROTECTED_PAGE_ENDPOINTS.SHOP);
+		appGoto(UNPROTECTED_PAGE_ENDPOINTS.SHOP);
 	}
 </script>
 
 <Sheet bind:open={cart.isOpen}>
-	<SheetContent side="right" class="w-full gap-0 p-0 sm:max-w-[420px]">
+	<SheetContent side="right" class="w-full gap-0 p-0 sm:max-w-105">
 		<SheetHeader class="border-b border-border p-4">
 			<SheetTitle class="text-base font-semibold">
-				Cart{#if cart.count > 0}<span class="text-muted-foreground"> ({cart.count})</span>{/if}
+				Carrito{#if cart.count > 0}<span class="text-muted-foreground"> ({cart.count})</span>{/if}
 			</SheetTitle>
 		</SheetHeader>
 
@@ -110,8 +118,8 @@
 			{:else if showEmpty}
 				<div class="flex h-full flex-col items-center justify-center gap-4 py-16 text-center">
 					<ShoppingBagIcon class="size-12 text-muted-foreground/40" strokeWidth={1.2} />
-					<p class="text-sm text-muted-foreground">Your cart is empty</p>
-					<Button onclick={browseShop}>Browse the shop</Button>
+					<p class="text-sm text-muted-foreground">Tu carrito está vacío</p>
+					<Button onclick={browseShop}>Explorar la tienda</Button>
 				</div>
 			{:else}
 				<ul class="divide-y divide-border">
@@ -133,12 +141,14 @@
 					</span>
 				</div>
 				<p class="text-xs text-muted-foreground">
-					Shipping and taxes calculated at checkout.{#if hasUnavailable}&nbsp;Unavailable items
-						aren't included in the subtotal.{/if}
+					El envío y los impuestos se calculan al finalizar la compra.{#if hasUnavailable}&nbsp;Los
+					productos no disponibles no se incluyen en el subtotal.{/if}
 				</p>
 
 				{#if FEATURES.CHECKOUT}
-					<Button class="h-11 w-full" onclick={checkout} disabled={!canCheckout}>Checkout</Button>
+					<Button class="h-11 w-full" onclick={checkout} disabled={!canCheckout}
+						>Finalizar compra</Button
+					>
 				{/if}
 				<Button
 					variant="ghost"
@@ -146,7 +156,7 @@
 					class="w-full text-muted-foreground"
 					onclick={() => cart.close()}
 				>
-					Continue shopping
+					Seguir comprando
 				</Button>
 			</SheetFooter>
 		{/if}

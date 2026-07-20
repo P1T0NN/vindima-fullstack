@@ -1,5 +1,6 @@
 // LIBRARIES
 import { v } from 'convex/values';
+import { zodToConvexFields } from 'convex-helpers/server/zod4';
 import { mutation } from '@/convex/_generated/server';
 import { internal } from '@/convex/_generated/api';
 
@@ -14,8 +15,11 @@ import { convexRateLimiter } from '@/convex/convexRateLimiter';
 import { calculateOrderPrice } from '../helpers/calculateOrderPrice';
 import { getPaymentProvider } from '../providers/registry';
 
+// SCHEMAS
+import { placeOrderSchema } from '@/shared/features/orders/schemas/ordersSchemas';
+
 // SCHEMA VALIDATORS
-import { orderAmountsValidator, orderDeliveryValidator } from '../validators/ordersValidators';
+import { orderAmountsValidator } from '../validators/ordersValidators';
 import { paymentInstructionValidator } from '../providers/types';
 import { mutationResultWith } from '@/convex/helpers/mutationResult';
 
@@ -31,17 +35,9 @@ import { mutationResultWith } from '@/convex/helpers/mutationResult';
  * (disabled, empty, unavailable lines) return `success: false` with a translatable key.
  */
 export const placeOrder = mutation({
-	args: {
-		attemptId: v.string(),
-		lines: v.array(v.object({ productRef: v.string(), qty: v.number() })),
-		contact: v.object({
-			name: v.string(),
-			email: v.string(),
-			phone: v.optional(v.string())
-		}),
-		delivery: orderDeliveryValidator,
-		note: v.optional(v.string())
-	},
+	// Wire shape + input rules come from the SHARED `placeOrderSchema` — the checkout form's
+	// flat model validates the same rules pre-submit before `transformArgs` nests it.
+	args: zodToConvexFields(placeOrderSchema.shape),
 	returns: mutationResultWith(
 		v.object({
 			orderId: v.optional(v.id('orders')),
@@ -54,6 +50,13 @@ export const placeOrder = mutation({
 	handler: async (ctx, args) => {
 		if (!FEATURES.CHECKOUT) {
 			return { success: false, message: { key: 'CheckoutMessages.CHECKOUT_DISABLED' } };
+		}
+
+		// Authoritative run of the shared schema (contact/email/address shape). Semantic
+		// checks (guest policy, empty order, delivery-mode enabled) follow with their own keys.
+		const parsedInput = placeOrderSchema.safeParse(args);
+		if (!parsedInput.success) {
+			return { success: false, message: { key: 'GenericMessages.UNEXPECTED_ERROR' } };
 		}
 
 		const userId = await getAuthUserId(ctx);

@@ -6,6 +6,7 @@
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
 	import { Input } from '@/components/ui/input/index.js';
+	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 
 	// UTILS
 	import { safeMutation } from '@/utils/convexHelpers';
@@ -17,6 +18,8 @@
 	// LUCIDE ICONS
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import PackageIcon from '@lucide/svelte/icons/package';
+	import TagIcon from '@lucide/svelte/icons/tag';
 
 	let { category }: { category: Doc<'productCategories'> } = $props();
 
@@ -38,7 +41,7 @@
 		try {
 			const res = await safeMutation(
 				convex,
-				api.tables.products.mutations.renameCategory.renameCategory,
+				api.tables.productCategories.mutations.renameCategory.renameCategory,
 				{ categoryId: category._id, name: draftName }
 			);
 			if (toastResult(res)) editing = false;
@@ -54,7 +57,7 @@
 			// Server refuses with CATEGORY_IN_USE while products still reference the slug.
 			const res = await safeMutation(
 				convex,
-				api.tables.products.mutations.deleteCategory.deleteCategory,
+				api.tables.productCategories.mutations.deleteCategory.deleteCategory,
 				{ categoryId: category._id }
 			);
 			toastResult(res);
@@ -69,9 +72,9 @@
 	{#if editing}
 		<form onsubmit={saveRename} class="flex flex-1 items-center gap-2">
 			<Input bind:value={draftName} class="max-w-xs" required disabled={busy} />
-			<Button type="submit" size="sm" disabled={busy || !draftName.trim()}>Save</Button>
+			<Button type="submit" size="sm" disabled={busy || !draftName.trim()}>Guardar</Button>
 			<Button type="button" variant="ghost" size="sm" onclick={() => (editing = false)}>
-				Cancel
+				Cancelar
 			</Button>
 		</form>
 	{:else}
@@ -80,27 +83,49 @@
 		<div class="flex shrink-0 items-center gap-1">
 			<Button
 				type="button"
-				variant="ghost"
+				variant="outline"
 				size="sm"
 				onclick={startRename}
 				disabled={busy}
-				aria-label={`Rename ${category.name}`}
+				aria-label={`Renombrar ${category.name}`}
 			>
 				<PencilIcon class="size-4" />
-				Rename
+				Renombrar
 			</Button>
-			<Button
-				type="button"
+
+			<ActionButton
+				function={remove}
 				variant="ghost"
 				size="sm"
 				class="text-destructive hover:text-destructive"
-				onclick={remove}
-				disabled={busy}
-				aria-label={`Delete ${category.name}`}
+				isDestructive
+				isPending={busy}
+				title={`¿Eliminar ${category.name}?`}
+				description="Esto no se puede deshacer."
 			>
 				<Trash2Icon class="size-4" />
-				Delete
-			</Button>
+				Eliminar
+
+				{#snippet body()}
+					<ul class="flex flex-col gap-2.5 text-sm">
+						<li class="flex items-start gap-2.5 text-foreground">
+							<PackageIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+							<span>
+								Solo se pueden eliminar categorías vacías — si algún producto aún usa esta, la
+								eliminación se rechaza y no cambia nada.
+							</span>
+						</li>
+						<li class="flex items-start gap-2.5 text-foreground">
+							<TagIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+							<span>Desaparece del formulario de producto y de la agrupación en la tienda.</span>
+						</li>
+					</ul>
+					<p class="mt-3 text-xs text-muted-foreground">
+						No se eliminan productos. Para retirar una categoría en uso, mueve antes sus productos
+						a otra categoría.
+					</p>
+				{/snippet}
+			</ActionButton>
 		</div>
 	{/if}
 </div>

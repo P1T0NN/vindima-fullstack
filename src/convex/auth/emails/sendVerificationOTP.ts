@@ -20,17 +20,17 @@ export async function sendVerificationOTP({
 	const resend = new ResendAPI(apiKey);
 
 	const subjects: Record<OtpType, string> = {
-		'sign-in': `Sign in to ${COMPANY_DATA.NAME}`,
-		'email-verification': `Verify your email for ${COMPANY_DATA.NAME}`,
-		'forget-password': `Reset your ${COMPANY_DATA.NAME} password`,
-		'change-email': `Confirm your new email for ${COMPANY_DATA.NAME}`
+		'sign-in': `Inicia sesión en ${COMPANY_DATA.NAME}`,
+		'email-verification': `Verifica tu correo electrónico en ${COMPANY_DATA.NAME}`,
+		'forget-password': `Restablece tu contraseña de ${COMPANY_DATA.NAME}`,
+		'change-email': `Confirma tu nuevo correo electrónico en ${COMPANY_DATA.NAME}`
 	};
 
 	const { error } = await resend.emails.send({
 		from: `${COMPANY_DATA.NAME} <${COMPANY_DATA.RESEND_EMAIL}>`,
 		to: [email],
 		subject: subjects[type],
-		text: `Your code is ${otp}`
+		text: `Tu código es ${otp}`
 	});
-	if (error) throw new Error('Could not send verification email');
+	if (error) throw new Error('No se pudo enviar el correo de verificación');
 }

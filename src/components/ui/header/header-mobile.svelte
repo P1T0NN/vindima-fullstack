@@ -6,14 +6,12 @@
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// CONFIG
-	import { COMPANY_DATA } from '@/shared/config.js';
 	import { PROTECTED_PAGE_ENDPOINTS, UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// CLASSES
 	import {
 		btnGoldClass,
 		header,
-		headerBrandClass,
 		isNavActive,
 		navItems,
 		navLinkActiveClass,
@@ -25,6 +23,7 @@
 
 	// COMPONENTS
 	import Link from '@/components/ui/link/link.svelte';
+	import Logo from '@/components/ui/logo/logo.svelte';
 	import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 	import LogoutButton from '@/features/auth/components/logout-button/logout-button.svelte';
 
@@ -53,7 +52,7 @@
 	const accountHref = $derived(
 		isAuthenticated ? PROTECTED_PAGE_ENDPOINTS.ACCOUNT : UNPROTECTED_PAGE_ENDPOINTS.LOGIN
 	);
-	const accountLabel = $derived(isAuthenticated ? 'My account' : 'Sign in');
+	const accountLabel = $derived(isAuthenticated ? 'Mi cuenta' : 'Iniciar sesión');
 
 	// Gold CTA: Join the Club (signed out) · Admin Dashboard (admin) · My Rewards (member).
 	const cta = $derived(resolveHeaderCta(authClass.currentUser, isAuthenticated));
@@ -69,7 +68,7 @@
 					'inline-flex size-9 touch-manipulation items-center justify-center rounded-sm text-accent transition-opacity hover:opacity-80 lg:hidden',
 					props.class as ClassValue
 				)}
-				aria-label={header.menuOpen ? 'Close menu' : 'Open menu'}
+				aria-label={header.menuOpen ? 'Cerrar menú' : 'Abrir menú'}
 			>
 				{#if header.menuOpen}
 					<XIcon class="size-5" strokeWidth={1.4} />
@@ -86,27 +85,20 @@
 		class="flex h-full max-h-dvh w-full max-w-80 flex-col gap-5 overflow-x-hidden overflow-y-auto border-border bg-background p-5 shadow-lg! data-[vaul-drawer-direction=right]:w-full sm:max-w-80"
 	>
 		<div class="flex min-w-0 items-center justify-between gap-2">
-			<Link
-				href={UNPROTECTED_PAGE_ENDPOINTS.ROOT}
-				class={headerBrandClass}
-				onclick={header.closeMenu}
-			>
-				<span class="size-[7px] shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
-				{COMPANY_DATA.NAME}
-			</Link>
+			<Logo class="transition-opacity hover:opacity-90" onclick={header.closeMenu} />
 
 			<DrawerClose>
 				<button
 					type="button"
 					class="inline-flex size-9 shrink-0 touch-manipulation items-center justify-center rounded-sm text-accent hover:opacity-80"
-					aria-label="Close menu"
+					aria-label="Cerrar menú"
 				>
 					<XIcon class="size-5" strokeWidth={1.4} />
 				</button>
 			</DrawerClose>
 		</div>
 
-		<nav aria-label="Mobile main">
+		<nav aria-label="Principal móvil">
 			<ul class="flex flex-col gap-1">
 				{#each navItems as item, i (item.href)}
 					{@const active = isNavActive(pathnameLogical, scrollSpy.active, item.href)}
@@ -149,7 +141,7 @@
 				}}
 			>
 				<ShoppingBagIcon class="size-4 shrink-0" strokeWidth={1.4} />
-				Cart
+				Carrito
 				{#if cart.count > 0}
 					<span
 						class="flex h-4 min-w-4 items-center justify-center rounded-[9px] bg-accent px-[3px] text-xs leading-4 font-semibold text-primary tabular-nums"

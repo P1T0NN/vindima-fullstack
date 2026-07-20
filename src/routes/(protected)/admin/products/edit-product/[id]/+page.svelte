@@ -29,7 +29,7 @@
 	const product = $derived(productQuery.data as AdminProductRow | null | undefined);
 </script>
 
-<SvelteHead title="Edit product" />
+<SvelteHead title="Editar producto" noindex description="Edita un producto del catálogo de Vindima." />
 
 <section class="{PAGE_CONTAINER} flex flex-col gap-6 py-4 md:py-6">
 	<EditProductHeader />
@@ -37,8 +37,8 @@
 	{#if productQuery.error}
 		<ErrorComponent
 			variant="alert"
-			title="Failed to load product"
-			description="Couldn't load this product. Please try again."
+			title="No se pudo cargar el producto"
+			description="No pudimos cargar este producto. Inténtalo de nuevo."
 		/>
 	{:else if product === null}
 		<EditProductEmpty />

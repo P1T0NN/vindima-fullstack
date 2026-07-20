@@ -59,7 +59,7 @@
   which fights one-off page updates and can reset the parent to page 1.
 -->
 <nav
-	aria-label="pagination"
+	aria-label="paginación"
 	data-slot="paginated-data"
 	class={cn('flex w-full items-center justify-between gap-2', className)}
 >
@@ -67,16 +67,16 @@
 		{#if isLoading}
 			<span class="inline-block min-w-[8ch]" aria-busy="true">…</span>
 		{:else if totalPages !== undefined}
-			{`Page ${page} of ${totalPages}`}
+			{`Página ${page} de ${totalPages}`}
 		{:else}
-			{`Page ${page}`}
+			{`Página ${page}`}
 		{/if}
 	</span>
 
 	<div class="flex items-center gap-1.5">
 		<button
 			type="button"
-			aria-label="Go to previous page"
+			aria-label="Ir a la página anterior"
 			class={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'rounded-full')}
 			disabled={page <= 1 || isLoading}
 			onclick={() => {
@@ -88,7 +88,7 @@
 
 		<button
 			type="button"
-			aria-label="Go to next page"
+			aria-label="Ir a la página siguiente"
 			class={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'rounded-full')}
 			disabled={!canGoNext || isLoading}
 			onclick={() => {

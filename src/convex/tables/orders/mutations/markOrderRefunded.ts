@@ -8,9 +8,11 @@ import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
 
 /**
  * Internal (admin path) — refund a paid order. `paid → refunded`, then reverse the order's
- * stamp (`RewardSystem.md` §6). Deliberately does NOT restore the welcome-offer row
- * (`RewardSystem.md` §15.7 — prevents buy-refund-rebuy cycling) and does NOT claw back an
- * applied reward claim (spec §9). Throws if the order isn't currently `paid`.
+ * stamp (`RewardSystem.md` §6) and release any reward claim the order consumed
+ * (`applied → active`, so the customer keeps their free item and can pick again — DECISION
+ * 2026-07-20, overriding spec §9's no-clawback stance: the money came back, so the reward
+ * does too). Deliberately does NOT restore the welcome-offer row (`RewardSystem.md` §15.7 —
+ * prevents buy-refund-rebuy cycling). Throws if the order isn't currently `paid`.
  */
 export const markOrderRefunded = internalMutation({
 	args: { orderId: v.id('orders') },
@@ -33,8 +35,14 @@ export const markOrderRefunded = internalMutation({
 
 		if (order.userId) {
 			await ctx.runMutation(
-				internal.tables.rewards.mutations.revokeStampForOrder.revokeStampForOrder,
+				internal.tables.rewardLedger.mutations.revokeStampForOrder.revokeStampForOrder,
 				{ orderId: order._id }
+			);
+		}
+		if (order.claimId) {
+			await ctx.runMutation(
+				internal.tables.rewardClaims.mutations.releaseRewardClaim.releaseRewardClaim,
+				{ claimId: order.claimId }
 			);
 		}
 		return null;

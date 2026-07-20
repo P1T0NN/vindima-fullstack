@@ -2,10 +2,9 @@
 	// SVELTEKIT IMPORTS
 	import { page } from '$app/state';
 
-	// LIBRARIES
-
 	// CONFIG
 	import { COMPANY_DATA } from '@/shared/config.js';
+	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
 	import * as Breadcrumb from '@/components/ui/breadcrumb/index.js';
@@ -69,7 +68,9 @@
 		<Breadcrumb.Root class="hidden sm:block">
 			<Breadcrumb.List>
 				<Breadcrumb.Item>
-					<Breadcrumb.Link href="##">{COMPANY_DATA.NAME}</Breadcrumb.Link>
+					<Breadcrumb.Link href={ADMIN_PAGE_ENDPOINTS.DASHBOARD}>
+						{COMPANY_DATA.NAME}
+					</Breadcrumb.Link>
 				</Breadcrumb.Item>
 
 				{#if overridden}

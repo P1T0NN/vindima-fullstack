@@ -15,27 +15,8 @@ import { v } from 'convex/values';
 import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
 import { attachVariants } from '../helpers/attachVariants';
 
-const shopProductRow = v.object({
-	_id: v.id('products'),
-	slug: v.string(),
-	name: v.string(),
-	description: v.union(v.string(), v.null()),
-	/** `images[0]` is the cover. */
-	images: v.array(v.string()),
-	category: v.string(),
-	featured: v.boolean(),
-	sortOrder: v.number(),
-	variants: v.array(
-		v.object({
-			_id: v.id('productVariants'),
-			ref: v.string(),
-			label: v.union(v.string(), v.null()),
-			priceMinor: v.number(),
-			available: v.boolean(),
-			sortOrder: v.number()
-		})
-	)
-});
+// VALIDATORS
+import { shopProductRow } from '../validators/productsValidators';
 
 export const fetchProductsByCategory = fetchOptimized({
 	table: 'products',

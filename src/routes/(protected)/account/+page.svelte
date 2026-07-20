@@ -33,7 +33,11 @@
 	);
 </script>
 
-<SvelteHead title="My Account" />
+<SvelteHead
+	title="Mi cuenta"
+	noindex
+	description="Administra tu membresía del club Vindima, tus recompensas y tu historial de compras."
+/>
 
 <Section
 	yPadding="none"

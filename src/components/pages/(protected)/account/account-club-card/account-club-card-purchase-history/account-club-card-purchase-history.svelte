@@ -40,7 +40,7 @@
 	// Resolve reward refs (eligible picker + the reserved claim) against the live catalog.
 	const rewardRefs = $derived([...eligibleItems, ...(activeClaim ? [activeClaim.itemRef] : [])]);
 	const productsQuery = useQuery(
-		api.tables.products.queries.resolveCartProducts.resolveCartProducts,
+		api.tables.cart.queries.resolveCartProducts.resolveCartProducts,
 		() => (rewardRefs.length > 0 ? { refs: rewardRefs } : 'skip')
 	);
 	const byRef = $derived.by(() => {
@@ -70,7 +70,7 @@
 		try {
 			const result = await safeMutation(
 				convex,
-				api.tables.rewards.mutations.claimReward.claimReward,
+				api.tables.rewardClaims.mutations.claimReward.claimReward,
 				{ itemRef: selectedItem }
 			);
 			if (toastResult(result)) selectedItem = null;
@@ -86,7 +86,7 @@
 			// Cancel returns the reward to the balance; the query then re-renders the picker.
 			const result = await safeMutation(
 				convex,
-				api.tables.rewards.mutations.cancelRewardClaim.cancelRewardClaim,
+				api.tables.rewardClaims.mutations.cancelRewardClaim.cancelRewardClaim,
 				{ claimId: activeClaim.claimId }
 			);
 			toastResult(result);
@@ -99,23 +99,23 @@
 <div class="px-8 py-8 sm:px-10">
 	<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
 		<p class="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">
-			Purchase history
+			Historial de compras
 		</p>
 		<a
 			href={appHref(PROTECTED_PAGE_ENDPOINTS.MY_ORDERS)}
 			class="inline-flex items-center gap-1.5 text-xs font-medium tracking-wide text-chart-2 uppercase no-underline transition-colors hover:text-accent"
 		>
-			My orders
+			Mis pedidos
 			<ArrowRightIcon class="size-3.5" />
 		</a>
 	</div>
 
 	<div class="grid grid-cols-3 gap-x-0 text-sm">
 		<div class="pb-3 text-xs font-semibold tracking-wide text-muted-foreground/70 uppercase">
-			Date
+			Fecha
 		</div>
 		<div class="pb-3 text-xs font-semibold tracking-wide text-muted-foreground/70 uppercase">
-			Order
+			Pedido
 		</div>
 		<div
 			class="pb-3 text-right text-xs font-semibold tracking-wide text-muted-foreground/70 uppercase"
@@ -140,27 +140,27 @@
 			class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-chart-2/40 bg-chart-2/12 px-5 py-4"
 		>
 			<p class="text-sm leading-snug text-accent">
-				Free item reserved:
+				Artículo gratis reservado:
 				<strong class="font-semibold">{claimName}</strong>
-				<span class="text-muted-foreground"> · We'll add it to your next order.</span>
+				<span class="text-muted-foreground"> · Lo agregaremos a tu próximo pedido.</span>
 			</p>
 			<Button
-				variant="outline"
+				variant="destructive"
 				onclick={changeChoice}
 				disabled={isBusy}
 				class="h-auto px-5 py-3 text-sm tracking-wider uppercase"
 			>
-				Change choice
+				Cancelar y cambiar elección
 			</Button>
 		</div>
 	{:else if availableRewards > 0}
 		<div class="mt-6 rounded-lg border border-primary/40 bg-primary/12 px-5 py-5">
 			<p class="text-sm font-semibold text-accent">
 				{availableRewards > 1
-					? `${availableRewards} free items waiting`
-					: "You've earned a free item!"}
+					? `${availableRewards} artículos gratis en espera`
+					: '¡Ganaste un artículo gratis!'}
 			</p>
-			<p class="mt-1 mb-4 text-sm text-muted-foreground">Pick your reward:</p>
+			<p class="mt-1 mb-4 text-sm text-muted-foreground">Elige tu recompensa:</p>
 
 			<div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
 				{#each pickerItems as item (item.productRef)}
@@ -185,7 +185,7 @@
 				disabled={!selectedItem || isBusy}
 				class="mt-4 h-auto px-5 py-3 text-sm tracking-wider uppercase"
 			>
-				Claim this reward
+				Reclamar esta recompensa
 			</Button>
 		</div>
 	{:else if featureOn}
@@ -193,12 +193,12 @@
 			class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/12 px-5 py-4"
 		>
 			<p class="text-sm leading-snug text-accent">
-				Next reward:
-				<strong class="font-semibold">a free item of your choice</strong
-				>{` when you reach ${stampsPerReward} purchases.`}
+				Próxima recompensa:
+				<strong class="font-semibold">un artículo gratis de tu elección</strong
+				>{` cuando llegues a ${stampsPerReward} compras.`}
 			</p>
 			<Button href="/#shop" class="h-auto px-5 py-3 text-sm tracking-wider uppercase">
-				Keep shopping
+				Sigue comprando
 			</Button>
 		</div>
 	{/if}

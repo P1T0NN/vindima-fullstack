@@ -28,7 +28,7 @@
 	let {
 		category,
 		featuredBadge,
-		addLabel = 'Add to Cart',
+		addLabel = 'Agregar al carrito',
 		class: className
 	}: {
 		/** DB product category to list (`status: 'active'` only, server-sorted). */

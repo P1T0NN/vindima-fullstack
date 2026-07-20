@@ -16,7 +16,7 @@
 		<span
 			class="rounded-sm bg-primary px-1.5 py-0.5 text-[0.6rem] font-semibold tracking-widest text-primary-foreground uppercase"
 		>
-			Free
+			Gratis
 		</span>
 
 		<span class="truncate text-foreground">{product.name}</span>

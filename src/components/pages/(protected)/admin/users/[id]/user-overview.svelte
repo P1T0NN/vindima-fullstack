@@ -45,13 +45,13 @@
 					<span
 						class="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200"
 					>
-						Verified
+						Verificado
 					</span>
 				{:else}
 					<span
 						class="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-900/40 dark:text-amber-200"
 					>
-						Unverified
+						Sin verificar
 					</span>
 				{/if}
 			</div>
@@ -59,27 +59,27 @@
 	</div>
 
 	<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-		{@render field('Role', capitalizeFirst(user.role))}
+		{@render field('Rol', capitalizeFirst(user.role))}
 		{@render field(
-			'Status',
+			'Estado',
 			user.banned
 				? banExpiresAt
-					? `Banned until ${banExpiresAt}`
-					: 'Banned (permanent)'
-				: 'Active'
+					? `Bloqueado hasta ${banExpiresAt}`
+					: 'Bloqueado (permanente)'
+				: 'Activo'
 		)}
 		{#if user.banned && user.banReason}
-			{@render field('Ban reason', user.banReason)}
+			{@render field('Motivo del bloqueo', user.banReason)}
 		{/if}
-		{@render field('Created', createdAt)}
-		{@render field('Updated', updatedAt)}
+		{@render field('Creado', createdAt)}
+		{@render field('Actualizado', updatedAt)}
 	</div>
 
 	<div class="flex flex-col gap-2">
-		<span class="text-xs tracking-wide text-muted-foreground uppercase">User ID</span>
+		<span class="text-xs tracking-wide text-muted-foreground uppercase">ID de usuario</span>
 		<div class="flex items-center gap-2">
 			<code class="rounded bg-muted px-2 py-1 font-mono text-xs">{user._id}</code>
-			<CopyButton value={user._id} label="Copy user ID" />
+			<CopyButton value={user._id} label="Copiar ID de usuario" />
 		</div>
 	</div>
 </div>

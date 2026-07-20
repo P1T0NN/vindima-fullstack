@@ -1,6 +1,9 @@
+// UTILS
+import { INTL_LOCALE } from './intlLocale';
+
 /** Locale-aware currency formatting via `Intl` (major units, e.g. dollars). */
 export function formatMoney(amount: number, currency = 'USD'): string {
-	return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount);
+	return new Intl.NumberFormat(INTL_LOCALE, { style: 'currency', currency }).format(amount);
 }
 
 /**
@@ -9,7 +12,7 @@ export function formatMoney(amount: number, currency = 'USD'): string {
  */
 export function moneyMinorDigits(currency = 'USD'): number {
 	return (
-		new Intl.NumberFormat(undefined, { style: 'currency', currency }).resolvedOptions()
+		new Intl.NumberFormat(INTL_LOCALE, { style: 'currency', currency }).resolvedOptions()
 			.maximumFractionDigits ?? 2
 	);
 }
@@ -31,12 +34,7 @@ export function fromMinorUnits(minor: number, currency = 'USD'): number {
  * alike — never a hardcoded `/100`.
  */
 export function formatMoneyMinor(minor: number, currency = 'USD'): string {
-	return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(
+	return new Intl.NumberFormat(INTL_LOCALE, { style: 'currency', currency }).format(
 		fromMinorUnits(minor, currency)
 	);
-}
-
-/** Pluralized item count, e.g. "1 item" / "3 items". */
-export function formatItemCount(count: number): string {
-	return count === 1 ? `${count} item` : `${count} items`;
 }

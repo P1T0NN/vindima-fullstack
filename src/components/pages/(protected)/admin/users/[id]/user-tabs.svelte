@@ -7,6 +7,7 @@
 	import UserSessions from '@/components/pages/(protected)/admin/users/[id]/user-sessions.svelte';
 	import UserAccounts from '@/components/pages/(protected)/admin/users/[id]/user-accounts.svelte';
 	import UserActivity from '@/components/pages/(protected)/admin/users/[id]/user-activity.svelte';
+	import UserRewards from '@/components/pages/(protected)/admin/users/[id]/user-rewards.svelte';
 	import UserDangerZone from '@/components/pages/(protected)/admin/users/[id]/user-danger-zone/user-danger-zone.svelte';
 
 	// TYPES
@@ -23,11 +24,12 @@
 
 <Tabs bind:value={activeTab}>
 	<TabsList>
-		<TabsTrigger value="overview">Overview</TabsTrigger>
-		<TabsTrigger value="sessions">Sessions</TabsTrigger>
-		<TabsTrigger value="accounts">Accounts</TabsTrigger>
-		<TabsTrigger value="activity">Activity</TabsTrigger>
-		<TabsTrigger value="danger">Danger zone</TabsTrigger>
+		<TabsTrigger value="overview">Resumen</TabsTrigger>
+		<TabsTrigger value="sessions">Sesiones</TabsTrigger>
+		<TabsTrigger value="accounts">Cuentas</TabsTrigger>
+		<TabsTrigger value="activity">Actividad</TabsTrigger>
+		<TabsTrigger value="rewards">Recompensas</TabsTrigger>
+		<TabsTrigger value="danger">Zona de peligro</TabsTrigger>
 	</TabsList>
 
 	<TabsContent value="overview" class="pt-2">
@@ -44,6 +46,10 @@
 
 	<TabsContent value="activity" class="pt-2">
 		<UserActivity userId={user._id} />
+	</TabsContent>
+
+	<TabsContent value="rewards" class="pt-2">
+		<UserRewards userId={user._id} />
 	</TabsContent>
 
 	<TabsContent value="danger" class="pt-2">

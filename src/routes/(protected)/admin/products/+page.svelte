@@ -5,7 +5,11 @@
 	import AdminProductsTable from '@/components/pages/(protected)/admin/products/admin-products-table.svelte';
 </script>
 
-<SvelteHead />
+<SvelteHead
+	title="Productos"
+	noindex
+	description="Administra tu catálogo de Vindima — productos, variantes, precios y disponibilidad."
+/>
 
 <section class="flex w-full flex-col gap-4 p-4 md:p-6">
 	<AdminProductsHeader />

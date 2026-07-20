@@ -22,16 +22,16 @@
 
 	{#if discountMinor > 0}
 		<div class="flex justify-between text-chart-2">
-			<span>First-order discount</span>
+			<span>Descuento por primer pedido</span>
 			<span class="tabular-nums">−{money(discountMinor)}</span>
 		</div>
 	{/if}
 
 	<div class="flex justify-between text-muted-foreground">
-		<span>Shipping</span>
+		<span>Envío</span>
 
 		<span class="tabular-nums">
-			{shippingMinor === 0 ? 'Free' : money(shippingMinor)}
+			{shippingMinor === 0 ? 'Gratis' : money(shippingMinor)}
 		</span>
 	</div>
 

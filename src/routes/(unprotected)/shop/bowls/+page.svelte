@@ -3,13 +3,19 @@
 	import { resolve } from '$app/paths';
 
 	// CONFIG
-	import { COMPANY_DATA } from '@/shared/config.js';
+	import { ASSETS_DATA, COMPANY_DATA } from '@/shared/config.js';
 
 	// COMPONENTS
+	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
 </script>
+
+<SvelteHead
+	title="Bowls"
+	description="Platillos ligeros con productos del mercado. Ideales para media tarde con una copa en Vindima."
+/>
 
 <Section
 	yPadding="none"
@@ -19,23 +25,21 @@
 		href="{resolve('/')}#shop"
 		class="mb-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-chart-2 uppercase no-underline transition-colors hover:text-accent"
 	>
-		← Back to shop
+		← Volver a la tienda
 	</a>
 
 	<div class="mb-8 flex flex-wrap items-center gap-7">
-		<div
-			class="flex size-28 shrink-0 items-center justify-center rounded-full border border-dashed border-accent/35 bg-primary/6 text-center"
-		>
-			<span
-				class="font-mono text-xs leading-snug tracking-wider whitespace-pre-line text-accent/60"
-			>
-				bowl illustration
-			</span>
-		</div>
+		<img
+			src={ASSETS_DATA.BOWL_PLATTER}
+			alt="Bowls"
+			class="h-32 shrink-0"
+			loading="lazy"
+			decoding="async"
+		/>
 
 		<div>
 			<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">
-				Fresh and seasonal
+				Frescos y de temporada
 			</p>
 
 			<h1
@@ -45,7 +49,7 @@
 			</h1>
 
 			<p class="mt-3.5 max-w-md text-sm leading-relaxed text-muted-foreground">
-				Light dishes with market produce. Ideal for midday with a glass.
+				Platillos ligeros con productos del mercado. Ideales para media tarde con una copa.
 			</p>
 		</div>
 	</div>
@@ -55,16 +59,15 @@
 	<div
 		class="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/12 px-5 py-5"
 	>
-		<p class="text-sm leading-snug text-accent">Build your bowl to go.</p>
-		
+		<p class="text-sm leading-snug text-accent">Arma tu bowl para llevar.</p>
+
 		<Button
 			href={COMPANY_DATA.WHATSAPP_CONTACT_URL}
 			target="_blank"
 			rel="noopener noreferrer"
 			variant="whatsapp"
-			class="h-auto px-6 py-4 text-xs tracking-wider uppercase"
 		>
-			Order via WhatsApp
+			Pedir por WhatsApp
 		</Button>
 	</div>
 </Section>

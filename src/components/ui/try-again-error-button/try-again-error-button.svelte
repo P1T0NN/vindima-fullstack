@@ -9,7 +9,7 @@
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 
 	let {
-		label = 'Try again',
+		label = 'Intentar de nuevo',
 		class: className
 	}: {
 		label?: string;

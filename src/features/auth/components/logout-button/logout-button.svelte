@@ -31,7 +31,7 @@
 			console.error('Sign out error:', result.error);
 			toast.error(result.error.message as string);
 		} else {
-			toast.success('Logged out successfully.');
+			toast.success('Sesión cerrada correctamente.');
 			appGoto(UNPROTECTED_PAGE_ENDPOINTS.LOGIN);
 		}
 
@@ -46,5 +46,5 @@
 		<LogOutIcon class="h-5 w-5" />
 	{/if}
 
-	<span>Logout</span>
+	<span>Cerrar sesión</span>
 </Button>

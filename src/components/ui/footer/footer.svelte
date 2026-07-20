@@ -6,6 +6,7 @@
 
 	// COMPONENTS
 	import Link from '@/components/ui/link/link.svelte';
+	import Logo from '@/components/ui/logo/logo.svelte';
 
 	// UTILS
 	import { cn } from '@/utils/utils.js';
@@ -17,7 +18,6 @@
 	// TAILWIND
 	import {
 		footerBodyTextClass,
-		footerBrandClass,
 		footerHeadingClass,
 		footerLinkClass,
 		footerMetaLineClass
@@ -45,12 +45,12 @@
 		)}
 	>
 		<div class="min-w-0">
-			<div class={cn(footerBrandClass, 'mb-3.5')}>{COMPANY_DATA.NAME}</div>
+			<Logo class="mb-3.5 transition-opacity hover:opacity-90" />
 			<p class={footerBodyTextClass}>{COMPANY_DATA.DESCRIPTION}</p>
 		</div>
 
-		<nav aria-label="Browse" class="flex min-w-0 flex-col gap-2.5">
-			<div class={cn(footerHeadingClass, 'mb-1')}>Browse</div>
+		<nav aria-label="Explorar" class="flex min-w-0 flex-col gap-2.5">
+			<div class={cn(footerHeadingClass, 'mb-1')}>Explorar</div>
 			{#each footerNavLinks as item (item.href)}
 				<Link href={item.href} class={footerLinkClass}>
 					{item.label}
@@ -59,9 +59,9 @@
 		</nav>
 
 		<div class="flex min-w-0 flex-col gap-2.5">
-			<div class={cn(footerHeadingClass, 'mb-1')}>Visit us</div>
-			<span class={footerMetaLineClass}>Aguascalientes, Mexico</span>
-			<span class={footerMetaLineClass}>Wed – Sun · 1:00 PM – 11:00 PM</span>
+			<div class={cn(footerHeadingClass, 'mb-1')}>Visítanos</div>
+			<span class={footerMetaLineClass}>Aguascalientes, México</span>
+			<span class={footerMetaLineClass}>Mié – Dom · 1:00 PM – 11:00 PM</span>
 			<a
 				href="mailto:{COMPANY_DATA.EMAIL}"
 				class={cn(footerMetaLineClass, 'transition-opacity hover:opacity-100')}
@@ -77,6 +77,6 @@
 			'mt-[34px] border-t border-primary/20 pt-[18px] text-xs leading-normal text-[#C8C8C8]/50'
 		)}
 	>
-		{`© ${year} ${COMPANY_DATA.NAME} · Made in Aguascalientes`}
+		{`© ${year} ${COMPANY_DATA.NAME} · Hecho en Aguascalientes`}
 	</div>
 </footer>

@@ -10,9 +10,6 @@
 		SelectTrigger
 	} from '@/components/ui/select/index.js';
 
-	// UTILS
-	import { capitalizeFirst } from '@/shared/utils/stringUtils';
-
 	/**
 	 * Filter bar for `/admin/users`. Lives outside the route file so the page can
 	 * stay focused on data flow (queryArgs, mutations, dialogs).
@@ -50,12 +47,12 @@
 >
 	<SelectTrigger class="w-36">
 		<span>
-			{`Search: ${capitalizeFirst(searchField)}`}
+			{`Buscar: ${searchField === 'email' ? 'Correo' : 'Nombre'}`}
 		</span>
 	</SelectTrigger>
 	<SelectContent>
-		<SelectItem value="email">Email</SelectItem>
-		<SelectItem value="name">Name</SelectItem>
+		<SelectItem value="email">Correo</SelectItem>
+		<SelectItem value="name">Nombre</SelectItem>
 	</SelectContent>
 </Select>
 
@@ -67,16 +64,16 @@
 	<SelectTrigger class="w-32">
 		<span>
 			{#if role}
-				{`Role: ${capitalizeFirst(role)}`}
+				{`Rol: ${role === 'admin' ? 'Administrador' : 'Usuario'}`}
 			{:else}
-				Any role
+				Cualquier rol
 			{/if}
 		</span>
 	</SelectTrigger>
 	<SelectContent>
-		<SelectItem value="">Any role</SelectItem>
-		<SelectItem value="user">User</SelectItem>
-		<SelectItem value="admin">Admin</SelectItem>
+		<SelectItem value="">Cualquier rol</SelectItem>
+		<SelectItem value="user">Usuario</SelectItem>
+		<SelectItem value="admin">Administrador</SelectItem>
 	</SelectContent>
 </Select>
 
@@ -88,18 +85,18 @@
 	<SelectTrigger class="w-36">
 		<span>
 			{#if banned === undefined}
-				Any status
+				Cualquier estado
 			{:else if banned}
-				Banned
+				Bloqueado
 			{:else}
-				Active
+				Activo
 			{/if}
 		</span>
 	</SelectTrigger>
 	<SelectContent>
-		<SelectItem value="">Any status</SelectItem>
-		<SelectItem value="true">Banned</SelectItem>
-		<SelectItem value="false">Active</SelectItem>
+		<SelectItem value="">Cualquier estado</SelectItem>
+		<SelectItem value="true">Bloqueado</SelectItem>
+		<SelectItem value="false">Activo</SelectItem>
 	</SelectContent>
 </Select>
 
@@ -111,21 +108,21 @@
 	<SelectTrigger class="w-44">
 		<span>
 			{#if emailVerified === undefined}
-				Any verification
+				Cualquier verificación
 			{:else if emailVerified}
-				Verified
+				Verificado
 			{:else}
-				Unverified
+				Sin verificar
 			{/if}
 		</span>
 	</SelectTrigger>
 	<SelectContent>
-		<SelectItem value="">Any verification</SelectItem>
-		<SelectItem value="true">Verified</SelectItem>
-		<SelectItem value="false">Unverified</SelectItem>
+		<SelectItem value="">Cualquier verificación</SelectItem>
+		<SelectItem value="true">Verificado</SelectItem>
+		<SelectItem value="false">Sin verificar</SelectItem>
 	</SelectContent>
 </Select>
 
 {#if hasActiveFilter}
-	<Button variant="ghost" size="sm" onclick={clearFilters}>Clear</Button>
+	<Button variant="ghost" size="sm" onclick={clearFilters}>Limpiar</Button>
 {/if}

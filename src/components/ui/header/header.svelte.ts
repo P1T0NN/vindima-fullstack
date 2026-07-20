@@ -9,8 +9,8 @@ export const navItems = [
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.ROOT, label: 'Inicio' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.SHOP, label: 'Tienda' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.ABOUT, label: 'Nosotros' },
+	{ href: UNPROTECTED_PAGE_ENDPOINTS.MARIDAJES, label: 'Maridajes' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.EVENTS, label: 'Eventos' },
-	{ href: UNPROTECTED_PAGE_ENDPOINTS.NEWS, label: 'Noticias' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.CONTACT, label: 'Contacto' }
 ] as const;
 
@@ -49,12 +49,12 @@ export function resolveHeaderCta(
 	isAuthenticated: boolean
 ): HeaderCta {
 	if (!isAuthenticated) {
-		return { href: UNPROTECTED_PAGE_ENDPOINTS.SIGNUP, label: 'Join the Club', variant: 'club' };
+		return { href: UNPROTECTED_PAGE_ENDPOINTS.SIGNUP, label: 'Únete al Club', variant: 'club' };
 	}
 	if (user?.role === 'admin') {
-		return { href: ADMIN_PAGE_ENDPOINTS.DASHBOARD, label: 'Admin Dashboard', variant: 'admin' };
+		return { href: ADMIN_PAGE_ENDPOINTS.DASHBOARD, label: 'Panel de administración', variant: 'admin' };
 	}
-	return { href: PROTECTED_PAGE_ENDPOINTS.ACCOUNT, label: 'My Rewards', variant: 'rewards' };
+	return { href: PROTECTED_PAGE_ENDPOINTS.ACCOUNT, label: 'Mis Recompensas', variant: 'rewards' };
 }
 
 /** Compare against `page.url.pathname`. */
@@ -99,8 +99,8 @@ export function isNavActive(pathname: string, activeHash: string, href: string):
  * Scrollspy via a single `IntersectionObserver` — no scroll listeners, so it costs
  * nothing during scroll (the browser only calls back when a section crosses the
  * detection band just below the sticky header). Observes only the in-page sections
- * that actually exist for the `#hash` nav items, so missing sections (e.g. no
- * `#news`) are simply skipped. Universal: keys off `navItems`, assumes no specific ids.
+ * that actually exist for the `#hash` nav items, so missing sections are simply
+ * skipped. Universal: keys off `navItems`, assumes no specific ids.
  *
  * Call from a browser-only `$effect` and return the cleanup. Re-run on route change
  * (pass `pathname` as the effect's dependency) so sections are re-resolved per page.

@@ -36,5 +36,5 @@
 			fill="currentColor"
 		/>
 	</svg>
-	Continue with Google
+	Continuar con Google
 </Button>

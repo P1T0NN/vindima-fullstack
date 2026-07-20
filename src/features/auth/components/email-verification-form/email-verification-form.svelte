@@ -88,14 +88,14 @@
 				console.error('Email verification: verifyEmail failed:', error);
 				errorMessage = rateLimitMessage(
 					error.message,
-					'Invalid or expired code. Please try again.'
+					'Código inválido o expirado. Inténtalo de nuevo.'
 				);
 				busy = false;
 				return;
 			}
 		} catch (error) {
 			console.error('Email verification: verifyEmail failed:', error);
-			errorMessage = 'Invalid or expired code. Please try again.';
+			errorMessage = 'Código inválido o expirado. Inténtalo de nuevo.';
 			busy = false;
 			return;
 		}
@@ -114,10 +114,10 @@
 
 {#if variant === 'card'}
 	<Card.Header>
-		<Card.Title class="text-2xl">Check your email</Card.Title>
+		<Card.Title class="text-2xl">Revisa tu correo electrónico</Card.Title>
 
 		<Card.Description>
-			{`We sent a verification code to ${email}. Enter it below to continue.`}
+			{`Enviamos un código de verificación a ${email}. Ingrésalo abajo para continuar.`}
 		</Card.Description>
 	</Card.Header>
 
@@ -125,7 +125,7 @@
 		<form class="w-full" onsubmit={onVerifySubmit}>
 			<FieldGroup>
 				<Field>
-					<FieldLabel for="ev-code-{id}">Verification code</FieldLabel>
+					<FieldLabel for="ev-code-{id}">Código de verificación</FieldLabel>
 					<InputOTP.Root
 						id="ev-otp-{id}"
 						inputId="ev-code-{id}"
@@ -160,7 +160,7 @@
 
 				<Field>
 					<Button type="submit" class={fullWidthButtons ? 'w-full' : ''} disabled={busy}>
-						Continue
+						Continuar
 					</Button>
 					<Button
 						type="button"
@@ -169,7 +169,7 @@
 						disabled={busy}
 						onclick={handleCancel}
 					>
-						Cancel
+						Cancelar
 					</Button>
 				</Field>
 				{#if resend}
@@ -187,14 +187,14 @@
 	>
 		<FieldGroup>
 			<div class="flex flex-col items-center gap-1 text-center">
-				<h1 class="text-2xl font-bold">Check your email</h1>
+				<h1 class="text-2xl font-bold">Revisa tu correo electrónico</h1>
 				<p class="text-sm text-balance text-muted-foreground">
-					{`We sent a verification code to ${email}. Enter it below to continue.`}
+					{`Enviamos un código de verificación a ${email}. Ingrésalo abajo para continuar.`}
 				</p>
 			</div>
 
 			<Field>
-				<FieldLabel for="ev-code-{id}-stacked">Verification code</FieldLabel>
+				<FieldLabel for="ev-code-{id}-stacked">Código de verificación</FieldLabel>
 				<InputOTP.Root
 					id="ev-otp-{id}-stacked"
 					inputId="ev-code-{id}-stacked"
@@ -229,7 +229,7 @@
 
 			<Field>
 				<Button type="submit" class={fullWidthButtons ? 'w-full' : ''} disabled={busy}>
-					Continue
+					Continuar
 				</Button>
 				<Button
 					type="button"
@@ -238,7 +238,7 @@
 					disabled={busy}
 					onclick={handleCancel}
 				>
-					Cancel
+					Cancelar
 				</Button>
 			</Field>
 			{#if resend}

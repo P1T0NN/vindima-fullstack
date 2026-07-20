@@ -15,67 +15,57 @@
  * any write — any refusal aborts the whole save atomically. There is deliberately NO order/cart
  * gate: orders snapshot their lines at placement (§2).
  *
- * Images are only overwritten when new ones are uploaded (empty array = keep current); status
- * changes stay in `setProductStatus`.
+ * Input validation is the SHARED `editProductSchema` (see `editProductSchemas.ts`) — the
+ * same rules the admin form runs pre-submit. `images` is the full desired ordered list
+ * (`[0]` = cover; omitted = keep current); status changes stay in `setProductStatus`.
  */
 
 // LIBRARIES
 import { v } from 'convex/values';
+import { zodToConvexFields } from 'convex-helpers/server/zod4';
 
 // MIDDLEWARE
 import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
 import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
 
+// SCHEMAS
+import { editProductSchema } from '@/shared/features/products/schemas/editProductSchemas';
+
 // VALIDATORS
-import { isValidPrice } from '../productsValidators';
 import { mutationResult } from '@/convex/helpers/mutationResult';
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+
+// UTILS
+import { trimToUndefined } from '@/shared/utils/validationUtils';
 
 // HELPERS
 import { resolveImageUrls } from '../helpers/resolveImageUrls';
 
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
-
-/** Trim; empty → undefined. Lets the admin form pass raw values straight through. */
-const clean = (s: string | undefined | null): string | undefined => {
-	const t = s?.trim();
-	return t ? t : undefined;
-};
-
-/** A variant row from the edit form — like `variantInput` plus an optional id (present = patch). */
-const editVariantInput = v.object({
-	variantId: v.optional(v.id('productVariants')),
-	ref: v.string(),
-	label: v.optional(v.string()),
-	priceMinor: v.number(),
-	available: v.boolean(),
-	sortOrder: v.number()
-});
+import type { ConvexMutationResult } from '@/convex/types/convexTypes';
 
 export const editProduct = adminMutation('editProduct')({
 	args: {
+		// Shape + input rules come from the SHARED schema; the id fields are overridden with
+		// real `v.id` validators so the handler keeps typed document ids.
+		...zodToConvexFields(editProductSchema.shape),
 		productId: v.id('products'),
-		name: v.optional(v.string()),
-		description: v.optional(v.string()),
-		/** Uploaded-file references or direct paths/URLs. `[0]` = cover. Empty/omitted = keep current. */
-		images: v.optional(v.array(v.string())),
-		category: v.optional(v.string()),
-		featured: v.optional(v.boolean()),
-		sortOrder: v.optional(v.number()),
-		variants: v.array(editVariantInput),
-		/** Saved variants to remove — explicit intent, never inferred from payload absence. */
 		removedVariantIds: v.optional(v.array(v.id('productVariants')))
 	},
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
+		// Authoritative run of the shared schema (the form's pre-submit check is advisory).
+		// Covers: name non-empty when provided, images ≥ 1 when provided, variants ≥ 1 with
+		// unique refs and positive integer prices. DB-dependent gates follow below.
+		const parsed = editProductSchema.safeParse(args);
+		if (!parsed.success) {
+			return { success: false, message: { key: 'GenericMessages.UNEXPECTED_ERROR' } };
+		}
+
 		const product = await ctx.db.get(args.productId);
 		if (!product) return fail('PRODUCT_NOT_FOUND');
 
-		// Validate first — nothing written yet, so every failure is a clean soft error.
-		const name = args.name !== undefined ? clean(args.name) : undefined;
-		if (args.name !== undefined && !name) return fail('NAME_REQUIRED');
-		if (args.variants.length === 0) return fail('VARIANT_REQUIRED');
+		const name = parsed.data.name; // already trimmed by the schema
 
 		// Runtime category safety (ProductCategorySystemDesign.md §5): a provided slug must exist.
 		if (args.category !== undefined) {
@@ -86,26 +76,23 @@ export const editProduct = adminMutation('editProduct')({
 			if (!categoryRow) return fail('CATEGORY_INVALID');
 		}
 
-		const seen = new Set<string>();
-		for (const variant of args.variants) {
-			if (!isValidPrice(variant.priceMinor)) return fail('INVALID_PRICE');
-			if (seen.has(variant.ref)) return fail('REF_TAKEN');
-			seen.add(variant.ref);
-		}
-
 		// One indexed read of this product's variants powers gates 1/4 and payload validation —
 		// and lets the write phase below run without a single read, so it can never soft-fail
 		// after writes have landed (a returned envelope COMMITS; only throws roll back).
+		// Keyed as plain strings so schema-typed variant ids compare without casts.
 		const existingAll = await ctx.db
 			.query('productVariants')
 			.withIndex('by_product', (q) => q.eq('productId', args.productId))
 			.collect();
-		const existingById = new Map(existingAll.map((variant) => [variant._id, variant]));
+		const existingById = new Map<string, Doc<'productVariants'>>(
+			existingAll.map((variant) => [variant._id, variant])
+		);
 
 		// ---- Removal gates (DeleteVariantSystemDesign.md §4) — all O(1), validate-first. ----
 		// De-duplicate; ids already tombstoned drop out as idempotent no-ops (stale double-save).
 		const requestedRemovalIds = [...new Set(args.removedVariantIds ?? [])];
-		const removedSet = new Set(requestedRemovalIds);
+		// Plain string set so schema-typed variant ids (strings) compare without casts.
+		const removedSet = new Set<string>(requestedRemovalIds);
 		const removals: Doc<'productVariants'>[] = [];
 		for (const variantId of requestedRemovalIds) {
 			// Gate 1 — exists and belongs to this product (absent from this product's variant
@@ -164,11 +151,13 @@ export const editProduct = adminMutation('editProduct')({
 
 		// ---- All gates passed — write. ----
 
-		// Patch the product's display fields — only what was provided; images only when re-uploaded.
+		// Patch the product's display fields — only what was provided. `images` is the FULL
+		// desired ordered list (existing URLs pass through, new refs resolve); `[0]` = cover.
+		// An explicit empty list removes all images; omitting the arg keeps them.
 		const patch: Record<string, unknown> = {};
 		if (name !== undefined) patch.name = name;
-		if (args.description !== undefined) patch.description = clean(args.description);
-		if (args.images !== undefined && args.images.length > 0) {
+		if (args.description !== undefined) patch.description = trimToUndefined(args.description);
+		if (args.images !== undefined) {
 			patch.images = await resolveImageUrls(ctx, args.images);
 		}
 		if (args.category !== undefined) patch.category = args.category;
@@ -199,10 +188,11 @@ export const editProduct = adminMutation('editProduct')({
 			// Removal wins over edit; tombstoned rows skip silently (§8 A5, validated above).
 			if (variant.variantId && (removedSet.has(variant.variantId) || skipVariantIds.has(variant.variantId)))
 				continue;
-			const label = clean(variant.label);
+			const label = trimToUndefined(variant.label);
 			const sortOrder = variantSortOrder++;
 			if (variant.variantId) {
-				await ctx.db.patch(variant.variantId, {
+				// Validated above: the id maps to a live variant of this product.
+				await ctx.db.patch(existingById.get(variant.variantId)!._id, {
 					label,
 					priceMinor: variant.priceMinor,
 					available: variant.available,

@@ -225,8 +225,8 @@
 					<Input
 						type="search"
 						bind:value={searchDraft}
-						placeholder={searchPlaceholder ?? 'Search…'}
-						aria-label={searchPlaceholder ?? 'Search…'}
+						placeholder={searchPlaceholder ?? 'Buscar…'}
+						aria-label={searchPlaceholder ?? 'Buscar…'}
 						class="pl-9"
 					/>
 				</div>
@@ -246,19 +246,19 @@
 						onValueChange={onMobileSortChange}
 						disabled={isSearching}
 					>
-						<SelectTrigger class="w-full" aria-label="Sort by">
+						<SelectTrigger class="w-full" aria-label="Ordenar por">
 							<ArrowUpDownIcon class="size-4 opacity-70" aria-hidden="true" />
 							<span class="truncate">
 								{#if activeSortLabel}
-									Sort by: {activeSortLabel.header}
+									Ordenar por: {activeSortLabel.header}
 									{activeSortLabel.direction === 'asc' ? '↑' : '↓'}
 								{:else}
-									Sort by
+									Ordenar por
 								{/if}
 							</span>
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">Default order</SelectItem>
+							<SelectItem value="">Orden predeterminado</SelectItem>
 							{#each sortableColumns as col (col.id)}
 								<SelectItem value={`${col.id}:desc`}>{col.header} ↓</SelectItem>
 								<SelectItem value={`${col.id}:asc`}>{col.header} ↑</SelectItem>

@@ -30,11 +30,11 @@
 	const META: Record<string, { icon: typeof StoreIcon; description: string }> = {
 		pickup: {
 			icon: StoreIcon,
-			description: "Collect your order in store when it's ready. No delivery fee."
+			description: 'Recoge tu pedido en tienda cuando esté listo. Sin costo de envío.'
 		},
 		delivery: {
 			icon: TruckIcon,
-			description: 'We deliver to the address you provide below.'
+			description: 'Entregamos en la dirección que indiques abajo.'
 		}
 	};
 </script>

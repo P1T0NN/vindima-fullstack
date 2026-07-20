@@ -22,9 +22,9 @@
 
 	// Row click opens the dedicated edit page; creating happens on the /add-product route.
 	function statusLabel(status: AdminProductRow['status']): string {
-		if (status === 'active') return 'Active';
-		if (status === 'archived') return 'Archived';
-		return 'Draft';
+		if (status === 'active') return 'Activo';
+		if (status === 'archived') return 'Archivado';
+		return 'Borrador';
 	}
 
 	function priceRange(row: AdminProductRow): string {
@@ -39,30 +39,30 @@
 	const columns: ColumnDef<AdminProductRow>[] = [
 		{
 			id: 'name',
-			header: 'Name',
+			header: 'Nombre',
 			accessor: (r) => r.name
 		},
 		{
 			id: 'category',
-			header: 'Category',
+			header: 'Categoría',
 			// Display name from the shared class; rows store the slug (the stable key).
 			accessor: (r) => productCategoriesClass.nameBySlug.get(r.category) ?? r.category,
 			hideBelow: 'md'
 		},
 		{
 			id: 'status',
-			header: 'Status',
+			header: 'Estado',
 			accessor: (r) => r.status
 		},
 		{
 			id: 'variants',
-			header: 'Variants',
+			header: 'Variantes',
 			accessor: (r) => r.variants.length,
 			hideBelow: 'md'
 		},
 		{
 			id: 'price',
-			header: 'Price',
+			header: 'Precio',
 			accessor: (r) => priceRange(r),
 			hideBelow: 'sm'
 		}
@@ -70,7 +70,7 @@
 </script>
 
 <ConvexDataTable
-	caption="Products"
+	caption="Productos"
 	query={api.tables.products.queries.fetchAllProducts.fetchAllProducts}
 	controlsPlace="top"
 	{columns}

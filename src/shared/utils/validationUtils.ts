@@ -2,6 +2,18 @@
 import type { FieldErrors } from '../types/types';
 import type { ZodIssue } from 'zod';
 
+/** Trim; empty or whitespace-only → `undefined`. Safe for optional form/API fields. */
+export function trimToUndefined(value: string | undefined | null): string | undefined {
+	const trimmed = value?.trim();
+	return trimmed ? trimmed : undefined;
+}
+
+/** Integer minor units, strictly positive — mirrors `productVariantInputSchema.priceMinor`
+ *  (a sellable variant always costs something; free reward items are zero-priced order lines). */
+export function isValidPrice(n: number): boolean {
+	return Number.isInteger(n) && n > 0;
+}
+
 /**
  * Maps Zod `issues` to field keys (top path segment): first issue message wins per field.
  * Pass `includeOnlyKeys` to drop unrelated fields (e.g. scheduling vs contact when using a merged schema).
@@ -22,6 +34,31 @@ export function zodIssuesToFieldErrors<T extends string>(
 		if (!(key in out)) {
 			(out as Record<string, string>)[key] = issue.message;
 		}
+	}
+	return out;
+}
+
+/**
+ * Per-row errors for one item of an array field, keyed by the item's own property name
+ * (`issues` with path `[arrayKey, index, prop]`). For array editors rendered outside the
+ * declared fields — `zodIssuesToFieldErrors` collapses those to the array key alone, which
+ * can't say WHICH row failed.
+ *
+ * @example
+ * ```ts
+ * const errors = zodIssuesForArrayItem(issues, 'variants', i); // { ref: '…', priceMinor: '…' }
+ * ```
+ */
+export function zodIssuesForArrayItem(
+	issues: readonly ZodIssue[],
+	arrayKey: string,
+	index: number
+): Record<string, string> {
+	const out: Record<string, string> = {};
+	for (const issue of issues) {
+		const [key, itemIndex, prop] = issue.path;
+		if (key !== arrayKey || itemIndex !== index || typeof prop !== 'string') continue;
+		if (!(prop in out)) out[prop] = issue.message;
 	}
 	return out;
 }

@@ -6,13 +6,11 @@
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// CONFIG
-	import { COMPANY_DATA } from '@/shared/config.js';
 	import { PROTECTED_PAGE_ENDPOINTS, UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// CLASSES
 	import {
 		btnGoldClass,
-		headerBrandClass,
 		isNavActive,
 		navItems,
 		navLinkActiveClass,
@@ -25,6 +23,7 @@
 
 	// COMPONENTS
 	import Link from '@/components/ui/link/link.svelte';
+	import Logo from '@/components/ui/logo/logo.svelte';
 	import HeaderMobile from './header-mobile.svelte';
 
 	// STATE
@@ -55,7 +54,7 @@
 	const accountHref = $derived(
 		isAuthenticated ? PROTECTED_PAGE_ENDPOINTS.ACCOUNT : UNPROTECTED_PAGE_ENDPOINTS.LOGIN
 	);
-	const accountLabel = $derived(isAuthenticated ? 'My account' : 'Sign in');
+	const accountLabel = $derived(isAuthenticated ? 'Mi cuenta' : 'Iniciar sesión');
 
 	// Gold CTA: Join the Club (signed out) · Admin Dashboard (admin) · My Rewards (member).
 	const cta = $derived(resolveHeaderCta(authClass.currentUser, isAuthenticated));
@@ -81,12 +80,9 @@
 	<div
 		class={cn(PAGE_CONTAINER, 'grid grid-cols-[auto_1fr_auto] items-center gap-4 py-[15px]')}
 	>
-		<Link href={UNPROTECTED_PAGE_ENDPOINTS.ROOT} class={headerBrandClass}>
-			<span class="size-[7px] shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
-			{COMPANY_DATA.NAME}
-		</Link>
+		<Logo class="transition-opacity hover:opacity-90" />
 
-		<nav class="hidden min-w-0 lg:flex" aria-label="Main">
+		<nav class="hidden min-w-0 lg:flex" aria-label="Principal">
 			<ul class="mx-auto flex max-w-full min-w-0 flex-wrap items-center justify-center gap-[18px]">
 				{#each navItems as item (item.href)}
 					{@const active = isNavActive(pathnameLogical, scrollSpy.active, item.href)}
@@ -121,7 +117,7 @@
 				type="button"
 				onclick={() => cart.toggle()}
 				class="relative flex rounded-sm text-accent transition-opacity outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary/40"
-				aria-label={cart.count === 1 ? `Cart, ${cart.count} item` : `Cart, ${cart.count} items`}
+				aria-label={cart.count === 1 ? `Carrito, ${cart.count} artículo` : `Carrito, ${cart.count} artículos`}
 			>
 				<ShoppingBagIcon class="size-[21px]" strokeWidth={1.4} />
 				{#if cart.count > 0}

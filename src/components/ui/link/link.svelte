@@ -1,6 +1,7 @@
 <script lang="ts">
 	// UTILS
 	import { cn, type WithElementRef } from '@/utils/utils.js';
+	import { appHref } from '@/utils/app-navigation.js';
 
 	// TYPES
 	import type { HTMLAnchorAttributes } from 'svelte/elements';
@@ -20,8 +21,10 @@
 		children,
 		...restProps
 	}: LinkProps = $props();
+
+	const resolvedHref = $derived(appHref(href));
 </script>
 
-<a bind:this={ref} data-slot="link" {href} class={cn(className)} {...restProps}>
+<a bind:this={ref} data-slot="link" href={resolvedHref} class={cn(className)} {...restProps}>
 	{@render children()}
 </a>

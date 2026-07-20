@@ -12,8 +12,8 @@
 		class="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
 	>
 		<ArrowLeftIcon class="size-4" aria-hidden="true" />
-		Products
+		Productos
 	</a>
 
-	<h1 class="text-2xl font-semibold tracking-tight">New product</h1>
+	<h1 class="text-2xl font-semibold tracking-tight">Nuevo producto</h1>
 </header>

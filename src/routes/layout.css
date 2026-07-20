@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+/* Wuchale writes catalog files on every save — keep them out of Tailwind's source scan
+   so translation updates stay HMR instead of forcing full page reloads (docs: guides/tailwind). */
+
 
 @import 'tw-animate-css';
 

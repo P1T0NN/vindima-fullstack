@@ -11,4 +11,4 @@
 	import { appHref } from '@/utils/app-navigation.js';
 </script>
 
-<Button variant="outline" href={appHref(UNPROTECTED_PAGE_ENDPOINTS.LOGIN)}>Login</Button>
+<Button variant="outline" href={appHref(UNPROTECTED_PAGE_ENDPOINTS.LOGIN)}>Iniciar sesión</Button>

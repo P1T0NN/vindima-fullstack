@@ -55,7 +55,7 @@
 							</Avatar.Root>
 
 							<div class="grid flex-1 text-start text-sm leading-tight">
-								<span class="truncate font-medium">{user?.name ?? 'Account'}</span>
+								<span class="truncate font-medium">{user?.name ?? 'Cuenta'}</span>
 								<span class="truncate text-xs text-muted-foreground">{user?.email ?? ''}</span>
 							</div>
 						{/if}
@@ -79,7 +79,7 @@
 						</Avatar.Root>
 
 						<div class="grid flex-1 text-start text-sm leading-tight">
-							<span class="truncate font-medium">{user?.name ?? 'Account'}</span>
+							<span class="truncate font-medium">{user?.name ?? 'Cuenta'}</span>
 							<span class="truncate text-xs text-muted-foreground">{user?.email ?? ''}</span>
 						</div>
 					</div>
@@ -90,7 +90,7 @@
 				<DropdownMenu.Group>
 					<DropdownMenu.Item>
 						<SparklesIcon />
-						Upgrade to Pro
+						Mejorar plan
 					</DropdownMenu.Item>
 				</DropdownMenu.Group>
 
@@ -99,17 +99,17 @@
 				<DropdownMenu.Group>
 					<DropdownMenu.Item>
 						<BadgeCheckIcon />
-						Account
+						Cuenta
 					</DropdownMenu.Item>
 
 					<DropdownMenu.Item>
 						<CreditCardIcon />
-						Billing
+						Facturación
 					</DropdownMenu.Item>
 
 					<DropdownMenu.Item>
 						<BellIcon />
-						Notifications
+						Notificaciones
 					</DropdownMenu.Item>
 				</DropdownMenu.Group>
 
@@ -117,7 +117,7 @@
 
 				<DropdownMenu.Item>
 					<LogOutIcon />
-					Log out
+					Cerrar sesión
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>

@@ -1,6 +1,4 @@
 <script lang="ts">
-	// LIBRARIES
-
 	// CONFIG
 	import { ASSETS_DATA, COMPANY_DATA } from '@/shared/config.js';
 
@@ -19,11 +17,11 @@
 	let message = $state('');
 
 	const eventTypes = [
-		{ value: 'birthday', label: () => 'Birthday' },
-		{ value: 'tasting', label: () => 'Private tasting' },
-		{ value: 'corporate', label: () => 'Company dinner' },
-		{ value: 'intimate', label: () => 'Intimate celebration' },
-		{ value: 'other', label: () => 'Other' }
+		{ value: 'birthday', label: () => 'Cumpleaños' },
+		{ value: 'tasting', label: () => 'Cata privada' },
+		{ value: 'corporate', label: () => 'Cena de empresa' },
+		{ value: 'intimate', label: () => 'Celebración íntima' },
+		{ value: 'other', label: () => 'Otro' }
 	] as const;
 
 	function selectedEventTypeLabel(): string {
@@ -32,13 +30,13 @@
 
 	function sendEventInquiry() {
 		const text = [
-			"Hi Vindima! I'm planning an event.",
+			'¡Hola Vindima! Estoy planeando un evento.',
 			'',
-			`${'Name'}: ${name}`,
-			`${'Event type'}: ${selectedEventTypeLabel()}`,
-			`${'Tentative date'}: ${date}`,
-			`${'Number of guests'}: ${guests}`,
-			`${'Message'}: ${message}`
+			`Nombre: ${name}`,
+			`Tipo de evento: ${selectedEventTypeLabel()}`,
+			`Fecha tentativa: ${date}`,
+			`No. de personas: ${guests}`,
+			`Mensaje: ${message}`
 		].join('\n');
 
 		window.open(
@@ -53,13 +51,13 @@
 	id="events"
 	contain={false}
 	yPadding="none"
-	class="relative overflow-hidden bg-accent py-14 pb-24 sm:py-16 sm:pb-28"
+	class="relative overflow-hidden bg-accent py-17.5 pb-24"
 >
 	<img
 		src={ASSETS_DATA.GLASS}
 		alt=""
 		aria-hidden="true"
-		class="pointer-events-none absolute top-20 -left-8 w-44 opacity-15"
+		class="pointer-events-none absolute top-20 -left-8 w-42.5 opacity-15"
 		loading="lazy"
 		decoding="async"
 	/>
@@ -67,32 +65,32 @@
 		src={ASSETS_DATA.BOARD}
 		alt=""
 		aria-hidden="true"
-		class="pointer-events-none absolute -right-16 -bottom-8 w-72 opacity-10"
+		class="pointer-events-none absolute -right-18 -bottom-8 w-75 opacity-10"
 		loading="lazy"
 		decoding="async"
 	/>
 
-	<div class="relative mx-auto w-full max-w-2xl px-4 text-center sm:px-6 lg:px-8">
-		<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Private events</p>
+	<div class="relative mx-auto w-full max-w-170 px-6 text-center sm:px-10">
+		<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Eventos privados</p>
 		<h2
-			class="mb-3.5 font-display text-4xl leading-tight font-semibold text-background uppercase sm:text-5xl"
+			class="mb-3.5 font-display text-4xl leading-tight font-semibold text-accent-foreground uppercase sm:text-[46px] sm:leading-[1.04]"
 		>
-			Planning<br />
-			an event?
+			¿Estás planeando<br />
+			un evento?
 		</h2>
 		<p class="mx-auto mb-9 max-w-md text-sm leading-relaxed text-accent-surface-muted">
-			Birthdays, private tastings, company dinners or intimate celebrations. Tell us what you have
-			in mind and we will reply directly on WhatsApp.
+			Cumpleaños, catas privadas, cenas de empresa o celebraciones íntimas. Cuéntanos qué tienes en
+			mente y te respondemos directo por WhatsApp.
 		</p>
 
-		<Card class="gap-0 rounded-xl border-0 bg-card px-9 py-10 text-left shadow-brand-form">
-			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4">
+		<Card class="gap-0 rounded-xl border-0 bg-card px-9 py-9.5 text-left shadow-brand-form">
+			<div class="grid grid-cols-1 gap-4.5 sm:grid-cols-2">
 				<div class="flex flex-col gap-1.5">
 					<Label
 						for="event-name"
 						class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 					>
-						Name
+						Nombre
 					</Label>
 					<Input
 						id="event-name"
@@ -107,7 +105,7 @@
 						for="event-type"
 						class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 					>
-						Event type
+						Tipo de evento
 					</Label>
 					<select
 						id="event-type"
@@ -125,7 +123,7 @@
 						for="event-date"
 						class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 					>
-						Tentative date
+						Fecha tentativa
 					</Label>
 					<Input
 						id="event-date"
@@ -140,7 +138,7 @@
 						for="event-guests"
 						class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 					>
-						Number of guests
+						No. de personas
 					</Label>
 					<Input
 						id="event-guests"
@@ -155,13 +153,13 @@
 						for="event-message"
 						class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
 					>
-						Tell us more
+						Cuéntanos más
 					</Label>
 					<Textarea
 						id="event-message"
 						bind:value={message}
 						rows={3}
-						placeholder="We would love a Vindima board and wine for a toast…"
+						placeholder="Nos encantaría una tabla Vindima y vino para brindar…"
 						class="min-h-0 rounded-sm px-3 py-3"
 					/>
 				</div>
@@ -170,7 +168,7 @@
 			<Button
 				type="button"
 				variant="whatsapp"
-				class="mt-6 h-auto w-full justify-center px-6 py-4 text-sm tracking-wider uppercase"
+				class="mt-6 h-auto w-full justify-center px-6 py-4 text-[13px] tracking-wider uppercase"
 				onclick={sendEventInquiry}
 			>
 				<svg
@@ -185,11 +183,11 @@
 						d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.4.1.1.1.6-.1 1.1Z"
 					/>
 				</svg>
-				Send via WhatsApp
+				Enviar por WhatsApp
 			</Button>
 
-			<p class="mt-3.5 text-center text-xs leading-snug text-muted-foreground/80">
-				WhatsApp will open with your message ready to send.
+			<p class="mt-3.5 text-center text-[11.5px] leading-snug text-muted-foreground/80">
+				Se abrirá WhatsApp con tu mensaje listo para enviar.
 			</p>
 		</Card>
 	</div>

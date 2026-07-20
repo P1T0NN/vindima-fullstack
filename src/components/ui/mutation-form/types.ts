@@ -1,4 +1,5 @@
 import type { Snippet } from 'svelte';
+import type { ZodIssue } from 'zod';
 import type { FullAutoFill, HTMLInputTypeAttribute } from 'svelte/elements';
 
 export type MutationFormFieldKind =
@@ -49,6 +50,9 @@ export type MutationFormFieldDef = {
 	/** kind: 'upload-single' | 'upload-multiple' */
 	accept?: string;
 
+	/** kind: 'upload-multiple' — show the star control; the starred image becomes `files[0]` (the cover). */
+	hasCoverImage?: boolean;
+
 	/** Grid columns the field occupies inside a section. Defaults to 2 (full width). */
 	colSpan?: 1 | 2;
 };
@@ -80,6 +84,16 @@ export type MutationFormCustomFields<T extends Record<string, unknown>> = Partia
 export type MutationFormFieldErrors<T extends Record<string, unknown>> = Partial<
 	Record<keyof T & string, string | undefined>
 >;
+
+/**
+ * Props handed to the `extraFields` snippet so blocks rendered outside the declared fields
+ * (array editors, custom sections) can show validation state: `errors` keyed by top-level
+ * field, `issues` raw — pass those to `zodIssuesForArrayItem` for per-row errors.
+ */
+export type MutationFormExtraFieldsProps<T extends Record<string, unknown>> = {
+	errors: MutationFormFieldErrors<T>;
+	issues: readonly ZodIssue[];
+};
 
 export type MutationFormProgress = {
 	readonly percent: number;

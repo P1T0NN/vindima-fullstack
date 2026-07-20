@@ -38,7 +38,7 @@ export const expirePendingOrders = internalMutation({
 			await ctx.db.patch(order._id, { status: 'cancelled' });
 			if (order.claimId) {
 				await ctx.runMutation(
-					internal.tables.rewards.mutations.releaseRewardClaim.releaseRewardClaim,
+					internal.tables.rewardClaims.mutations.releaseRewardClaim.releaseRewardClaim,
 					{ claimId: order.claimId }
 				);
 			}

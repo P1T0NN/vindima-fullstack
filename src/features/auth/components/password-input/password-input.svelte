@@ -43,7 +43,7 @@
 		size="icon-sm"
 		class="absolute end-1 top-1/2 z-10 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 		onclick={() => (visible = !visible)}
-		aria-label={visible ? 'Hide password' : 'Show password'}
+		aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
 		aria-pressed={visible}
 		{disabled}
 	>

@@ -25,7 +25,7 @@ export function useProgress(options?: UseProgressOptions) {
 		return compressMax + (filesDone / totalFiles) * uploadSpan;
 	}
 
-	function start(message = 'Starting...') {
+	function start(message = 'Iniciando...') {
 		percent = 0;
 		label = message;
 	}
@@ -38,21 +38,21 @@ export function useProgress(options?: UseProgressOptions) {
 	const setOptimizeProgress: OptimizeImagesProgressCallback = (info) => {
 		const pct = (info.overallOptimizePercent / 100) * compressMax;
 		percent = Math.min(workMax, Math.round(pct));
-		label = `Compressing ${info.fileIndex + 1} / ${info.totalFiles} (${Math.round(info.fileCompressionPercent)}%)`;
+		label = `Comprimiendo ${info.fileIndex + 1} / ${info.totalFiles} (${Math.round(info.fileCompressionPercent)}%)`;
 	};
 
 	function beforeUploadFile(fileNum: number, totalFiles: number) {
 		percent = Math.round(uploadSlicePercent(fileNum - 1, totalFiles));
-		label = `Uploading file ${fileNum} of ${totalFiles}…`;
+		label = `Subiendo archivo ${fileNum} de ${totalFiles}…`;
 	}
 
 	function afterUploadFile(fileNum: number, totalFiles: number) {
 		const pctOfFiles = Math.round((fileNum / totalFiles) * 100);
 		percent = Math.min(workMax, Math.round(uploadSlicePercent(fileNum, totalFiles)));
-		label = `${fileNum} of ${totalFiles} files uploaded (${pctOfFiles}%)`;
+		label = `${fileNum} de ${totalFiles} archivos subidos (${pctOfFiles}%)`;
 	}
 
-	function markDone(doneLabel = 'Done') {
+	function markDone(doneLabel = 'Listo') {
 		percent = 100;
 		label = doneLabel;
 	}

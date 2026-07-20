@@ -16,53 +16,53 @@ import type {
 const CONTACT_FIELDS: MutationFormFieldDef[] = [
 	{
 		id: 'name',
-		label: 'Name',
+		label: 'Nombre',
 		kind: 'input',
 		required: true,
 		autocomplete: 'name',
-		placeholder: 'Jane Doe',
+		placeholder: 'Juan Pérez',
 		colSpan: 1
 	},
 	{
 		id: 'email',
-		label: 'Email',
+		label: 'Correo electrónico',
 		kind: 'input',
 		type: 'email',
 		required: true,
 		autocomplete: 'email',
-		placeholder: 'you@example.com',
+		placeholder: 'correo@ejemplo.com',
 		colSpan: 1
 	},
 	{
 		id: 'phone',
-		label: 'Phone',
+		label: 'Teléfono',
 		kind: 'input',
 		type: 'tel',
 		autocomplete: 'tel',
 		placeholder: '449 000 0000',
-		description: 'Optional — only used if we need to reach you about this order.'
+		description: 'Opcional — solo lo usamos si necesitamos contactarte sobre este pedido.'
 	}
 ];
 
 const ADDRESS_FIELDS: MutationFormFieldDef[] = [
 	{
 		id: 'line1',
-		label: 'Address',
+		label: 'Dirección',
 		kind: 'input',
 		autocomplete: 'address-line1',
-		placeholder: '123 Main Street'
+		placeholder: 'Calle Principal 123'
 	},
 	{
 		id: 'line2',
-		label: 'Apartment, suite, etc.',
+		label: 'Departamento, interior, etc.',
 		kind: 'input',
 		autocomplete: 'address-line2',
-		placeholder: 'Apartment, suite, floor…',
-		description: 'Optional.'
+		placeholder: 'Departamento, interior, piso…',
+		description: 'Opcional.'
 	},
 	{
 		id: 'city',
-		label: 'City',
+		label: 'Ciudad',
 		kind: 'input',
 		autocomplete: 'address-level2',
 		placeholder: 'Aguascalientes',
@@ -70,7 +70,7 @@ const ADDRESS_FIELDS: MutationFormFieldDef[] = [
 	},
 	{
 		id: 'postcode',
-		label: 'Postcode',
+		label: 'Código postal',
 		kind: 'input',
 		autocomplete: 'postal-code',
 		placeholder: '20000',
@@ -78,20 +78,20 @@ const ADDRESS_FIELDS: MutationFormFieldDef[] = [
 	},
 	{
 		id: 'country',
-		label: 'Country',
+		label: 'País',
 		kind: 'input',
 		autocomplete: 'country-name',
-		placeholder: 'Mexico'
+		placeholder: 'México'
 	}
 ];
 
 const NOTE_FIELD: MutationFormFieldDef = {
 	id: 'note',
-	label: 'Order note',
+	label: 'Nota del pedido',
 	kind: 'textarea',
 	rows: 2,
-	placeholder: 'Anything we should know?',
-	description: 'Optional.'
+	placeholder: '¿Algo que debamos saber?',
+	description: 'Opcional.'
 };
 
 export function createPlaceOrderForm(params: {
@@ -105,22 +105,22 @@ export function createPlaceOrderForm(params: {
 	return [
 		{
 			id: 'contact',
-			title: 'Your details',
-			description: 'Where the order confirmation goes.',
+			title: 'Tus datos',
+			description: 'A dónde llegará la confirmación del pedido.',
 			class: 'lg:col-start-1',
 			fields: CONTACT_FIELDS
 		},
 		{
 			id: 'delivery',
-			title: 'Delivery',
-			description: 'How you want to receive the order.',
+			title: 'Entrega',
+			description: 'Cómo quieres recibir tu pedido.',
 			class: 'lg:col-start-1',
 			fields: [
 				...(modeOptions.length > 1
 					? [
 							{
 								id: 'mode',
-								label: 'Method',
+								label: 'Método',
 								kind: 'radio',
 								options: modeOptions,
 								radioOrientation: 'horizontal',

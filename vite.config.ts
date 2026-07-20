@@ -25,9 +25,10 @@ export default defineConfig({
 			}
 		}
 	},
-    plugins: [
-        // i18n: intentionally none right now — Paraglide was removed; wuchale's vite plugin
-        // slots in here when it gets adopted (it extracts the plain strings from source).
+	preview: {
+		port: 5173
+	},
+	plugins: [
         tailwindcss(),
         sveltekit()
     ]

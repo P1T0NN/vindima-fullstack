@@ -77,7 +77,7 @@
 
 <FieldDescription class="text-center">
 	<span class="inline-flex flex-wrap items-center justify-center gap-x-1">
-		<span>Didn't receive the code?</span>
+		<span>¿No recibiste el código?</span>
 
 		<Button
 			type="button"
@@ -86,7 +86,7 @@
 			disabled={blocked}
 			onclick={handleResend}
 		>
-			{cooldownRemaining > 0 ? `Resend in ${cooldownRemaining}s` : 'Resend'}
+			{cooldownRemaining > 0 ? `Reenviar en ${cooldownRemaining}s` : 'Reenviar'}
 		</Button>
 	</span>
 </FieldDescription>

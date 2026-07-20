@@ -15,7 +15,11 @@
 	import type { Doc } from '@/convex/_generated/dataModel';
 </script>
 
-<SvelteHead title="My Orders" />
+<SvelteHead
+	title="Mis pedidos"
+	noindex
+	description="Consulta tus pedidos anteriores de Vindima y sigue su estado."
+/>
 
 <Section
 	yPadding="none"

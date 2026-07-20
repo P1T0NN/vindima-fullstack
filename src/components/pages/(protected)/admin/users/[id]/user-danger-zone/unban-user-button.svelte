@@ -33,4 +33,4 @@
 	}
 </script>
 
-<Button variant="outline" onclick={unban} disabled={isPending}>Unban</Button>
+<Button variant="outline" onclick={unban} disabled={isPending}>Desbloquear</Button>

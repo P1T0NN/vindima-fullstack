@@ -7,12 +7,15 @@
 		field,
 		inputId,
 		value,
-		setValue
+		setValue,
+		invalid = false
 	}: {
 		field: MutationFormFieldDef;
 		inputId: string;
 		value: unknown;
 		setValue: (next: unknown) => void;
+		/** Schema validation failed for this field — paints the dropzone destructive. */
+		invalid?: boolean;
 	} = $props();
 </script>
 
@@ -21,6 +24,7 @@
 		id={inputId}
 		accept={field.accept}
 		disabled={field.disabled}
+		{invalid}
 		bind:file={() => (value as File | null) ?? null, (v) => setValue(v)}
 	/>
 {:else if field.kind === 'upload-multiple'}
@@ -28,6 +32,8 @@
 		id={inputId}
 		accept={field.accept}
 		disabled={field.disabled}
-		bind:files={() => (value as File[]) ?? [], (v) => setValue(v)}
+		hasCoverImage={field.hasCoverImage}
+		{invalid}
+		bind:files={() => (value as (File | string)[]) ?? [], (v) => setValue(v)}
 	/>
 {/if}

@@ -12,7 +12,6 @@
 	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
 	import { api } from '@/convex/_generated/api';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 
 	// CLASSES
 	import { authClass, type CurrentUser } from '@/features/auth/classes/authClass.svelte';
@@ -37,7 +36,6 @@
 		authClient,
 		getServerState: () => data.authState
 	});
-	injectSpeedInsights();
 
 	// NOTE: Has to be after the `createSvelteAuthClient` call because it uses the `authClient` instance.
 	const auth = useAuth();
@@ -54,8 +52,14 @@
 	// Push the live query into the shared store so any component can read
 	// `authClass.currentUser` without re-subscribing.
 	$effect(() => {
-		const data = currentUserResponse.data as CurrentUser | null | undefined;
-		authClass.syncFromCurrentUserQuery(data, currentUserResponse.isLoading);
+		// Definitively signed out (not loading) — otherwise a skipped query would leave the
+		// store at `undefined` ("not yet synced") and consumers could wait forever.
+		if (!auth.isAuthenticated) {
+			authClass.syncFromCurrentUserQuery(null, false);
+			return;
+		}
+		const user = currentUserResponse.data as CurrentUser | null | undefined;
+		authClass.syncFromCurrentUserQuery(user, currentUserResponse.isLoading);
 	});
 
 	// CART — one subscription drives the authenticated cart; guests use localStorage.

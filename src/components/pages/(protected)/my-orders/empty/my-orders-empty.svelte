@@ -22,20 +22,20 @@
 		</span>
 	</div>
 
-	<p class="mb-3 text-[0.7rem] font-medium tracking-[0.3em] text-chart-2 uppercase">Order history</p>
+	<p class="mb-3 text-[0.7rem] font-medium tracking-[0.3em] text-chart-2 uppercase">Historial de pedidos</p>
 	<h2 class="mb-3 font-display text-3xl font-semibold tracking-wide text-accent sm:text-4xl">
-		No orders yet
+		Aún no tienes pedidos
 	</h2>
 	<p class="mb-9 max-w-sm text-sm leading-relaxed text-muted-foreground">
-		Your orders will appear here the moment you place one — with live fulfillment tracking from
-		processing to your door.
+		Tus pedidos aparecerán aquí en cuanto realices uno — con seguimiento en vivo desde que se
+		procesa hasta tu puerta.
 	</p>
 
 	<Button
 		href="{UNPROTECTED_PAGE_ENDPOINTS.ROOT}{UNPROTECTED_PAGE_ENDPOINTS.SHOP}"
 		class="group h-12 gap-2 px-8 text-sm tracking-wider uppercase"
 	>
-		Browse the shop
+		Explora la tienda
 		<ArrowRightIcon class="size-4 transition-transform group-hover:translate-x-0.5" />
 	</Button>
 </div>

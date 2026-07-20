@@ -4,16 +4,15 @@ import { v } from 'convex/values';
 
 // TABLES
 import { auditLogTable } from './tables/auditLog/schemas/auditLogSchema';
-import {
-	rewardAccountsTable,
-	rewardClaimsTable,
-	rewardLedgerTable,
-	firstPurchasesTable
-} from './tables/rewards/schemas/rewardsSchema';
+import { rewardAccountsTable } from './tables/rewardAccounts/schemas/rewardAccountsSchema';
+import { rewardClaimsTable } from './tables/rewardClaims/schemas/rewardClaimsSchema';
+import { rewardLedgerTable } from './tables/rewardLedger/schemas/rewardLedgerSchema';
+import { firstPurchasesTable } from './tables/firstPurchases/schemas/firstPurchasesSchema';
 import { cartsTable } from './tables/cart/schemas/cartSchema';
 import { ordersTable } from './tables/orders/schemas/ordersSchema';
-import { productsTable, productVariantsTable } from './tables/products/schemas/productsSchema';
-import { productCategoriesTable } from './tables/products/schemas/productCategoriesSchema';
+import { productsTable } from './tables/products/schemas/productsSchema';
+import { productVariantsTable } from './tables/productVariants/schemas/productVariantsSchema';
+import { productCategoriesTable } from './tables/productCategories/schemas/productCategoriesSchema';
 
 const schema = defineSchema({
 	// Users (with `role` and other custom fields) live in the better-auth component;
@@ -57,15 +56,6 @@ const schema = defineSchema({
 	// Category rows the admin picks from — `products.category` stores the slug verbatim,
 	// validated at write time. See ProductCategorySystemDesign.md.
 	productCategories: productCategoriesTable,
-
-	/** Convex file storage reference + resolved download URL. Owner-stamped at upload. */
-	uploadedFiles: defineTable({
-		ownerId: v.string(),
-		storageId: v.id('_storage'),
-		url: v.string()
-	})
-		.index('by_storage_id', ['storageId'])
-		.index('by_owner', ['ownerId']),
 
 	/** Cloudflare R2 file reference + cached download URL. Owner-stamped at upload. */
 	uploadedFilesR2: defineTable({

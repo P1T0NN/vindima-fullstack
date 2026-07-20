@@ -18,7 +18,7 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 	return {
-		baseURL: process.env.SITE_URL,
+		baseURL: process.env.PUBLIC_SITE_URL,
 		database: authComponent.adapter(ctx),
 		user: {
 			additionalFields: {

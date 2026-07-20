@@ -49,7 +49,7 @@ export const markOrderPaid = internalMutation({
 
 			// Stamp: post-discount subtotal, reward line already excluded from subtotalMinor.
 			await ctx.runMutation(
-				internal.tables.rewards.mutations.grantStampForOrder.grantStampForOrder,
+				internal.tables.rewardLedger.mutations.grantStampForOrder.grantStampForOrder,
 				{
 					userId,
 					orderId: order._id,
@@ -59,7 +59,7 @@ export const markOrderPaid = internalMutation({
 
 			// First-purchase record — ALWAYS, even discount 0, so a later config flip can't be gamed.
 			await ctx.runMutation(
-				internal.tables.rewards.mutations.recordFirstPurchase.recordFirstPurchase,
+				internal.tables.firstPurchases.mutations.recordFirstPurchase.recordFirstPurchase,
 				{
 					userId,
 					orderId: order._id,
@@ -72,7 +72,7 @@ export const markOrderPaid = internalMutation({
 			if (order.claimId) {
 				try {
 					await ctx.runMutation(
-						internal.tables.rewards.mutations.applyRewardClaim.applyRewardClaim,
+						internal.tables.rewardClaims.mutations.applyRewardClaim.applyRewardClaim,
 						{ claimId: order.claimId, appliedTo: order._id }
 					);
 				} catch (err) {

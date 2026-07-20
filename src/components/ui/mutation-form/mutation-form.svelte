@@ -38,8 +38,10 @@
 
 	// TYPES
 	import type { Snippet } from 'svelte';
+	import type { ZodIssue } from 'zod';
 	import type {
 		MutationFormCustomFields,
+		MutationFormExtraFieldsProps,
 		MutationFormFieldDef,
 		MutationFormFieldErrors,
 		MutationFormPrepareSubmit,
@@ -56,7 +58,7 @@
 		prepareSubmit,
 		schema,
 		onSuccess,
-		submitLabel = 'Submit',
+		submitLabel = 'Enviar',
 		resetOnSuccess = true,
 		customFields,
 		header,
@@ -78,7 +80,10 @@
 		resetOnSuccess?: boolean;
 		customFields?: MutationFormCustomFields<T>;
 		header?: Snippet;
-		extraFields?: Snippet;
+		/** Rendered after the declared sections (array editors, custom blocks). Receives the
+		 *  validation state so those blocks can show their own errors: `errors` keyed by top-level
+		 *  field, `issues` raw (use `zodIssuesForArrayItem` for per-row errors). */
+		extraFields?: Snippet<[MutationFormExtraFieldsProps<T>]>;
 		actions?: Snippet<[{ busy: boolean }]>;
 		class?: string;
 	} = $props();
@@ -90,6 +95,9 @@
 	const resetSnapshot: T = $state.snapshot(initialValues ?? values) as T;
 
 	let fieldErrors = $state<MutationFormFieldErrors<T>>({});
+	// Raw issues, handed to `extraFields` so array editors (rendered outside the declared
+	// fields) can surface per-row errors — `fieldErrors` only keys by the top path segment.
+	let issues = $state<readonly ZodIssue[]>([]);
 	let busy = $state(false);
 
 	const resolvedSections = $derived<MutationFormSection[]>(
@@ -121,10 +129,12 @@
 		const validation = schema.safeParse(valueSnapshot);
 		if (!validation.success) {
 			fieldErrors = zodIssuesToFieldErrors<keyof T & string>(validation.error.issues);
-			toast.error('You need to correct form errors');
+			issues = validation.error.issues;
+			toast.error('Corrige los errores del formulario');
 			return;
 		}
 		fieldErrors = {};
+		issues = [];
 
 		busy = true;
 		progress.start();
@@ -232,6 +242,7 @@
 					{inputId}
 					value={getValue(field.id)}
 					setValue={(v) => setValue(field.id, v)}
+					invalid={!!err}
 				/>
 			{:else if field.kind === 'select'}
 				<SelectField
@@ -270,7 +281,9 @@
 	</div>
 {/snippet}
 
-<form onsubmit={handleSubmit} class={cn('flex flex-col gap-6', className)}>
+<!-- novalidate: the zod schema is the validator — native browser bubbles would fire
+     before handleSubmit and block the schema's field errors from ever rendering. -->
+<form onsubmit={handleSubmit} novalidate class={cn('flex flex-col gap-6', className)}>
 	{@render header?.()}
 
 	{#each resolvedSections as section, i (section.id ?? i)}
@@ -305,7 +318,7 @@
 		{/if}
 	{/each}
 
-	{@render extraFields?.()}
+	{@render extraFields?.({ errors: fieldErrors, issues })}
 
 	{#if busy && showUploadProgress}
 		<div class="flex w-full flex-col gap-2">

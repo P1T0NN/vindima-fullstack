@@ -71,11 +71,11 @@
 	actionDisabled={role === 'admin' || typedConfirm !== userEmail}
 	isDestructive={role !== 'admin'}
 	hideProceed={role === 'admin'}
-	title={role === 'admin' ? `Cannot delete ${userEmail}` : `Delete ${userEmail}?`}
+	title={role === 'admin' ? `No se puede eliminar a ${userEmail}` : `¿Eliminar a ${userEmail}?`}
 	description={role === 'admin'
-		? 'Admins must be demoted to "user" before they can be deleted.'
-		: 'This is permanent and cascades to sessions and accounts. Type the email below to confirm.'}
+		? 'Los admins deben ser degradados a "usuario" antes de poder eliminarlos.'
+		: 'Esto es permanente y se extiende a sesiones y cuentas. Escribe el correo abajo para confirmar.'}
 	body={role !== 'admin' ? deleteForm : undefined}
 >
-	Delete…
+	Eliminar…
 </ActionButton>

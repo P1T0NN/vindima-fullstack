@@ -6,11 +6,6 @@ export const PAGINATION_DATA = {
 	DEFAULT_OPTIMIZATION_STRATEGY: 'cursor' as const
 } as const;
 
-export const COOKIE_NAMES = {
-	SESSION_TOKEN: 'session_token',
-	DEVICE_FINGERPRINT: 'device_fingerprint'
-} as const;
-
 const WHATSAPP_NUMBER = '524491234567';
 
 /**
@@ -22,11 +17,14 @@ export const COMPANY_DATA = {
 	EMAIL: 'hola@vindima.mx',
 	RESEND_EMAIL: 'onboarding@resend.dev',
 	DOMAIN: 'vindima.mx',
-	LOGO: '/logo/logo.webp',
-	DESCRIPTION: 'Organic winery · author wines, charcuterie and experiences for great hosts.',
+	LOGO: '/logo/opt/logo-1536w.webp',
+	DESCRIPTION: 'Vinícola orgánica · vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
-	PHONE: '449 000 0000'
+	PHONE: '449 000 0000',
+	OG_IMAGE: '/assets/og-image.png',
+	OG_IMAGE_WIDTH: 1200,
+	OG_IMAGE_HEIGHT: 630
 } as const;
 
 export const ASSETS_DATA = {
@@ -56,14 +54,6 @@ export const FEATURES = {
 	 * declared in the schema so toggling this flag needs no migration.
 	 */
 	AUDIT_LOGS: true,
-
-	/**
-	 * Use Cloudflare R2 (`@convex-dev/r2`) for file uploads instead of Convex storage.
-	 * - `true`  → uploads go to R2, reads/deletes target `uploadedFilesR2`.
-	 * - `false` → uploads go to Convex storage, reads/deletes target `uploadedFiles`.
-	 * Both backends stay registered server-side; this only switches which one the UI uses.
-	 */
-	USE_R2: true,
 
 	/**
 	 * Enable the punch-card rewards system. Tables stay declared; flipping needs no
@@ -148,6 +138,12 @@ export const CART_CONFIG = {
 	MAX_QTY_PER_LINE: 20,
 	/** Max distinct lines per cart. Adds beyond this are rejected. */
 	MAX_LINES: 50,
+	/**
+	 * Server cap for one `resolveCartProducts` request: `MAX_LINES` + the reward-claim ref,
+	 * rounded up for headroom. A bigger batch can't come from a real cart, so the public
+	 * resolver rejects it (`TOO_MANY_REFS`) before doing any DB reads. Keep > `MAX_LINES` + 1.
+	 */
+	MAX_RESOLVE_REFS: 64,
 	/** Versioned localStorage key. Bump the suffix to invalidate old guest carts. */
 	STORAGE_KEY: 'cart.v1',
 	/** Debounce (ms) for coalescing quantity-stepper writes to the server. */

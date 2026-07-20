@@ -51,7 +51,7 @@ export function createSignUpForm(copy: SignUpFormCopy) {
 		}
 
 		if (p.data.password !== p.data.confirmPassword) {
-			fieldErrors = { confirmPassword: 'Passwords must match.' };
+			fieldErrors = { confirmPassword: 'Las contraseñas deben coincidir.' };
 			errorMessage = null;
 			return;
 		}
@@ -172,7 +172,7 @@ export function createSignUpPageForm(copy: SignUpFormCopy) {
 		}
 
 		if (p.data.password !== p.data.confirmPassword) {
-			fieldErrors = { confirmPassword: 'Passwords must match.' };
+			fieldErrors = { confirmPassword: 'Las contraseñas deben coincidir.' };
 			errorMessage = null;
 			return;
 		}

@@ -1,38 +1,58 @@
 /**
- * Zod schema + types for the admin "create product" form.
+ * Product schemas — the single source of truth for the create-product input, shared by
+ * BOTH sides:
  *
- * The form model IS `createProduct`'s args shape — `ConvexMutationForm` submits `values` verbatim
- * (blank name/description/label are cleaned server-side in `createProduct`; picked image Files are
- * uploaded and replaced with storage refs on submit). Product content is single-language plain text.
+ *   - Convex: `createProduct` derives its args from `createProductSchema` via
+ *     `zodToConvexFields` and re-runs `safeParse` authoritatively in the handler. Only
+ *     DB-dependent rules (slug/ref uniqueness, category existence) live in the mutation.
+ *   - Client: the admin form validates with `createProductFormSchema` — the same schema
+ *     with `images` holding picked `File`s, which the form uploads on submit and replaces
+ *     with storage refs before the mutation call.
  *
- * The schema is the single source of truth; the types are inferred from it.
+ * No custom validation messages for now: a schema failure marks the field client-side and
+ * returns a generic envelope key server-side.
  */
 
 // LIBRARIES
 import { z } from 'zod';
 
+// SCHEMAS
+import { productVariantInputSchema } from '@/shared/features/productVariants/schemas/productVariantsSchemas';
+
+/** Wire shape — what `createProduct` receives (`images` are uploaded storage refs / URLs). */
 export const createProductSchema = z.object({
 	slug: z.string().min(1),
-	name: z.string().min(1),
-	description: z.string(),
-	/** Picked files, uploaded by the form on submit — the mutation receives storage ids/keys.
-	 *  The first file is the cover (the upload component's ordering). */
-	images: z.array(z.instanceof(File)),
+	name: z.string().trim().min(1),
+	description: z.string().optional(),
+	/** Uploaded-file refs (storage ids / R2 keys) or direct URLs. `[0]` is the cover.
+	 *  At least one is required — a product always has something to show on its card. */
+	images: z.array(z.string()).min(1),
 	category: z.string().min(1),
-	featured: z.boolean(),
-	sortOrder: z.number(),
+	featured: z.boolean().optional(),
 	variants: z
+		.array(productVariantInputSchema)
+		.min(1)
+		// In-payload duplicate refs fail here; DB uniqueness is checked in the mutation.
+		.refine((variants) => new Set(variants.map((v) => v.ref)).size === variants.length)
+});
+
+/**
+ * Client form model — `images` holds picked `File`s (uploaded on submit) and/or
+ * existing-image URL strings (edit-style seeding); entry `[0]` is the cover and the star
+ * control reorders. `File` is referenced only inside the check function (never at module
+ * load), so this module stays loadable in the Convex runtime, which imports the wire
+ * schema above and has no `File` global.
+ */
+export const createProductFormSchema = createProductSchema.extend({
+	images: z
 		.array(
-			z.object({
-				ref: z.string().min(1),
-				label: z.string(),
-				priceMinor: z.number().int().nonnegative(),
-				available: z.boolean(),
-				sortOrder: z.number()
-			})
+			z.union([
+				z.custom<File>((value) => typeof File !== 'undefined' && value instanceof File),
+				z.string()
+			])
 		)
 		.min(1)
 });
 
-export type CreateProductInput = z.infer<typeof createProductSchema>;
-export type CreateProductVariantInput = CreateProductInput['variants'][number];
+export type CreateProductWireInput = z.infer<typeof createProductSchema>;
+export type CreateProductInput = z.infer<typeof createProductFormSchema>;

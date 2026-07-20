@@ -24,10 +24,10 @@
 
 <Card.Root class="gap-0 border-0 bg-background p-4 shadow-xl sm:p-5">
 	<Card.Header class="p-0">
-		<Card.Title class="text-base font-semibold text-foreground">Send a message</Card.Title>
+		<Card.Title class="text-base font-semibold text-foreground">Envíanos un mensaje</Card.Title>
 
 		<Card.Description class="mt-1 text-sm text-muted-foreground">
-			Share your enquiry and Teresa will reply as soon as she can — usually within 24 hours.
+			Cuéntanos tu consulta y te responderemos lo antes posible — normalmente en menos de 24 horas.
 		</Card.Description>
 	</Card.Header>
 
@@ -35,7 +35,7 @@
 		<FieldSet>
 			<FieldGroup class="gap-4">
 				<Field data-invalid={Boolean(contactSectionClass.fieldErrors.name)}>
-					<FieldLabel for="contact-name">Your name</FieldLabel>
+					<FieldLabel for="contact-name">Tu nombre</FieldLabel>
 
 					<FieldContent>
 						<Input
@@ -44,7 +44,7 @@
 							type="text"
 							name="name"
 							autocomplete="name"
-							placeholder="Your full name"
+							placeholder="Tu nombre completo"
 							aria-invalid={Boolean(contactSectionClass.fieldErrors.name)}
 							oninput={clearFieldErrorOn(contactSectionClass, 'name')}
 						/>
@@ -56,7 +56,7 @@
 				</Field>
 
 				<Field data-invalid={Boolean(contactSectionClass.fieldErrors.email)}>
-					<FieldLabel for="contact-email">Email</FieldLabel>
+					<FieldLabel for="contact-email">Correo electrónico</FieldLabel>
 
 					<FieldContent>
 						<Input
@@ -65,7 +65,7 @@
 							type="email"
 							name="email"
 							autocomplete="email"
-							placeholder="you@example.com"
+							placeholder="correo@ejemplo.com"
 							aria-invalid={Boolean(contactSectionClass.fieldErrors.email)}
 							oninput={clearFieldErrorOn(contactSectionClass, 'email')}
 						/>
@@ -77,7 +77,7 @@
 				</Field>
 
 				<Field data-invalid={Boolean(contactSectionClass.fieldErrors.message)}>
-					<FieldLabel for="contact-message">Message</FieldLabel>
+					<FieldLabel for="contact-message">Mensaje</FieldLabel>
 
 					<FieldContent>
 						<Textarea
@@ -85,7 +85,7 @@
 							bind:value={contactSectionClass.contactInputs.message}
 							name="message"
 							rows={5}
-							placeholder="Dates, venue, vibe, allergies — whatever helps Teresa prepare."
+							placeholder="Fecha, número de personas, tipo de evento, alergias — lo que nos ayude a prepararnos."
 							aria-invalid={Boolean(contactSectionClass.fieldErrors.message)}
 							oninput={clearFieldErrorOn(contactSectionClass, 'message')}
 							class="resize-none"
@@ -107,7 +107,7 @@
 			aria-hidden="true"
 			style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;"
 		>
-			<label for="contact-website">Website</label>
+			<label for="contact-website">Sitio web</label>
 			<input
 				id="contact-website"
 				type="text"
@@ -121,7 +121,7 @@
 		<ContactSubmitButton />
 
 		<p class="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
-			No spam — just a thoughtful reply when she is back at her desk.
+			Sin spam — solo una respuesta cuando volvamos a revisar tu mensaje.
 		</p>
 	</Card.Content>
 </Card.Root>

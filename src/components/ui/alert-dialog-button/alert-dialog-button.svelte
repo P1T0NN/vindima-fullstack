@@ -78,10 +78,10 @@
 	<AlertDialogContent class={isDestructive ? 'ring-destructive/30' : ''}>
 		<AlertDialogHeader>
 			<AlertDialogTitle class={isDestructive ? 'text-destructive' : ''}>
-				{title ?? 'Action cannot be reversed'}
+				{title ?? 'Esta acción no se puede revertir'}
 			</AlertDialogTitle>
 			<AlertDialogDescription>
-				{description ?? 'Are you sure you want to do this? This action cannot be undone.'}
+				{description ?? '¿Estás seguro de que quieres hacer esto? Esta acción no se puede deshacer.'}
 			</AlertDialogDescription>
 		</AlertDialogHeader>
 
@@ -97,7 +97,7 @@
 				onclick={() => (onOpenChange ? onOpenChange(false) : (open = false))}
 				disabled={isPending}
 			>
-				Cancel
+				Cancelar
 			</AlertDialogCancel>
 
 			{#if !hideProceed}
@@ -111,7 +111,7 @@
 					{#if isPending}
 						<Loader class="h-3 w-3 animate-spin" />
 					{/if}
-					Proceed
+					Continuar
 				</AlertDialogAction>
 			{/if}
 		</AlertDialogFooter>

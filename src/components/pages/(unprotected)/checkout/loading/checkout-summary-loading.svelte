@@ -5,7 +5,7 @@
 	const linePlaceholders = [0, 1];
 </script>
 
-<div class="flex flex-col gap-3 py-3" aria-busy="true" aria-label="Loading order summary">
+<div class="flex flex-col gap-3 py-3" aria-busy="true" aria-label="Cargando resumen del pedido">
 	{#each linePlaceholders as index (index)}
 		<div class="flex items-start justify-between gap-3">
 			<div class="flex min-w-0 flex-1 flex-col gap-2">

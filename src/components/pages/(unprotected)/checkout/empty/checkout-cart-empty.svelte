@@ -26,18 +26,18 @@
 	<h2
 		class="mb-3 font-display text-3xl font-semibold tracking-wide text-accent uppercase sm:text-4xl"
 	>
-		Your cart is empty
+		Tu carrito está vacío
 	</h2>
 	<p class="mb-8 max-w-sm text-sm leading-relaxed text-muted-foreground">
-		Nothing here yet. Browse the shop and add a few things — they'll show up here, ready to check
-		out.
+		Aún no hay nada. Explora la tienda y agrega algunos productos — aparecerán aquí, listos para
+		pagar.
 	</p>
 
 	<Button
 		href="{UNPROTECTED_PAGE_ENDPOINTS.ROOT}{UNPROTECTED_PAGE_ENDPOINTS.SHOP}"
 		class="group h-12 gap-2 px-8 text-sm tracking-wider uppercase"
 	>
-		Browse the shop
+		Explorar la tienda
 		<ArrowRightIcon class="size-4 transition-transform group-hover:translate-x-0.5" />
 	</Button>
 </div>

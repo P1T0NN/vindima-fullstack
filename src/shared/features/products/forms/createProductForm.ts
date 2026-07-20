@@ -23,40 +23,40 @@ export function createProductSections(
 	return [
 		{
 			id: 'details',
-			title: 'Product details',
-			description: 'What shoppers see on the card and in the cart.',
+			title: 'Detalles del producto',
+			description: 'Lo que ven los clientes en la ficha y en el carrito.',
 			fields: [
 				{
 					id: 'name',
-					label: 'Name',
+					label: 'Nombre',
 					kind: 'input',
 					required: true,
-					placeholder: 'e.g. Cheese board'
+					placeholder: 'p. ej. Tabla de quesos'
 				},
 				{
 					id: 'description',
-					label: 'Description',
+					label: 'Descripción',
 					kind: 'textarea',
 					rows: 2,
-					placeholder: 'Short text shown on the product card…'
+					placeholder: 'Texto breve que aparece en la ficha del producto…'
 				},
 				{
 					id: 'slug',
 					label: 'Slug',
 					kind: 'input',
 					required: true,
-					placeholder: 'boards-1',
-					description: 'Permanent ID for grouping and admin lookups.',
+					placeholder: 'tablas-1',
+					description: 'Identificador permanente para agrupación y búsquedas en admin.',
 					colSpan: 1
 				},
 				{
 					id: 'category',
-					label: 'Category',
+					label: 'Categoría',
 					kind: 'select',
 					required: true,
 					options: categoryOptions,
-					selectPlaceholder: 'Choose a category',
-					description: 'Shop pages group and filter by this.',
+					selectPlaceholder: 'Elige una categoría',
+					description: 'La tienda agrupa y filtra por esta categoría.',
 					colSpan: 1
 				}
 			]
@@ -64,21 +64,22 @@ export function createProductSections(
 		{
 			id: 'merchandising',
 			title: 'Merchandising',
-			description: 'Image, ordering, and highlighting in listings.',
+			description: 'Imagen, orden y destacado en los listados.',
 			fields: [
 				{
 					id: 'images',
-					label: 'Images',
+					label: 'Imágenes',
 					kind: 'upload-multiple',
 					accept: 'image/*',
-					description: 'Optional — the first image is the cover; a placeholder is shown without one.'
+					hasCoverImage: true,
+					description: 'Se requiere al menos una imagen — la marcada con estrella es la portada.'
 				},
 				// Toggles get their own full-width row — never inline with inputs.
 				{
 					id: 'featured',
-					label: 'Featured',
+					label: 'Destacado',
 					kind: 'switch',
-					description: 'Shows the highlight badge.'
+					description: 'Muestra la insignia de destacado.'
 				}
 			]
 		}

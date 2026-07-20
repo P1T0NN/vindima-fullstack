@@ -14,11 +14,11 @@
 
 <div class="flex flex-wrap items-center justify-between gap-5 bg-accent px-8 py-8 sm:px-10">
 	<div>
-		<p class="mb-2.5 text-xs font-medium tracking-wide text-primary uppercase">My account</p>
+		<p class="mb-2.5 text-xs font-medium tracking-wide text-primary uppercase">Mi cuenta</p>
 		<h1
 			class="font-display text-4xl leading-none font-semibold tracking-wide text-background uppercase"
 		>
-			Hello, {customerName}
+			Hola, {customerName}
 		</h1>
 	</div>
 
@@ -27,7 +27,7 @@
 			class="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-xs font-semibold tracking-wide text-primary-foreground uppercase"
 		>
 			<span class="size-2 rounded-full bg-accent" aria-hidden="true"></span>
-			Active Club
+			Club activo
 		</span>
 	{/if}
 </div>
