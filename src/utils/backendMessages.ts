@@ -1,0 +1,96 @@
+/**
+ * Backend outcome messages — the ONLY key→text mapping in the app.
+ *
+ * Convex returns `message: { key, params? }` envelopes (never display text); this map renders
+ * them to English on the client. Plain literal strings so a source-extracting i18n tool (wuchale)
+ * can pick them up. Unknown keys fall back to the key literal (visible in dev — by design).
+ */
+export const BACKEND_MESSAGES: Record<string, string> = {
+	'GenericMessages.PASSWORD_TOO_SHORT': 'Password must be at least {min} characters.',
+	'GenericMessages.PASSWORD_TOO_LONG': 'Password is too long.',
+	'GenericMessages.PASSWORD_TOO_COMMON':
+		'That password is too common. Please choose a stronger one.',
+	'GenericMessages.NO_ITEMS_PROVIDED': 'No items provided.',
+	'GenericMessages.NO_MATCHING_ITEMS': 'No matching items found.',
+	'GenericMessages.DATA_TABLE_DELETED_ALL': 'Deleted {count} item(s).',
+	'GenericMessages.DATA_TABLE_DELETED_WITH_MISSING':
+		'Deleted {count} item(s); {missing} were already gone.',
+	'GenericMessages.STORAGE_DELETE_FAILED':
+		"Couldn't delete the file from storage. Nothing was removed.",
+	'GenericMessages.STORAGE_URL_UNAVAILABLE': "Couldn't resolve the file URL.",
+	'GenericMessages.UPLOAD_SAVE_FAILED': 'Could not save the uploaded file. Please try again.',
+	'GenericMessages.UPLOAD_URL_READY': 'Upload URL generated.',
+	'GenericMessages.EMAIL_SENT_SUCCESSFULLY': 'Email sent successfully.',
+	'GenericMessages.TEST_ROW_CREATED': 'Test row created.',
+	'GenericMessages.OK': 'Done.',
+	'GenericMessages.YOU_NEED_TO_CORRECT_FORM_ERRORS': 'You need to correct form errors',
+	'GenericMessages.BATCH_TOO_LARGE': 'Too many items in a single request (max {limit}).',
+	'GenericMessages.FORBIDDEN': "You're not allowed to perform this action.",
+	'GenericMessages.NOT_AUTHENTICATED': 'Please sign in to continue.',
+	'GenericMessages.ADMIN_ACCESS_REQUIRED': 'This action requires admin privileges.',
+	'GenericMessages.ADMIN_CANNOT_BE_DELETED': 'Admins can\'t be deleted. Demote to "user" first.',
+	'GenericMessages.USER_NOT_FOUND': 'User not found.',
+	'GenericMessages.USER_DELETED': 'User deleted.',
+	'GenericMessages.USER_BANNED': 'User banned.',
+	'GenericMessages.USER_UNBANNED': 'User unbanned.',
+	'GenericMessages.USER_ROLE_UPDATED': 'User role updated.',
+	'GenericMessages.SESSION_REVOKED': 'Session revoked.',
+	'GenericMessages.ALL_SESSIONS_REVOKED': 'All sessions revoked.',
+	'GenericMessages.TOO_MANY_REQUESTS': 'Too many requests. Please try again later.',
+	'GenericMessages.TOO_MANY_REQUESTS_SECONDS': 'Too many requests. Try again in {seconds}s.',
+	'GenericMessages.TOO_MANY_REQUESTS_MINUTES': 'Too many requests. Try again in {minutes} min.',
+	'GenericMessages.UNEXPECTED_ERROR': 'An unexpected error occurred. Please try again.',
+	'RewardMessages.REWARDS_DISABLED': "Rewards aren't available right now.",
+	'RewardMessages.ITEM_NOT_ELIGIBLE': "That item isn't available as a reward.",
+	'RewardMessages.NO_REWARDS_AVAILABLE': "You don't have a free item to claim yet.",
+	'RewardMessages.ACTIVE_CLAIM_EXISTS': 'You already have a free item reserved.',
+	'RewardMessages.REWARD_CLAIMED': "Free item reserved — it's on your next order!",
+	'RewardMessages.CLAIM_CANCELLED': 'Reward returned to your balance.',
+	'RewardMessages.CLAIM_NOT_FOUND': "We couldn't find that reward claim.",
+	'RewardMessages.CLAIM_NOT_CANCELLABLE': 'That reward can no longer be changed.',
+	'RewardMessages.CLAIM_NOT_ACTIVE': 'That reward claim is no longer active.',
+	'RewardMessages.REWARD_ITEM_ADDED': 'Added to reward items.',
+	'RewardMessages.REWARD_ITEM_REMOVED': 'Removed from reward items.',
+	'RewardMessages.REWARD_ITEM_NOT_AVAILABLE':
+		"This item isn't purchasable right now — make it available first.",
+	'ProductMessages.PRODUCT_CREATED': 'Product created.',
+	'ProductMessages.PRODUCT_UPDATED': 'Product updated.',
+	'ProductMessages.PRODUCT_ARCHIVED': 'Product archived.',
+	'ProductMessages.PRODUCT_RESTORED': 'Product published.',
+	'ProductMessages.PRODUCT_DELETED': 'Product deleted.',
+	'ProductMessages.SLUG_TAKEN': 'That slug is already in use.',
+	'ProductMessages.REF_TAKEN': 'That variant reference is already in use.',
+	'ProductMessages.PRODUCT_NOT_FOUND': "We couldn't find that product.",
+	'ProductMessages.VARIANT_NOT_FOUND': "We couldn't find that variant.",
+	'ProductMessages.PRODUCT_NOT_DRAFT':
+		'This product has been active, so it can only be archived — not deleted.',
+	'ProductMessages.VARIANT_REQUIRED': 'A product needs at least one variant.',
+	'ProductMessages.NAME_REQUIRED': 'A product name is required.',
+	'ProductMessages.INVALID_PRICE': 'Price must be a whole number of minor units (no negatives).',
+	'ProductMessages.TOO_MANY_REFS': 'Too many items requested.',
+	'ProductMessages.CATEGORY_CREATED': 'Category created.',
+	'ProductMessages.CATEGORY_RENAMED': 'Category renamed.',
+	'ProductMessages.CATEGORY_DELETED': 'Category deleted.',
+	'ProductMessages.CATEGORY_TAKEN': 'That category already exists.',
+	'ProductMessages.CATEGORY_NOT_FOUND': "We couldn't find that category.",
+	'ProductMessages.CATEGORY_NAME_REQUIRED': 'A category name is required.',
+	'ProductMessages.CATEGORY_IN_USE': 'This category still has products. Move or delete them first.',
+	'ProductMessages.CATEGORY_INVALID': "That category doesn't exist. Pick one from the list.",
+	'ProductMessages.LAST_VARIANT': "Can't remove the last variant — a product needs at least one.",
+	'ProductMessages.VARIANT_REWARD_ELIGIBLE':
+		'This variant is a reward item. Remove it from the rewards list first.',
+	'ProductMessages.VARIANT_HAS_ACTIVE_CLAIM':
+		'A customer has this variant reserved as a reward. Try again once their claim is used or cancelled.',
+	'CartMessages.CART_FULL': 'Your cart is full. Remove an item before adding another.',
+	'CheckoutMessages.CHECKOUT_DISABLED': 'Checkout is currently unavailable.',
+	'CheckoutMessages.AUTH_REQUIRED': 'Please sign in to place your order.',
+	'CheckoutMessages.EMPTY_ORDER': 'Your cart is empty.',
+	'CheckoutMessages.UNAVAILABLE_LINES':
+		'Some items are no longer available. Please review your order.',
+	'CheckoutMessages.INVALID_DELIVERY': "That delivery option isn't available.",
+	'CheckoutMessages.ORDER_PLACED': 'Order placed.',
+	'CheckoutMessages.ORDER_NOT_FOUND': "We couldn't find that order.",
+	'CheckoutMessages.ORDER_NOT_PENDING': 'This order can no longer be changed.',
+	'CheckoutMessages.NOT_YOUR_ORDER': "This order isn't yours.",
+	'CheckoutMessages.ORDER_CANCELLED': 'Order cancelled.'
+};

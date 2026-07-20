@@ -1,0 +1,52 @@
+# CI: run on every PR + push to main. Fails the build on:
+#   - vulnerable dependencies (`bun audit`)
+#   - lint errors (`bun run lint`)
+#   - type errors (`bun run check`)
+#
+# Add a build/test step here when you wire up either.
+
+name: CI
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    audit:
+        name: Audit dependencies
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+            # `--audit-level=high` tolerates low/moderate findings so the build
+            # only blocks on serious issues. Tighten to `moderate` once the repo
+            # is clean to catch regressions earlier.
+            - run: bun audit --audit-level=high
+              # Don't fail the whole workflow on transient registry blips;
+              # rerunning is cheap.
+              continue-on-error: false
+
+    lint:
+        name: Lint
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+            - run: bun install --frozen-lockfile
+            - run: bun run lint
+
+    typecheck:
+        name: Type check
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+            - run: bun install --frozen-lockfile
+            - run: bun run check

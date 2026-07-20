@@ -1,0 +1,240 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+	--radius: 0.625rem;
+
+	/* Base Colors - Light Mode */
+	--background: #f2f1ed;
+	--foreground: #1c1418;
+	--card: #fbfaf7;
+	--card-foreground: #1c1418;
+	--popover: #fbfaf7;
+	--popover-foreground: #1c1418;
+
+	/* Primary - Refined Deep Blue (Professional AI) */
+	--primary: #d9af50;
+	--primary-foreground: #510128;
+
+	/* Secondary - Cool Slate */
+	--secondary: #edebe3;
+	--secondary-foreground: #510128;
+
+	/* Muted - Neutral Backgrounds */
+	--muted: #edebe3;
+	--muted-foreground: rgba(28, 20, 24, 0.6);
+
+	/* Accent - Sophisticated Purple (Subtle Energy) */
+	--accent: #510128;
+	--accent-foreground: #f2f1ed;
+
+	/* Destructive - Professional Red */
+	--destructive: #dc2626;
+	--destructive-foreground: #f2f1ed;
+
+	/* Borders & Inputs */
+	--border: rgba(81, 1, 40, 0.13);
+	--input: rgba(81, 1, 40, 0.22);
+	--ring: #d9af50;
+
+	/* Chart Colors - Professional Palette */
+	--chart-1: #d9af50; /* Deep Blue */
+	--chart-2: #b8902f; /* Purple */
+	--chart-3: #510128; /* Teal */
+	--chart-4: #1f7a4d; /* Subtle Pink */
+	--chart-5: #3a0a22; /* Green */
+
+	/* Sidebar */
+	--sidebar: #fbfaf7;
+	--sidebar-foreground: #1c1418;
+	--sidebar-primary: #d9af50;
+	--sidebar-primary-foreground: #510128;
+	--sidebar-accent: #edebe3;
+	--sidebar-accent-foreground: #510128;
+	--sidebar-border: rgba(81, 1, 40, 0.13);
+	--sidebar-ring: #d9af50;
+
+	/* Custom Emotional Design Tokens */
+	--color-viral: #3a0a22; /* Subtle magenta for trending */
+	--color-engagement: #d9af50; /* Soft coral for interactions */
+	--color-ai: #510128; /* Deep blue for AI features */
+	--color-growth: #1f7a4d; /* Professional green */
+	--color-whatsapp: #25d366; /* WhatsApp brand green */
+	--color-whatsapp-foreground: #ffffff;
+	--color-warning: #d9af50; /* Refined amber */
+	--color-info: #1f7a4d; /* Clear blue */
+
+	/* Root page section tokens */
+	--accent-surface-muted: #c8c8c8;
+	--shadow-brand-subtle: 0 1px 0 color-mix(in oklab, var(--accent) 4%, transparent);
+	--shadow-brand-lift: 0 22px 40px -22px color-mix(in oklab, var(--accent) 45%, transparent);
+	--shadow-brand-elevated: 0 30px 70px -34px color-mix(in oklab, var(--accent) 50%, transparent);
+	--shadow-brand-panel: 0 24px 60px -34px color-mix(in oklab, var(--accent) 40%, transparent);
+	--shadow-brand-form: 0 30px 70px -34px color-mix(in oklab, var(--foreground) 60%, transparent);
+	--drop-shadow-brand-lg: 0 26px 34px color-mix(in oklab, var(--accent) 28%, transparent);
+	--drop-shadow-brand-md: 0 18px 24px color-mix(in oklab, var(--accent) 24%, transparent);
+}
+
+.dark {
+	/* Base Colors - Dark Mode */
+	--background: #3a0a22;
+	--foreground: #f2f1ed;
+	--card: #510128;
+	--card-foreground: #f2f1ed;
+	--popover: #510128;
+	--popover-foreground: #f2f1ed;
+
+	/* Primary - Refined Bright Blue */
+	--primary: #d9af50;
+	--primary-foreground: #510128;
+
+	/* Secondary - Elevated Surface */
+	--secondary: #510128;
+	--secondary-foreground: #f2f1ed;
+
+	/* Muted - Subtle Elevation */
+	--muted: #510128;
+	--muted-foreground: #c8c8c8;
+
+	/* Accent - Professional Purple */
+	--accent: #d9af50;
+	--accent-foreground: #510128;
+
+	/* Destructive - Clear Red */
+	--destructive: #f87171;
+	--destructive-foreground: #f2f1ed;
+
+	/* Borders & Inputs - Refined */
+	--border: rgba(217, 175, 80, 0.22);
+	--input: rgba(217, 175, 80, 0.22);
+	--ring: #d9af50;
+
+	/* Chart Colors - Elegant Dark Mode */
+	--chart-1: #d9af50; /* Bright Blue */
+	--chart-2: #e7c069; /* Bright Purple */
+	--chart-3: #b8902f; /* Bright Teal */
+	--chart-4: #23895a; /* Soft Pink */
+	--chart-5: #c8c8c8; /* Bright Green */
+
+	/* Sidebar - Professional Dark */
+	--sidebar: #3a0a22;
+	--sidebar-foreground: #f2f1ed;
+	--sidebar-primary: #d9af50;
+	--sidebar-primary-foreground: #510128;
+	--sidebar-accent: #510128;
+	--sidebar-accent-foreground: #f2f1ed;
+	--sidebar-border: rgba(217, 175, 80, 0.22);
+	--sidebar-ring: #d9af50;
+
+	/* Custom Emotional Design Tokens - Dark Mode */
+	--color-viral: #510128; /* Refined magenta */
+	--color-engagement: #e7c069; /* Clear coral */
+	--color-ai: #d9af50; /* Bright blue */
+	--color-growth: #23895a; /* Professional green */
+	--color-whatsapp: #2dd36f; /* WhatsApp brand green */
+	--color-whatsapp-foreground: #ffffff;
+	--color-warning: #e7c069; /* Clear amber */
+	--color-info: #23895a; /* Bright info blue */
+}
+
+@theme inline {
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+
+	--font-sans: 'Jost', system-ui, sans-serif;
+	--font-display: 'Cormorant Garamond', Georgia, serif;
+
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+
+	/* Custom Token Mappings */
+	--color-viral: var(--color-viral);
+	--color-engagement: var(--color-engagement);
+	--color-ai: var(--color-ai);
+	--color-growth: var(--color-growth);
+	--color-whatsapp: var(--color-whatsapp);
+	--color-whatsapp-foreground: var(--color-whatsapp-foreground);
+	--color-warning: var(--color-warning);
+	--color-info: var(--color-info);
+
+	--color-accent-surface-muted: var(--accent-surface-muted);
+
+	--shadow-brand-subtle: var(--shadow-brand-subtle);
+	--shadow-brand-lift: var(--shadow-brand-lift);
+	--shadow-brand-elevated: var(--shadow-brand-elevated);
+	--shadow-brand-panel: var(--shadow-brand-panel);
+	--shadow-brand-form: var(--shadow-brand-form);
+	--drop-shadow-brand-lg: var(--drop-shadow-brand-lg);
+	--drop-shadow-brand-md: var(--drop-shadow-brand-md);
+
+	--min-height-hero: 26.25rem;
+	--min-height-hero-lg: 31.25rem;
+	--min-height-section-tall: 41.25rem;
+}
+
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+	}
+
+	body {
+		@apply bg-background font-sans text-foreground;
+		font-feature-settings:
+			'rlig' 1,
+			'calt' 1;
+	}
+
+	/* Custom scrollbar styling */
+	::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: var(--muted);
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: var(--primary);
+		border-radius: var(--radius);
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: var(--accent);
+	}
+}
