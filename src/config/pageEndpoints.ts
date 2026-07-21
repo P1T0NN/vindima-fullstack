@@ -9,6 +9,8 @@ export const ADMIN_PAGE_ENDPOINTS = {
 	ADD_PRODUCT: resolve('/admin/products/add-product'),
 	EDIT_PRODUCT: resolve('/admin/products/edit-product/:id'),
 	CATEGORIES: resolve('/admin/categories'),
+	ADD_CATEGORY: resolve('/admin/categories/add-category'),
+	EDIT_CATEGORY: resolve('/admin/categories/edit-category/:id'),
 	REWARDS: resolve('/admin/rewards'),
 	ORDERS: resolve('/admin/orders')
 } as const;

@@ -4,9 +4,9 @@
 
 	// COMPONENTS
 	import ConvexDataList from '@/components/ui/data-list/convex-data-list.svelte';
-	import RewardsItemRow from './rewards-item-row.svelte';
-	import RewardsTableLoading from './loading/rewards-table-loading.svelte';
-	import RewardsTableEmpty from './empty/rewards-table-empty.svelte';
+	import AdminRewardsItemRow from './admin-rewards-item-row.svelte';
+	import AdminRewardsTableLoading from './loading/admin-rewards-table-loading.svelte';
+	import AdminRewardsTableEmpty from './empty/admin-rewards-table-empty.svelte';
 
 	// TYPES
 	import type { RewardItemRow } from '@/shared/features/productVariants/types/productVariantsTypes';
@@ -21,15 +21,15 @@
 		class="gap-0 divide-y divide-border rounded-lg border px-4"
 	>
 		{#snippet item({ item }: { item: RewardItemRow; index: number })}
-			<RewardsItemRow {item} />
+			<AdminRewardsItemRow {item} />
 		{/snippet}
 
 		{#snippet loading()}
-			<RewardsTableLoading />
+			<AdminRewardsTableLoading />
 		{/snippet}
 
 		{#snippet empty()}
-			<RewardsTableEmpty />
+			<AdminRewardsTableEmpty />
 		{/snippet}
 	</ConvexDataList>
 </div>

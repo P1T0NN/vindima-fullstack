@@ -17,7 +17,8 @@
  *
  * Input validation is the SHARED `editProductSchema` (see `editProductSchemas.ts`) — the
  * same rules the admin form runs pre-submit. `images` is the full desired ordered list
- * (`[0]` = cover; omitted = keep current); status changes stay in `setProductStatus`.
+ * (`[0]` = cover; omitted = keep current). `status` publishes/unpublishes (draft ↔ active);
+ * archiving and restoring stay in `setProductStatus`, so an archived product ignores it.
  */
 
 // LIBRARIES
@@ -162,6 +163,14 @@ export const editProduct = adminMutation('editProduct')({
 		}
 		if (args.category !== undefined) patch.category = args.category;
 		if (args.featured !== undefined) patch.featured = args.featured;
+		// Publish switch (draft ↔ active). An archived product keeps its status: restoring is a
+		// deliberate action from the products table, never a side effect of saving an edit — the
+		// form doesn't send it, and a stale client that does is ignored rather than failed.
+		if (args.status !== undefined && product.status !== 'archived') {
+			patch.status = args.status;
+			// Latch on first activation — gates hard-delete forever after (as `setProductStatus`).
+			if (args.status === 'active' && !product.wasActive) patch.wasActive = true;
+		}
 		// Product ordering isn't edited here — it's auto-assigned on create; `args.sortOrder` is ignored.
 		await ctx.db.patch(args.productId, patch);
 
@@ -212,9 +221,11 @@ export const editProduct = adminMutation('editProduct')({
 
 		ctx.audit(AUDIT_ACTIONS.PRODUCT_UPDATE, {
 			resource: { table: 'products', id: args.productId },
-			before: { slug: product.slug, category: product.category },
+			before: { slug: product.slug, category: product.category, status: product.status },
 			after: {
 				category: args.category ?? product.category,
+				// `patch.status` is set only when the change was actually applied.
+				status: (patch.status as string | undefined) ?? product.status,
 				variantCount: args.variants.length,
 				removedVariants: removals.length
 			}

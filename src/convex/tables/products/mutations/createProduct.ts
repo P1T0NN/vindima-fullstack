@@ -5,10 +5,12 @@
  * (`@/shared/features/products/schemas/productsSchemas`) — the same schema the admin form
  * runs pre-submit. Args are derived from it (`zodToConvexFields`), and the handler re-runs
  * it authoritatively; a failure returns a generic soft-fail envelope (no per-issue
- * messages for now). Only DB-dependent rules live here:
- * slug unique (`by_slug`), every ref unique (`by_ref`), category exists. Created as `draft`
- * (admin publishes later); `wasActive` starts false so it stays hard-deletable until first
- * activation.
+ * messages for now). The `slug` is DERIVED here from the product name (same rule as
+ * `createCategory` — admins never type identifiers), with a numeric suffix on collision so
+ * two products may share a name. Only DB-dependent rules live here:
+ * every ref unique (`by_ref`), category exists. Status comes from the
+ * form's publish switch (`draft` when absent); `wasActive` latches on creation-as-active, so a
+ * product published straight away is never hard-deletable (a shipped ref is a public contract).
  */
 
 // LIBRARIES
@@ -29,6 +31,7 @@ import { trimToUndefined } from '@/shared/utils/validationUtils';
 
 // HELPERS
 import { resolveImageUrls } from '../helpers/resolveImageUrls';
+import { getProductSlug } from '../helpers/getProductSlug';
 
 // TYPES
 import type { ConvexMutationResult } from '@/convex/types/convexTypes';
@@ -45,7 +48,9 @@ export const createProduct = adminMutation('createProduct')({
 		}
 
 		// Post-parse cleanup: `name` is already trimmed by the schema; '' → absent for the rest.
-		const { slug, category, name, featured } = parsed.data;
+		const { category, name, featured } = parsed.data;
+		// Absent = draft: a scripted caller that omits it can never publish by accident.
+		const status = parsed.data.status ?? 'draft';
 		const description = trimToUndefined(parsed.data.description);
 		const images = await resolveImageUrls(ctx, parsed.data.images);
 		const cleanedVariants = parsed.data.variants.map((variant) => ({
@@ -61,13 +66,10 @@ export const createProduct = adminMutation('createProduct')({
 			.unique();
 		if (!categoryRow) return fail('CATEGORY_INVALID');
 
-		// Uniqueness against the DB (OCC serializes concurrent duplicate creates).
-		const slugTaken = await ctx.db
-			.query('products')
-			.withIndex('by_slug', (q) => q.eq('slug', slug))
-			.unique();
-		if (slugTaken) return fail('SLUG_TAKEN');
+		// Derived, never typed — the admin only ever names the product.
+		const slug = await getProductSlug(ctx, name);
 
+		// Uniqueness against the DB (OCC serializes concurrent duplicate creates).
 		for (const variant of cleanedVariants) {
 			const refTaken = await ctx.db
 				.query('productVariants')
@@ -91,9 +93,11 @@ export const createProduct = adminMutation('createProduct')({
 			description,
 			images,
 			category,
-			status: 'draft',
+			status,
 			featured,
-			wasActive: false,
+			// Latch on creation-as-active — same rule as `setProductStatus`: once live, the
+			// product archives instead of hard-deleting forever after.
+			wasActive: status === 'active',
 			sortOrder: productSortOrder
 		});
 
@@ -112,7 +116,7 @@ export const createProduct = adminMutation('createProduct')({
 
 		ctx.audit(AUDIT_ACTIONS.PRODUCT_CREATE, {
 			resource: { table: 'products', id: productId },
-			after: { slug, category, variantCount: cleanedVariants.length }
+			after: { slug, category, status, variantCount: cleanedVariants.length }
 		});
 
 		return { success: true, message: { key: 'ProductMessages.PRODUCT_CREATED' } };

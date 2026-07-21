@@ -35,7 +35,7 @@
 		}
 	] as const;
 
-	const autoplay = Autoplay({ delay: 4000, stopOnInteraction: false });
+	const autoplay = Autoplay({ delay: 3000, stopOnInteraction: false });
 </script>
 
 <Section

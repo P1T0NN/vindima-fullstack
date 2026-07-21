@@ -35,7 +35,7 @@ export const AUDIT_ACTIONS = {
 
 	// Product categories
 	CATEGORY_CREATE: 'product.category.create',
-	CATEGORY_RENAME: 'product.category.rename',
+	CATEGORY_UPDATE: 'product.category.update',
 	CATEGORY_DELETE: 'product.category.delete',
 
 	// Orders

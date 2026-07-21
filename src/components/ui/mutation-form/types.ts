@@ -50,6 +50,20 @@ export type MutationFormFieldDef = {
 	/** kind: 'upload-single' | 'upload-multiple' */
 	accept?: string;
 
+	/**
+	 * kind: 'upload-*' — folder for uploaded object keys (`products/<uuid>`), keeping the
+	 * bucket browsable. Must be in the storage layer's allowlist; unknown values are
+	 * rejected server-side. Omit to store keys at the root.
+	 */
+	uploadPrefix?: string;
+
+	/**
+	 * kind: 'upload-single' — offer a "use a URL" mode beside the file picker, for images
+	 * that already live somewhere (a static asset shipped with the app, an external CDN).
+	 * The field then holds that string verbatim — nothing is uploaded.
+	 */
+	allowUrl?: boolean;
+
 	/** kind: 'upload-multiple' — show the star control; the starred image becomes `files[0]` (the cover). */
 	hasCoverImage?: boolean;
 

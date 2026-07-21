@@ -7,7 +7,7 @@
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import Section from '@/components/ui/section/section.svelte';
 	import AccountClubCard from '@/components/pages/(protected)/account/account-club-card/account-club-card.svelte';
-	import LogoutButton from '@/features/auth/components/logout-button/logout-button.svelte';
+	import AccountSessionCard from '@/components/pages/(protected)/account/account-session-card.svelte';
 
 	// UTILS
 	import { formatOrderDate } from '@/features/orders/utils/ordersUtils.js';
@@ -43,9 +43,8 @@
 	yPadding="none"
 	class="min-h-[calc(100dvh-3.5rem)] bg-secondary py-16 pb-24 sm:pb-28"
 >
-	<AccountClubCard {history} />
-
-	<div class="mt-8 flex justify-center">
-		<LogoutButton />
+	<div class="flex flex-col gap-6">
+		<AccountClubCard {history} />
+		<AccountSessionCard />
 	</div>
 </Section>

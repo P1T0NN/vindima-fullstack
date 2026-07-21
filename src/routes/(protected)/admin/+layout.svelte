@@ -10,9 +10,6 @@
 	// CLASSES
 	import { productCategoriesClass } from '@/features/products/classes/productCategoriesClass.svelte';
 
-	// TYPES
-	import type { Doc } from '@/convex/_generated/dataModel';
-
 	// COMPONENTS
 	import * as Sidebar from '@/components/ui/sidebar/index.js';
 	import AppSidebar from '@/components/ui/app-sidebar/app-sidebar.svelte';
@@ -20,6 +17,7 @@
 
 	// TYPES
 	import type { AppSidebarNavItems } from '@/components/ui/app-sidebar/types.js';
+	import type { Doc } from '@/convex/_generated/dataModel';
 
 	// LUCIDE ICONS
 	import FrameIcon from '@lucide/svelte/icons/frame';
@@ -49,34 +47,49 @@
 	const navItems: AppSidebarNavItems = {
 		navMain: [
 			{
-				name: 'Panel',
-				url: ADMIN_PAGE_ENDPOINTS.DASHBOARD,
-				icon: FrameIcon
+				label: 'General',
+				items: [
+					{
+						name: 'Panel',
+						url: ADMIN_PAGE_ENDPOINTS.DASHBOARD,
+						icon: FrameIcon
+					},
+					{
+						name: 'Usuarios',
+						url: ADMIN_PAGE_ENDPOINTS.USERS,
+						icon: PieChartIcon
+					}
+				]
 			},
 			{
-				name: 'Usuarios',
-				url: ADMIN_PAGE_ENDPOINTS.USERS,
-				icon: PieChartIcon
+				label: 'Productos',
+				items: [
+					{
+						name: 'Productos',
+						url: ADMIN_PAGE_ENDPOINTS.PRODUCTS,
+						icon: PackageIcon
+					},
+					{
+						name: 'Categorías',
+						url: ADMIN_PAGE_ENDPOINTS.CATEGORIES,
+						icon: TagIcon
+					},
+					{
+						name: 'Recompensas',
+						url: ADMIN_PAGE_ENDPOINTS.REWARDS,
+						icon: GiftIcon
+					}
+				]
 			},
 			{
-				name: 'Productos',
-				url: ADMIN_PAGE_ENDPOINTS.PRODUCTS,
-				icon: PackageIcon
-			},
-			{
-				name: 'Categorías',
-				url: ADMIN_PAGE_ENDPOINTS.CATEGORIES,
-				icon: TagIcon
-			},
-			{
-				name: 'Recompensas',
-				url: ADMIN_PAGE_ENDPOINTS.REWARDS,
-				icon: GiftIcon
-			},
-			{
-				name: 'Pedidos',
-				url: ADMIN_PAGE_ENDPOINTS.ORDERS,
-				icon: ShoppingBagIcon
+				label: 'Pedidos',
+				items: [
+					{
+						name: 'Pedidos',
+						url: ADMIN_PAGE_ENDPOINTS.ORDERS,
+						icon: ShoppingBagIcon
+					}
+				]
 			}
 		]
 	};

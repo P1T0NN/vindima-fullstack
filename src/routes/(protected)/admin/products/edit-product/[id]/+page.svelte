@@ -40,10 +40,10 @@
 			title="No se pudo cargar el producto"
 			description="No pudimos cargar este producto. Inténtalo de nuevo."
 		/>
-	{:else if product === null}
-		<EditProductEmpty />
-	{:else if product === undefined}
+	{:else if productQuery.isLoading}
 		<EditProductLoading />
+	{:else if !product}
+		<EditProductEmpty />
 	{:else}
 		{#key product._id}
 			<EditProductForm {product} />

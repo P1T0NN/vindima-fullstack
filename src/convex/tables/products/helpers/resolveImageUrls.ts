@@ -1,11 +1,13 @@
 /**
  * Resolve the admin form's `images` values to display URLs, preserving order (`[0]` = cover).
  *
- * The upload field submits R2 object keys (`uploadedFilesR2` rows store the resolved `url`).
- * Direct path/URL strings ('/assets/…', 'https://…') pass through verbatim so scripted
- * callers can still set images directly. Unresolvable refs are dropped (never stored as
- * broken image sources).
+ * Per-entry resolution lives in the shared `resolveImageUrl` (upload refs → cached URL,
+ * direct paths pass through). Unresolvable refs are dropped here rather than failing the
+ * save — a product carries a list, so one bad entry shouldn't sink the rest.
  */
+
+// HELPERS
+import { resolveImageUrl } from '@/convex/storage/r2/resolveImageUrl';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';
@@ -13,19 +15,8 @@ import type { QueryCtx } from '@/convex/_generated/server';
 export async function resolveImageUrls(ctx: QueryCtx, images: string[]): Promise<string[]> {
 	const urls: string[] = [];
 	for (const image of images) {
-		const url = await resolveOne(ctx, image);
+		const url = await resolveImageUrl(ctx, image);
 		if (url) urls.push(url);
 	}
 	return urls;
-}
-
-async function resolveOne(ctx: QueryCtx, image: string): Promise<string | null> {
-	if (!image) return null;
-	if (image.startsWith('/') || image.startsWith('http')) return image;
-
-	const r2 = await ctx.db
-		.query('uploadedFilesR2')
-		.withIndex('by_key', (q) => q.eq('key', image))
-		.unique();
-	return r2?.url ?? null;
 }

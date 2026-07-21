@@ -11,6 +11,9 @@
 	import { Button } from '@/components/ui/button/index.js';
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
+
+	// LUCIDE ICONS
+	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 </script>
 
 <SvelteHead
@@ -21,7 +24,7 @@
 <Section
 	contain={false}
 	yPadding="none"
-	class="relative overflow-hidden bg-accent py-14 pb-24 sm:py-16 sm:pb-28"
+	class="relative overflow-hidden bg-background py-14 pb-24 sm:py-16 sm:pb-28"
 >
 	<img
 		src={ASSETS_DATA.BOTTLE}
@@ -41,12 +44,10 @@
 	/>
 
 	<div class="relative {PAGE_CONTAINER}">
-		<a
-			href="{resolve('/')}#shop"
-			class="mb-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-primary uppercase no-underline transition-colors hover:text-accent-foreground"
-		>
-			← Volver a la tienda
-		</a>
+		<Button href="{resolve('/')}#shop" class="mb-8">
+			<ArrowLeftIcon class="size-4" strokeWidth={1.75} />
+			Volver a la tienda
+		</Button>
 
 		<div class="mb-8 flex flex-wrap items-center gap-7">
 			<img
@@ -57,24 +58,24 @@
 				decoding="async"
 			/>
 			<div>
-				<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Vino de autor</p>
+				<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">Vino de autor</p>
 				<h1
-					class="font-display text-4xl leading-none font-semibold tracking-wide text-background uppercase sm:text-5xl"
+					class="font-display text-4xl leading-none font-semibold tracking-wide text-accent uppercase sm:text-5xl"
 				>
 					Bebidas
 				</h1>
-				<p class="mt-3.5 max-w-md text-sm leading-relaxed text-accent-surface-muted">
+				<p class="mt-3.5 max-w-md text-sm leading-relaxed text-muted-foreground">
 					Selección de bodega por copa y botella. Pregunta por el maridaje del día.
 				</p>
 			</div>
 		</div>
 
-		<CategoryProductGrid category="drinks" />
+		<CategoryProductGrid category="bebidas" />
 
 		<div
-			class="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/35 bg-primary/10 px-5 py-5"
+			class="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/12 px-5 py-5"
 		>
-			<p class="text-sm leading-snug text-background">
+			<p class="text-sm leading-snug text-accent">
 				¿Quieres una cata privada o botellas para tu evento?
 			</p>
 			<Button

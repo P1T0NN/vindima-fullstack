@@ -72,6 +72,19 @@ export const FEATURES = {
 } as const;
 
 /**
+ * Storefront config — per-project knobs for what the public pages show.
+ */
+export const SHOP_CONFIG = {
+	/**
+	 * Hard cap on the categories the homepage shop section fetches, enforced server-side in
+	 * `fetchCategoriesSafe`. The section is a menu overview, not a directory: past this many
+	 * cards the grid stops reading as "pick one" and starts reading as a list to scroll.
+	 * Extra categories stay fully reachable at their own `/shop/<slug>` pages.
+	 */
+	MAX_ROOT_CATEGORIES: 6
+} as const;
+
+/**
  * Punch-card rewards config — THE per-project knob (see `RewardSystem.md`).
  * Every value is an integer, string, or null (null = feature off). To retarget
  * this template for a new store, edit only this block (+ copy strings in the UI layer).
@@ -133,7 +146,7 @@ export const CART_CONFIG = {
 	 * Default ISO 4217 currency for prices (used when a product doesn't override it).
 	 * Neutral template default — set this to the store's currency per project.
 	 */
-	CURRENCY: 'USD',
+	CURRENCY: 'MXN',
 	/** Max quantity per line. Stepper clamps to this; mutations enforce it server-side. */
 	MAX_QTY_PER_LINE: 20,
 	/** Max distinct lines per cart. Adds beyond this are rejected. */

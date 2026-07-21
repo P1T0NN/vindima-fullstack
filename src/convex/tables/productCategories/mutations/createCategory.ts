@@ -1,8 +1,10 @@
 /**
  * Create a product category (ProductCategorySystemDesign.md §5).
  *
- * The owner types a display name only; the slug — THE string `products.category` stores —
- * is derived here once (lowercase kebab-case) and is immutable thereafter. Uniqueness is
+ * The owner types a display name, a one-line description and picks a card image; the slug —
+ * THE string `products.category` stores — is derived here once (lowercase kebab-case) and is
+ * immutable thereafter. The storefront's price range is NOT stored: it's computed from the
+ * category's products so it can never drift from real prices. Uniqueness is
  * enforced on the slug (`by_slug`; OCC serializes concurrent duplicate creates), so two
  * names that slugify identically ("Boards" / "boards!") collide by design — they'd be the
  * same grouping key. `sortOrder` is auto-assigned (append), same convention as products.
@@ -23,7 +25,11 @@ import { mutationResult } from '@/convex/helpers/mutationResult';
 import type { ConvexMutationResult } from '@/convex/types/convexTypes';
 
 // UTILS
-import { slugify } from '@/shared/utils/stringUtils';
+import { slugify } from '@/shared/utils/slugify';
+import { trimToUndefined } from '@/shared/utils/validationUtils';
+
+// HELPERS
+import { resolveImageUrl } from '@/convex/storage/r2/resolveImageUrl';
 
 export const createCategory = adminMutation('createCategory')({
 	args: zodToConvexFields(createCategorySchema.shape),
@@ -44,11 +50,24 @@ export const createCategory = adminMutation('createCategory')({
 			.unique();
 		if (taken) return fail('CATEGORY_TAKEN');
 
+		// The card image is required, so an unresolvable ref fails the whole create rather
+		// than silently producing a category that renders as a hole on the storefront.
+		const image = await resolveImageUrl(ctx, parsed.data.image);
+		if (!image) return fail('CATEGORY_IMAGE_INVALID');
+
+		const description = trimToUndefined(parsed.data.description);
+
 		// Append to the end of the picker, same auto-assign convention as createProduct.
 		const all = await ctx.db.query('productCategories').collect();
 		const sortOrder = all.reduce((max, c) => Math.max(max, c.sortOrder), -1) + 1;
 
-		const categoryId = await ctx.db.insert('productCategories', { slug, name, sortOrder });
+		const categoryId = await ctx.db.insert('productCategories', {
+			slug,
+			name,
+			image,
+			description,
+			sortOrder
+		});
 
 		ctx.audit(AUDIT_ACTIONS.CATEGORY_CREATE, {
 			resource: { table: 'productCategories', id: categoryId },

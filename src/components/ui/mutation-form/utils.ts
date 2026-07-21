@@ -7,7 +7,7 @@ import { optimizeImages } from '@/features/uploadFile/utils/optimizeImages';
 // TYPES
 import type { MutationFormProgress, MutationFormSection } from './types.js';
 
-export type MutationFormUploadOne = (file: File) => Promise<string | null>;
+export type MutationFormUploadOne = (file: File, prefix?: string) => Promise<string | null>;
 
 /**
  * Walks `sections`, finds upload-single / upload-multiple fields, optimizes and uploads
@@ -59,7 +59,7 @@ export async function processUploadFields(params: {
 					const n = optimized.length;
 					for (let j = 0; j < n; j++) {
 						progress.beforeUploadFile(j + 1, n);
-						const result = await uploadOne(optimized[j]);
+						const result = await uploadOne(optimized[j], f.uploadPrefix);
 						progress.afterUploadFile(j + 1, n);
 						if (!result) return false;
 						out[fileSlots[j]] = result;

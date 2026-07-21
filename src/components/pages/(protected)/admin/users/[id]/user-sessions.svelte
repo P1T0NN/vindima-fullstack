@@ -112,7 +112,7 @@
 
 	{#if sessionsQuery.error}
 		<p class="text-sm text-destructive">No se pudieron cargar las sesiones.</p>
-	{:else if sessionsQuery.data === undefined}
+	{:else if sessionsQuery.isLoading}
 		<div class="flex flex-col gap-2">
 			<Skeleton class="h-16 w-full" />
 			<Skeleton class="h-16 w-full" />

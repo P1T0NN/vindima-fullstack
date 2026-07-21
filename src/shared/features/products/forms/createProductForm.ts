@@ -9,6 +9,9 @@
  *
  * Only scalar fields are declared here; the variants array editor can't be expressed as a
  * flat field and lives in the page's `extraFields` snippet (as its own matching Card).
+ *
+ * The product's `slug` is deliberately NOT a field: admins aren't developers and shouldn't
+ * have to invent an identifier. `createProduct` derives it from the name.
  */
 
 // TYPES
@@ -41,23 +44,13 @@ export function createProductSections(
 					placeholder: 'Texto breve que aparece en la ficha del producto…'
 				},
 				{
-					id: 'slug',
-					label: 'Slug',
-					kind: 'input',
-					required: true,
-					placeholder: 'tablas-1',
-					description: 'Identificador permanente para agrupación y búsquedas en admin.',
-					colSpan: 1
-				},
-				{
 					id: 'category',
 					label: 'Categoría',
 					kind: 'select',
 					required: true,
 					options: categoryOptions,
 					selectPlaceholder: 'Elige una categoría',
-					description: 'La tienda agrupa y filtra por esta categoría.',
-					colSpan: 1
+					description: 'La tienda agrupa y filtra por esta categoría.'
 				}
 			]
 		},
@@ -68,11 +61,12 @@ export function createProductSections(
 			fields: [
 				{
 					id: 'images',
-					label: 'Imágenes',
-					kind: 'upload-multiple',
+					label: 'Imagen',
+					kind: 'upload-single',
 					accept: 'image/*',
-					hasCoverImage: true,
-					description: 'Se requiere al menos una imagen — la marcada con estrella es la portada.'
+					uploadPrefix: 'products',
+					allowUrl: true,
+					description: 'La imagen que los clientes ven en la tienda. Obligatoria.'
 				},
 				// Toggles get their own full-width row — never inline with inputs.
 				{

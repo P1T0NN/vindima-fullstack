@@ -8,6 +8,7 @@ import { getAuthUserId } from '../../auth/helpers/getAuthUserId.js';
 import { logAudit } from '../../tables/auditLog/helpers/logAudit';
 import { AUDIT_ACTIONS } from '../../tables/auditLog/auditLogConfigs';
 import { authMutation } from '../../auth/middleware/authMiddleware';
+import { buildR2PublicObjectUrl } from './buildR2PublicObjectUrl.js';
 
 // TYPES
 import type { DataModel } from '../../_generated/dataModel';
@@ -20,8 +21,7 @@ import type { ConvexMutationResult } from '../../types/convexTypes.js';
 export const r2 = new R2(components.r2);
 
 /**
- * Mirrors the Convex-storage path in `storageMutations.ts` — keep the limits in lockstep
- * so swapping backends doesn't change UX or the trust boundary.
+ * Mirrors historical Convex-storage upload limits — keep caps aligned so production UX stays predictable.
  */
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_CONTENT_TYPES = new Set<string>([
@@ -33,7 +33,20 @@ const ALLOWED_CONTENT_TYPES = new Set<string>([
 ]);
 
 /**
- * Custom upload-URL minter. We DO NOT export the package's built-in `generateUploadUrl`
+ * Object-key prefixes clients may request, so bucket contents stay browsable by entity type
+ * (`products/<uuid>`, `categories/<uuid>`) instead of a flat pile of UUIDs. Strict
+ * allowlist — a free-form prefix from the client would let a caller write anywhere in the
+ * bucket namespace. Ownership lives in the DB rows (`uploadedFilesR2`, `products.images`,
+ * `productCategories.image`), not in the key path, so no per-entity-id folders are needed.
+ *
+ * Keys are permanent: renaming a prefix here does NOT move existing objects, so add new
+ * values rather than editing old ones.
+ */
+const ALLOWED_KEY_PREFIX = /^(products|categories)$/;
+
+/**
+ * Custom upload-URL minter (named `generateR2UploadUrl` so it doesn't collide with the
+ * library's own `generateUploadUrl`). We DO NOT export the package's built-in one
  * because its `checkUpload` hook only gets a `QueryCtx` — there's no way to charge a
  * rate-limit token there. If we did rate-limit later in `onUpload`, a throw on a full
  * bucket would roll back the mutation while the R2 object had already been PUT, leaving
@@ -41,7 +54,10 @@ const ALLOWED_CONTENT_TYPES = new Set<string>([
  * minted: any failure means no URL, no PUT, no orphan possible.
  */
 export const generateR2UploadUrl = authMutation('generateR2UploadUrl')({
-	args: {},
+	args: {
+		/** Optional folder prefix for the object key — see {@link ALLOWED_KEY_PREFIX}. */
+		prefix: v.optional(v.string())
+	},
 	returns: v.object({
 		success: v.boolean(),
 		message: v.object({
@@ -50,9 +66,14 @@ export const generateR2UploadUrl = authMutation('generateR2UploadUrl')({
 		}),
 		data: v.optional(v.object({ url: v.string(), key: v.string() }))
 	}),
-	handler: async (): Promise<ConvexMutationResult<{ url: string; key: string }>> => {
+	handler: async (_ctx, args): Promise<ConvexMutationResult<{ url: string; key: string }>> => {
 		// `authMutation` already handled auth + rate-limit before we got here.
-		const minted = await r2.generateUploadUrl();
+		if (args.prefix !== undefined && !ALLOWED_KEY_PREFIX.test(args.prefix)) {
+			throw new Error(`Invalid upload key prefix: ${args.prefix}`);
+		}
+		const minted = await r2.generateUploadUrl(
+			args.prefix ? `${args.prefix}/${crypto.randomUUID()}` : undefined
+		);
 		return {
 			success: true,
 			message: { key: 'GenericMessages.UPLOAD_URL_READY' },
@@ -160,9 +181,17 @@ export const { syncMetadata, onSyncMetadata } = r2.clientApi<DataModel>({
 			return;
 		}
 
-		// Accept: backfill the cached URL on the row so list/grid reads don't pay a
-		// per-row R2 round-trip later.
-		const url = await r2.getUrl(key);
+		// Stable URL for public buckets (R2.dev / custom domain). Without
+		// `R2_PUBLIC_BASE_URL`, we only have expiring signed URLs — bad for `coverImageUrl`
+		// stored on domain rows.
+		const publicUrl = buildR2PublicObjectUrl(key);
+		const url = publicUrl ?? (await r2.getUrl(key, { expiresIn: 604800 }));
+		if (!publicUrl) {
+			console.warn(
+				'[r2.onSyncMetadata] R2_PUBLIC_BASE_URL is unset; using 7-day signed URL. Set R2_PUBLIC_BASE_URL in Convex (e.g. https://pub-xxxx.r2.dev) for permanent image links.',
+				{ key }
+			);
+		}
 		await ctx.db.patch(row._id, { url });
 	}
 });

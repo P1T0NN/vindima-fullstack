@@ -18,6 +18,12 @@ export const productCategoriesTable = defineTable({
 	slug: v.string(),
 	/** Owner-facing display name ('Cheese Boards'). Freely editable. */
 	name: v.string(),
+	/** Storefront card image — a resolved URL (upload refs resolve at write time).
+	 *  OPTIONAL because categories created before this field existed have none; the
+	 *  create form requires one, so every new category carries an image. */
+	image: v.optional(v.string()),
+	/** One-line pitch under the card title on the storefront. Optional, same reason. */
+	description: v.optional(v.string()),
 	/** Ordering in pickers and any future category listing. Auto-assigned (append). */
 	sortOrder: v.number()
 })

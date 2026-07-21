@@ -15,6 +15,7 @@
 	// COMPONENTS
 	import ConvexMutationForm from '@/components/ui/mutation-form/convex-mutation-form.svelte';
 	import VariantFormCard from '@/features/productVariants/components/variant-form-card.svelte';
+	import ProductStatusCard from '@/features/products/components/product-status-card.svelte';
 	import EditProductAddVariant from './edit-product-add-variant.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 	import {
@@ -52,13 +53,20 @@
 	// Form model — seeded ONCE from `product` (untracked; the route remounts this via `{#key}` when
 	// the edited id changes, so capturing initial values here is correct).
 	const seed = untrack(() => product);
+
+	// Archived products keep their status: restoring is a deliberate action from the products
+	// table, not a side effect of saving an edit. `undefined` = "don't touch it" (and
+	// `transformArgs` drops the key entirely).
+	const archived = seed.status === 'archived';
+
 	let values = $state<EditProductInput>({
-		slug: seed.slug,
 		name: seed.name,
 		description: seed.description ?? '',
-		// Existing images ride along as URL strings — starrable/removable without re-upload.
-		images: [...seed.images],
+		// The current image rides along as a URL string (shown as "imagen existente"), so
+		// saving without touching it keeps the product's image as-is.
+		images: seed.images[0] ?? null,
 		category: seed.category,
+		status: seed.status === 'archived' ? undefined : seed.status,
 		featured: seed.featured ?? false,
 		sortOrder: seed.sortOrder,
 		variants: seed.variants.map((v) => ({
@@ -100,11 +108,16 @@
 		removedVariantIds = [];
 	}
 
-	// Inject the route's productId + pending removals; drop the read-only slug
-	// (editProduct doesn't accept it).
+	// Inject the route's productId + pending removals.
 	function transformArgs(args: Record<string, unknown>) {
 		const rest = { ...args };
-		delete rest.slug;
+		// Archived product — send no status at all rather than an explicit `undefined`.
+		if (rest.status === undefined) delete rest.status;
+		// One image in, a list out (`images[0]` is what the storefront shows). Cleared field →
+		// omit the key so the mutation keeps the product's current image.
+		const image = rest.images;
+		if (typeof image === 'string' && image) rest.images = [image];
+		else delete rest.images;
 		return { ...rest, productId: product._id, removedVariantIds: [...removedVariantIds] };
 	}
 </script>
@@ -164,4 +177,7 @@
 			<EditProductAddVariant bind:variants={values.variants} />
 		</CardContent>
 	</Card>
+
+	<!-- Publish decision last — the final call before saving. -->
+	<ProductStatusCard bind:status={values.status} {archived} />
 {/snippet}

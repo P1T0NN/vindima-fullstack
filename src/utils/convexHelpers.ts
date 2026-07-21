@@ -43,11 +43,21 @@ import { api } from '@/convex/_generated/api';
  * translated toasts and a `null` return. The intermediate R2 PUT is a raw `fetch`; on failure
  * we toast the generic upload-failed copy and return `null`.
  *
+ * @param prefix - Optional folder for the object key (`products/<uuid>`), keeping the bucket
+ *   browsable. Must be in the server's allowlist — an unknown prefix is rejected there.
  * @returns the R2 object `key` on success (the row's stable identifier in `uploadedFilesR2`),
  *          or `null` when an error was already toasted.
  */
-export async function uploadFileToR2(client: ConvexClient, file: File): Promise<string | null> {
-	const minted = await safeMutation(client, api.storage.r2.r2.generateR2UploadUrl, {});
+export async function uploadFileToR2(
+	client: ConvexClient,
+	file: File,
+	prefix?: string
+): Promise<string | null> {
+	const minted = await safeMutation(
+		client,
+		api.storage.r2.r2.generateR2UploadUrl,
+		prefix ? { prefix } : {}
+	);
 	if (!minted || !minted.success || !minted.data) return null;
 
 	const { url, key } = minted.data;

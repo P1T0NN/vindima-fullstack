@@ -79,10 +79,13 @@ export const BACKEND_MESSAGES: Record<string, string> = {
 	'ProductMessages.TOO_MANY_REFS': 'Se solicitaron demasiados elementos.',
 	'ProductMessages.CATEGORY_CREATED': 'Categoría creada.',
 	'ProductMessages.CATEGORY_RENAMED': 'Categoría renombrada.',
+	'ProductMessages.CATEGORY_UPDATED': 'Categoría actualizada.',
 	'ProductMessages.CATEGORY_DELETED': 'Categoría eliminada.',
 	'ProductMessages.CATEGORY_TAKEN': 'Esa categoría ya existe.',
 	'ProductMessages.CATEGORY_NOT_FOUND': 'No encontramos esa categoría.',
 	'ProductMessages.CATEGORY_NAME_REQUIRED': 'Se requiere un nombre de categoría.',
+	'ProductMessages.CATEGORY_IMAGE_INVALID':
+		'No se pudo guardar la imagen de la categoría. Vuelve a subirla.',
 	'ProductMessages.CATEGORY_IN_USE':
 		'Esta categoría todavía tiene productos. Muévelos o elimínalos primero.',
 	'ProductMessages.CATEGORY_INVALID': 'Esa categoría no existe. Elige una de la lista.',

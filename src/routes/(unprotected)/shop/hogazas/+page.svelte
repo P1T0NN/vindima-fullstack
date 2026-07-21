@@ -11,6 +11,9 @@
 	import { Button } from '@/components/ui/button/index.js';
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
+
+	// LUCIDE ICONS
+	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 </script>
 
 <SvelteHead
@@ -33,12 +36,10 @@
 	/>
 
 	<div class="relative {PAGE_CONTAINER}">
-		<a
-			href="{resolve('/')}#shop"
-			class="mb-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-chart-2 uppercase no-underline transition-colors hover:text-accent"
-		>
-			← Volver a la tienda
-		</a>
+		<Button href="{resolve('/')}#shop" class="mb-8">
+			<ArrowLeftIcon class="size-4" strokeWidth={1.75} />
+			Volver a la tienda
+		</Button>
 
 		<div class="mb-8 flex flex-wrap items-center gap-7">
 			<img
@@ -61,7 +62,7 @@
 			</div>
 		</div>
 
-		<CategoryProductGrid category="loaves" />
+		<CategoryProductGrid category="hogazas" />
 
 		<div
 			class="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-primary/40 bg-primary/12 px-5 py-5"

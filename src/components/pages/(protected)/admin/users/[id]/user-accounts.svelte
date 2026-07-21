@@ -43,7 +43,7 @@
 
 	{#if accountsQuery.error}
 		<p class="text-sm text-destructive">No se pudieron cargar las cuentas.</p>
-	{:else if accountsQuery.data === undefined}
+	{:else if accountsQuery.isLoading}
 		<div class="flex flex-col gap-2">
 			<Skeleton class="h-16 w-full" />
 			<Skeleton class="h-16 w-full" />

@@ -96,7 +96,7 @@
 			sections,
 			args,
 			progress,
-			uploadOne: (file) => uploadFileToR2(convex, file)
+			uploadOne: (file, prefix) => uploadFileToR2(convex, file, prefix)
 		});
 	};
 

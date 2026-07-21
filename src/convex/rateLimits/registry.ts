@@ -150,7 +150,7 @@ export const convexRateLimitRegistry = {
 
 	// Product categories — admin-managed grouping keys
 	createCategory: limitPresets.interactiveWrite,
-	renameCategory: limitPresets.interactiveWrite,
+	editCategory: limitPresets.interactiveWrite,
 	deleteCategory: limitPresets.interactiveWrite,
 
 	// Better Auth HTTP routes (enforced in hooks.before — see auth/authRoutes.ts)

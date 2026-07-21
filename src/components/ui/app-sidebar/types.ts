@@ -11,7 +11,17 @@ export type AppSidebarNavItemWithActive = AppSidebarNavItem & {
 	isActive?: boolean;
 };
 
+export type AppSidebarNavGroup = {
+	label: string;
+	items: AppSidebarNavItem[];
+};
+
+export type AppSidebarNavGroupWithActive = {
+	label: string;
+	items: AppSidebarNavItemWithActive[];
+};
+
 export type AppSidebarNavItems = {
-	navMain: AppSidebarNavItem[];
+	navMain: AppSidebarNavGroup[];
 	navSecondary?: AppSidebarNavItem[];
 };

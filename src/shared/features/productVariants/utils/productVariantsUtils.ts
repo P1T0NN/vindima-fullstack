@@ -1,5 +1,5 @@
 // UTILS
-import { slugify } from '@/shared/utils/stringUtils';
+import { slugify } from '@/shared/utils/slugify';
 
 /**
  * Suggested variant reference: product slug (+ slugified label when present).

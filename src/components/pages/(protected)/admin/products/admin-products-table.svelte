@@ -11,6 +11,10 @@
 
 	// COMPONENTS
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
+	import { Button } from '@/components/ui/button/index.js';
+
+	// LUCIDE ICONS
+	import PencilIcon from '@lucide/svelte/icons/pencil';
 
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
@@ -21,6 +25,11 @@
 	import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
 
 	// Row click opens the dedicated edit page; creating happens on the /add-product route.
+	// One helper so the name link and the Editar button can never point at different places.
+	function editProductHref(row: AdminProductRow): string {
+		return appHref(ADMIN_PAGE_ENDPOINTS.EDIT_PRODUCT.replace(':id', row._id));
+	}
+
 	function statusLabel(status: AdminProductRow['status']): string {
 		if (status === 'active') return 'Activo';
 		if (status === 'archived') return 'Archivado';
@@ -65,6 +74,14 @@
 			header: 'Precio',
 			accessor: (r) => priceRange(r),
 			hideBelow: 'sm'
+		},
+		{
+			id: 'actions',
+			header: '',
+			// The cell is a button, not data — the accessor exists only to satisfy ColumnDef.
+			accessor: () => '',
+			headerClass: 'w-px',
+			cellClass: 'w-px text-right'
 		}
 	];
 </script>
@@ -75,14 +92,11 @@
 	controlsPlace="top"
 	{columns}
 	getRowId={(r) => r._id}
-	customCells={{ name: nameCell, status: statusCell }}
+	customCells={{ name: nameCell, status: statusCell, actions: actionsCell }}
 />
 
 {#snippet nameCell({ row }: DataTableCellSnippetProps<AdminProductRow>)}
-	<a
-		href={appHref(ADMIN_PAGE_ENDPOINTS.EDIT_PRODUCT.replace(':id', row._id))}
-		class="flex items-center gap-2 hover:underline"
-	>
+	<a href={editProductHref(row)} class="flex items-center gap-2 hover:underline">
 		<span class="size-7 shrink-0 overflow-hidden rounded-md bg-muted">
 			{#if row.images[0]}
 				<img src={row.images[0]} alt="" class="size-full object-cover" />
@@ -90,6 +104,20 @@
 		</span>
 		<span class="font-medium">{row.name}</span>
 	</a>
+{/snippet}
+
+{#snippet actionsCell({ row }: DataTableCellSnippetProps<AdminProductRow>)}
+	<!-- Same destination as the product name — a discoverable target for admins who don't
+	     expect the name itself to be a link. -->
+	<Button
+		variant="outline"
+		size="sm"
+		href={editProductHref(row)}
+		aria-label={`Editar ${row.name}`}
+	>
+		<PencilIcon class="size-4" />
+		Editar
+	</Button>
 {/snippet}
 
 {#snippet statusCell({ row }: DataTableCellSnippetProps<AdminProductRow>)}

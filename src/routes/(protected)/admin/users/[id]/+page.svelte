@@ -71,10 +71,10 @@
 			title="No se pudo cargar el usuario"
 			description="Algo salió mal al obtener este usuario. Inténtalo de nuevo."
 		/>
-	{:else if user === null}
-		<UserPageEmpty />
-	{:else if user === undefined}
+	{:else if userQuery.isLoading}
 		<UserPageLoading />
+	{:else if !user}
+		<UserPageEmpty />
 	{:else}
 		<UserTabs {user} />
 	{/if}

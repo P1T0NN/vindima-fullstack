@@ -9,8 +9,8 @@
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import { ErrorComponent } from '@/components/ui/error-component/index.js';
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
-	import CategoriesAddForm from '@/components/pages/(protected)/admin/categories/categories-add-form.svelte';
-	import CategoriesRow from '@/components/pages/(protected)/admin/categories/categories-row.svelte';
+	import AdminCategoriesRow from '@/components/pages/(protected)/admin/categories/admin-categories-row.svelte';
+	import AdminCategoriesHeader from '@/components/pages/(protected)/admin/categories/admin-categories-header.svelte';
 
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';
@@ -29,14 +29,7 @@
 />
 
 <section class="flex w-full flex-col gap-4 p-4 md:p-6">
-	<header class="flex flex-col gap-1">
-		<h1 class="text-2xl font-semibold tracking-tight">Categorías</h1>
-		<p class="text-sm text-muted-foreground">
-			Los grupos a los que pertenecen los productos — las páginas de la tienda y los formularios de producto las usan.
-		</p>
-	</header>
-
-	<CategoriesAddForm />
+	<AdminCategoriesHeader />
 
 	{#if productCategoriesClass.error}
 		<ErrorComponent
@@ -57,5 +50,5 @@
 </section>
 
 {#snippet nameCell({ row }: DataTableCellSnippetProps<Doc<'productCategories'>>)}
-	<CategoriesRow category={row} />
+	<AdminCategoriesRow category={row} />
 {/snippet}

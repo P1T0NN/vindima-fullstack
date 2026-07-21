@@ -10,14 +10,10 @@
 	import * as DropdownMenu from '@/components/ui/dropdown-menu/index.js';
 	import * as Sidebar from '@/components/ui/sidebar/index.js';
 	import { Spinner } from '@/components/ui/spinner/index.js';
+	import LogoutButton from '@/features/auth/components/logout-button/logout-button.svelte';
 
 	// LUCIDE ICONS
-	import BadgeCheckIcon from '@lucide/svelte/icons/badge-check';
-	import BellIcon from '@lucide/svelte/icons/bell';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
-	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
-	import LogOutIcon from '@lucide/svelte/icons/log-out';
-	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 
 	const sidebar = Sidebar.useSidebar();
 
@@ -66,59 +62,17 @@
 			</DropdownMenu.Trigger>
 
 			<DropdownMenu.Content
-				class="w-(--bits-dropdown-menu-anchor-width) min-w-56 rounded-lg"
+				class="w-(--bits-dropdown-menu-anchor-width) min-w-56 rounded-lg p-1"
 				side={sidebar.isMobile ? 'bottom' : 'right'}
 				align="end"
 				sideOffset={4}
 			>
-				<DropdownMenu.Label class="p-0 font-normal">
-					<div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-						<Avatar.Root class="size-8 rounded-lg">
-							<Avatar.Image src={user?.image} alt={user?.name ?? ''} />
-							<Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
-						</Avatar.Root>
-
-						<div class="grid flex-1 text-start text-sm leading-tight">
-							<span class="truncate font-medium">{user?.name ?? 'Cuenta'}</span>
-							<span class="truncate text-xs text-muted-foreground">{user?.email ?? ''}</span>
-						</div>
-					</div>
-				</DropdownMenu.Label>
-
-				<DropdownMenu.Separator />
-
-				<DropdownMenu.Group>
-					<DropdownMenu.Item>
-						<SparklesIcon />
-						Mejorar plan
-					</DropdownMenu.Item>
-				</DropdownMenu.Group>
-
-				<DropdownMenu.Separator />
-
-				<DropdownMenu.Group>
-					<DropdownMenu.Item>
-						<BadgeCheckIcon />
-						Cuenta
-					</DropdownMenu.Item>
-
-					<DropdownMenu.Item>
-						<CreditCardIcon />
-						Facturación
-					</DropdownMenu.Item>
-
-					<DropdownMenu.Item>
-						<BellIcon />
-						Notificaciones
-					</DropdownMenu.Item>
-				</DropdownMenu.Group>
-
-				<DropdownMenu.Separator />
-
-				<DropdownMenu.Item>
-					<LogOutIcon />
-					Cerrar sesión
-				</DropdownMenu.Item>
+				<LogoutButton
+					class="w-full justify-start"
+					onClick={() => {
+						if (sidebar.isMobile) sidebar.setOpenMobile(false);
+					}}
+				/>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</Sidebar.MenuItem>

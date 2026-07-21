@@ -16,8 +16,19 @@
 	// LUCIDE ICONS
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 
+	// TYPES
+	import type { ButtonVariant } from '@/components/ui/button/button.svelte';
+
 	// Optional side-effect run before sign-out — e.g. closing the mobile drawer.
-	let { onClick }: { onClick?: () => void } = $props();
+	let {
+		onClick,
+		class: className,
+		variant = 'outline'
+	}: {
+		onClick?: () => void;
+		class?: string;
+		variant?: ButtonVariant;
+	} = $props();
 
 	let isLoggingOut = $state(false);
 
@@ -39,7 +50,7 @@
 	};
 </script>
 
-<Button variant="outline" onclick={handleLogout} disabled={isLoggingOut}>
+<Button {variant} class={className} onclick={handleLogout} disabled={isLoggingOut}>
 	{#if isLoggingOut}
 		<Spinner />
 	{:else}

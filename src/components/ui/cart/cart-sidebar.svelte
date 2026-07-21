@@ -79,7 +79,7 @@
 	const canCheckout = $derived(subtotalMinor > 0);
 
 	const productsLoading = $derived(
-		cart.isOpen && refs.length > 0 && productsQuery.data === undefined
+		cart.isOpen && refs.length > 0 && productsQuery.isLoading
 	);
 	const showSkeleton = $derived((cart.loading && cart.lines.length === 0) || productsLoading);
 	const showEmpty = $derived(!cart.loading && cart.lines.length === 0);

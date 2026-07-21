@@ -69,8 +69,8 @@
 		className
 	)}
 >
-	<!-- Media zone — square, so cards read as tiles, never wide rows -->
-	<div class="relative flex aspect-square items-center justify-center bg-muted">
+	<!-- Media zone — fixed square; image never grows the card -->
+	<div class="relative aspect-square shrink-0 overflow-hidden bg-muted">
 		{#if badge}
 			<span
 				class="absolute top-3 right-3 z-10 rounded-sm bg-primary px-2 py-1 text-[0.65rem] font-semibold tracking-widest text-primary-foreground uppercase"
@@ -83,14 +83,14 @@
 			<img
 				src={image}
 				alt={imageAlt}
-				class="h-full w-full object-contain p-6 transition-transform duration-200 group-hover/card:scale-105"
+				class="absolute inset-0 size-full object-contain p-6 transition-transform duration-200 group-hover/card:scale-105"
 				loading="lazy"
 				decoding="async"
 			/>
 		{:else}
 			<span
 				aria-hidden="true"
-				class="font-display text-6xl font-semibold text-primary/25 select-none"
+				class="absolute inset-0 flex items-center justify-center font-display text-6xl font-semibold text-primary/25 select-none"
 			>
 				{monogram}
 			</span>

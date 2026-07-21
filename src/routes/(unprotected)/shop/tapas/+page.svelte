@@ -8,8 +8,12 @@
 
 	// COMPONENTS
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import { Button } from '@/components/ui/button/index.js';
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
+
+	// LUCIDE ICONS
+	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 </script>
 
 <SvelteHead
@@ -20,7 +24,7 @@
 <Section
 	contain={false}
 	yPadding="none"
-	class="relative overflow-hidden bg-accent py-14 pb-24 sm:py-16 sm:pb-28"
+	class="relative overflow-hidden bg-background py-14 pb-24 sm:py-16 sm:pb-28"
 >
 	<img
 		src={ASSETS_DATA.TAPA}
@@ -40,21 +44,19 @@
 	/>
 
 	<div class="relative {PAGE_CONTAINER}">
-		<a
-			href="{resolve('/')}#shop"
-			class="mb-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-primary uppercase no-underline transition-colors hover:text-accent-foreground"
-		>
-			← Volver a la tienda
-		</a>
+		<Button href="{resolve('/')}#shop" class="mb-8">
+			<ArrowLeftIcon class="size-4" strokeWidth={1.75} />
+			Volver a la tienda
+		</Button>
 
 		<div class="mb-12 text-center">
-			<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Para picar</p>
+			<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">Para picar</p>
 			<h1
-				class="font-display text-4xl leading-none font-semibold tracking-wide text-background uppercase sm:text-5xl"
+				class="font-display text-4xl leading-none font-semibold tracking-wide text-accent uppercase sm:text-5xl"
 			>
 				Tapas
 			</h1>
-			<p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-accent-surface-muted">
+			<p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
 				Tres platillos para acompañar tu copa. Elige uno o combínalos para la mesa.
 			</p>
 		</div>

@@ -16,6 +16,7 @@
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import AddProductHeader from '@/components/pages/(protected)/admin/add-product/add-product-header.svelte';
 	import VariantFormCard from '@/features/productVariants/components/variant-form-card.svelte';
+	import ProductStatusCard from '@/features/products/components/product-status-card.svelte';
 	import ConvexMutationForm from '@/components/ui/mutation-form/convex-mutation-form.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 	import {
@@ -46,11 +47,12 @@
 	const sections = $derived(createProductSections(productCategoriesClass.options));
 
 	let values = $state<CreateProductInput>({
-		slug: '',
 		name: '',
 		description: '',
-		images: [],
+		images: null,
 		category: '',
+		// Publish by default — the common case is adding a product that goes live.
+		status: 'active',
 		featured: false,
 		variants: [{ ref: '', label: '', priceMinor: 0, available: true, sortOrder: 0 }]
 	});
@@ -70,6 +72,13 @@
 	function removeVariant(index: number) {
 		values.variants.splice(index, 1);
 	}
+
+	// The form collects one image; the product stores a list (`images[0]` is what the
+	// storefront shows). By here the upload step has already turned the `File` into a ref.
+	function transformArgs(args: Record<string, unknown>) {
+		const image = args.images;
+		return { ...args, images: typeof image === 'string' && image ? [image] : [] };
+	}
 </script>
 
 <SvelteHead title="Nuevo producto" noindex description="Crea un nuevo producto en el catálogo de Vindima." />
@@ -82,6 +91,7 @@
 		schema={createProductFormSchema}
 		{sections}
 		runFunction={api.tables.products.mutations.createProduct.createProduct}
+		{transformArgs}
 		submitLabel="Crear producto"
 		resetOnSuccess={false}
 		onSuccess={() => goto(ADMIN_PAGE_ENDPOINTS.PRODUCTS)}
@@ -107,7 +117,7 @@
 					canRemove={values.variants.length > 1}
 					onRemove={() => removeVariant(i)}
 					errors={zodIssuesForArrayItem(issues, 'variants', i)}
-					refBase={values.slug || values.name}
+					refBase={values.name}
 				/>
 			{/each}
 
@@ -121,4 +131,7 @@
 			</Button>
 		</CardContent>
 	</Card>
+
+	<!-- Publish decision last — the final call before creating the product. -->
+	<ProductStatusCard bind:status={values.status} />
 {/snippet}

@@ -1,96 +1,46 @@
 <script lang="ts">
 	// LIBRARIES
-	import { resolve } from '$app/paths';
+	import { api } from '@/convex/_generated/api';
+	import { useQuery } from '@mmailaender/convex-svelte';
 
 	// CONFIG
-	import { ASSETS_DATA } from '@/shared/config.js';
+	import { CART_CONFIG } from '@/shared/config.js';
 
 	// COMPONENTS
 	import { Card, CardDescription, CardTitle } from '@/components/ui/card/index.js';
 	import Section from '@/components/ui/section/section.svelte';
+	import ShopSectionLoading from './shop-section-loading.svelte';
+	import ShopSectionEmpty from './shop-section-empty.svelte';
 
-	type CategoryCard = {
-		path:
-			| '/shop/vinos-de-autor'
-			| '/shop/tablas'
-			| '/shop/tapas'
-			| '/shop/hogazas'
-			| '/shop/bebidas'
-			| '/shop/bowls';
-		title: () => string;
-		description: () => string;
-		priceRange: () => string;
-		image: { src: string; alt: () => string; class?: string };
-	};
+	// UTILS
+	import { appHref } from '@/utils/app-navigation.js';
+	import { formatMoneyMinor } from '@/utils/formatters.js';
 
-	const categories: CategoryCard[] = [
-		{
-			path: '/shop/vinos-de-autor',
-			title: () => 'Vinos de Autor',
-			description: () => 'Selección de la bodega, solo por botella',
-			priceRange: () => '$560 – $1,200',
-			image: {
-				src: ASSETS_DATA.WINE_BOTTLE,
-				alt: () => 'Vinos de Autor',
-				class: 'h-36'
-			}
-		},
-		{
-			path: '/shop/tablas',
-			title: () => 'Tablas',
-			description: () => 'Charcutería y queso para compartir',
-			priceRange: () => '$650 – $2,380',
-			image: {
-				src: ASSETS_DATA.BOARD,
-				alt: () => 'Tabla de charcutería',
-				class: 'h-32 self-end'
-			}
-		},
-		{
-			path: '/shop/tapas',
-			title: () => 'Tapas',
-			description: () => 'Bocados para acompañar tu copa',
-			priceRange: () => '$55 – $95',
-			image: {
-				src: ASSETS_DATA.TAPA,
-				alt: () => 'Tapas',
-				class: 'h-32'
-			}
-		},
-		{
-			path: '/shop/hogazas',
-			title: () => 'Hogazas',
-			description: () => 'Pan artesanal de masa madre',
-			priceRange: () => '$120 – $260',
-			image: {
-				src: ASSETS_DATA.CHEESE,
-				alt: () => 'Hogazas',
-				class: 'h-32'
-			}
-		},
-		{
-			path: '/shop/bebidas',
-			title: () => 'Bebidas',
-			description: () => 'Vino de autor por copa y botella',
-			priceRange: () => '$90 – $1,200',
-			image: {
-				src: ASSETS_DATA.GLASS_SOFT,
-				alt: () => 'Bebidas',
-				class: 'h-36 self-end'
-			}
-		},
-		{
-			path: '/shop/bowls',
-			title: () => 'Bowls',
-			description: () => 'Frescos, de temporada',
-			priceRange: () => '$110 – $190',
-			image: {
-				src: ASSETS_DATA.BOWL_PLATTER,
-				alt: () => 'Bowls',
-				class: 'h-32'
-			}
-		}
-	];
+	// TYPES
+	import type { ShopCategoryRow } from '@/shared/features/productCategories/types/productCategoriesTypes';
+
+	// The homepage's single subscription. Categories are owner-managed in /admin/categories,
+	// so nothing about this section is hardcoded; the query caps how many come back.
+	const categoriesQuery = useQuery(
+		api.tables.productCategories.queries.fetchCategoriesSafe.fetchCategoriesSafe,
+		{}
+	);
+	const categories = $derived((categoriesQuery.data ?? []) as ShopCategoryRow[]);
+
+	const money = (minor: number) => formatMoneyMinor(minor, CART_CONFIG.CURRENCY);
+
+	/**
+	 * Derived server-side from the category's live products, so it can never contradict a
+	 * product page. Empty categories show nothing rather than a misleading "$0".
+	 */
+	function priceRange(category: ShopCategoryRow): string | null {
+		const { minPriceMinor: min, maxPriceMinor: max } = category;
+		if (min === null || max === null) return null;
+		return min === max ? money(min) : `${money(min)} – ${money(max)}`;
+	}
+
+	// Category pages live at /shop/<slug>, so the slug the owner's category carries IS the route.
+	const categoryHref = (category: ShopCategoryRow) => appHref(`/shop/${category.slug}`);
 </script>
 
 <Section id="shop" yPadding="none" class="bg-secondary py-16 pb-24 sm:pb-28">
@@ -104,41 +54,52 @@
 		</h2>
 
 		<p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
-			Seis categorías para montar tu mesa. Toca una para ver el menú completo y hacer tu pedido.
+			Toca una categoría para ver el menú completo y hacer tu pedido.
 		</p>
 	</div>
 
-	<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-		{#each categories as category (category.path)}
-			<a href={resolve(category.path)} class="group block no-underline">
-				<Card
-					class="h-full items-center gap-3 rounded-lg border-primary bg-card px-6 py-6 text-center shadow-brand-subtle transition-all duration-200 hover:-translate-y-1 hover:shadow-brand-lift"
-				>
-					<div class="flex h-36 w-full items-center justify-center">
-						<img
-							src={category.image.src}
-							alt={category.image.alt()}
-							class={category.image.class}
-							loading="lazy"
-							decoding="async"
-						/>
-					</div>
-
-					<CardTitle
-						class="font-display text-2xl font-semibold tracking-wide text-accent uppercase"
+	{#if categoriesQuery.isLoading}
+		<ShopSectionLoading />
+	{:else if categories.length === 0}
+		<ShopSectionEmpty />
+	{:else}
+		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+			{#each categories as category (category._id)}
+				{@const range = priceRange(category)}
+				<a href={categoryHref(category)} class="group block no-underline">
+					<Card
+						class="h-full items-center gap-3 rounded-lg border-primary bg-card px-6 py-6 text-center shadow-brand-subtle transition-all duration-200 hover:-translate-y-1 hover:shadow-brand-lift"
 					>
-						{category.title()}
-					</CardTitle>
+						<div class="flex h-36 w-full items-center justify-center">
+							{#if category.image}
+								<img
+									src={category.image}
+									alt={category.name}
+									class="max-h-36 w-auto object-contain"
+									loading="lazy"
+									decoding="async"
+								/>
+							{/if}
+						</div>
 
-					<CardDescription class="text-xs leading-snug">
-						{category.description()}
-					</CardDescription>
+						<CardTitle
+							class="font-display text-2xl font-semibold tracking-wide text-accent uppercase"
+						>
+							{category.name}
+						</CardTitle>
 
-					<span class="font-display text-lg font-semibold text-chart-2">
-						{category.priceRange()}
-					</span>
-				</Card>
-			</a>
-		{/each}
-	</div>
+						{#if category.description}
+							<CardDescription class="text-xs leading-snug">
+								{category.description}
+							</CardDescription>
+						{/if}
+
+						{#if range}
+							<span class="font-display text-lg font-semibold text-chart-2">{range}</span>
+						{/if}
+					</Card>
+				</a>
+			{/each}
+		</div>
+	{/if}
 </Section>
