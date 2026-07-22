@@ -16,7 +16,7 @@ export const COMPANY_DATA = {
 	NAME: 'Vindima',
 	EMAIL: 'info@kurosava.com',
 	RESEND_EMAIL: 'info@kurosava.com',
-	DOMAIN: 'https://vindima-fullstack.vercel.app/',
+	DOMAIN: 'vindima-fullstack.vercel.app',
 	LOGO: '/logo/opt/logo-1536w.webp',
 	DESCRIPTION:
 		'Vinícola orgánica · vinos de autor, charcutería y experiencias para grandes anfitriones.',
