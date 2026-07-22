@@ -22,7 +22,15 @@ export const editCategorySections: MutationFormSection[] = [
 				kind: 'input',
 				required: true,
 				placeholder: 'p. ej. Tablas de queso',
-				description: 'El título de la tarjeta, y como aparece al elegir la categoría de un producto.'
+				description:
+					'El título de la tarjeta, y como aparece al elegir la categoría de un producto.'
+			},
+			{
+				id: 'subtitle',
+				label: 'Subtítulo',
+				kind: 'input',
+				placeholder: 'p. ej. Para picar',
+				description: 'Etiqueta corta en mayúsculas sobre el título de la página. Opcional.'
 			},
 			{
 				id: 'description',

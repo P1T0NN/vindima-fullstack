@@ -14,6 +14,8 @@ import { isFileValue, isValidImageValue } from '@/shared/utils/imageValue';
 export const createCategorySchema = z.object({
 	/** Owner-facing display name; the slug is derived from it once, server-side. */
 	name: z.string().trim().min(1),
+	/** Short uppercase eyebrow above the title on the category page. */
+	subtitle: z.string().trim().max(60).optional(),
 	/** Uploaded-file ref (R2 key) or a direct URL — the storefront card image. */
 	image: z.string().min(1),
 	/** One line under the card title. Capped so every card stays the same height. */
@@ -46,6 +48,8 @@ export const editCategorySchema = z.object({
 	categoryId: z.string().min(1),
 	/** New display name — the slug never changes. */
 	name: z.string().trim().min(1),
+	/** Short uppercase eyebrow above the title. Sent empty clears it. */
+	subtitle: z.string().trim().max(60).optional(),
 	/** Uploaded-file ref (R2 key) or a direct URL. Omitted = keep the current image. */
 	image: z.string().min(1).optional(),
 	/** One line under the card title. Capped so every card stays the same height. */

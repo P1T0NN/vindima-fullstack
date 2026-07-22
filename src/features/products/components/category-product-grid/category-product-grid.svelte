@@ -27,15 +27,10 @@
 
 	let {
 		category,
-		featuredBadge,
-		addLabel = 'Agregar al carrito',
 		class: className
 	}: {
 		/** DB product category to list (`status: 'active'` only, server-sorted). */
 		category: string;
-		/** Badge shown on `featured` products (e.g. "Signature"). Omit to show none. */
-		featuredBadge?: string;
-		addLabel?: string;
 		class?: string;
 	} = $props();
 
@@ -84,8 +79,6 @@
 					description={product.description ?? undefined}
 					image={product.images[0]}
 					imageAlt={product.name}
-					badge={product.featured ? featuredBadge : undefined}
-					{addLabel}
 					addDisabled={!variant.available}
 					onadd={() => add(variant.ref)}
 				>
@@ -137,9 +130,7 @@
 					description={product.description ?? undefined}
 					image={product.images[0]}
 					imageAlt={product.name}
-					badge={product.featured ? featuredBadge : undefined}
 					price={money(variant.priceMinor)}
-					{addLabel}
 					addDisabled={!variant.available}
 					onadd={() => add(variant.ref)}
 				/>

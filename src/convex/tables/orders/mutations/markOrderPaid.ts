@@ -43,9 +43,19 @@ export const markOrderPaid = internalMutation({
 			paymentRef: args.paymentRef ?? order.paymentRef
 		});
 
+		// Reward-line inputs for the receipt email (O2), captured across the stamp grant.
+		let rewardStamps: number | undefined;
+		let rewardCompleted: boolean | undefined;
+
 		// Guest orders (userId null) earn no stamps, no welcome record, hold no claim.
 		if (order.userId) {
 			const userId = order.userId;
+
+			// Snapshot the card before granting, so the email can report the stamp this order added.
+			const beforeAccount = await ctx.db
+				.query('rewardAccounts')
+				.withIndex('by_user', (q) => q.eq('userId', userId))
+				.unique();
 
 			// Stamp: post-discount subtotal, reward line already excluded from subtotalMinor.
 			await ctx.runMutation(
@@ -91,7 +101,32 @@ export const markOrderPaid = internalMutation({
 			if (cart && cart.lines.length > 0) {
 				await ctx.db.patch(cart._id, { lines: [], updatedAt: Date.now() });
 			}
+
+			// Did this order confirm a stamp? (lifetimeStamps moves only on confirmation; a
+			// still-pending stamp leaves it flat, so O2 shows no reward line — R1 handles it later.)
+			const afterAccount = await ctx.db
+				.query('rewardAccounts')
+				.withIndex('by_user', (q) => q.eq('userId', userId))
+				.unique();
+			if (afterAccount && afterAccount.lifetimeStamps > (beforeAccount?.lifetimeStamps ?? 0)) {
+				rewardStamps = afterAccount.stamps;
+				rewardCompleted = afterAccount.availableRewards > (beforeAccount?.availableRewards ?? 0);
+			}
 		}
+
+		// Email side effects — fire-and-forget, only on this fresh settlement (idempotent no-op
+		// replays returned above). O2 = customer receipt, S1 = owner notification. See
+		// `EmailSystemDesign.md` §4.2/§4.4. Scheduling is commit-gated, so a rollback sends nothing.
+		void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+			kind: 'orderPaid',
+			orderId: order._id,
+			rewardStamps,
+			rewardCompleted
+		});
+		void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+			kind: 'newOrderOwner',
+			orderId: order._id
+		});
 
 		return null;
 	}

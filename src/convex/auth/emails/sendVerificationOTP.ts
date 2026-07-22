@@ -1,11 +1,18 @@
-// LIBRARIES
-import { Resend as ResendAPI } from 'resend';
+// TEMPLATE
+import { authOtpEmail } from '@/convex/emails/templates/authOtpEmail';
 
-// CONFIG
-import { COMPANY_DATA } from '@/shared/config.js';
+// SEND SEAM
+import { sendViaResend } from '@/convex/emails/sendViaResend';
 
-type OtpType = 'sign-in' | 'email-verification' | 'forget-password' | 'change-email';
+// TYPES
+import type { OtpEmailType } from '@/shared/features/emails/types/emailsTypes';
 
+/**
+ * better-auth OTP hook (A1–A4, see `EmailSystemDesign.md` §4.1). Unlike the transactional
+ * emails, this is NOT fire-and-forget: the user is actively waiting on the code, so it sends
+ * synchronously through the shared Resend seam (which also owns the `FEATURES.EMAILS` gate and
+ * the `from` address). better-auth owns WHEN this fires — do not add trigger logic here.
+ */
 export async function sendVerificationOTP({
 	email,
 	otp,
@@ -13,24 +20,12 @@ export async function sendVerificationOTP({
 }: {
 	email: string;
 	otp: string;
-	type: OtpType;
+	type: OtpEmailType;
 }) {
-	const apiKey = process.env.RESEND_API_KEY;
-	if (!apiKey) throw new Error('RESEND_API_KEY is not set');
-	const resend = new ResendAPI(apiKey);
-
-	const subjects: Record<OtpType, string> = {
-		'sign-in': `Inicia sesión en ${COMPANY_DATA.NAME}`,
-		'email-verification': `Verifica tu correo electrónico en ${COMPANY_DATA.NAME}`,
-		'forget-password': `Restablece tu contraseña de ${COMPANY_DATA.NAME}`,
-		'change-email': `Confirma tu nuevo correo electrónico en ${COMPANY_DATA.NAME}`
-	};
-
-	const { error } = await resend.emails.send({
-		from: `${COMPANY_DATA.NAME} <${COMPANY_DATA.RESEND_EMAIL}>`,
-		to: [email],
-		subject: subjects[type],
-		text: `Tu código es ${otp}`
-	});
-	if (error) throw new Error('No se pudo enviar el correo de verificación');
+	try {
+		await sendViaResend(email, authOtpEmail(otp, type), `authOtp-${type}-${otp}`);
+	} catch {
+		// Surface a translatable failure to the auth flow (the user is waiting and can retry).
+		throw new Error('No se pudo enviar el correo de verificación');
+	}
 }

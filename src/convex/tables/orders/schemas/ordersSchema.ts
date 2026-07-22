@@ -66,8 +66,15 @@ export const ordersTable = defineTable({
 	/** Reward claim consumed by this order, if any (applied on settle, released on cancel). */
 	claimId: v.optional(v.id('rewardClaims')),
 	/** Provider's payment reference (intent/session id). Absent for the 'manual' provider. */
-	paymentRef: v.optional(v.string())
+	paymentRef: v.optional(v.string()),
+
+	/** Denormalized "number + name + email" blob, written at placement (see
+	 *  `buildOrderSearchText`). Powers the admin table's full-text search only — never
+	 *  display data. Optional so old rows validate; every new order sets it. */
+	searchText: v.optional(v.string())
 })
 	.index('by_user', ['userId'])
 	.index('by_attempt', ['attemptId'])
-	.index('by_status', ['status']);
+	.index('by_status', ['status'])
+	// Admin order search: match number/customer, still filterable by status.
+	.searchIndex('search_text', { searchField: 'searchText', filterFields: ['status'] });

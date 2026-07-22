@@ -81,7 +81,9 @@ async function priceRange(
 		)
 		.take(PAGINATION_DATA.DEFAULT_PAGE_SIZE);
 
-	const prices = (await Promise.all(products.map((product) => livePrices(ctx, product._id)))).flat();
+	const prices = (
+		await Promise.all(products.map((product) => livePrices(ctx, product._id)))
+	).flat();
 
 	return {
 		productCount: products.length,

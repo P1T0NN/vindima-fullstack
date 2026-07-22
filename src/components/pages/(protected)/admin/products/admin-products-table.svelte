@@ -6,94 +6,95 @@
 	import { productCategoriesClass } from '@/features/products/classes/productCategoriesClass.svelte';
 
 	// CONFIG
-	import { CART_CONFIG } from '@/shared/config';
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
 	import { Button } from '@/components/ui/button/index.js';
+	import {
+		Select,
+		SelectContent,
+		SelectItem,
+		SelectTrigger
+	} from '@/components/ui/select/index.js';
+
+	// TABLE / DATA / UTILS
+	import { adminProductsColumns } from '@/features/products/tables/adminProductsTable.js';
+	import { PRODUCT_STATUS_LABELS } from '@/shared/features/products/data/productsData.js';
+	import { productStatusLabel } from '@/features/products/utils/productStatus.js';
+	import { appHref } from '@/utils/app-navigation.js';
+
+	// TYPES
+	import type { DataTableCellSnippetProps } from '@/components/ui/data-table/types.js';
+	import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
 
 	// LUCIDE ICONS
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 
-	// UTILS
-	import { formatMoneyMinor } from '@/utils/formatters.js';
-	import { appHref } from '@/utils/app-navigation.js';
+	// Filters: '' = all. Both flow into the query via `queryArgs` (undefined when all).
+	let statusFilter = $state<'' | AdminProductRow['status']>('');
+	let categoryFilter = $state<string>('');
 
-	// TYPES
-	import type { ColumnDef, DataTableCellSnippetProps } from '@/components/ui/data-table/types.js';
-	import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
+	const statusTriggerLabel = $derived(
+		statusFilter ? productStatusLabel(statusFilter) : 'Estado: todos'
+	);
+	const categoryTriggerLabel = $derived(
+		categoryFilter
+			? (productCategoriesClass.nameBySlug.get(categoryFilter) ?? categoryFilter)
+			: 'Categoría: todas'
+	);
 
-	// Row click opens the dedicated edit page; creating happens on the /add-product route.
-	// One helper so the name link and the Editar button can never point at different places.
 	function editProductHref(row: AdminProductRow): string {
 		return appHref(ADMIN_PAGE_ENDPOINTS.EDIT_PRODUCT.replace(':id', row._id));
 	}
-
-	function statusLabel(status: AdminProductRow['status']): string {
-		if (status === 'active') return 'Activo';
-		if (status === 'archived') return 'Archivado';
-		return 'Borrador';
-	}
-
-	function priceRange(row: AdminProductRow): string {
-		if (row.variants.length === 0) return '—';
-		const prices = row.variants.map((v) => v.priceMinor);
-		const min = Math.min(...prices);
-		const max = Math.max(...prices);
-		const fmt = (n: number) => formatMoneyMinor(n, CART_CONFIG.CURRENCY);
-		return min === max ? fmt(min) : `${fmt(min)} – ${fmt(max)}`;
-	}
-
-	const columns: ColumnDef<AdminProductRow>[] = [
-		{
-			id: 'name',
-			header: 'Nombre',
-			accessor: (r) => r.name
-		},
-		{
-			id: 'category',
-			header: 'Categoría',
-			// Display name from the shared class; rows store the slug (the stable key).
-			accessor: (r) => productCategoriesClass.nameBySlug.get(r.category) ?? r.category,
-			hideBelow: 'md'
-		},
-		{
-			id: 'status',
-			header: 'Estado',
-			accessor: (r) => r.status
-		},
-		{
-			id: 'variants',
-			header: 'Variantes',
-			accessor: (r) => r.variants.length,
-			hideBelow: 'md'
-		},
-		{
-			id: 'price',
-			header: 'Precio',
-			accessor: (r) => priceRange(r),
-			hideBelow: 'sm'
-		},
-		{
-			id: 'actions',
-			header: '',
-			// The cell is a button, not data — the accessor exists only to satisfy ColumnDef.
-			accessor: () => '',
-			headerClass: 'w-px',
-			cellClass: 'w-px text-right'
-		}
-	];
 </script>
 
 <ConvexDataTable
 	caption="Productos"
 	query={api.tables.products.queries.fetchAllProducts.fetchAllProducts}
+	queryArgs={{ status: statusFilter || undefined, category: categoryFilter || undefined }}
 	controlsPlace="top"
-	{columns}
+	searchable
+	searchPlaceholder="Buscar por nombre…"
+	columns={adminProductsColumns}
 	getRowId={(r) => r._id}
 	customCells={{ name: nameCell, status: statusCell, actions: actionsCell }}
+	{filters}
 />
+
+{#snippet filters()}
+	<Select
+		type="single"
+		value={statusFilter}
+		onValueChange={(v) => (statusFilter = v as typeof statusFilter)}
+	>
+		<SelectTrigger class="w-full md:w-40" aria-label="Filtrar por estado">
+			{statusTriggerLabel}
+		</SelectTrigger>
+		<SelectContent>
+			<SelectItem value="">Estado: todos</SelectItem>
+			{#each Object.entries(PRODUCT_STATUS_LABELS) as [value, label] (value)}
+				<SelectItem {value}>{label}</SelectItem>
+			{/each}
+		</SelectContent>
+	</Select>
+
+	<Select
+		type="single"
+		value={categoryFilter}
+		onValueChange={(v) => (categoryFilter = v ?? '')}
+	>
+		<SelectTrigger class="w-full md:w-48" aria-label="Filtrar por categoría">
+			{categoryTriggerLabel}
+		</SelectTrigger>
+		<SelectContent>
+			<SelectItem value="">Categoría: todas</SelectItem>
+			{#each productCategoriesClass.options as opt (opt.value)}
+				<SelectItem value={opt.value}>{opt.label}</SelectItem>
+			{/each}
+		</SelectContent>
+	</Select>
+{/snippet}
 
 {#snippet nameCell({ row }: DataTableCellSnippetProps<AdminProductRow>)}
 	<a href={editProductHref(row)} class="flex items-center gap-2 hover:underline">
@@ -128,6 +129,6 @@
 				? 'inline-flex rounded-sm bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive'
 				: 'inline-flex rounded-sm bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground'}
 	>
-		{statusLabel(row.status)}
+		{productStatusLabel(row.status)}
 	</span>
 {/snippet}

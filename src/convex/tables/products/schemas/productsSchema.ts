@@ -40,4 +40,8 @@ export const productsTable = defineTable({
 	.index('by_slug', ['slug'])
 	// Trailing `sortOrder` makes the index order = shop display order, so paginated
 	// category listings come back sorted without an in-memory pass.
-	.index('by_category_status', ['category', 'status', 'sortOrder']);
+	.index('by_category_status', ['category', 'status', 'sortOrder'])
+	// Status-only filter for the admin table (the composite above needs a category prefix).
+	.index('by_status', ['status'])
+	// Admin catalog search: match name, still filterable by category and/or status.
+	.searchIndex('search_name', { searchField: 'name', filterFields: ['category', 'status'] });

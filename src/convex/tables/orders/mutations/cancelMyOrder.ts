@@ -36,6 +36,14 @@ export const cancelMyOrder = authMutation('cancelMyOrder')({
 				{ claimId: order.claimId }
 			);
 		}
+
+		// O5 — confirm the self-cancel (attributes it to the customer). `EmailSystemDesign.md` §5 O5.
+		void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+			kind: 'orderCancelled',
+			orderId: order._id,
+			cancelReason: 'user'
+		});
+
 		return { success: true, message: { key: 'CheckoutMessages.ORDER_CANCELLED' } };
 	}
 });

@@ -2,11 +2,21 @@
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
 
+	// CONFIG
+	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
+
 	// COMPONENTS
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
 	import AdminOrderRefundButton from './admin-order-refund-button.svelte';
+	import {
+		Select,
+		SelectContent,
+		SelectItem,
+		SelectTrigger
+	} from '@/components/ui/select/index.js';
 
 	// UTILS
+	import { appHref } from '@/utils/app-navigation.js';
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 
 	// TYPES
@@ -52,16 +62,49 @@
 		{ id: 'status', header: 'Estado', accessor: (r) => STATUS_LABELS[r.status] },
 		{ id: 'actions', header: '', accessor: () => '', wrap: true }
 	];
+
+	// Status filter: '' = all. Flows into the query via `queryArgs.status` (undefined when all).
+	let statusFilter = $state<'' | OrderRow['status']>('');
+	const statusTriggerLabel = $derived(
+		statusFilter ? STATUS_LABELS[statusFilter] : 'Estado: todos'
+	);
 </script>
 
 <ConvexDataTable
 	caption="Pedidos"
 	query={api.tables.orders.queries.fetchOrders.fetchOrders}
+	queryArgs={{ status: statusFilter || undefined }}
 	controlsPlace="top"
+	searchable
+	searchPlaceholder="Buscar por número o cliente…"
 	{columns}
 	getRowId={(r) => r._id}
-	customCells={{ status: statusCell, actions: actionsCell }}
+	customCells={{ number: numberCell, status: statusCell, actions: actionsCell }}
+	{filters}
 />
+
+{#snippet filters()}
+	<Select type="single" value={statusFilter} onValueChange={(v) => (statusFilter = v as typeof statusFilter)}>
+		<SelectTrigger class="w-full md:w-48" aria-label="Filtrar por estado">
+			{statusTriggerLabel}
+		</SelectTrigger>
+		<SelectContent>
+			<SelectItem value="">Estado: todos</SelectItem>
+			{#each Object.entries(STATUS_LABELS) as [value, label] (value)}
+				<SelectItem {value}>{label}</SelectItem>
+			{/each}
+		</SelectContent>
+	</Select>
+{/snippet}
+
+{#snippet numberCell({ row }: DataTableCellSnippetProps<OrderRow>)}
+	<a
+		href={appHref(ADMIN_PAGE_ENDPOINTS.ORDER.replace(':id', row._id))}
+		class="font-medium text-accent hover:underline"
+	>
+		{row.number}
+	</a>
+{/snippet}
 
 {#snippet statusCell({ row }: DataTableCellSnippetProps<OrderRow>)}
 	<span class={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${STATUS_CLASSES[row.status]}`}>

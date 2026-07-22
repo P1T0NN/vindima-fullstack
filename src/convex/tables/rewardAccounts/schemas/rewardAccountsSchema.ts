@@ -18,6 +18,10 @@ import { v } from 'convex/values';
  * - `lifetimeStamps`  — all confirmed stamps ever; display/analytics only.
  * - `lastActivityAt`  — ms epoch of the last confirmed stamp or claim; drives
  *                        inactivity expiry and the pre-expiry warning.
+ * - `warnedAt`        — ms epoch the pre-expiry warning email (R2) was last sent. The warn
+ *                        cron re-warns only when `warnedAt < lastActivityAt`, so any new
+ *                        activity re-arms the warning without touching every activity writer.
+ *                        Absent until the first warning. See `EmailSystemDesign.md` §4.3.
  *
  * Register in `src/convex/schema.ts`.
  */
@@ -27,7 +31,8 @@ export const rewardAccountsTable = defineTable({
 	pendingStamps: v.number(),
 	availableRewards: v.number(),
 	lifetimeStamps: v.number(),
-	lastActivityAt: v.number()
+	lastActivityAt: v.number(),
+	warnedAt: v.optional(v.number())
 })
 	.index('by_user', ['userId'])
 	.index('by_last_activity', ['lastActivityAt']);

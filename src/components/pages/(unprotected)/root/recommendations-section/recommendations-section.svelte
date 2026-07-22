@@ -1,7 +1,4 @@
 <script lang="ts">
-	// LIBRARIES
-	import { resolve } from '$app/paths';
-
 	// CONFIG
 	import { ASSETS_DATA } from '@/shared/config.js';
 
@@ -11,6 +8,7 @@
 	import * as Tabs from '@/components/ui/tabs/index.js';
 
 	// UTILS
+	import { appHref } from '@/utils/app-navigation.js';
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 	import { cn } from '@/utils/utils.js';
 
@@ -26,6 +24,10 @@
 	type GuideRow = { dish: string; note?: string; wines: string };
 	type WinePick = 'blanc' | 'piensos' | 'postos' | 'granreserva';
 	type RecCard = { name: string; desc: string; href: string };
+
+	// Category pairings/links carry `/shop/<slug>` strings; the storefront is one dynamic
+	// route (`/shop/[category]`) that serves every slug, so these are plain hrefs now.
+	const shopHref = (href: string) => appHref(href);
 
 	const wines: WineCard[] = [
 		{
@@ -230,9 +232,7 @@
 						<span
 							class={cn(
 								'shrink-0 rounded-sm px-2.5 py-1.5 text-[9.5px] font-semibold tracking-[0.18em] uppercase',
-								wine.featured
-									? 'bg-primary text-primary-foreground'
-									: 'bg-primary/16 text-accent'
+								wine.featured ? 'bg-primary text-primary-foreground' : 'bg-primary/16 text-accent'
 							)}
 						>
 							{wine.tag}
@@ -283,10 +283,7 @@
 						</p>
 						<div class="flex flex-wrap gap-2">
 							{#each wine.pairings as chip (chip.label)}
-								<a
-									href={resolve(chip.href as '/shop/tablas' | '/shop/hogazas' | '/shop/tapas')}
-									class={wine.featured ? chipFeaturedClass : chipClass}
-								>
+								<a href={shopHref(chip.href)} class={wine.featured ? chipFeaturedClass : chipClass}>
 									{chip.label}
 								</a>
 							{/each}
@@ -301,9 +298,7 @@
 		>
 			<div class="min-w-60 flex-1">
 				<div class="flex flex-wrap items-baseline gap-3">
-					<h3
-						class="font-display text-2xl font-semibold tracking-[0.02em] text-accent uppercase"
-					>
+					<h3 class="font-display text-2xl font-semibold tracking-[0.02em] text-accent uppercase">
 						Clericot de la casa
 					</h3>
 					<span
@@ -317,8 +312,8 @@
 				</p>
 			</div>
 			<div class="flex flex-wrap gap-2">
-				<a href={resolve('/shop/tapas')} class={chipClass}>Picoteo</a>
-				<a href={resolve('/shop/tapas')} class={chipClass}>Tortilla Española</a>
+				<a href={shopHref('/shop/tapas')} class={chipClass}>Picoteo</a>
+				<a href={shopHref('/shop/tapas')} class={chipClass}>Tortilla Española</a>
 			</div>
 		</Card>
 
@@ -344,7 +339,9 @@
 					>
 						{row.dish}
 						{#if row.note}
-							<span class="font-sans text-xs font-normal tracking-normal text-foreground/50 normal-case">
+							<span
+								class="font-sans text-xs font-normal tracking-normal text-foreground/50 normal-case"
+							>
 								{row.note}
 							</span>
 						{/if}
@@ -409,7 +406,7 @@
 			<div class="mt-9 grid grid-cols-1 gap-4.5 text-left sm:grid-cols-2 lg:grid-cols-3">
 				{#each activeRecs as rec (rec.name)}
 					<a
-						href={resolve(rec.href as '/shop/tablas' | '/shop/hogazas' | '/shop/tapas')}
+						href={shopHref(rec.href)}
 						class="flex flex-col gap-2.5 rounded-lg border border-primary bg-card px-5 py-5.5 no-underline transition-colors hover:bg-card/95"
 					>
 						<span

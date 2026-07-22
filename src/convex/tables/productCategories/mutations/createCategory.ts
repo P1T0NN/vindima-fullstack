@@ -56,6 +56,7 @@ export const createCategory = adminMutation('createCategory')({
 		if (!image) return fail('CATEGORY_IMAGE_INVALID');
 
 		const description = trimToUndefined(parsed.data.description);
+		const subtitle = trimToUndefined(parsed.data.subtitle);
 
 		// Append to the end of the picker, same auto-assign convention as createProduct.
 		const all = await ctx.db.query('productCategories').collect();
@@ -64,6 +65,7 @@ export const createCategory = adminMutation('createCategory')({
 		const categoryId = await ctx.db.insert('productCategories', {
 			slug,
 			name,
+			subtitle,
 			image,
 			description,
 			sortOrder

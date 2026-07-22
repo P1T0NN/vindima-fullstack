@@ -45,6 +45,14 @@ export const markOrderRefunded = internalMutation({
 				{ claimId: order.claimId }
 			);
 		}
+
+		// O7 — refund confirmation. `EmailSystemDesign.md` §5 O7. Idempotent seam: only reached
+		// on the `paid → refunded` transition (a non-paid order threw above), so it fires once.
+		void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+			kind: 'orderRefunded',
+			orderId: order._id
+		});
+
 		return null;
 	}
 });

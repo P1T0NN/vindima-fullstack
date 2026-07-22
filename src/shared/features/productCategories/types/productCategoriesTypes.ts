@@ -19,3 +19,16 @@ export type ShopCategoryRow = {
 	minPriceMinor: number | null;
 	maxPriceMinor: number | null;
 };
+
+/**
+ * Minimal category projection for the dynamic `/shop/[category]` page header, returned by
+ * `fetchCategoryBySlug`. Just what the storefront header renders — no price bounds (the
+ * product grid shows prices) and no id (the slug is the key).
+ */
+export type ShopCategoryHeader = {
+	slug: string;
+	name: string;
+	subtitle: string | null;
+	description: string | null;
+	image: string | null;
+};

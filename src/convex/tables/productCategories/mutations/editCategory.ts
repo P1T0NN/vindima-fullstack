@@ -57,11 +57,15 @@ export const editCategory = adminMutation('editCategory')({
 		if (parsed.data.description !== undefined) {
 			patch.description = trimToUndefined(parsed.data.description);
 		}
+		if (parsed.data.subtitle !== undefined) {
+			patch.subtitle = trimToUndefined(parsed.data.subtitle);
+		}
 
 		if (parsed.data.image !== undefined) {
 			const image = await resolveImageUrl(ctx, parsed.data.image);
 			// Refuse rather than blanking the card image on a bad ref.
-			if (!image) return { success: false, message: { key: 'ProductMessages.CATEGORY_IMAGE_INVALID' } };
+			if (!image)
+				return { success: false, message: { key: 'ProductMessages.CATEGORY_IMAGE_INVALID' } };
 			patch.image = image;
 		}
 

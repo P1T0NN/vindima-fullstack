@@ -138,6 +138,8 @@ export const convexRateLimitRegistry = {
 	placeOrder: limitPresets.interactiveWrite,
 	cancelMyOrder: limitPresets.interactiveWrite,
 	refundOrder: limitPresets.interactiveWrite,
+	settleOrder: limitPresets.interactiveWrite,
+	setOrderFulfillment: limitPresets.interactiveWrite,
 
 	// Products catalog — admin-managed writes
 	createProduct: limitPresets.interactiveWrite,

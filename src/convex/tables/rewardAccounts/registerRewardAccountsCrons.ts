@@ -20,4 +20,12 @@ export function registerRewardAccountsCrons(crons: Crons, internalApi: InternalA
 		internalApi.tables.rewardAccounts.crons.rewardAccountsCrons.expireInactiveCards,
 		{}
 	);
+
+	/** Warn accounts nearing inactivity expiry (R2). Daily, before the expire run. */
+	crons.daily(
+		'warn expiring reward cards',
+		{ hourUTC: 4, minuteUTC: 0 },
+		internalApi.tables.rewardAccounts.crons.rewardAccountsCrons.warnExpiringRewards,
+		{}
+	);
 }

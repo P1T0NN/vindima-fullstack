@@ -27,6 +27,15 @@ export function fromMinorUnits(minor: number, currency = 'USD'): number {
 	return minor / 10 ** moneyMinorDigits(currency);
 }
 
+/** Long-form localized date from an epoch-ms timestamp, e.g. "22 de julio de 2026". */
+export function formatDateLong(epochMs: number): string {
+	return new Intl.DateTimeFormat(INTL_LOCALE, {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric'
+	}).format(new Date(epochMs));
+}
+
 /**
  * Locale-aware currency formatting from MINOR units (e.g. cents). The minor-unit
  * exponent is derived from the currency via `Intl`, so this is correct for

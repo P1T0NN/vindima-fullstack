@@ -13,6 +13,7 @@ import { convexRateLimiter } from '@/convex/convexRateLimiter';
 
 // HELPERS / PROVIDERS
 import { calculateOrderPrice } from '../helpers/calculateOrderPrice';
+import { buildOrderSearchText } from '../helpers/buildOrderSearchText';
 import { getPaymentProvider } from '../providers/registry';
 
 // SCHEMAS
@@ -140,7 +141,15 @@ export const placeOrder = mutation({
 			.replace(/[^A-Za-z0-9]/g, '')
 			.slice(-6)
 			.toUpperCase()}`;
-		await ctx.db.patch(orderId, { number });
+		await ctx.db.patch(orderId, {
+			number,
+			// Number only exists post-insert, so the search blob is written with it.
+			searchText: buildOrderSearchText({
+				number,
+				name: args.contact.name,
+				email: args.contact.email
+			})
+		});
 
 		const order = (await ctx.db.get(orderId))!;
 		const payment = await getPaymentProvider().createPayment(order);
@@ -152,6 +161,18 @@ export const placeOrder = mutation({
 		if (payment.kind === 'none' && CHECKOUT_CONFIG.SETTLE_ON_PLACE) {
 			await ctx.runMutation(internal.tables.orders.mutations.markOrderPaid.markOrderPaid, {
 				orderId
+			});
+		}
+
+		// O1 "order received" — ONLY when the order is still pending (the collapse rule,
+		// `EmailSystemDesign.md` §4.2). A settle-on-place order is already paid → O2 covers it,
+		// so we send nothing here and avoid two emails for one click.
+		const settled = await ctx.db.get(orderId);
+		if (settled?.status === 'pending') {
+			void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+				kind: 'orderReceived',
+				orderId,
+				paymentUrl: payment.kind === 'redirect' ? payment.url : undefined
 			});
 		}
 

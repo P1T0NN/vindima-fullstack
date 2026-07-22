@@ -12,7 +12,8 @@ export const ADMIN_PAGE_ENDPOINTS = {
 	ADD_CATEGORY: resolve('/admin/categories/add-category'),
 	EDIT_CATEGORY: resolve('/admin/categories/edit-category/:id'),
 	REWARDS: resolve('/admin/rewards'),
-	ORDERS: resolve('/admin/orders')
+	ORDERS: resolve('/admin/orders'),
+	ORDER: resolve('/admin/orders/:id')
 } as const;
 
 export const PROTECTED_PAGE_ENDPOINTS = {

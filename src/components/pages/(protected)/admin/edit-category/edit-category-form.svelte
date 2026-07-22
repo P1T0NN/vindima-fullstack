@@ -32,6 +32,7 @@
 
 	let values = $state<EditCategoryFormInput>({
 		name: seed.name,
+		subtitle: seed.subtitle ?? '',
 		description: seed.description ?? '',
 		// The current image rides along as a URL string (shown as "imagen existente"), so
 		// saving without touching it keeps the category's image as-is.

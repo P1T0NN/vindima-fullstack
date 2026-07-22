@@ -40,6 +40,8 @@ export const AUDIT_ACTIONS = {
 
 	// Orders
 	ORDER_REFUND: 'order.refund',
+	ORDER_MARK_PAID: 'order.mark_paid',
+	ORDER_FULFILLMENT: 'order.fulfillment',
 
 	// Rewards
 	REWARD_ADJUST: 'reward.adjust',

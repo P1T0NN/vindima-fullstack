@@ -29,8 +29,6 @@
 		href?: string;
 		/** Add-to-cart handler. When set, the card renders an add button. */
 		onadd?: () => void;
-		/** Add-button label (e.g. "Add to order"). */
-		addLabel?: string;
 		/** Greys out the add button (e.g. sold out / not purchasable). */
 		addDisabled?: boolean;
 		class?: string;
@@ -50,7 +48,6 @@
 		imageAlt = '',
 		href,
 		onadd,
-		addLabel,
 		addDisabled = false,
 		class: className,
 		children,
@@ -137,7 +134,7 @@
 					onclick={onadd}
 				>
 					<ShoppingBagIcon class="size-4" />
-					{addLabel}
+					Agregar al carrito
 				</Button>
 			{/if}
 		</div>

@@ -8,8 +8,7 @@
 export const BACKEND_MESSAGES: Record<string, string> = {
 	'GenericMessages.PASSWORD_TOO_SHORT': 'La contraseña debe tener al menos {min} caracteres.',
 	'GenericMessages.PASSWORD_TOO_LONG': 'La contraseña es demasiado larga.',
-	'GenericMessages.PASSWORD_TOO_COMMON':
-		'Esa contraseña es demasiado común. Elige una más segura.',
+	'GenericMessages.PASSWORD_TOO_COMMON': 'Esa contraseña es demasiado común. Elige una más segura.',
 	'GenericMessages.NO_ITEMS_PROVIDED': 'No se proporcionaron elementos.',
 	'GenericMessages.NO_MATCHING_ITEMS': 'No se encontraron elementos coincidentes.',
 	'GenericMessages.DATA_TABLE_DELETED_ALL': 'Se eliminaron {count} elemento(s).',
@@ -107,6 +106,8 @@ export const BACKEND_MESSAGES: Record<string, string> = {
 	'CheckoutMessages.ORDER_NOT_PENDING': 'Este pedido ya no se puede modificar.',
 	'CheckoutMessages.NOT_YOUR_ORDER': 'Este pedido no es tuyo.',
 	'CheckoutMessages.ORDER_CANCELLED': 'Pedido cancelado.',
-	'CheckoutMessages.ORDER_NOT_PAID': 'Solo los pedidos pagados se pueden reembolsar.',
-	'CheckoutMessages.ORDER_REFUNDED': 'Pedido reembolsado.'
+	'CheckoutMessages.ORDER_NOT_PAID': 'Esta acción solo aplica a pedidos pagados.',
+	'CheckoutMessages.ORDER_REFUNDED': 'Pedido reembolsado.',
+	'CheckoutMessages.ORDER_MARKED_PAID': 'Pedido marcado como pagado.',
+	'CheckoutMessages.ORDER_FULFILLMENT_UPDATED': 'Estado de entrega actualizado.'
 };

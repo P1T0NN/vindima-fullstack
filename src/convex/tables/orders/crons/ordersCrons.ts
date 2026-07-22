@@ -42,6 +42,14 @@ export const expirePendingOrders = internalMutation({
 					{ claimId: order.claimId }
 				);
 			}
+
+			// O6 — tell the customer their pending order expired. `EmailSystemDesign.md` §5 O6.
+			void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+				kind: 'orderCancelled',
+				orderId: order._id,
+				cancelReason: 'expired'
+			});
+
 			cancelled++;
 		}
 

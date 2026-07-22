@@ -14,17 +14,42 @@ const WHATSAPP_NUMBER = '524491234567';
  */
 export const COMPANY_DATA = {
 	NAME: 'Vindima',
-	EMAIL: 'hola@vindima.mx',
-	RESEND_EMAIL: 'onboarding@resend.dev',
-	DOMAIN: 'vindima.mx',
+	EMAIL: 'info@kurosava.com',
+	RESEND_EMAIL: 'info@kurosava.com',
+	DOMAIN: 'https://vindima-fullstack.vercel.app/',
 	LOGO: '/logo/opt/logo-1536w.webp',
-	DESCRIPTION: 'Vinícola orgánica · vinos de autor, charcutería y experiencias para grandes anfitriones.',
+	DESCRIPTION:
+		'Vinícola orgánica · vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
 	PHONE: '449 000 0000',
 	OG_IMAGE: '/assets/og-image.png',
 	OG_IMAGE_WIDTH: 1200,
 	OG_IMAGE_HEIGHT: 630
+} as const;
+
+/**
+ * Email palette — inline hex only, since email clients don't support CSS variables
+ * (so these can't reference `layout.css` vars and are duplicated here on purpose).
+ * Used by the transactional email header/footer templates.
+ */
+export const EMAIL_CONFIG = {
+	/** Deep burgundy — header bar background, links. Mirrors `--accent`. */
+	ACCENT: '#510128',
+	/** Gold — wordmark. Mirrors `--primary`. */
+	GOLD: '#d9af50',
+	/** Page background around the 600px email. Mirrors `--background`. */
+	BACKGROUND: '#f2f1ed',
+	/** Footer panel background. Mirrors `--secondary`/`--muted`. */
+	SURFACE: '#edebe3',
+	/** Body card background (the middle of the sandwich). Mirrors `--card`. */
+	CARD: '#fbfaf7',
+	/** Primary body text + headings. Mirrors `--foreground`. */
+	TEXT: '#1c1418',
+	/** Muted text — taglines, legal line, secondary copy. Mirrors `--muted-foreground`. */
+	MUTED_TEXT: 'rgba(28,20,24,0.6)',
+	/** Text on the accent CTA button. Mirrors `--accent-foreground`. */
+	ON_ACCENT: '#f2f1ed'
 } as const;
 
 export const ASSETS_DATA = {
@@ -68,7 +93,16 @@ export const FEATURES = {
 	 * button (the site becomes catalog-only). See `CheckoutPageSystemDesign.md` and
 	 * `CHECKOUT_CONFIG` below.
 	 */
-	CHECKOUT: true
+	CHECKOUT: true,
+
+	/**
+	 * Enable transactional email (order/auth/reward notifications via Resend). When `false`,
+	 * every send no-ops with a console log and no migration is needed — the whole pipeline
+	 * (mutations, scheduler, templates) still runs, it just never calls Resend. See
+	 * `EmailSystemDesign.md`. NOTE: this also gates the auth OTP emails, so turning it off
+	 * breaks email sign-in — intended only for dev/testing without a Resend key.
+	 */
+	EMAILS: true
 } as const;
 
 /**
@@ -204,7 +238,7 @@ export const CHECKOUT_CONFIG = {
 	 * settle via the payment webhook). Set to `false` for a true pay-on-delivery model where
 	 * rewards should only count once staff mark the order paid.
 	 */
-	SETTLE_ON_PLACE: true,
+	SETTLE_ON_PLACE: false,
 
 	/** Hours a `pending` order lives before the cron cancels it (and frees any reward claim). */
 	PENDING_EXPIRY_HOURS: 48,

@@ -1,6 +1,9 @@
 // UTILS
 import { confirmStamp } from '@/shared/features/rewards/utils/rewardsUtils';
 
+// EMAIL
+import { internal } from '@/convex/_generated/api';
+
 // TYPES
 import type { MutationCtx } from '@/convex/_generated/server';
 import type { Doc } from '@/convex/_generated/dataModel';
@@ -36,6 +39,13 @@ export async function applyConfirmedStamp(
 			source: 'reward',
 			sourceKey: `reward:${stampSourceKey}`,
 			note: next.rewardsEarned > 1 ? `${next.rewardsEarned} rewards` : undefined
+		});
+
+		// R1 — the free-item-unlocked email. Fires here so BOTH the immediate-confirm path and
+		// the pending-confirm cron trigger it exactly once per completed card. `EmailSystemDesign.md` §4.3.
+		void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+			kind: 'rewardUnlocked',
+			userId: account.userId
 		});
 	}
 

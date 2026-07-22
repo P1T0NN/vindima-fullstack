@@ -1,6 +1,7 @@
 // LIBRARIES
 import { ConvexError, v } from 'convex/values';
 import { internalMutation } from '@/convex/_generated/server';
+import { internal } from '@/convex/_generated/api';
 
 // TYPES
 import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
@@ -31,6 +32,17 @@ export const setFulfillment = internalMutation({
 			} satisfies ConvexErrorPayload);
 		}
 		await ctx.db.patch(order._id, { fulfillment: args.fulfillment });
+
+		// O3/O4 — "en camino" (delivery) or "listo para recoger" (pickup); one template branches
+		// on delivery kind. `EmailSystemDesign.md` §4.2. Only the `shipped` transition emails —
+		// `processing`/`delivered` deliberately send nothing.
+		if (args.fulfillment === 'shipped') {
+			void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+				kind: 'orderShipped',
+				orderId: order._id
+			});
+		}
+
 		return null;
 	}
 });

@@ -27,6 +27,7 @@
 	// (slug from the name; the storefront price range from the category's products).
 	let values = $state<CreateCategoryFormInput>({
 		name: '',
+		subtitle: '',
 		description: '',
 		image: null
 	});
