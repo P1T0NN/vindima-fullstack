@@ -4,7 +4,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"analytics:configure": "bunx convex run analytics:writeConfiguration",
+		"analytics:configure": "bunx convex run analytics/index:writeConfiguration",
 		"predev": "bun run analytics:configure || exit 0",
 		"dev": "vite dev",
 		"build": "vite build",
@@ -25,14 +25,18 @@
 		"@sveltejs/kit": "^2.61.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.1.17",
+		"@types/d3-scale": "^4.0.9",
+		"@types/d3-shape": "^3.1.8",
 		"@types/node": "^20",
 		"bits-ui": "^2.16.3",
 		"clsx": "^2.1.1",
+		"d3-shape": "^3.2.0",
 		"embla-carousel-svelte": "^8.6.0",
 		"eslint": "^9.39.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.13.1",
 		"globals": "^16.5.0",
+		"layerchart": "2.0.0-next.48",
 		"mode-watcher": "^1.1.0",
 		"prettier": "^3.7.4",
 		"prettier-plugin-svelte": "^3.4.0",
@@ -51,6 +55,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@convex-dev/aggregate": "^0.2.2",
 		"@convex-dev/better-auth": "^0.12.1",
 		"@convex-dev/r2": "^0.10.1",
 		"@convex-dev/rate-limiter": "^0.3.2",
@@ -63,7 +68,9 @@
 		"convex": "^1.36.1",
 		"convex-helpers": "^0.1.115",
 		"convex-svelte": "^0.0.12",
+		"d3-scale": "^4.0.2",
 		"embla-carousel-autoplay": "^8.6.0",
+		"nuqs-svelte": "^1.2.2",
 		"resend": "^6.12.2",
 		"zod": "^4.4.3"
 	}

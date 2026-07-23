@@ -1,4 +1,7 @@
 <script lang="ts">
+	// LIBRARIES
+	import { NuqsAdapter } from 'nuqs-svelte/adapters/svelte-kit';
+
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
@@ -71,16 +74,20 @@
 	};
 </script>
 
-<Sidebar.Provider
-	style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
->
-	<AppSidebar variant="inset" {navItems} />
+<!-- NuqsAdapter: enables `useQueryState` URL-synced state for admin pages (e.g. the orders
+     status filter). Scoped here — only the admin area uses URL-as-state. -->
+<NuqsAdapter>
+	<Sidebar.Provider
+		style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
+	>
+		<AppSidebar variant="inset" {navItems} />
 
-	<Sidebar.Inset>
-		<SiteHeader hidePaths={['/admin']} />
+		<Sidebar.Inset>
+			<SiteHeader hidePaths={['/admin']} />
 
-		<div class="flex min-h-0 flex-1 flex-col">
-			{@render children()}
-		</div>
-	</Sidebar.Inset>
-</Sidebar.Provider>
+			<div class="flex min-h-0 flex-1 flex-col">
+				{@render children()}
+			</div>
+		</Sidebar.Inset>
+	</Sidebar.Provider>
+</NuqsAdapter>

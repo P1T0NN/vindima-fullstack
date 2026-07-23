@@ -2,6 +2,9 @@
 import { v } from 'convex/values';
 import { internalMutation } from '@/convex/_generated/server';
 
+// ANALYTICS
+import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';
+
 // TYPES
 import type { Id } from '@/convex/_generated/dataModel';
 
@@ -35,10 +38,24 @@ export const recordFirstPurchase = internalMutation({
 			.unique();
 		if (existing) return existing._id;
 
-		return await ctx.db.insert('firstPurchases', {
+		const rowId = await ctx.db.insert('firstPurchases', {
 			userId: args.userId,
 			orderId: args.orderId,
 			discountMinorUnits: args.discountMinorUnits
 		});
+
+		// Analytics — the dashboard's "new customers" KPI (first PAID order, not signup).
+		// Only on the insert path, so replays never double-count; never blocks the money path.
+		try {
+			await analytics.track(ctx, ANALYTICS_EVENT.CUSTOMER_FIRST_PURCHASE, {
+				actorId: args.userId,
+				properties: { discountMinor: args.discountMinorUnits },
+				unique: { key: `first-purchase:${args.userId}` }
+			});
+		} catch (err) {
+			console.warn('[firstPurchases] analytics track failed; recording anyway', { err });
+		}
+
+		return rowId;
 	}
 });

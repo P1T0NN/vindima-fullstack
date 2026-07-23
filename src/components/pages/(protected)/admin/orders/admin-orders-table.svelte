@@ -1,6 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
+	import { useQueryState, parseAsStringLiteral } from 'nuqs-svelte';
 
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -15,29 +16,19 @@
 		SelectTrigger
 	} from '@/components/ui/select/index.js';
 
+	// DATA
+	import { ORDER_STATUSES, ORDER_STATUS_LABELS } from '@/shared/features/orders/data/ordersData.js';
+
 	// UTILS
 	import { appHref } from '@/utils/app-navigation.js';
 	import { formatMoneyMinor } from '@/utils/formatters.js';
+	import { orderStatusLabel, orderStatusBadgeClass } from '@/features/orders/utils/orderStatus.js';
 
 	// TYPES
 	import type { ColumnDef, DataTableCellSnippetProps } from '@/components/ui/data-table/types.js';
 	import type { Doc } from '@/convex/_generated/dataModel';
 
 	type OrderRow = Doc<'orders'>;
-
-	const STATUS_LABELS: Record<OrderRow['status'], string> = {
-		pending: 'Pendiente',
-		paid: 'Pagado',
-		cancelled: 'Cancelado',
-		refunded: 'Reembolsado'
-	};
-
-	const STATUS_CLASSES: Record<OrderRow['status'], string> = {
-		paid: 'bg-chart-2/15 text-chart-2',
-		pending: 'bg-muted text-muted-foreground',
-		cancelled: 'bg-destructive/10 text-destructive',
-		refunded: 'bg-destructive/10 text-destructive'
-	};
 
 	const columns: ColumnDef<OrderRow>[] = [
 		{ id: 'number', header: 'Pedido', accessor: (r) => r.number },
@@ -59,21 +50,23 @@
 			header: 'Total',
 			accessor: (r) => formatMoneyMinor(r.amounts.totalMinor, r.currency)
 		},
-		{ id: 'status', header: 'Estado', accessor: (r) => STATUS_LABELS[r.status] },
+		{ id: 'status', header: 'Estado', accessor: (r) => orderStatusLabel(r.status) },
 		{ id: 'actions', header: '', accessor: () => '', wrap: true }
 	];
 
-	// Status filter: '' = all. Flows into the query via `queryArgs.status` (undefined when all).
-	let statusFilter = $state<'' | OrderRow['status']>('');
+	// Status filter is URL-synced (`?status=`): null = all. Bookmarkable/shareable filtered
+	// views and back-button support come for free, and the dashboard's order alert cards
+	// deep-link here by setting the param.
+	const status = useQueryState('status', parseAsStringLiteral(ORDER_STATUSES));
 	const statusTriggerLabel = $derived(
-		statusFilter ? STATUS_LABELS[statusFilter] : 'Estado: todos'
+		status.current ? orderStatusLabel(status.current) : 'Estado: todos'
 	);
 </script>
 
 <ConvexDataTable
 	caption="Pedidos"
 	query={api.tables.orders.queries.fetchOrders.fetchOrders}
-	queryArgs={{ status: statusFilter || undefined }}
+	queryArgs={{ status: status.current ?? undefined }}
 	controlsPlace="top"
 	searchable
 	searchPlaceholder="Buscar por número o cliente…"
@@ -84,14 +77,18 @@
 />
 
 {#snippet filters()}
-	<Select type="single" value={statusFilter} onValueChange={(v) => (statusFilter = v as typeof statusFilter)}>
+	<Select
+		type="single"
+		value={status.current ?? ''}
+		onValueChange={(v) => (status.current = v ? (v as OrderRow['status']) : null)}
+	>
 		<SelectTrigger class="w-full md:w-48" aria-label="Filtrar por estado">
 			{statusTriggerLabel}
 		</SelectTrigger>
 		<SelectContent>
 			<SelectItem value="">Estado: todos</SelectItem>
-			{#each Object.entries(STATUS_LABELS) as [value, label] (value)}
-				<SelectItem {value}>{label}</SelectItem>
+			{#each ORDER_STATUSES as value (value)}
+				<SelectItem {value}>{ORDER_STATUS_LABELS[value]}</SelectItem>
 			{/each}
 		</SelectContent>
 	</Select>
@@ -107,8 +104,10 @@
 {/snippet}
 
 {#snippet statusCell({ row }: DataTableCellSnippetProps<OrderRow>)}
-	<span class={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${STATUS_CLASSES[row.status]}`}>
-		{STATUS_LABELS[row.status]}
+	<span
+		class={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${orderStatusBadgeClass(row.status)}`}
+	>
+		{orderStatusLabel(row.status)}
 	</span>
 {/snippet}
 

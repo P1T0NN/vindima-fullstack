@@ -3,7 +3,15 @@ import { ConvexError, v } from 'convex/values';
 import { internalMutation } from '@/convex/_generated/server';
 import { internal } from '@/convex/_generated/api';
 
+// ANALYTICS
+import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';
+
+// HELPERS
+import { orderCountAggregate } from '../helpers/orderCountAggregate';
+
 // TYPES
+import type { MutationCtx } from '@/convex/_generated/server';
+import type { Doc } from '@/convex/_generated/dataModel';
 import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
 
 /**
@@ -42,6 +50,20 @@ export const markOrderPaid = internalMutation({
 			status: 'paid',
 			paymentRef: args.paymentRef ?? order.paymentRef
 		});
+		// Work-queue counter: pending → open (paid, not yet delivered).
+		await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
+
+		// Analytics — order.settled + one order.line_sold per non-reward line (feeds the
+		// admin dashboard). unique keys make webhook replays a no-op; the catch keeps a
+		// misconfigured analytics component from ever rolling back a settlement.
+		try {
+			await trackSettlement(ctx, order);
+		} catch (err) {
+			console.warn('[orders] analytics track failed on settle; settling anyway', {
+				orderId: order._id,
+				err
+			});
+		}
 
 		// Reward-line inputs for the receipt email (O2), captured across the stamp grant.
 		let rewardStamps: number | undefined;
@@ -131,3 +153,42 @@ export const markOrderPaid = internalMutation({
 		return null;
 	}
 });
+
+/** Build + write the settlement analytics batch. Category resolves ref → variant → product
+ *  at settle time (once per order) so dashboard breakdowns never need the join. */
+async function trackSettlement(ctx: MutationCtx, order: Doc<'orders'>): Promise<void> {
+	const actorId = order.userId ?? undefined;
+
+	const lineEvents = [];
+	for (const line of order.lines) {
+		if (line.isRewardLine) continue;
+		const variant = await ctx.db
+			.query('productVariants')
+			.withIndex('by_ref', (q) => q.eq('ref', line.productRef))
+			.unique();
+		const product = variant ? await ctx.db.get(variant.productId) : null;
+		lineEvents.push({
+			name: ANALYTICS_EVENT.ORDER_LINE_SOLD,
+			actorId,
+			properties: {
+				revenueMinor: line.unitPriceMinor * line.qty,
+				qty: line.qty,
+				product: line.name,
+				category: product?.category ?? 'otros'
+			},
+			unique: { key: `line-sold:${order._id}:${line.productRef}` }
+		});
+	}
+
+	await analytics.track(ctx, {
+		events: [
+			{
+				name: ANALYTICS_EVENT.ORDER_SETTLED,
+				actorId,
+				properties: { amountMinor: order.amounts.totalMinor, currency: order.currency },
+				unique: { key: `order-settled:${order._id}` }
+			},
+			...lineEvents
+		]
+	});
+}

@@ -84,6 +84,8 @@ import type * as tables_firstPurchases_schemas_firstPurchasesSchema from "../tab
 import type * as tables_orders_crons_ordersCrons from "../tables/orders/crons/ordersCrons.js";
 import type * as tables_orders_helpers_buildOrderSearchText from "../tables/orders/helpers/buildOrderSearchText.js";
 import type * as tables_orders_helpers_calculateOrderPrice from "../tables/orders/helpers/calculateOrderPrice.js";
+import type * as tables_orders_helpers_orderCountAggregate from "../tables/orders/helpers/orderCountAggregate.js";
+import type * as tables_orders_mutations_backfillOrderCounts from "../tables/orders/mutations/backfillOrderCounts.js";
 import type * as tables_orders_mutations_cancelMyOrder from "../tables/orders/mutations/cancelMyOrder.js";
 import type * as tables_orders_mutations_markOrderPaid from "../tables/orders/mutations/markOrderPaid.js";
 import type * as tables_orders_mutations_markOrderRefunded from "../tables/orders/mutations/markOrderRefunded.js";
@@ -95,11 +97,13 @@ import type * as tables_orders_mutations_settleOrder from "../tables/orders/muta
 import type * as tables_orders_providers_manual from "../tables/orders/providers/manual.js";
 import type * as tables_orders_providers_registry from "../tables/orders/providers/registry.js";
 import type * as tables_orders_providers_types from "../tables/orders/providers/types.js";
+import type * as tables_orders_queries_fetchDashboard from "../tables/orders/queries/fetchDashboard.js";
 import type * as tables_orders_queries_fetchMyLatestOrders from "../tables/orders/queries/fetchMyLatestOrders.js";
 import type * as tables_orders_queries_fetchMyOrders from "../tables/orders/queries/fetchMyOrders.js";
 import type * as tables_orders_queries_fetchOrder from "../tables/orders/queries/fetchOrder.js";
 import type * as tables_orders_queries_fetchOrderForAdmin from "../tables/orders/queries/fetchOrderForAdmin.js";
 import type * as tables_orders_queries_fetchOrders from "../tables/orders/queries/fetchOrders.js";
+import type * as tables_orders_queries_fetchOrdersCounts from "../tables/orders/queries/fetchOrdersCounts.js";
 import type * as tables_orders_registerOrdersCrons from "../tables/orders/registerOrdersCrons.js";
 import type * as tables_orders_schemas_ordersSchema from "../tables/orders/schemas/ordersSchema.js";
 import type * as tables_orders_validators_ordersValidators from "../tables/orders/validators/ordersValidators.js";
@@ -241,6 +245,8 @@ declare const fullApi: ApiFromModules<{
   "tables/orders/crons/ordersCrons": typeof tables_orders_crons_ordersCrons;
   "tables/orders/helpers/buildOrderSearchText": typeof tables_orders_helpers_buildOrderSearchText;
   "tables/orders/helpers/calculateOrderPrice": typeof tables_orders_helpers_calculateOrderPrice;
+  "tables/orders/helpers/orderCountAggregate": typeof tables_orders_helpers_orderCountAggregate;
+  "tables/orders/mutations/backfillOrderCounts": typeof tables_orders_mutations_backfillOrderCounts;
   "tables/orders/mutations/cancelMyOrder": typeof tables_orders_mutations_cancelMyOrder;
   "tables/orders/mutations/markOrderPaid": typeof tables_orders_mutations_markOrderPaid;
   "tables/orders/mutations/markOrderRefunded": typeof tables_orders_mutations_markOrderRefunded;
@@ -252,11 +258,13 @@ declare const fullApi: ApiFromModules<{
   "tables/orders/providers/manual": typeof tables_orders_providers_manual;
   "tables/orders/providers/registry": typeof tables_orders_providers_registry;
   "tables/orders/providers/types": typeof tables_orders_providers_types;
+  "tables/orders/queries/fetchDashboard": typeof tables_orders_queries_fetchDashboard;
   "tables/orders/queries/fetchMyLatestOrders": typeof tables_orders_queries_fetchMyLatestOrders;
   "tables/orders/queries/fetchMyOrders": typeof tables_orders_queries_fetchMyOrders;
   "tables/orders/queries/fetchOrder": typeof tables_orders_queries_fetchOrder;
   "tables/orders/queries/fetchOrderForAdmin": typeof tables_orders_queries_fetchOrderForAdmin;
   "tables/orders/queries/fetchOrders": typeof tables_orders_queries_fetchOrders;
+  "tables/orders/queries/fetchOrdersCounts": typeof tables_orders_queries_fetchOrdersCounts;
   "tables/orders/registerOrdersCrons": typeof tables_orders_registerOrdersCrons;
   "tables/orders/schemas/ordersSchema": typeof tables_orders_schemas_ordersSchema;
   "tables/orders/validators/ordersValidators": typeof tables_orders_validators_ordersValidators;
@@ -347,4 +355,5 @@ export declare const components: {
   betterAuth: import("../auth/component/_generated/component.js").ComponentApi<"betterAuth">;
   r2: import("@convex-dev/r2/_generated/component.js").ComponentApi<"r2">;
   analytics: import("@piton-/analytics-convex/_generated/component.js").ComponentApi<"analytics">;
+  orderCounts: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"orderCounts">;
 };

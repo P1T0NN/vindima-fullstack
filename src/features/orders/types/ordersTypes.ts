@@ -1,5 +1,6 @@
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
+import type { OrderStatus } from '@/shared/features/orders/types/ordersTypes';
 
 /**
  * Display status the order UI renders (badge, styles, filter chips) — derived from
@@ -8,6 +9,6 @@ import type { Doc } from '@/convex/_generated/dataModel';
  */
 export type OrderDisplayStatus =
 	| NonNullable<Doc<'orders'>['fulfillment']>
-	| Extract<Doc<'orders'>['status'], 'cancelled'>;
+	| Extract<OrderStatus, 'cancelled'>;
 
 export type OrderFilter = OrderDisplayStatus | 'all';

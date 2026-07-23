@@ -26,6 +26,9 @@ export const orderAmountsValidator = v.object({
 	totalMinor: v.number()
 });
 
+/** How the shopper chose to pay (spec §8.1). `cash` = offline/manual; `online` = hosted page (Stripe). */
+export const orderPaymentMethodValidator = v.union(v.literal('cash'), v.literal('online'));
+
 /** Where/how the customer receives the order. */
 export const orderDeliveryValidator = v.union(
 	v.object({ kind: v.literal('pickup') }),

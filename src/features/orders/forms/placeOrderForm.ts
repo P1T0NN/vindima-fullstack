@@ -40,7 +40,7 @@ const CONTACT_FIELDS: MutationFormFieldDef[] = [
 		type: 'tel',
 		autocomplete: 'tel',
 		placeholder: '449 000 0000',
-		description: 'Opcional — solo lo usamos si necesitamos contactarte sobre este pedido.'
+		description: 'Opcional — Usaremos este número para contactarte sobre tu pedido'
 	}
 ];
 
@@ -97,10 +97,12 @@ const NOTE_FIELD: MutationFormFieldDef = {
 export function createPlaceOrderForm(params: {
 	/** Fulfillment modes enabled in config. A single option renders no picker. */
 	modeOptions: MutationFormSelectOption[];
+	/** Payment methods offered (disabled ones still render as "coming soon" cards). */
+	paymentOptions: MutationFormSelectOption[];
 	/** Whether the picked mode collects a shipping address. */
 	showAddress: boolean;
 }): MutationFormSection[] {
-	const { modeOptions, showAddress } = params;
+	const { modeOptions, paymentOptions, showAddress } = params;
 
 	return [
 		{
@@ -130,6 +132,21 @@ export function createPlaceOrderForm(params: {
 					: []),
 				...(showAddress ? ADDRESS_FIELDS : []),
 				NOTE_FIELD
+			]
+		},
+		{
+			id: 'payment',
+			title: 'Pago',
+			description: 'Cómo quieres pagar tu pedido.',
+			class: 'lg:col-start-1',
+			fields: [
+				{
+					id: 'payment',
+					label: 'Método de pago',
+					kind: 'radio',
+					options: paymentOptions,
+					required: true
+				}
 			]
 		}
 	];

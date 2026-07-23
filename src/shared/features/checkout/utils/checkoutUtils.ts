@@ -4,6 +4,7 @@ import { CHECKOUT_CONFIG } from '@/shared/config.js';
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
 import type { OrderDisplayStatus } from '@/features/orders/types/ordersTypes.js';
+import type { OrderStatus } from '@/shared/features/orders/types/ordersTypes.js';
 
 /**
  * Pure checkout math (see `CheckoutPageSystemDesign.md` §5). No Convex ctx, no I/O — every
@@ -48,7 +49,7 @@ export function orderTotalMinor(
  * (source of truth) and the derived `OrderDisplayStatus` in `ordersTypes.ts`.
  */
 export function orderDisplayStatus(
-	status: Doc<'orders'>['status'],
+	status: OrderStatus,
 	fulfillment: Doc<'orders'>['fulfillment']
 ): OrderDisplayStatus {
 	if (status === 'cancelled' || status === 'refunded') return 'cancelled';

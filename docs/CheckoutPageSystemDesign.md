@@ -149,6 +149,10 @@ orders: defineTable({
 			})
 		})
 	),
+	/** Shopper's chosen payment method (§8.1). Optional so pre-existing rows validate; a
+	 *  missing value means the historical default, `cash` (old manual-only behaviour). */
+	paymentMethod: v.optional(v.union(v.literal('cash'), v.literal('online'))),
+
 	/** Optional customer note ("no onions", "call on arrival"). Display only. */
 	note: v.optional(v.string()),
 
@@ -200,8 +204,10 @@ export const CHECKOUT_CONFIG = {
 		} as { FEE_MINOR_UNITS: number; FREE_ABOVE_MINOR_UNITS: number | null } | null
 	},
 
-	/** Payment provider key, resolved by the adapter registry (§8). 'manual' = zero-config. */
-	PAYMENT_PROVIDER: 'manual' as 'manual' | 'redirect',
+	/** Payment methods offered as cards at checkout (§8.1); registry maps method → provider
+	 *  (cash → manual, online → redirect). Keep ONLINE false until Stripe lands — the card
+	 *  still renders, disabled, so no shopper hits a dead path. One method → no picker. */
+	PAYMENT_METHODS: { CASH: true, ONLINE: false },
 
 	/** Hours a 'pending' order lives before the cron cancels it (frees its claim). */
 	PENDING_EXPIRY_HOURS: 48,
@@ -255,7 +261,7 @@ burst — abuse protection, not flow control).
 
 | Function | Behavior |
 |---|---|
-| `placeOrder` (mutation) | Args: `{ attemptId, lines: {productRef, qty}[], contact {name, email, phone?}, delivery, note? }`. Guards: `FEATURES.CHECKOUT`; signed-out + `!ALLOW_GUEST_CHECKOUT` → `AUTH_REQUIRED`; empty lines → `EMPTY_ORDER`; clamp qty/lines to `CART_CONFIG` limits. **Idempotency:** existing order with this `attemptId` (`by_attempt`) → return it, do nothing (double-click, network retry, back-button resubmit all collapse to one order). Otherwise: run `calculateOrderPrice` (§5), insert the order (`pending`, generated `number`), call the provider's `createPayment` (§8), return `{ orderId, number, amounts, payment }`. |
+| `placeOrder` (mutation) | Args: `{ attemptId, lines: {productRef, qty}[], contact {name, email, phone?}, delivery, paymentMethod, note? }`. Guards: `FEATURES.CHECKOUT`; signed-out + `!ALLOW_GUEST_CHECKOUT` → `AUTH_REQUIRED`; empty lines → `EMPTY_ORDER`; delivery kind and `paymentMethod` must both be enabled in config (→ `INVALID_DELIVERY` / `INVALID_PAYMENT_METHOD` — a client can't pick a disabled card); clamp qty/lines to `CART_CONFIG` limits. **Idempotency:** existing order with this `attemptId` (`by_attempt`) → return it, do nothing (double-click, network retry, back-button resubmit all collapse to one order). Otherwise: run `calculateOrderPrice` (§5), insert the order (`pending`, generated `number`), call the method's provider `createPayment` (§8/§8.1), return `{ orderId, number, amounts, payment }`. |
 | `fetchMyOrders` (query) | Paginated orders for the signed-in user (`by_user`, newest first), mapped to the account-UI shape via §4.2. Replaces the `accountOrders` mock. |
 | `fetchOrder` (query) | One order by id — owner-checked for auth users. For guests: requires the `orderId` **and** matching `email` arg (possession of both ≈ the confirmation email; enough for a status page, no account system invented). |
 | `cancelMyOrder` (mutation) | Owner-checked, `pending` only → `cancelled` + release claim if present. Paid orders are refund territory (admin), not self-serve. |
@@ -320,6 +326,29 @@ export type PaymentProvider = {
 The client never learns which provider is active beyond the `PaymentInstruction` it must
 follow. Adding a provider = one file implementing the type + one registry entry + keys.
 
+### 8.1 Per-order payment method (Cash / Online)
+
+The provider is **not** a single build-time choice — the shopper picks per order between
+**Cash** and **Online**, and that choice is snapshotted on the order (`paymentMethod`, §4.1)
+like every other order fact. This is a pure re-mapping onto the seam above, not a new state
+machine: `cash` → the `manual` provider (`{ kind: 'none' }`, settle offline), `online` → the
+`redirect` provider (Stripe). `getPaymentProvider(order.paymentMethod)` does the dispatch;
+`markOrderPaid`, `SETTLE_ON_PLACE`, and the expiry cron are all untouched.
+
+- **Config gates which cards are offered** (`PAYMENT_METHODS`, §4.3). A single enabled method
+  renders no picker and is used directly.
+- **Online ships as a disabled card until Stripe lands.** `PAYMENT_METHODS.ONLINE = false`
+  keeps the "Pago en línea" card visible but greyed ("Próximamente"), so shoppers see the
+  full choice without a dead path. Triple-guarded: the disabled card, the server
+  `INVALID_PAYMENT_METHOD` check, and the registry throw for `online`. Flip the flag the day
+  the Stripe adapter (§8) is implemented — no schema or UI rework.
+- **Refund copy follows the method**, not global config: `online` refunds land back on the
+  card in a few business days; `cash` refunds are coordinated offline (`orderRefundedEmail`).
+- **UI:** one generic `checkout-card-select.svelte` (a card-radio taking a per-value
+  icon/blurb `meta`) backs both the fulfillment and payment pickers. The pay button narrates
+  the method: `cash` → "Hacer pedido — $X" + "paga al recoger…"; `online` → "Continuar al
+  pago — $X" + "Serás redirigido…".
+
 ## 9. Checkout Page — UI/UX Spec (`/checkout`)
 
 Route: `src/routes/(unprotected)/checkout/+page.svelte` (endpoint already exists as
@@ -342,7 +371,11 @@ tap-to-expand total bar pinned above the pay button — the total is **always vi
 │    address fields appear ONLY when     │  auth + saved addresses → picker chips
 │    Delivery is selected                │  + "new address" fallback
 ├────────────────────────────────────────┤
-│ 3  Order summary  (read-only)          │  line: name × qty ····· price
+│ 3  Payment                             │  [ ◉ Efectivo   ○ Pago en línea ]
+│    two cards, mutually exclusive       │  online card disabled until Stripe
+│    (§8.1); one method → no picker      │  is wired (config flag)
+├────────────────────────────────────────┤
+│ 4  Order summary  (read-only)          │  line: name × qty ····· price
 │    ✦ free item line at $0 (removable)  │  ── discount line (auto, green)
 │    ── one muted earn-hint line         │  ── shipping (or "Free")
 │                                        │  ══ Total
@@ -428,7 +461,7 @@ Same envelope convention as rewards (`{ success, message: { key } }` / typed
 `ConvexError`s), namespace `CheckoutMessages.*`:
 
 - `CHECKOUT_DISABLED` · `AUTH_REQUIRED` · `EMPTY_ORDER` — placement gates
-- `UNAVAILABLE_LINES` (carries `refs: string[]` payload) · `INVALID_DELIVERY` — validation
+- `UNAVAILABLE_LINES` (carries `refs: string[]` payload) · `INVALID_DELIVERY` · `INVALID_PAYMENT_METHOD` — validation
 - `ORDER_PLACED` — success
 - `ORDER_NOT_FOUND` · `ORDER_NOT_PENDING` · `NOT_YOUR_ORDER` — state/ownership errors
 

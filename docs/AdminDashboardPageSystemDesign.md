@@ -1,7 +1,11 @@
 # Admin Dashboard Page — Design & Implementation Spec (`/admin/dashboard`)
 
-> Status: **design, not yet built** (route exists as an empty stub; `ADMIN_PAGE_ENDPOINTS.DASHBOARD`
-> already points at it and the sidebar already links it as "Panel").
+> Status: **BUILT 2026-07-23** (code-complete, browser pass pending). One deviation from the
+> original plan, by owner decision: the table-sourced "v1" (§4) was skipped — trends/KPIs/
+> breakdowns run on `@piton-/analytics-convex` from day one (what §9 called Phase 3). §4's
+> v1 text is kept as the record of the alternative considered. Consequence: dashboard
+> history starts the day tracking shipped — orders settled before then aren't in the rollups
+> (order work-queue counts + rewards liability read live tables, so those are always exact).
 > Written 2026-07-23. Companion docs: `GeneralSystemDesignRule.md` (fetching),
 > `EmailSystemDesign.md` §7 (file-layout conventions this spec mirrors).
 >
@@ -183,17 +187,17 @@ runtime config — this is the designed-for extension point, not a fork.
 
 In v2, `fetchDashboard` keeps its exact response shape but sources `kpis`/`revenueSeries`/
 `categoryRevenue` from `analytics.fetchSummary` / time-series rollups (server helpers, inside
-the same query) instead of window scans. Zone 1 attention counts STAY on live tables forever.
+the same query) instead of window scans. Zone 1 order work-queue counts STAY on live tables forever.
 
 ### What is live vs one-shot (per `GeneralSystemDesignRule.md`)
 
 | Data | Mode | Justification (required for any subscription) |
 |---|---|---|
-| Zone 1 attention counts | **subscription** | // other users place/pay orders while the owner watches; the page's job is to surface them |
+| Zone 1 order work-queue counts | **subscription** | // other users place/pay orders while the owner watches; the page's job is to surface them |
 | Everything else (`fetchDashboard`) | **one-shot** on mount + on period change + manual ⟳ | trends don't move meaningfully mid-visit; a stale-by-minutes chart is fine; refetch is one indexed query |
 
-Implementation: the attention counts are INSIDE `fetchDashboard`'s response for the initial
-paint (no flash of "todo al día"), and additionally a tiny separate `fetchAttentionCounts`
+Implementation: the order work-queue counts are INSIDE `fetchDashboard`'s response for the initial
+paint (no flash of "todo al día"), and additionally a tiny separate `fetchOrdersCounts`
 query is the page's single `useQuery` subscription keeping Zone 1 live. One subscription per
 page, and it's the cheapest possible one (two indexed counts).
 
@@ -224,7 +228,7 @@ Follows the established conventions (feature folders, `components/pages/(protect
 ```
 src/routes/(protected)/admin/dashboard/+page.svelte        # shell: fetch + zones + skeleton/error
 src/components/pages/(protected)/admin/dashboard/
-  dashboard-attention.svelte                               # Zone 1 (takes counts, renders cards/all-clear)
+  dashboard-orders-alerts.svelte                               # Zone 1 (takes counts, renders cards/all-clear)
   dashboard-kpi-row.svelte                                 # Zone 2 (takes kpis config+values)
   dashboard-revenue-chart.svelte                           # Zone 3 chart
   dashboard-top-list.svelte                                # top products AND categories (same widget, props)
@@ -232,7 +236,7 @@ src/components/pages/(protected)/admin/dashboard/
   loading/dashboard-loading.svelte
 src/components/ui/stat-tile/stat-tile.svelte               # UNIVERSAL: value+label+delta(+sparkline)
 src/components/ui/chart/…                                  # UNIVERSAL: the one chart primitive set (§7.3)
-src/convex/tables/orders/queries/fetchDashboard.ts         # the one query (+ fetchAttentionCounts)
+src/convex/tables/orders/queries/fetchDashboard.ts         # the one query (+ fetchOrdersCounts)
 src/shared/features/orders/types/ordersTypes.ts            # DashboardPayload, DashboardPeriod types
 ```
 
@@ -290,7 +294,7 @@ hardcoded Spanish per the i18n decision; backend error keys map through `backend
 ## 8. Permissions & safety
 
 - Route lives under `(protected)/admin` — layout already gates; `fetchDashboard` and
-  `fetchAttentionCounts` additionally call `requireAdmin` server-side (never trust the route).
+  `fetchOrdersCounts` additionally call `requireAdmin` server-side (never trust the route).
 - Analytics reads (v2) are `.adminOnly()` metrics — the existing `authorize` callback already
   enforces the admin role for them.
 - No mutations on this page. The dashboard is read-only by design; every action link leads to
@@ -299,7 +303,7 @@ hardcoded Spanish per the i18n decision; backend error keys map through `backend
 ## 9. Build order (phases)
 
 1. **Phase 1 — the page, table-sourced** (no analytics component): `fetchDashboard` +
-   `fetchAttentionCounts`, `stat-tile` primitive, Zone 1 + Zone 2 + skeleton/error/empty.
+   `fetchOrdersCounts`, `stat-tile` primitive, Zone 1 + Zone 2 + skeleton/error/empty.
    Ship this before any chart — the tiles alone deliver 80% of the value.
 2. **Phase 2 — the chart primitive + Zone 3/4**: revenue trend, top lists, rewards card.
 3. **Phase 3 — analytics v2** (triggered by Stripe or scale, NOT by calendar): register the

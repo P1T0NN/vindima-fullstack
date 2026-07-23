@@ -1,31 +1,32 @@
-// CONFIG
-import { CHECKOUT_CONFIG } from '@/shared/config.js';
-
 // PROVIDERS
 import { manualProvider } from './manual';
 
 // TYPES
 import type { PaymentProvider } from './types';
+import type { Infer } from 'convex/values';
+import type { orderPaymentMethodValidator } from '../validators/ordersValidators';
+
+type PaymentMethod = Infer<typeof orderPaymentMethodValidator>;
 
 /**
- * Resolve the payment provider named in `CHECKOUT_CONFIG.PAYMENT_PROVIDER`.
+ * Resolve the settlement provider for an order's chosen payment method (spec §8 / §8.1).
  *
- * `redirect` is Stripe Checkout for this project — decided but NOT yet implemented (see
- * `CheckoutPageSystemDesign.md` §8). Keep `PAYMENT_PROVIDER` on `'manual'` until the Stripe
- * adapter lands; selecting `'redirect'` before then throws on purpose rather than placing
- * orders no one can pay.
+ * `online` is Stripe Checkout for this project — decided but NOT yet implemented. It stays
+ * unreachable via `CHECKOUT_CONFIG.PAYMENT_METHODS.ONLINE = false` (the card renders disabled)
+ * plus the server-side enabled-method guard in `placeOrder`; this throw is the last line of
+ * defense rather than a path any shopper can take.
  */
-export function getPaymentProvider(): PaymentProvider {
-	switch (CHECKOUT_CONFIG.PAYMENT_PROVIDER) {
-		case 'manual':
+export function getPaymentProvider(method: PaymentMethod): PaymentProvider {
+	switch (method) {
+		case 'cash':
 			return manualProvider;
-		case 'redirect':
+		case 'online':
 			throw new Error(
-				'redirect payment provider (Stripe) not implemented — keep PAYMENT_PROVIDER = "manual"'
+				'online payment (Stripe) not implemented — keep PAYMENT_METHODS.ONLINE = false'
 			);
 		default: {
-			const exhaustive: never = CHECKOUT_CONFIG.PAYMENT_PROVIDER;
-			throw new Error(`unknown payment provider: ${String(exhaustive)}`);
+			const exhaustive: never = method;
+			throw new Error(`unknown payment method: ${String(exhaustive)}`);
 		}
 	}
 }

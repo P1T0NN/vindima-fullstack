@@ -12,6 +12,7 @@
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { formatOrderDate } from '@/features/orders/utils/ordersUtils.js';
+	import { orderStatusLabel, orderStatusBadgeClass } from '@/features/orders/utils/orderStatus.js';
 
 	// LUCIDE ICONS
 	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
@@ -22,19 +23,6 @@
 	let { order }: { order: Doc<'orders'> } = $props();
 
 	const money = (minor: number) => formatMoneyMinor(minor, order.currency);
-
-	const STATUS_LABELS: Record<Doc<'orders'>['status'], string> = {
-		pending: 'Pendiente',
-		paid: 'Pagado',
-		cancelled: 'Cancelado',
-		refunded: 'Reembolsado'
-	};
-	const STATUS_CLASSES: Record<Doc<'orders'>['status'], string> = {
-		paid: 'bg-chart-2/15 text-chart-2',
-		pending: 'bg-muted text-muted-foreground',
-		cancelled: 'bg-destructive/10 text-destructive',
-		refunded: 'bg-destructive/10 text-destructive'
-	};
 
 	const itemCount = $derived(order.lines.reduce((n, line) => n + line.qty, 0));
 	const hasWelcome = $derived(order.amounts.welcomeDiscountMinor > 0);
@@ -67,9 +55,9 @@
 				</p>
 			</div>
 			<span
-				class={`inline-flex rounded-sm px-2.5 py-1 text-sm font-medium ${STATUS_CLASSES[order.status]}`}
+				class={`inline-flex rounded-sm px-2.5 py-1 text-sm font-medium ${orderStatusBadgeClass(order.status)}`}
 			>
-				{STATUS_LABELS[order.status]}
+				{orderStatusLabel(order.status)}
 			</span>
 		</div>
 	</div>

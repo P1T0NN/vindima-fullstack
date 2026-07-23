@@ -5,6 +5,9 @@ import { internal } from '@/convex/_generated/api';
 // MIDDLEWARE
 import { authMutation } from '@/convex/auth/middleware/authMiddleware';
 
+// HELPERS
+import { orderCountAggregate } from '../helpers/orderCountAggregate';
+
 // VALIDATORS
 import { mutationResult } from '@/convex/helpers/mutationResult';
 
@@ -30,6 +33,8 @@ export const cancelMyOrder = authMutation('cancelMyOrder')({
 		}
 
 		await ctx.db.patch(order._id, { status: 'cancelled' });
+		// Work-queue counter: pending → closed.
+		await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
 		if (order.claimId) {
 			await ctx.runMutation(
 				internal.tables.rewardClaims.mutations.releaseRewardClaim.releaseRewardClaim,

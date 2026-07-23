@@ -1,6 +1,3 @@
-// CONFIG
-import { CHECKOUT_CONFIG } from '@/shared/config.js';
-
 // UTILS
 import { formatMoneyMinor } from '@/utils/formatters';
 
@@ -13,15 +10,15 @@ import type { EmailContent } from '@/shared/features/emails/types/emailsTypes';
 
 /**
  * O7 — refund issued (`EmailSystemDesign.md` §5 O7). Quiet and factual, no CTA. Copy differs
- * by provider: `manual` money moves offline (staff coordinate); `redirect` (Stripe) lands back
- * on the payment method in a few business days.
+ * by how the order was paid: `cash` money moves offline (staff coordinate); `online` (Stripe)
+ * lands back on the payment method in a few business days.
  */
 export function orderRefundedEmail(order: Doc<'orders'>): EmailContent {
 	const hi = firstName(order.name);
 	const amount = formatMoneyMinor(order.amounts.totalMinor, order.currency);
 
 	const nextLine =
-		CHECKOUT_CONFIG.PAYMENT_PROVIDER === 'redirect'
+		order.paymentMethod === 'online'
 			? 'Verás el reembolso en tu método de pago en 5–10 días hábiles.'
 			: 'Te contactaremos para coordinar la devolución.';
 

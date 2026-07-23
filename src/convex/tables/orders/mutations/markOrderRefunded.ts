@@ -3,6 +3,12 @@ import { ConvexError, v } from 'convex/values';
 import { internalMutation } from '@/convex/_generated/server';
 import { internal } from '@/convex/_generated/api';
 
+// ANALYTICS
+import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';
+
+// HELPERS
+import { orderCountAggregate } from '../helpers/orderCountAggregate';
+
 // TYPES
 import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
 
@@ -32,6 +38,22 @@ export const markOrderRefunded = internalMutation({
 		}
 
 		await ctx.db.patch(order._id, { status: 'refunded' });
+		// Work-queue counter: open → closed.
+		await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
+
+		// Analytics — feeds the dashboard's refunds KPI. Never blocks the refund.
+		try {
+			await analytics.track(ctx, ANALYTICS_EVENT.ORDER_REFUNDED, {
+				actorId: order.userId ?? undefined,
+				properties: { amountMinor: order.amounts.totalMinor, currency: order.currency },
+				unique: { key: `order-refunded:${order._id}` }
+			});
+		} catch (err) {
+			console.warn('[orders] analytics track failed on refund; refunding anyway', {
+				orderId: order._id,
+				err
+			});
+		}
 
 		if (order.userId) {
 			await ctx.runMutation(

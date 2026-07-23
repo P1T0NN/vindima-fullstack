@@ -22,6 +22,7 @@ export const COMPANY_DATA = {
 		'Vinícola orgánica · vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
+	INSTAGRAM_URL: "https://www.instagram.com/vindima.ags/",
 	PHONE: '449 000 0000',
 	OG_IMAGE: '/assets/og-image.png',
 	OG_IMAGE_WIDTH: 1200,
@@ -116,6 +117,13 @@ export const SHOP_CONFIG = {
 	 * Extra categories stay fully reachable at their own `/shop/<slug>` pages.
 	 */
 	MAX_ROOT_CATEGORIES: 6,
+	/**
+	 * Store-local day boundaries for the admin dashboard (period windows), as a fixed UTC
+	 * offset in minutes. -360 = UTC-6 (Mexico City, no DST since 2022). Analytics rollups
+	 * are hourly, so windows built from these midnights are exact.
+	 * ponytail: fixed offset, swap to an IANA-timezone computation if a store with DST needs it.
+	 */
+	DASHBOARD_UTC_OFFSET_MINUTES: -360,
 	/**
 	 * Server-side bound on the products one `/shop/[category]` page returns (all at once,
 	 * no pagination — a storefront category is a scrollable menu, not a directory). Far above
@@ -229,12 +237,18 @@ export const CHECKOUT_CONFIG = {
 	},
 
 	/**
-	 * Payment provider, resolved by the adapter registry. `'manual'` = zero-config (order is
-	 * placed `pending`, paid offline on pickup/delivery; staff settle it). `'redirect'` =
-	 * hosted payment page — this project's redirect provider will be Stripe Checkout, chosen
-	 * but not yet implemented; keep this on `'manual'` until the Stripe adapter lands.
+	 * Payment methods offered at checkout — the shopper picks one as a card (spec §8.1). The
+	 * provider registry maps method → settlement provider: `CASH` → the manual provider (order
+	 * placed `pending`, paid offline on pickup/delivery; staff settle it), `ONLINE` → the
+	 * `redirect` provider (a hosted page — this project's is Stripe Checkout, chosen but NOT yet
+	 * implemented). Keep `ONLINE: false` until the Stripe adapter lands: the card still renders
+	 * but stays disabled ("Próximamente"), so no shopper can reach a dead payment path. With a
+	 * single method enabled the checkout shows no picker and uses it directly.
 	 */
-	PAYMENT_PROVIDER: 'manual' as 'manual' | 'redirect',
+	PAYMENT_METHODS: {
+		CASH: true,
+		ONLINE: false
+	},
 
 	/**
 	 * Settle a manual (offline-paid) order the moment it's placed — mark it paid and fire the

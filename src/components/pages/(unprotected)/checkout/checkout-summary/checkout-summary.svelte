@@ -32,11 +32,14 @@
 
 	let {
 		mode,
+		payment = 'cash',
 		unavailableRefs = [],
 		busy = false
 	}: {
 		/** Picked fulfillment mode — drives the shipping line. */
 		mode: DeliveryKind;
+		/** Picked payment method — drives the button label + trust line. */
+		payment?: 'cash' | 'online';
 		/** Refs the server rejected on the last attempt — greyed out alongside unpriced lines. */
 		unavailableRefs?: string[];
 		/** Order placement in flight. */
@@ -102,6 +105,15 @@
 	const money = (minor: number) => formatMoneyMinor(minor, currency);
 
 	const cantSubmit = $derived(busy || loading || subtotalMinor === 0);
+
+	// Button verb + trust line follow the chosen method: online continues to a hosted page,
+	// cash confirms the order and is paid offline.
+	const submitVerb = $derived(payment === 'online' ? 'Continuar al pago' : 'Hacer pedido');
+	const trustLine = $derived(
+		payment === 'online'
+			? 'Serás redirigido a una página de pago segura.'
+			: 'Sin pago en línea — paga al recoger o en la entrega.'
+	);
 </script>
 
 <div class="flex flex-col gap-4">
@@ -139,9 +151,9 @@
 		class="h-12 w-full justify-center text-sm tracking-wider uppercase"
 		disabled={cantSubmit}
 	>
-		{busy ? 'Procesando pedido…' : loading ? 'Hacer pedido' : `Hacer pedido — ${money(totalMinor)}`}
+		{busy ? 'Procesando pedido…' : loading ? submitVerb : `${submitVerb} — ${money(totalMinor)}`}
 	</Button>
 	<p class="text-center text-xs leading-snug text-muted-foreground">
-		Sin pago en línea — paga al recoger o en la entrega.
+		{trustLine}
 	</p>
 </div>

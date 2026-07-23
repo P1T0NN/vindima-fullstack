@@ -42,6 +42,8 @@ export const placeOrderSchema = z.object({
 		phone: z.string().optional()
 	}),
 	delivery: orderDeliverySchema,
+	/** Shopper's chosen payment method — the server also checks it's enabled in config. */
+	paymentMethod: z.enum(['cash', 'online']),
 	note: z.string().optional()
 });
 
@@ -56,6 +58,7 @@ export const placeOrderFormSchema = z
 		email: z.email(),
 		phone: z.string(),
 		mode: z.enum(['pickup', 'delivery']),
+		payment: z.enum(['cash', 'online']),
 		line1: z.string(),
 		line2: z.string(),
 		city: z.string(),

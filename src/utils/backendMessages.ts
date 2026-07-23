@@ -101,6 +101,7 @@ export const BACKEND_MESSAGES: Record<string, string> = {
 	'CheckoutMessages.UNAVAILABLE_LINES':
 		'Algunos artículos ya no están disponibles. Revisa tu pedido.',
 	'CheckoutMessages.INVALID_DELIVERY': 'Esa opción de entrega no está disponible.',
+	'CheckoutMessages.INVALID_PAYMENT_METHOD': 'Ese método de pago no está disponible.',
 	'CheckoutMessages.ORDER_PLACED': 'Pedido realizado.',
 	'CheckoutMessages.ORDER_NOT_FOUND': 'No encontramos ese pedido.',
 	'CheckoutMessages.ORDER_NOT_PENDING': 'Este pedido ya no se puede modificar.',

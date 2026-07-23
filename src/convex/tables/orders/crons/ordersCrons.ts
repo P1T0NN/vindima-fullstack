@@ -5,6 +5,9 @@ import { internal } from '@/convex/_generated/api';
 // CONFIG
 import { CHECKOUT_CONFIG, FEATURES } from '@/shared/config.js';
 
+// HELPERS
+import { orderCountAggregate } from '../helpers/orderCountAggregate';
+
 const HOUR_MS = 60 * 60 * 1000;
 
 /**
@@ -36,6 +39,8 @@ export const expirePendingOrders = internalMutation({
 		for (const order of pending) {
 			if (order._creationTime >= cutoff) break; // oldest-first: the rest are still fresh
 			await ctx.db.patch(order._id, { status: 'cancelled' });
+			// Work-queue counter: pending → closed.
+			await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
 			if (order.claimId) {
 				await ctx.runMutation(
 					internal.tables.rewardClaims.mutations.releaseRewardClaim.releaseRewardClaim,

@@ -19,15 +19,10 @@ import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
  * below — keep the two lists in sync.
  */
 export const ANALYTICS_EVENT = {
-	INVOICE_PAID: 'invoice.paid',
-	INVOICE_FAILED: 'invoice.failed',
-	REFUND_CREATED: 'refund.created',
-	SUBSCRIPTION_CREATED: 'subscription.created',
-	SUBSCRIPTION_CANCELLED: 'subscription.cancelled',
-	USER_SIGNED_UP: 'user.signed_up',
-	FILE_UPLOADED: 'file.uploaded',
-	STORAGE_USAGE_RECORDED: 'storage.usage_recorded',
-	FEATURE_USED: 'feature.used'
+	ORDER_SETTLED: 'order.settled',
+	ORDER_REFUNDED: 'order.refunded',
+	ORDER_LINE_SOLD: 'order.line_sold',
+	CUSTOMER_FIRST_PURCHASE: 'customer.first_purchase'
 } as const;
 
 /**
@@ -38,9 +33,10 @@ export const ANALYTICS_EVENT = {
  */
 const ADMIN_ONLY_METRICS = new Set<string>([
 	'revenue',
+	'orders',
 	'refunds',
-	'failedPayments',
-	'featureUsage'
+	'newCustomers',
+	'productRevenue'
 ]);
 
 function _throwNotAuthenticated(): never {
@@ -60,118 +56,73 @@ function _throwNotAuthenticated(): never {
  * the browser calls) run `authorize`.
  */
 export const analytics = defineAnalytics(components.analytics, {
+	// E-commerce money-path events ONLY (AdminDashboardPageSystemDesign.md §4): no page
+	// views, no clicks — Umami owns behavior; this component owns money. All tracked
+	// server-side from the settle/refund/first-purchase seams.
 	events: {
-		invoicePaid: event('invoice.paid', {
-			label: 'Invoice paid',
+		orderSettled: event('order.settled', {
+			label: 'Order settled',
 			properties: {
-				amountCents: property.number({ required: true }),
-				currency: property.string({ required: true }),
-				plan: property.string(),
-				provider: property.string()
+				amountMinor: property.number({ required: true }),
+				currency: property.string({ required: true })
 			}
 		}),
-		invoiceFailed: event('invoice.failed', {
-			label: 'Invoice failed',
+		orderRefunded: event('order.refunded', {
+			label: 'Order refunded',
 			properties: {
-				amountCents: property.number(),
-				currency: property.string({ required: true }),
-				plan: property.string(),
-				provider: property.string(),
-				reason: property.string()
+				amountMinor: property.number({ required: true }),
+				currency: property.string({ required: true })
 			}
 		}),
-		refundCreated: event('refund.created', {
-			label: 'Refund created',
+		// One event per non-reward order line at settle — powers the product/category
+		// breakdowns. `product` is the snapshot display name; `category` is the slug.
+		orderLineSold: event('order.line_sold', {
+			label: 'Order line sold',
 			properties: {
-				amountCents: property.number({ required: true }),
-				currency: property.string({ required: true }),
-				plan: property.string(),
-				provider: property.string()
+				revenueMinor: property.number({ required: true }),
+				qty: property.number({ required: true }),
+				product: property.string({ required: true }),
+				category: property.string({ required: true })
 			}
 		}),
-		subscriptionCreated: event('subscription.created', {
-			label: 'Subscription created',
+		customerFirstPurchase: event('customer.first_purchase', {
+			label: 'Customer first purchase',
 			properties: {
-				plan: property.string({ required: true }),
-				provider: property.string()
-			}
-		}),
-		subscriptionCancelled: event('subscription.cancelled', {
-			label: 'Subscription cancelled',
-			properties: {
-				plan: property.string({ required: true }),
-				provider: property.string(),
-				reason: property.string()
-			}
-		}),
-		userSignedUp: event('user.signed_up', {
-			label: 'User signed up',
-			properties: {
-				provider: property.string(),
-				role: property.string(),
-				plan: property.string()
-			}
-		}),
-		fileUploaded: event('file.uploaded', {
-			label: 'File uploaded',
-			properties: {
-				provider: property.string(),
-				mimeType: property.string(),
-				bytes: property.number()
-			}
-		}),
-		storageUsageRecorded: event('storage.usage_recorded', {
-			label: 'Storage usage recorded',
-			properties: {
-				provider: property.string(),
-				bytes: property.number({ required: true })
-			}
-		}),
-		featureUsed: event('feature.used', {
-			label: 'Feature used',
-			properties: {
-				feature: property.string({ required: true }),
-				surface: property.string()
+				discountMinor: property.number()
 			}
 		})
 	},
+	// KPI metrics are `.hourly()` so period windows built from store-local midnights are
+	// exact (daily rollups only know UTC days). `productRevenue` stays daily — a ±6h skew
+	// on a top-products ranking is immaterial, and breakdowns read fewer rows that way.
 	metrics: ({ count, sum }) => ({
 		revenue: sum('Revenue', 'currency')
-			.description('Gross paid invoice amount')
-			.from('invoice.paid')
-			.value('amountCents')
-			.by('plan', 'currency', 'provider')
+			.description('Gross settled order totals')
+			.from('order.settled')
+			.value('amountMinor')
+			.hourly()
 			.adminOnly(),
+		orders: count('Orders').from('order.settled').hourly().adminOnly(),
 		refunds: sum('Refunds', 'currency')
-			.from('refund.created')
-			.value('amountCents')
-			.by('plan', 'currency', 'provider')
+			.from('order.refunded')
+			.value('amountMinor')
+			.hourly()
 			.adminOnly(),
-		failedPayments: count('Failed payments')
-			.from('invoice.failed')
-			.by('plan', 'currency', 'provider', 'reason')
+		newCustomers: count('New customers')
+			.description('First paid order per customer')
+			.from('customer.first_purchase')
+			.hourly()
 			.adminOnly(),
-		newSubscriptions: count('New subscriptions')
-			.from('subscription.created')
-			.by('plan', 'provider'),
-		cancelledSubscriptions: count('Cancelled subscriptions')
-			.from('subscription.cancelled')
-			.by('plan', 'provider', 'reason'),
-		newUsers: count('New users').from('user.signed_up').by('provider', 'role', 'plan'),
-		uploads: count('Uploads').from('file.uploaded').by('provider', 'mimeType'),
-		storageUsedBytes: sum('Storage used', 'bytes')
-			.from('storage.usage_recorded', 'file.uploaded')
-			.value('bytes')
-			.by('provider', 'mimeType'),
-		featureUsage: count('Feature usage').from('feature.used').by('feature', 'surface').adminOnly()
+		productRevenue: sum('Product revenue', 'currency')
+			.from('order.line_sold')
+			.value('revenueMinor')
+			.by('product', 'category')
+			.adminOnly()
 	}),
 	settings: {
-		trafficMode: 'mediumVolume',
-		mediumVolumeShardCount: 16,
-		highVolumeShardCount: 64,
-		highVolumeBatchSize: 500,
-		highVolumeBatchIntervalMinutes: 1,
-		highVolumeMaxCatchupBatches: 20,
+		// Boutique volume; hourly rollups require lowVolume.
+		trafficMode: 'lowVolume',
+		defaultTimezone: 'America/Mexico_City',
 		maxQueryRangeDays: 366,
 		maxRollupRowsPerQuery: 5_000,
 		maxBreakdownItems: 25,

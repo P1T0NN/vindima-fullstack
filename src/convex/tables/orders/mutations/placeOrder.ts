@@ -14,6 +14,7 @@ import { convexRateLimiter } from '@/convex/convexRateLimiter';
 // HELPERS / PROVIDERS
 import { calculateOrderPrice } from '../helpers/calculateOrderPrice';
 import { buildOrderSearchText } from '../helpers/buildOrderSearchText';
+import { orderCountAggregate } from '../helpers/orderCountAggregate';
 import { getPaymentProvider } from '../providers/registry';
 
 // SCHEMAS
@@ -80,7 +81,9 @@ export const placeOrder = mutation({
 			.withIndex('by_attempt', (q) => q.eq('attemptId', args.attemptId))
 			.first();
 		if (existing) {
-			const payment = await getPaymentProvider().createPayment(existing);
+			const payment = await getPaymentProvider(existing.paymentMethod ?? 'cash').createPayment(
+				existing
+			);
 			return {
 				success: true,
 				message: { key: 'CheckoutMessages.ORDER_PLACED' },
@@ -99,6 +102,15 @@ export const placeOrder = mutation({
 		}
 		if (args.delivery.kind === 'delivery' && !CHECKOUT_CONFIG.FULFILLMENT.DELIVERY) {
 			return { success: false, message: { key: 'CheckoutMessages.INVALID_DELIVERY' } };
+		}
+
+		// Chosen payment method must be enabled in config (a client can't pick a disabled card —
+		// e.g. `online` while Stripe is unimplemented).
+		const methodEnabled =
+			(args.paymentMethod === 'cash' && CHECKOUT_CONFIG.PAYMENT_METHODS.CASH) ||
+			(args.paymentMethod === 'online' && CHECKOUT_CONFIG.PAYMENT_METHODS.ONLINE);
+		if (!methodEnabled) {
+			return { success: false, message: { key: 'CheckoutMessages.INVALID_PAYMENT_METHOD' } };
 		}
 
 		// Clamp to the same limits the cart enforces, then let the server price it.
@@ -133,6 +145,7 @@ export const placeOrder = mutation({
 			amounts: priced.amounts,
 			currency: priced.currency,
 			delivery: args.delivery,
+			paymentMethod: args.paymentMethod,
 			note: args.note,
 			claimId: priced.claimId
 		});
@@ -152,7 +165,10 @@ export const placeOrder = mutation({
 		});
 
 		const order = (await ctx.db.get(orderId))!;
-		const payment = await getPaymentProvider().createPayment(order);
+		// Work-queue counter: a fresh order enters the 'pending' bucket.
+		await orderCountAggregate.insert(ctx, order);
+
+		const payment = await getPaymentProvider(order.paymentMethod ?? 'cash').createPayment(order);
 
 		// Manual orders have no online payment step. Optionally settle right away (mark paid → grant
 		// stamp, record first purchase, apply claim) so rewards count now, rather than waiting for a

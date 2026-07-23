@@ -102,6 +102,20 @@ Implementation (2026-07-19) + the full interactive pass (2026-07-20): admin adds
 row-by-row. Also new: admin reward corrections UI (`/admin/users/[id]` → Rewards tab:
 adjust stamps/rewards with note, rebuild-from-ledger, full ledger table).
 
+### 5b. Admin Dashboard page — 🟩 CODE-COMPLETE (2026-07-23, not browser-verified)
+Built to `docs/AdminDashboardPageSystemDesign.md`, analytics-first (owner decision: skip the
+table-sourced v1). `/admin/dashboard`: live order-alerts strip (the page's one subscription) →
+5 KPI tiles with prev-period deltas → revenue chart + top products → categories + rewards
+liability. Data: `fetchDashboard` (one-shot) reads `@piton-/analytics-convex` rollups
+(hourly; events tracked at settle/refund/first-purchase seams, unique-keyed, try/caught so
+they never block money paths); `analytics/index:writeConfiguration` now actually registered
+(the `predev` script had been failing silently). Attention cards deep-link `?status=` into
+the orders table.
+Still open:
+- ❌ Browser pass (place+settle an order → tiles/chart/breakdowns move; period switch dims;
+  skeleton on first load; live order-count updates from a second session).
+- Note: rollup history starts 2026-07-23 — pre-existing orders don't appear in KPIs/charts.
+
 ### 6. Stripe Checkout — ⏸ ON HOLD (unchanged)
 Already decided as the payment provider — **do NOT implement until explicitly asked.**
 It slots into the existing provider seam (`src/convex/tables/orders/providers/manual.ts`).

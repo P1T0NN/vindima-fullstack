@@ -97,11 +97,11 @@
 			</div>
 
 			<img
-				src={ASSETS_DATA.BOTTLE}
+				src="/root/opt/hero-section-wine-bottle-433w.webp"
 				alt="Botella de vino Vindima"
 				class="pointer-events-none absolute right-8.5 -bottom-11 z-10 hidden h-141.5 drop-shadow-brand-lg lg:block"
-				width="280"
-				height="566"
+				width="433"
+				height="577"
 				loading="eager"
 				decoding="async"
 			/>

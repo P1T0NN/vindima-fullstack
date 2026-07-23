@@ -6,7 +6,8 @@ import { v } from 'convex/values';
 import {
 	orderLineValidator,
 	orderAmountsValidator,
-	orderDeliveryValidator
+	orderDeliveryValidator,
+	orderPaymentMethodValidator
 } from '../validators/ordersValidators';
 
 /**
@@ -60,6 +61,9 @@ export const ordersTable = defineTable({
 	currency: v.string(),
 
 	delivery: orderDeliveryValidator,
+	/** Shopper's chosen payment method (spec §8.1). Optional so pre-existing rows validate;
+	 *  a missing value means the historical default, `cash` (the old manual-only behaviour). */
+	paymentMethod: v.optional(orderPaymentMethodValidator),
 	/** Optional customer note ("no onions", "call on arrival"). Display only. */
 	note: v.optional(v.string()),
 

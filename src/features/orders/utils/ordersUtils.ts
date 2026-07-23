@@ -44,6 +44,7 @@ export function toPlaceOrderArgs(
 		attemptId,
 		lines,
 		contact: { name: values.name, email: values.email, phone: values.phone || undefined },
+		paymentMethod: values.payment,
 		delivery:
 			values.mode === 'pickup'
 				? { kind: 'pickup' }

@@ -7,6 +7,7 @@
 	// COMPONENTS
 	import Link from '@/components/ui/link/link.svelte';
 	import Logo from '@/components/ui/logo/logo.svelte';
+	import Instagram from '@/svgs/instagram.svelte';
 
 	// UTILS
 	import { cn } from '@/utils/utils.js';
@@ -47,6 +48,15 @@
 		<div class="min-w-0">
 			<Logo class="mb-3.5 transition-opacity hover:opacity-90" />
 			<p class={footerBodyTextClass}>{COMPANY_DATA.DESCRIPTION}</p>
+			<a
+				href={COMPANY_DATA.INSTAGRAM_URL}
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label="Instagram"
+				class="mt-4 inline-flex text-[#C8C8C8] transition-opacity hover:opacity-100 opacity-70"
+			>
+				<Instagram class="size-5" />
+			</a>
 		</div>
 
 		<nav aria-label="Explorar" class="flex min-w-0 flex-col gap-2.5">
