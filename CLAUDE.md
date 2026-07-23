@@ -21,6 +21,10 @@ When the user states something is **for this project only**, or names a specific
 
 For full engineering standards (Svelte, Convex, architecture, DX), see `AGENTS.md`.
 
+## Data Fetching — Realtime Is Opt-In
+
+**Before wiring ANY data read (subscription, `useQuery`, live listener, or one-shot fetch), read `docs/GeneralSystemDesignRule.md`** — especially its "FOR LLMs / AI ASSISTANTS" section. Short version: default to a one-shot fetch on mount; a realtime subscription must be justified (in a code comment) by data that changes under the viewer without them acting. This rule is backend-agnostic and applies in every project bootstrapped from this template.
+
 <!-- convex-ai-start -->
 This project uses [Convex](https://convex.dev) as its backend.
 

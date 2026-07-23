@@ -109,7 +109,8 @@ import type * as tables_productCategories_mutations_editCategory from "../tables
 import type * as tables_productCategories_queries_fetchAllCategories from "../tables/productCategories/queries/fetchAllCategories.js";
 import type * as tables_productCategories_queries_fetchCategoriesSafe from "../tables/productCategories/queries/fetchCategoriesSafe.js";
 import type * as tables_productCategories_queries_fetchCategoryById from "../tables/productCategories/queries/fetchCategoryById.js";
-import type * as tables_productCategories_queries_fetchCategoryBySlug from "../tables/productCategories/queries/fetchCategoryBySlug.js";
+import type * as tables_productCategories_queries_fetchCategoryOptions from "../tables/productCategories/queries/fetchCategoryOptions.js";
+import type * as tables_productCategories_queries_fetchCategoryPage from "../tables/productCategories/queries/fetchCategoryPage.js";
 import type * as tables_productCategories_schemas_productCategoriesSchema from "../tables/productCategories/schemas/productCategoriesSchema.js";
 import type * as tables_productCategories_validators_productCategoriesValidators from "../tables/productCategories/validators/productCategoriesValidators.js";
 import type * as tables_productVariants_mutations_setVariantRewardEligible from "../tables/productVariants/mutations/setVariantRewardEligible.js";
@@ -125,7 +126,6 @@ import type * as tables_products_mutations_editProduct from "../tables/products/
 import type * as tables_products_mutations_setProductStatus from "../tables/products/mutations/setProductStatus.js";
 import type * as tables_products_queries_fetchAllProducts from "../tables/products/queries/fetchAllProducts.js";
 import type * as tables_products_queries_fetchProductById from "../tables/products/queries/fetchProductById.js";
-import type * as tables_products_queries_fetchProductsByCategory from "../tables/products/queries/fetchProductsByCategory.js";
 import type * as tables_products_queries_fetchRewardCatalog from "../tables/products/queries/fetchRewardCatalog.js";
 import type * as tables_products_schemas_productsSchema from "../tables/products/schemas/productsSchema.js";
 import type * as tables_products_validators_productsValidators from "../tables/products/validators/productsValidators.js";
@@ -266,7 +266,8 @@ declare const fullApi: ApiFromModules<{
   "tables/productCategories/queries/fetchAllCategories": typeof tables_productCategories_queries_fetchAllCategories;
   "tables/productCategories/queries/fetchCategoriesSafe": typeof tables_productCategories_queries_fetchCategoriesSafe;
   "tables/productCategories/queries/fetchCategoryById": typeof tables_productCategories_queries_fetchCategoryById;
-  "tables/productCategories/queries/fetchCategoryBySlug": typeof tables_productCategories_queries_fetchCategoryBySlug;
+  "tables/productCategories/queries/fetchCategoryOptions": typeof tables_productCategories_queries_fetchCategoryOptions;
+  "tables/productCategories/queries/fetchCategoryPage": typeof tables_productCategories_queries_fetchCategoryPage;
   "tables/productCategories/schemas/productCategoriesSchema": typeof tables_productCategories_schemas_productCategoriesSchema;
   "tables/productCategories/validators/productCategoriesValidators": typeof tables_productCategories_validators_productCategoriesValidators;
   "tables/productVariants/mutations/setVariantRewardEligible": typeof tables_productVariants_mutations_setVariantRewardEligible;
@@ -282,7 +283,6 @@ declare const fullApi: ApiFromModules<{
   "tables/products/mutations/setProductStatus": typeof tables_products_mutations_setProductStatus;
   "tables/products/queries/fetchAllProducts": typeof tables_products_queries_fetchAllProducts;
   "tables/products/queries/fetchProductById": typeof tables_products_queries_fetchProductById;
-  "tables/products/queries/fetchProductsByCategory": typeof tables_products_queries_fetchProductsByCategory;
   "tables/products/queries/fetchRewardCatalog": typeof tables_products_queries_fetchRewardCatalog;
   "tables/products/schemas/productsSchema": typeof tables_products_schemas_productsSchema;
   "tables/products/validators/productsValidators": typeof tables_products_validators_productsValidators;

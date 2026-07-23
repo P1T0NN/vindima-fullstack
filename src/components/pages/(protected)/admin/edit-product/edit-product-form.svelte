@@ -6,8 +6,8 @@
 	import { untrack } from 'svelte';
 	import { api } from '@/convex/_generated/api';
 
-	// CLASSES
-	import { productCategoriesClass } from '@/features/products/classes/productCategoriesClass.svelte';
+	// HOOKS
+	import { useCategoryOptions } from '@/features/productCategories/hooks/useCategoryOptions.svelte';
 
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -45,10 +45,10 @@
 
 	let { product }: { product: AdminProductRow } = $props();
 
-	// Category options come from the DB via the admin layout's shared subscription — the
-	// owner picks, never types (typo-proof). The product's current slug preselects because
-	// `values.category` already holds it.
-	const sections = $derived(editProductSections(productCategoriesClass.options));
+	// Category options come from the DB — the owner picks, never types (typo-proof). The
+	// product's current slug preselects because `values.category` already holds it.
+	const categoryOptions = useCategoryOptions();
+	const sections = $derived(editProductSections(categoryOptions.options));
 
 	// Form model — seeded ONCE from `product` (untracked; the route remounts this via `{#key}` when
 	// the edited id changes, so capturing initial values here is correct).

@@ -1,5 +1,6 @@
 // TYPES
 import type { Id } from '@/convex/_generated/dataModel';
+import type { ShopProductRow } from '@/shared/features/products/types/productsTypes';
 
 /**
  * One storefront category card, as returned by `fetchCategoriesSafe` — the public
@@ -21,9 +22,9 @@ export type ShopCategoryRow = {
 };
 
 /**
- * Minimal category projection for the dynamic `/shop/[category]` page header, returned by
- * `fetchCategoryBySlug`. Just what the storefront header renders — no price bounds (the
- * product grid shows prices) and no id (the slug is the key).
+ * Minimal category projection for the dynamic `/shop/[category]` page header. Just what the
+ * storefront header renders — no price bounds (the product grid shows prices) and no id
+ * (the slug is the key).
  */
 export type ShopCategoryHeader = {
 	slug: string;
@@ -31,4 +32,14 @@ export type ShopCategoryHeader = {
 	subtitle: string | null;
 	description: string | null;
 	image: string | null;
+};
+
+/**
+ * Everything the `/shop/[category]` route renders, returned by `fetchCategoryPage` in ONE
+ * query: the header plus all active products with variants. Fetched one-shot server-side
+ * (SSR — SEO + no client subscription; see docs/GeneralSystemDesignRule.md).
+ */
+export type ShopCategoryPage = {
+	category: ShopCategoryHeader;
+	products: ShopProductRow[];
 };

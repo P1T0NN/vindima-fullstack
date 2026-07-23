@@ -115,7 +115,13 @@ export const SHOP_CONFIG = {
 	 * cards the grid stops reading as "pick one" and starts reading as a list to scroll.
 	 * Extra categories stay fully reachable at their own `/shop/<slug>` pages.
 	 */
-	MAX_ROOT_CATEGORIES: 6
+	MAX_ROOT_CATEGORIES: 6,
+	/**
+	 * Server-side bound on the products one `/shop/[category]` page returns (all at once,
+	 * no pagination — a storefront category is a scrollable menu, not a directory). Far above
+	 * any realistic catalog; raise it before a category legitimately outgrows it.
+	 */
+	MAX_PRODUCTS_PER_CATEGORY: 200
 } as const;
 
 /**

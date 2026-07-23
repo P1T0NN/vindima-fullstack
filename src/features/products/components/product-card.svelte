@@ -80,7 +80,7 @@
 			<img
 				src={image}
 				alt={imageAlt}
-				class="absolute inset-0 size-full object-contain p-6 transition-transform duration-200 group-hover/card:scale-105"
+				class="absolute inset-0 size-full object-cover transition-transform duration-200 group-hover/card:scale-105"
 				loading="lazy"
 				decoding="async"
 			/>
@@ -103,7 +103,7 @@
 		</h3>
 
 		{#if description}
-			<p class="line-clamp-2 text-xs leading-snug text-muted-foreground">
+			<p class="text-xs leading-snug text-muted-foreground">
 				{description}
 			</p>
 		{/if}

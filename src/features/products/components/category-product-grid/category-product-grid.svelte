@@ -1,17 +1,12 @@
 <script lang="ts">
-	// LIBRARIES
-	import { useQuery } from '@mmailaender/convex-svelte';
-	import { api } from '@/convex/_generated/api';
-
 	// CONFIG
-	import { CART_CONFIG, PAGINATION_DATA } from '@/shared/config.js';
+	import { CART_CONFIG } from '@/shared/config.js';
 
-	// STATE
+	// CLASSES
 	import { cart } from '@/features/cart/cart.svelte';
 
 	// COMPONENTS
 	import ProductCard from '../product-card.svelte';
-	import CategoryProductGridLoading from './category-product-grid-loading.svelte';
 	import CategoryProductGridEmpty from './category-product-grid-empty.svelte';
 
 	// UTILS
@@ -19,40 +14,25 @@
 	import { cn } from '@/utils/utils.js';
 
 	// TYPES
-	import type { FunctionReturnType } from 'convex/server';
-
-	type ShopProduct = FunctionReturnType<
-		typeof api.tables.products.queries.fetchProductsByCategory.fetchProductsByCategory
-	>['page'][number];
+	import type { ShopProductRow } from '@/shared/features/products/types/productsTypes';
+	import type { ShopProductVariantRow } from '@/shared/features/productVariants/types/productVariantsTypes';
 
 	let {
-		category,
+		products,
 		class: className
 	}: {
-		/** DB product category to list (`status: 'active'` only, server-sorted). */
-		category: string;
+		/** Server-loaded products for one category (see `fetchCategoryPage` — SSR, no subscription). */
+		products: ShopProductRow[];
 		class?: string;
 	} = $props();
-
-	const products = useQuery(
-		api.tables.products.queries.fetchProductsByCategory.fetchProductsByCategory,
-		() => ({
-			category,
-			paginationOpts: { numItems: PAGINATION_DATA.DEFAULT_PAGE_SIZE, cursor: null }
-		})
-	);
-
-	const productRows = $derived(products.data?.page ?? []);
 
 	// Selected variant ref per product slug (multi-variant products only).
 	let selected = $state<Record<string, string>>({});
 
-	type ShopVariant = ShopProduct['variants'][number];
-
 	/** The variant the card is currently selling: picked → first available → first. */
-	function currentVariant(product: ShopProduct): ShopVariant {
-		const picked = product.variants.find((v: ShopVariant) => v.ref === selected[product.slug]);
-		return picked ?? product.variants.find((v: ShopVariant) => v.available) ?? product.variants[0];
+	function currentVariant(product: ShopProductRow): ShopProductVariantRow {
+		const picked = product.variants.find((v) => v.ref === selected[product.slug]);
+		return picked ?? product.variants.find((v) => v.available) ?? product.variants[0];
 	}
 
 	const money = (minor: number) => formatMoneyMinor(minor, CART_CONFIG.CURRENCY);
@@ -65,13 +45,11 @@
 	const gridClass = $derived(cn('grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3', className));
 </script>
 
-{#if products.isLoading}
-	<CategoryProductGridLoading class={className} />
-{:else if productRows.length === 0}
+{#if products.length === 0}
 	<CategoryProductGridEmpty class={className} />
 {:else}
 	<div class={gridClass}>
-		{#each productRows as product (product.slug)}
+		{#each products as product (product.slug)}
 			{@const variant = currentVariant(product)}
 			{#if product.variants.length > 1}
 				<ProductCard

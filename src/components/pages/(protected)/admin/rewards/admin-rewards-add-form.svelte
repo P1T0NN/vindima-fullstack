@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery } from 'convex-svelte';
+	import { usePaginatedQuery } from '@mmailaender/convex-svelte';
 
 	// CONFIG
 	import { PAGINATION_DATA } from '@/shared/config';
@@ -26,12 +26,18 @@
 	import type { MutationFormFieldSnippetProps } from '@/components/ui/mutation-form/types';
 
 	// Catalog for the add-picker; the current-items list lives on `AdminRewardsTable`
-	// (both are live, so they can't drift).
-	const catalogQuery = useQuery(
+	// (both are live, so they can't drift). Feeds a <select>, so we drain every page —
+	// a pager makes no sense inside a dropdown.
+	const catalogQuery = usePaginatedQuery(
 		api.tables.products.queries.fetchRewardCatalog.fetchRewardCatalog,
-		() => ({ paginationOpts: { numItems: PAGINATION_DATA.DEFAULT_PAGE_SIZE, cursor: null } })
+		{},
+		{ initialNumItems: PAGINATION_DATA.DEFAULT_PAGE_SIZE }
 	);
-	const catalog = $derived(catalogQuery.data?.page as AdminProductRow[] | undefined);
+	$effect(() => {
+		if (catalogQuery.status === 'CanLoadMore')
+			catalogQuery.loadMore(PAGINATION_DATA.DEFAULT_PAGE_SIZE);
+	});
+	const catalog = $derived(catalogQuery.results as AdminProductRow[] | undefined);
 
 	// Active products with ≥1 available, not-yet-reward variant.
 	const candidates = $derived(
@@ -77,7 +83,7 @@
 		title="No se pudieron cargar los artículos de recompensa"
 		description="Algo salió mal al obtener el catálogo. Inténtalo de nuevo."
 	/>
-{:else if catalogQuery.isLoading}
+{:else if catalogQuery.status === 'LoadingFirstPage'}
 	<AdminRewardsAddFormLoading />
 {:else}
 	<ConvexMutationForm

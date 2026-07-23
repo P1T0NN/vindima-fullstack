@@ -2,8 +2,8 @@
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
 
-	// CLASSES
-	import { productCategoriesClass } from '@/features/products/classes/productCategoriesClass.svelte';
+	// HOOKS
+	import { useCategoryOptions } from '@/features/productCategories/hooks/useCategoryOptions.svelte';
 
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -31,6 +31,9 @@
 	// LUCIDE ICONS
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 
+	// Categories feed the filter select and the slug→name column.
+	const categoryOptions = useCategoryOptions();
+
 	// Filters: '' = all. Both flow into the query via `queryArgs` (undefined when all).
 	let statusFilter = $state<'' | AdminProductRow['status']>('');
 	let categoryFilter = $state<string>('');
@@ -40,7 +43,7 @@
 	);
 	const categoryTriggerLabel = $derived(
 		categoryFilter
-			? (productCategoriesClass.nameBySlug.get(categoryFilter) ?? categoryFilter)
+			? (categoryOptions.nameBySlug.get(categoryFilter) ?? categoryFilter)
 			: 'Categoría: todas'
 	);
 
@@ -56,7 +59,7 @@
 	controlsPlace="top"
 	searchable
 	searchPlaceholder="Buscar por nombre…"
-	columns={adminProductsColumns}
+	columns={adminProductsColumns(categoryOptions.nameBySlug)}
 	getRowId={(r) => r._id}
 	customCells={{ name: nameCell, status: statusCell, actions: actionsCell }}
 	{filters}
@@ -89,7 +92,7 @@
 		</SelectTrigger>
 		<SelectContent>
 			<SelectItem value="">Categoría: todas</SelectItem>
-			{#each productCategoriesClass.options as opt (opt.value)}
+			{#each categoryOptions.options as opt (opt.value)}
 				<SelectItem value={opt.value}>{opt.label}</SelectItem>
 			{/each}
 		</SelectContent>

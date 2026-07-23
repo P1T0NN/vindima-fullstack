@@ -32,11 +32,19 @@ email, and `auditLogs` entry confirmed.
 Config note: `CHECKOUT_CONFIG.SETTLE_ON_PLACE` is `false` (orders stay `pending` at placement,
 no auto-stamp; settle from admin). Flip to `true` to auto-settle on placement again.
 
-### 2. Dynamic `/shop/[category]` route — 🟩 CODE-COMPLETE (2026-07-22, not browser-verified)
+### 2. Dynamic `/shop/[category]` route — ✅ DONE (browser-verified 2026-07-23)
 Done:
-- ✅ `/shop/[category]/+page.svelte` + `+page.server.ts` (SSR loader via `fetchCategoryBySlug`,
+- ✅ `/shop/[category]/+page.svelte` + `+page.server.ts` (SSR loader via `fetchCategoryPage` —
+  since 2026-07-23 ONE query returns header + ALL active products, no client subscription,
   404 on unknown slug). All 6 hardcoded pages **deleted**; every category (incl. admin-created)
   now gets a storefront page automatically. Home + recommendation links already point at `/shop/<slug>`.
+- ✅ **Streamed SSR + loading skeleton** (2026-07-23) — loader awaits on direct hits (products
+  in initial HTML for SEO + real 404), but returns the un-awaited promise on client-side
+  navigations (`isDataRequest`). `+page.svelte` is a thin `<svelte:boundary>` shell with
+  `pending` (skeleton) / `failed` (error) snippets; body lives in `category-page-content.svelte`
+  (`const page = $derived(await pageData)`, experimental async Svelte). Null-resolve renders
+  `empty/category-page-empty.svelte`. Skeletons: `category-page-loading.svelte` +
+  `category-product-grid-loading.svelte`.
 - ✅ Background = the category's own uploaded image, floated faintly (no asset registry).
 - ✅ New `subtitle` DB column (schema + zod + create/edit mutations + admin forms) drives the
   page eyebrow, replacing a hardcoded per-slug `{#if}` chain. Existing 6 categories need their
@@ -44,21 +52,19 @@ Done:
   compartir", hogazas→"Horno de la casa", bowls→"Frescos y de temporada", bebidas/vinos→"Vino de autor").
 - Remaining bespoke bits (vinos promotions, per-category WhatsApp CTAs) stay inline `{#if slug === …}`.
 
-Still open:
-- ❌ **Browser pass** — compare each category page against the old look (backgrounds now use the
-  category photo, not the old prop cut-outs; headers are centered for all).
-- ❌ **Page-size truncation** (below) — the route shipped, but the grid still reads one page.
+- ✅ **Browser pass (2026-07-23)** — category pages verified against the old look, AND the
+  streamed path confirmed live: the `<svelte:boundary>` skeleton shows on client-side nav and
+  content swaps in, direct hits SSR products into the HTML, unknown slug 404s. Experimental
+  `<svelte:boundary>` + `$derived(await …)` works at runtime.
 
-**Scale caveat (2026-07-20, STILL OPEN — not addressed by the route).** Everything rendered
-through `ConvexDataTable` / `ConvexDataList` paginates properly (40 rows = 4 pages via
-`PaginatedData`). The caveat is ONLY the three plain `useQuery` subscriptions that fetch
-a single page (`DEFAULT_PAGE_SIZE` = 10) and render it as the whole set, with no pager:
-  1. the shop category grid (`category-product-grid` — an 11th active product in a
-     category silently never renders),
-  2. the rewards add-picker candidates (derived from one page of the catalog),
-  3. the admin layout's categories subscription (form selects see the first 10).
-Fix alongside this route with `usePaginatedQuery` accumulation (the documented
-infinite-loading recipe) — the shop grid is the one that will bite first.
+**Scale caveat — ✅ RESOLVED 2026-07-23.** All three single-page truncation reads are gone:
+  1. shop category grid → server-rendered via `fetchCategoryPage` (all active products,
+     bounded by `SHOP_CONFIG.MAX_PRODUCTS_PER_CATEGORY` = 200, no subscription),
+  2. rewards add-picker → `usePaginatedQuery` auto-drain of the whole catalog,
+  3. admin categories → non-paginated `fetchCategoryOptions` fetched one-shot per page via
+     `useCategoryOptions` (layout subscription + `productCategoriesClass` deleted).
+See `docs/GeneralSystemDesignRule.md` (new standing rule: realtime is opt-in; one-shot
+fetch is the default).
 
 ### 3. Transactional order emails — 🟩 CODE-COMPLETE (2026-07-22, not browser-verified)
 Full system built to `docs/EmailSystemDesign.md` — went well past the original ask:
@@ -115,7 +121,7 @@ Note: Stripe is what makes #1's "Mark paid" + pending-order lifecycle real.
 |---|---|---|
 | **Cart** | ✅ Ready | End-to-end verified; now self-healing (delisted items auto-removed with toast, guest + authed) |
 | **Products catalog** | ✅ Ready-ish | Add-product browser-passed (validation, required image, auto-ref); edit-product + cover-swap still needs one interactive pass |
-| **Categories** | 🟩 Code-complete | CRUD page + delete dialog; new `subtitle` field; storefront now fully dynamic (#2 route shipped, 6 hardcoded pages deleted). Browser pass (rename/delete + the new category pages) still pending |
+| **Categories** | 🟡 Mostly ready | New category storefront pages browser-verified 2026-07-23 (#2, incl. streamed skeleton). Still pending: admin CRUD browser pass (rename/delete dialog) |
 | **Delete variant** | 🟡 Code-ready | Reward gate now live (real `rewardEligible` items exist) — browser pass pending |
 | **Checkout/orders** | ✅ Ready | Full lifecycle browser-verified 2026-07-22 (place → mark paid → fulfillment → refund), incl. reward side-effects + emails + audit. `SETTLE_ON_PLACE` is `false` (settle from admin). Only real-payment settlement (Stripe #6) is outstanding |
 | **Rewards** | ✅ Ready | Full lifecycle browser-verified incl. refund-release; admin corrections UI shipped |
@@ -130,7 +136,8 @@ Note: Stripe is what makes #1's "Mark paid" + pending-order lifecycle real.
 2. ✅ **RESOLVED — Fulfillment UI shipped** (#1). Admin mark-paid + `processing → shipped →
    delivered` advance, browser-verified; the customer rail on `/my-orders` now moves. The full
    order lifecycle can be completed in front of the customer (manual/pickup).
-3. **Page-size truncation** (see #2) — shop/rewards/categories whole-set reads cap at 10.
+3. ✅ **RESOLVED (2026-07-23) — page-size truncation** — shop grid now SSR whole-set via
+   `fetchCategoryPage`; rewards picker drains; categories use one-shot `fetchCategoryOptions`.
 4. **Production environment config** — `PUBLIC_SITE_URL` (Vercel env + Convex prod env;
    only the dev deployment is configured), and the R2 bucket is still the template's
    test bucket (`svelte-components-test`) — a real bucket + credentials are needed.

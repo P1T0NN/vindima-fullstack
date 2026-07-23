@@ -5,8 +5,8 @@
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
 
-	// CLASSES
-	import { productCategoriesClass } from '@/features/products/classes/productCategoriesClass.svelte';
+	// HOOKS
+	import { useCategoryOptions } from '@/features/productCategories/hooks/useCategoryOptions.svelte';
 
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -42,9 +42,9 @@
 	// TYPES
 	import type { MutationFormExtraFieldsProps } from '@/components/ui/mutation-form/types';
 
-	// Category options come from the DB via the admin layout's shared subscription —
-	// the owner picks, never types (typo-proof).
-	const sections = $derived(createProductSections(productCategoriesClass.options));
+	// Category options come from the DB — the owner picks, never types (typo-proof).
+	const categoryOptions = useCategoryOptions();
+	const sections = $derived(createProductSections(categoryOptions.options));
 
 	let values = $state<CreateProductInput>({
 		name: '',

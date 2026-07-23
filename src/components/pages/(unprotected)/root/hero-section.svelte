@@ -28,14 +28,14 @@
 		{
 			src: '/root/opt/hero-carousel-3-1280w.webp',
 			alt: 'Foto del lugar 3'
-		},
-		{
-			src: '/root/opt/hero-carousel-4-1280w.webp',
-			alt: 'Foto del lugar 4'
 		}
 	] as const;
 
-	const autoplay = Autoplay({ delay: 3000, stopOnInteraction: false });
+	const autoplay = Autoplay({
+		delay: 1500,
+		stopOnInteraction: false,
+		stopOnMouseEnter: false
+	});
 </script>
 
 <Section
@@ -121,8 +121,6 @@
 			plugins={[autoplay]}
 			class="mt-7 border border-primary/60"
 			aria-label="Galería del lugar"
-			onmouseenter={autoplay.stop}
-			onmouseleave={autoplay.reset}
 		>
 			<Carousel.Content class="ms-0">
 				{#each HERO_CAROUSEL_SLIDES as slide (slide.src)}

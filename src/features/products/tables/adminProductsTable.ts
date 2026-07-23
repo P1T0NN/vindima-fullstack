@@ -2,9 +2,6 @@
 // the (long) shape edits on its own. Cell RENDERING (links, badges, buttons) stays in the
 // component as snippets — only the data/accessor shape lives here.
 
-// CLASSES
-import { productCategoriesClass } from '@/features/products/classes/productCategoriesClass.svelte';
-
 // UTILS
 import { priceRange } from '@/shared/utils/priceRange';
 
@@ -12,13 +9,15 @@ import { priceRange } from '@/shared/utils/priceRange';
 import type { ColumnDef } from '@/components/ui/data-table/types.js';
 import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
 
-export const adminProductsColumns: ColumnDef<AdminProductRow>[] = [
+/** `nameBySlug` comes from the page's one-shot `fetchCategoryOptions` — rows store the slug. */
+export const adminProductsColumns = (
+	nameBySlug: Map<string, string>
+): ColumnDef<AdminProductRow>[] => [
 	{ id: 'name', header: 'Nombre', accessor: (r) => r.name },
 	{
 		id: 'category',
 		header: 'Categoría',
-		// Display name from the shared class; rows store the slug (the stable key).
-		accessor: (r) => productCategoriesClass.nameBySlug.get(r.category) ?? r.category,
+		accessor: (r) => nameBySlug.get(r.category) ?? r.category,
 		hideBelow: 'md'
 	},
 	{ id: 'status', header: 'Estado', accessor: (r) => r.status },

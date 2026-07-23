@@ -2,12 +2,8 @@
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
 
-	// CLASSES
-	import { productCategoriesClass } from '@/features/products/classes/productCategoriesClass.svelte';
-
 	// COMPONENTS
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
-	import { ErrorComponent } from '@/components/ui/error-component/index.js';
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
 	import AdminCategoriesRow from '@/components/pages/(protected)/admin/categories/admin-categories-row.svelte';
 	import AdminCategoriesHeader from '@/components/pages/(protected)/admin/categories/admin-categories-header.svelte';
@@ -31,22 +27,15 @@
 <section class="flex w-full flex-col gap-4 p-4 md:p-6">
 	<AdminCategoriesHeader />
 
-	{#if productCategoriesClass.error}
-		<ErrorComponent
-			variant="alert"
-			title="No se pudieron cargar las categorías"
-			description="Algo salió mal al obtener las categorías. Inténtalo de nuevo."
-		/>
-	{:else}
-		<ConvexDataTable
-			caption="Categorías"
-			query={api.tables.productCategories.queries.fetchAllCategories.fetchAllCategories}
-			optimizationStrategy="offset"
-			{columns}
-			getRowId={(r) => r._id}
-			customCells={{ name: nameCell }}
-		/>
-	{/if}
+	<!-- The table subscribes to `fetchAllCategories` itself — the page needs no extra query. -->
+	<ConvexDataTable
+		caption="Categorías"
+		query={api.tables.productCategories.queries.fetchAllCategories.fetchAllCategories}
+		optimizationStrategy="offset"
+		{columns}
+		getRowId={(r) => r._id}
+		customCells={{ name: nameCell }}
+	/>
 </section>
 
 {#snippet nameCell({ row }: DataTableCellSnippetProps<Doc<'productCategories'>>)}
