@@ -155,6 +155,12 @@ export const convexRateLimitRegistry = {
 	editCategory: limitPresets.interactiveWrite,
 	deleteCategory: limitPresets.interactiveWrite,
 
+	// Upsells — admin-managed add-to-cart suggestion rules (UpsellsSystemDesign.md)
+	createUpsellRule: limitPresets.interactiveWrite,
+	editUpsellRule: limitPresets.interactiveWrite,
+	setUpsellRuleEnabled: limitPresets.interactiveWrite,
+	deleteUpsellRule: limitPresets.interactiveWrite,
+
 	// Better Auth HTTP routes (enforced in hooks.before — see auth/authRoutes.ts)
 	signInEmail: limitPresets.authSignIn,
 	signUpEmail: limitPresets.authSignUp,

@@ -6,7 +6,7 @@ export const PAGINATION_DATA = {
 	DEFAULT_OPTIMIZATION_STRATEGY: 'cursor' as const
 } as const;
 
-const WHATSAPP_NUMBER = '524491234567';
+const WHATSAPP_NUMBER = '5214499409233';
 
 /**
  * Branding / contact strings used by emails, headers, etc.
@@ -23,7 +23,7 @@ export const COMPANY_DATA = {
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
 	INSTAGRAM_URL: "https://www.instagram.com/vindima.ags/",
-	PHONE: '449 000 0000',
+	PHONE: '1 449 940 9233',
 	OG_IMAGE: '/assets/og-image.png',
 	OG_IMAGE_WIDTH: 1200,
 	OG_IMAGE_HEIGHT: 630
@@ -103,7 +103,15 @@ export const FEATURES = {
 	 * `EmailSystemDesign.md`. NOTE: this also gates the auth OTP emails, so turning it off
 	 * breaks email sign-in — intended only for dev/testing without a Resend key.
 	 */
-	EMAILS: true
+	EMAILS: true,
+
+	/**
+	 * Enable add-to-cart upsell suggestions. Table stays declared; flipping needs no
+	 * migration. When `false`: the `/admin/upsells` nav entry hides, `fetchUpsellCatalog`
+	 * returns empty, no dialog ever mounts, and the add-to-cart flow behaves exactly as
+	 * before the feature existed. See `UpsellsSystemDesign.md` and `UPSELLS_CONFIG` below.
+	 */
+	UPSELLS: true
 } as const;
 
 /**
@@ -265,6 +273,20 @@ export const CHECKOUT_CONFIG = {
 
 	/** Documentation, not a subsystem: prices are tax-inclusive. See spec §2. */
 	TAX_MODE: 'included' as const
+} as const;
+
+/**
+ * Add-to-cart upsell suggestions — per-project knobs. See `UpsellsSystemDesign.md` §4.2.
+ * Gated by `FEATURES.UPSELLS`.
+ */
+export const UPSELLS_CONFIG = {
+	/** Max items one rule may offer (and the dialog may show). 3–4 reads as a suggestion; more
+	 *  reads as a second catalog. Enforced in the zod schema AND the mutations. */
+	MAX_ITEMS_PER_RULE: 4,
+	/** Show a given rule's dialog at most once per browser session (sessionStorage). `false` =
+	 *  every matching add fires it — the current choice: the popup appears on every add of a
+	 *  product that has upsells. */
+	SHOW_ONCE_PER_SESSION: false
 } as const;
 
 /**

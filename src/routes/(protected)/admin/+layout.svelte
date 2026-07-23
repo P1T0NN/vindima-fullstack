@@ -20,6 +20,10 @@
 	import TagIcon from '@lucide/svelte/icons/tag';
 	import GiftIcon from '@lucide/svelte/icons/gift';
 	import ShoppingBagIcon from '@lucide/svelte/icons/shopping-bag';
+	import SparklesIcon from '@lucide/svelte/icons/sparkles';
+
+	// CONFIG
+	import { FEATURES } from '@/shared/config.js';
 
 	let { children } = $props();
 
@@ -57,7 +61,17 @@
 						name: 'Recompensas',
 						url: ADMIN_PAGE_ENDPOINTS.REWARDS,
 						icon: GiftIcon
-					}
+					},
+					// Add-to-cart suggestions — hidden when the feature is off.
+					...(FEATURES.UPSELLS
+						? [
+								{
+									name: 'Sugerencias',
+									url: ADMIN_PAGE_ENDPOINTS.UPSELLS,
+									icon: SparklesIcon
+								}
+							]
+						: [])
 				]
 			},
 			{

@@ -108,7 +108,7 @@
 			<img
 				src={ASSETS_DATA.GLASS}
 				alt="Copa de vino"
-				class="pointer-events-none absolute right-61.5 -bottom-7.5 z-1 hidden h-75 -rotate-3 drop-shadow-brand-md lg:block"
+				class="pointer-events-none absolute right-75 -bottom-7.5 z-1 hidden h-75 -rotate-3 drop-shadow-brand-md lg:block"
 				width="150"
 				height="300"
 				loading="eager"

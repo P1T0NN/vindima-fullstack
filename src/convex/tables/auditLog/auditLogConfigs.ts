@@ -38,6 +38,12 @@ export const AUDIT_ACTIONS = {
 	CATEGORY_UPDATE: 'product.category.update',
 	CATEGORY_DELETE: 'product.category.delete',
 
+	// Upsells (add-to-cart suggestions)
+	UPSELL_CREATE: 'upsell.create',
+	UPSELL_UPDATE: 'upsell.update',
+	UPSELL_TOGGLE: 'upsell.toggle',
+	UPSELL_DELETE: 'upsell.delete',
+
 	// Orders
 	ORDER_REFUND: 'order.refund',
 	ORDER_MARK_PAID: 'order.mark_paid',

@@ -12,20 +12,34 @@
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
 	import CategoryPageEmpty from './empty/category-page-empty.svelte';
+	import UpsellDialog from '@/features/upsells/components/upsell-dialog.svelte';
+
+	// STATE
+	import { upsells } from '@/features/upsells/upsells.svelte';
 
 	// TYPES
 	import type { ShopCategoryPage } from '@/shared/features/productCategories/types/productCategoriesTypes';
+	import type { UpsellCatalog } from '@/shared/features/upsells/types/upsellsTypes';
 
 	// LUCIDE ICONS
 	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 
 	let {
-		pageData
+		pageData,
+		upsellCatalog
 	}: {
 		/** Resolved on direct hits (loader awaited it — real 404s happen there); a streamed
 		 *  promise on client-side navigations, suspending the parent `<svelte:boundary>`. */
 		pageData: ShopCategoryPage | Promise<ShopCategoryPage | null>;
+		/** Streamed upsell rules — seeds the client controller (one-shot, no subscription). */
+		upsellCatalog: Promise<UpsellCatalog>;
 	} = $props();
+
+	// Seed the upsell controller once the (streamed) catalog resolves. Client-only ($effect),
+	// never blocks the product render — the dialog only matters after a user taps "Agregar".
+	$effect(() => {
+		upsellCatalog.then((c) => upsells.setCatalog(c.rules)).catch(() => {});
+	});
 
 	// Experimental async Svelte: `$derived(await …)` — SSR waits (content lands in the
 	// HTML); the first client render suspends into the boundary's pending snippet; and
@@ -94,7 +108,7 @@
 				{/if}
 			</div>
 
-			<CategoryProductGrid products={page.products} />
+			<CategoryProductGrid products={page.products} category={category.slug} />
 
 			<!-- Category-specific extras (promotions / CTA), inline per slug. -->
 			{#if slug === 'vinos-de-autor'}
@@ -130,6 +144,9 @@
 			{/if}
 		</div>
 	</Section>
+
+	<!-- Add-to-cart suggestion dialog — controlled by the shared upsells controller. -->
+	<UpsellDialog />
 {/if}
 
 <!-- The WhatsApp CTA panel a few categories share — one markup, called per category above. -->

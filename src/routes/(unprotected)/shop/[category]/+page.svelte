@@ -14,7 +14,7 @@
      streamed) page data. Direct hits arrive resolved (full SSR HTML — SEO + real 404);
      client-side navigations suspend into the pending skeleton. -->
 <svelte:boundary>
-	<CategoryPageContent pageData={data.pageData} />
+	<CategoryPageContent pageData={data.pageData} upsellCatalog={data.upsellCatalog} />
 
 	{#snippet pending()}
 		<CategoryPageLoading />

@@ -66,9 +66,11 @@ export function isNavItemActive(pathname: string, href: string): boolean {
 class Header {
 	menuOpen = $state(false);
 
-	closeMenu() {
+	// Arrow field, not a method: it's passed as a bare `onclick={header.closeMenu}` reference,
+	// so `this` must be bound here — a plain method would lose it and silently no-op on click.
+	closeMenu = () => {
 		this.menuOpen = false;
-	}
+	};
 }
 
 export const header = new Header();

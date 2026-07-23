@@ -4,6 +4,7 @@
 
 	// CLASSES
 	import { cart } from '@/features/cart/cart.svelte';
+	import { upsells } from '@/features/upsells/upsells.svelte';
 
 	// COMPONENTS
 	import ProductCard from '../product-card.svelte';
@@ -19,10 +20,13 @@
 
 	let {
 		products,
+		category,
 		class: className
 	}: {
 		/** Server-loaded products for one category (see `fetchCategoryPage` — SSR, no subscription). */
 		products: ShopProductRow[];
+		/** The category slug these products belong to — used to match upsell rules on add. */
+		category: string;
 		class?: string;
 	} = $props();
 
@@ -37,9 +41,12 @@
 
 	const money = (minor: number) => formatMoneyMinor(minor, CART_CONFIG.CURRENCY);
 
-	function add(ref: string) {
+	function add(product: ShopProductRow, ref: string) {
 		cart.add(ref);
-		cart.open();
+		// An upsell dialog may intercept here; if it opens, it owns landing the shopper in the
+		// cart on close. Otherwise open the cart now, exactly as before the feature existed.
+		const shown = upsells.maybeShow({ slug: product.slug, category, name: product.name }, ref);
+		if (!shown) cart.open();
 	}
 
 	const gridClass = $derived(cn('grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3', className));
@@ -58,7 +65,7 @@
 					image={product.images[0]}
 					imageAlt={product.name}
 					addDisabled={!variant.available}
-					onadd={() => add(variant.ref)}
+					onadd={() => add(product, variant.ref)}
 				>
 					{#snippet footer()}
 						<div class="flex flex-col gap-3">
@@ -110,7 +117,7 @@
 					imageAlt={product.name}
 					price={money(variant.priceMinor)}
 					addDisabled={!variant.available}
-					onadd={() => add(variant.ref)}
+					onadd={() => add(product, variant.ref)}
 				/>
 			{/if}
 		{/each}

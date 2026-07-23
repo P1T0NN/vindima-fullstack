@@ -110,5 +110,16 @@ export const BACKEND_MESSAGES: Record<string, string> = {
 	'CheckoutMessages.ORDER_NOT_PAID': 'Esta acción solo aplica a pedidos pagados.',
 	'CheckoutMessages.ORDER_REFUNDED': 'Pedido reembolsado.',
 	'CheckoutMessages.ORDER_MARKED_PAID': 'Pedido marcado como pagado.',
-	'CheckoutMessages.ORDER_FULFILLMENT_UPDATED': 'Estado de entrega actualizado.'
+	'CheckoutMessages.ORDER_FULFILLMENT_UPDATED': 'Estado de entrega actualizado.',
+
+	// Upsells (add-to-cart suggestions) — UpsellsSystemDesign.md §11
+	'UpsellsMessages.RULE_CREATED': 'Sugerencia creada.',
+	'UpsellsMessages.RULE_UPDATED': 'Sugerencia actualizada.',
+	'UpsellsMessages.RULE_DELETED': 'Sugerencia eliminada.',
+	'UpsellsMessages.RULE_TOGGLED': 'Sugerencia actualizada.',
+	'UpsellsMessages.RULE_EXISTS': 'Ya existe una sugerencia para este disparador.',
+	'UpsellsMessages.RULE_NOT_FOUND': 'No encontramos esa sugerencia.',
+	'UpsellsMessages.INVALID_TRIGGER': 'Ese disparador ya no está disponible.',
+	'UpsellsMessages.INVALID_ITEMS': 'Revisa los artículos sugeridos: algunos ya no están disponibles.',
+	'UpsellsMessages.UPSELLS_DISABLED': 'Las sugerencias no están disponibles por el momento.'
 };

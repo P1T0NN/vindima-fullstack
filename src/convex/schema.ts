@@ -13,6 +13,7 @@ import { ordersTable } from './tables/orders/schemas/ordersSchema';
 import { productsTable } from './tables/products/schemas/productsSchema';
 import { productVariantsTable } from './tables/productVariants/schemas/productVariantsSchema';
 import { productCategoriesTable } from './tables/productCategories/schemas/productCategoriesSchema';
+import { upsellsTable } from './tables/upsells/schemas/upsellsSchema';
 
 const schema = defineSchema({
 	// Users (with `role` and other custom fields) live in the better-auth component;
@@ -56,6 +57,11 @@ const schema = defineSchema({
 	// Category rows the admin picks from — `products.category` stores the slug verbatim,
 	// validated at write time. See ProductCategorySystemDesign.md.
 	productCategories: productCategoriesTable,
+
+	// Add-to-cart upsell rules — one row per trigger, offering variant refs. See
+	// UpsellsSystemDesign.md. Toggle population via FEATURES.UPSELLS (table always declared
+	// so flipping needs no migration).
+	upsells: upsellsTable,
 
 	/** Cloudflare R2 file reference + cached download URL. Owner-stamped at upload. */
 	uploadedFilesR2: defineTable({
