@@ -9,25 +9,25 @@
  * dead-ends on a name the admin would have to change by hand.
  */
 
+// CONFIG
+import { CATALOG_CONFIG } from '@/shared/config.js';
+
 // UTILS
 import { slugify } from '@/shared/utils/slugify';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';
 
-/** Base used when a name has no slug-able characters at all. */
-const FALLBACK_BASE = 'producto';
-/** Numeric suffixes tried before falling back to a timestamp. */
-const SUFFIX_LIMIT = 50;
+const { SLUG_FALLBACK_BASE, SLUG_SUFFIX_LIMIT } = CATALOG_CONFIG;
 
 export async function getProductSlug(ctx: QueryCtx, name: string): Promise<string> {
-	const base = slugify(name) || FALLBACK_BASE;
+	const base = slugify(name) || SLUG_FALLBACK_BASE;
 
 	let slug = base;
-	for (let suffix = 2; suffix <= SUFFIX_LIMIT; suffix++) {
+	for (let suffix = 2; suffix <= SLUG_SUFFIX_LIMIT; suffix++) {
 		if (!(await isTaken(ctx, slug))) return slug;
 		// The timestamp branch is returned unchecked: unique in practice, and the loop ends here.
-		slug = suffix === SUFFIX_LIMIT ? `${base}-${Date.now()}` : `${base}-${suffix}`;
+		slug = suffix === SLUG_SUFFIX_LIMIT ? `${base}-${Date.now()}` : `${base}-${suffix}`;
 	}
 	return slug;
 }

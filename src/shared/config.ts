@@ -6,6 +6,46 @@ export const PAGINATION_DATA = {
 	DEFAULT_OPTIMIZATION_STRATEGY: 'cursor' as const
 } as const;
 
+/**
+ * Server-side batch sizes for bulk work — one bounded batch per cron tick / request, never
+ * a self-rescheduling loop. A full batch is the signal to raise the cron frequency or the
+ * number here (the crons log a warning when they saturate).
+ */
+export const BATCH_CONFIG = {
+	/** `confirmPendingStamps` — pending stamps promoted per hourly run (~4.8k/day headroom). */
+	REWARD_STAMP_CONFIRM: 200,
+	/** `expireInactiveCards` — inactive reward accounts wiped per daily run. */
+	REWARD_CARD_EXPIRE: 500,
+	/** `expirePendingOrders` — abandoned `pending` orders cancelled per run. */
+	ORDER_EXPIRE: 200,
+	/** `purgeStaleAuditLogs` — hard cap per run so a post-downtime backlog can't blow the budget. */
+	AUDIT_PURGE: 5_000,
+	/** `cleanupOrphanDataR2` — R2 metadata keys per page, and pages walked per run. Orphans past
+	 *  `PAGE_SIZE * MAX_PAGES` wait for the next sweep. */
+	R2_CLEANUP_PAGE_SIZE: 200,
+	R2_CLEANUP_MAX_PAGES: 25,
+	/** `createDeleteMutation` — default cap on `ids.length` per request. Overridable per call site. */
+	DELETE_MUTATION: 200
+} as const;
+
+/**
+ * Direct-to-R2 upload limits, enforced server-side before a signed URL is minted.
+ * Mirrors historical Convex-storage limits — keep caps aligned so UX stays predictable.
+ */
+export const UPLOADS_CONFIG = {
+	MAX_UPLOAD_BYTES: 10 * 1024 * 1024, // 10 MB
+	ALLOWED_CONTENT_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'],
+	/**
+	 * Object-key prefixes clients may request, so bucket contents stay browsable by entity type
+	 * (`products/<uuid>`) instead of a flat pile of UUIDs. Strict allowlist — a free-form prefix
+	 * from the client would let a caller write anywhere in the bucket namespace.
+	 *
+	 * Keys are permanent: renaming a prefix here does NOT move existing objects, so add new
+	 * values rather than editing old ones.
+	 */
+	ALLOWED_KEY_PREFIXES: ['products', 'categories']
+} as const;
+
 const WHATSAPP_NUMBER = '5214499409233';
 
 /**
@@ -50,7 +90,17 @@ export const EMAIL_CONFIG = {
 	/** Muted text — taglines, legal line, secondary copy. Mirrors `--muted-foreground`. */
 	MUTED_TEXT: 'rgba(28,20,24,0.6)',
 	/** Text on the accent CTA button. Mirrors `--accent-foreground`. */
-	ON_ACCENT: '#f2f1ed'
+	ON_ACCENT: '#f2f1ed',
+	/** Serif stack — matches the header wordmark. Email-safe families only. */
+	FONT_SERIF: "Georgia,'Times New Roman',serif",
+	/** Sans stack — the body default. */
+	FONT_SANS: 'Arial,Helvetica,sans-serif',
+	/**
+	 * Minutes an OTP stays valid, as printed in the auth emails. This is COPY, not enforcement:
+	 * the real window is better-auth's `emailOTP.expiresIn` (left at its 5-minute default).
+	 * Bump both together.
+	 */
+	OTP_EXPIRY_MINUTES: 5
 } as const;
 
 export const ASSETS_DATA = {
@@ -137,7 +187,25 @@ export const SHOP_CONFIG = {
 	 * no pagination — a storefront category is a scrollable menu, not a directory). Far above
 	 * any realistic catalog; raise it before a category legitimately outgrows it.
 	 */
-	MAX_PRODUCTS_PER_CATEGORY: 200
+	MAX_PRODUCTS_PER_CATEGORY: 200,
+	/** Newest orders shown in compact surfaces (account club-card history strip). Server-side `take`. */
+	MY_ORDERS_PREVIEW_LIMIT: 3
+} as const;
+
+/**
+ * Catalog shape knobs — products, variants, generated slugs. Server-side bounds, not UI.
+ */
+export const CATALOG_CONFIG = {
+	/**
+	 * Server-side `take` bound when joining a product's variants. One variant axis per product
+	 * (`ProductsTableSystemDesign.md` §2), so a handful of rows at most — this is a safety cap,
+	 * not a page size.
+	 */
+	MAX_VARIANTS_PER_PRODUCT: 64,
+	/** Base for a generated product slug when the name has no slug-able characters at all. */
+	SLUG_FALLBACK_BASE: 'producto',
+	/** Numeric slug suffixes tried before falling back to a timestamp. */
+	SLUG_SUFFIX_LIMIT: 50
 } as const;
 
 /**
@@ -286,7 +354,9 @@ export const UPSELLS_CONFIG = {
 	/** Show a given rule's dialog at most once per browser session (sessionStorage). `false` =
 	 *  every matching add fires it — the current choice: the popup appears on every add of a
 	 *  product that has upsells. */
-	SHOW_ONCE_PER_SESSION: false
+	SHOW_ONCE_PER_SESSION: false,
+	/** Versioned sessionStorage key holding the ids of rules already shown (§5.4). Bump to reset. */
+	SHOWN_STORAGE_KEY: 'upsells.shown.v1'
 } as const;
 
 /**

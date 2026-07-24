@@ -1,4 +1,7 @@
 <script lang="ts">
+	// UTILS
+	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
+
 	// TYPES
 	import type { CartLine } from '@/shared/features/cart/cartUtils';
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
@@ -18,13 +21,16 @@
 	const unavailable = $derived(
 		product.unitPriceMinor === null || unavailableRefs.includes(line.productRef)
 	);
+	const name = $derived(resolvedDisplayName({ ...product, ref: product.productRef }));
 </script>
 
 <li class="flex items-start justify-between gap-3 py-3 text-sm {unavailable ? 'opacity-50' : ''}">
 	<span class="min-w-0">
-		<span class="block truncate text-foreground">{product.name}</span>
+		<span class="block truncate text-foreground">{name}</span>
 		<span class="text-xs text-muted-foreground">
-			{unavailable ? 'Ya no está disponible' : `${line.qty} × ${money(product.unitPriceMinor ?? 0)}`}
+			{unavailable
+				? 'Ya no está disponible'
+				: `${line.qty} × ${money(product.unitPriceMinor ?? 0)}`}
 		</span>
 	</span>
 	{#if !unavailable}

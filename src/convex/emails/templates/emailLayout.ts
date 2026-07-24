@@ -11,10 +11,10 @@ import { emailFooter } from './emailFooter';
  * repeated. Rules: table-based, inline hex only (no CSS vars, no `<style>` blocks — Gmail
  * strips them), no images for critical info, single 600px column.
  *
- * Serif stack matches the header wordmark; sans stack is the body default.
+ * Serif stack matches the header wordmark; sans stack is the body default (`EMAIL_CONFIG`).
  */
-const SERIF = "Georgia,'Times New Roman',serif";
-const SANS = 'Arial,Helvetica,sans-serif';
+const SERIF = EMAIL_CONFIG.FONT_SERIF;
+const SANS = EMAIL_CONFIG.FONT_SANS;
 
 /** Absolute site URL for a path (emails need absolute links). e.g. `siteUrl('/shop')`. */
 export function siteUrl(path: string): string {

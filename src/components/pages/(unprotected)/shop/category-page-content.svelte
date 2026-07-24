@@ -12,10 +12,10 @@
 	import Section from '@/components/ui/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
 	import CategoryPageEmpty from './empty/category-page-empty.svelte';
-	import UpsellDialog from '@/features/upsells/components/upsell-dialog.svelte';
+	import UpsellDialog from '@/features/upsells/components/upsell-dialog/upsell-dialog.svelte';
 
 	// STATE
-	import { upsells } from '@/features/upsells/upsells.svelte';
+	import { upsells } from '@/features/upsells/classes/upsells.svelte';
 
 	// TYPES
 	import type { ShopCategoryPage } from '@/shared/features/productCategories/types/productCategoriesTypes';

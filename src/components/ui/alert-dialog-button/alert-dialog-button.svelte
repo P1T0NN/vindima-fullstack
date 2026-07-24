@@ -1,21 +1,11 @@
 <script lang="ts">
-	// LIBRARIES
+	// Confirm-action dialog on the native <dialog> AlertDialog: trigger button → confirm/cancel.
+	// Same public API as before; the shell is now the browser's (focus trap, top layer, backdrop).
 
 	// COMPONENTS
-	import {
-		AlertDialog,
-		AlertDialogAction,
-		AlertDialogCancel,
-		AlertDialogContent,
-		AlertDialogDescription,
-		AlertDialogFooter,
-		AlertDialogHeader,
-		AlertDialogTitle,
-		AlertDialogTrigger
-	} from '@/components/ui/alert-dialog';
-
-	// LUCIDE ICONS
-	import { Loader } from '@lucide/svelte';
+	import { AlertDialog } from '@/components/ui/alert-dialog/index.js';
+	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 
 	interface Props {
 		// Function to call when action is confirmed
@@ -70,20 +60,23 @@
 	}
 </script>
 
-<AlertDialog bind:open {onOpenChange}>
-	<AlertDialogTrigger class={triggerClass}>
-		{@render triggerChildren?.()}
-	</AlertDialogTrigger>
-
-	<AlertDialogContent class={isDestructive ? 'ring-destructive/30' : ''}>
-		<AlertDialogHeader>
-			<AlertDialogTitle class={isDestructive ? 'text-destructive' : ''}>
+<AlertDialog
+	bind:open
+	{onOpenChange}
+	{triggerChildren}
+	{triggerClass}
+	class={isDestructive ? 'ring-destructive/30' : undefined}
+>
+	{#snippet children()}
+		<div class="alert-dialog__header">
+			<h2 class={isDestructive ? 'text-destructive' : undefined}>
 				{title ?? 'Esta acción no se puede revertir'}
-			</AlertDialogTitle>
-			<AlertDialogDescription>
-				{description ?? '¿Estás seguro de que quieres hacer esto? Esta acción no se puede deshacer.'}
-			</AlertDialogDescription>
-		</AlertDialogHeader>
+			</h2>
+			<p>
+				{description ??
+					'¿Estás seguro de que quieres hacer esto? Esta acción no se puede deshacer.'}
+			</p>
+		</div>
 
 		{#if body}
 			<div class="py-2">
@@ -91,17 +84,18 @@
 			</div>
 		{/if}
 
-		<AlertDialogFooter>
-			<AlertDialogCancel
+		<div class="alert-dialog__footer">
+			<Button
 				type="button"
+				variant="outline"
 				onclick={() => (onOpenChange ? onOpenChange(false) : (open = false))}
 				disabled={isPending}
 			>
 				Cancelar
-			</AlertDialogCancel>
+			</Button>
 
 			{#if !hideProceed}
-				<AlertDialogAction
+				<Button
 					type="button"
 					onclick={handleAction}
 					class={actionClass}
@@ -109,11 +103,11 @@
 					disabled={isPending || actionDisabled}
 				>
 					{#if isPending}
-						<Loader class="h-3 w-3 animate-spin" />
+						<Spinner class="size-3.5" />
 					{/if}
 					Continuar
-				</AlertDialogAction>
+				</Button>
 			{/if}
-		</AlertDialogFooter>
-	</AlertDialogContent>
+		</div>
+	{/snippet}
 </AlertDialog>

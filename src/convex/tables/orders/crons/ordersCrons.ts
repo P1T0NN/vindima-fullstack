@@ -3,19 +3,15 @@ import { internalMutation } from '@/convex/_generated/server';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG
-import { CHECKOUT_CONFIG, FEATURES } from '@/shared/config.js';
+import { BATCH_CONFIG, CHECKOUT_CONFIG, FEATURES } from '@/shared/config.js';
 
 // HELPERS
 import { orderCountAggregate } from '../helpers/orderCountAggregate';
 
 const HOUR_MS = 60 * 60 * 1000;
 
-/**
- * Max orders cancelled per run — one bounded batch per tick (same style as the rewards/storage
- * crons). Pending orders older than the window are the tail of abandoned checkouts; a full
- * batch logs a warning to raise the frequency.
- */
-const EXPIRE_BATCH = 200;
+/** Max orders cancelled per run — see `BATCH_CONFIG`. */
+const EXPIRE_BATCH = BATCH_CONFIG.ORDER_EXPIRE;
 
 /**
  * Cancel `pending` orders older than `PENDING_EXPIRY_HOURS`, releasing any reward claim they

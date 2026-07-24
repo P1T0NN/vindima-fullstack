@@ -5,6 +5,7 @@
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import {
 		Card,
 		CardHeader,
@@ -330,6 +331,9 @@
 	{#if actions}
 		{@render actions({ busy })}
 	{:else}
-		<Button type="submit" class="w-full" disabled={busy}>{submitLabel}</Button>
+		<Button type="submit" class="w-full" disabled={busy}>
+			{#if busy}<Spinner class="size-3.5" />{/if}
+			{submitLabel}
+		</Button>
 	{/if}
 </form>

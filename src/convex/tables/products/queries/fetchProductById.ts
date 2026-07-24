@@ -8,14 +8,14 @@
 import { query } from '@/convex/_generated/server';
 import { v } from 'convex/values';
 
+// CONFIG
+import { CATALOG_CONFIG } from '@/shared/config.js';
+
 // MIDDLEWARE
 import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
 
 // TYPES
 import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
-
-/** One product has a handful of variants (single axis). */
-const MAX_VARIANTS_PER_PRODUCT = 64;
 
 export const fetchProductById = query({
 	args: { productId: v.string() },
@@ -32,7 +32,7 @@ export const fetchProductById = query({
 			await ctx.db
 				.query('productVariants')
 				.withIndex('by_product', (q) => q.eq('productId', product._id))
-				.take(MAX_VARIANTS_PER_PRODUCT)
+				.take(CATALOG_CONFIG.MAX_VARIANTS_PER_PRODUCT)
 		).filter((variant) => variant.deletedAt === undefined); // hide tombstones
 		variants.sort((a, b) => a.sortOrder - b.sortOrder);
 

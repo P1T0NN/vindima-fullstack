@@ -17,10 +17,12 @@ export const upsellTriggerValidator = v.union(
 
 // ─── Shop-side catalog (fetchUpsellCatalog) ──────────────────────────────────
 
-/** A resolved, live offer item — dead refs are dropped, so price is never null here. */
+/** A resolved, live offer item — dead refs are dropped, so price is never null here. Raw
+ *  fields only — the frontend composes the display name (`variantDisplayName.ts`). */
 export const upsellCatalogItemValidator = v.object({
 	ref: v.string(),
-	name: v.string(),
+	productName: v.string(),
+	variantLabel: v.union(v.string(), v.null()),
 	description: v.union(v.string(), v.null()),
 	imageUrl: v.union(v.string(), v.null()),
 	priceMinor: v.number()
@@ -34,10 +36,12 @@ export const upsellCatalogRuleValidator = v.object({
 
 // ─── Admin list (fetchUpsellRules) ───────────────────────────────────────────
 
-/** Per-item health so the list can badge problems without breaking the rule. */
+/** Per-item health so the list can badge problems without breaking the rule. Raw fields
+ *  only — `productName: null` = unresolvable ref (frontend falls back to a readable ref). */
 export const upsellAdminItemValidator = v.object({
 	ref: v.string(),
-	name: v.string(),
+	productName: v.union(v.string(), v.null()),
+	variantLabel: v.union(v.string(), v.null()),
 	imageUrl: v.union(v.string(), v.null()),
 	priceMinor: v.union(v.number(), v.null()),
 	status: v.union(v.literal('ok'), v.literal('missing'), v.literal('unavailable'))

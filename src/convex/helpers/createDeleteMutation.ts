@@ -3,6 +3,9 @@ import { ConvexError, v } from 'convex/values';
 import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
 import { mutation } from '../_generated/server';
 
+// CONFIG
+import { BATCH_CONFIG } from '@/shared/config.js';
+
 // HELPERS
 import { convexGetRateLimitedUserId } from './convexGetRateLimitedUserId.js';
 import { requireAdmin } from '../auth/middleware/authMiddleware.js';
@@ -17,8 +20,8 @@ import type { AuditAction } from '../tables/auditLog/auditLogConfigs';
 
 // ─── Config types ────────────────────────────────────────────────────────────
 
-/** Default cap on `ids.length` per request. Overridable per call site. */
-const DEFAULT_MAX_BATCH_SIZE = 200;
+/** Default cap on `ids.length` per request — see `BATCH_CONFIG`. Overridable per call site. */
+const DEFAULT_MAX_BATCH_SIZE = BATCH_CONFIG.DELETE_MUTATION;
 
 /**
  * Phase 2 execution strategy. Controls how per-row work (`onDelete` → `ctx.db.delete`)

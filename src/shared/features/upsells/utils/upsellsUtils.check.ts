@@ -13,12 +13,17 @@ assert.equal(buildTriggerKey({ kind: 'global' }), 'global');
 
 const item = (ref: string): UpsellCatalogRule['items'][number] => ({
 	ref,
-	name: ref,
+	productName: ref,
+	variantLabel: null,
 	description: null,
 	imageUrl: null,
 	priceMinor: 1000
 });
-const rule = (id: string, trigger: UpsellCatalogRule['trigger'], refs: string[]): UpsellCatalogRule => ({
+const rule = (
+	id: string,
+	trigger: UpsellCatalogRule['trigger'],
+	refs: string[]
+): UpsellCatalogRule => ({
 	id,
 	trigger,
 	items: refs.map(item)

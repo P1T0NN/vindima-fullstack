@@ -7,12 +7,7 @@
 	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 	import { Input } from '@/components/ui/input/index.js';
 	import { Field, FieldLabel } from '@/components/ui/field/index.js';
-	import {
-		Select,
-		SelectContent,
-		SelectItem,
-		SelectTrigger
-	} from '@/components/ui/select/index.js';
+	import { NativeSelect } from '@/components/ui/select/index.js';
 
 	// UTILS
 	import { safeMutation } from '@/utils/convexHelpers';
@@ -70,32 +65,17 @@
 
 		<Field>
 			<FieldLabel for="ban-expires">Expira</FieldLabel>
-			<Select
-				type="single"
-				value={expiresIn}
-				onValueChange={(v) => (expiresIn = v)}
+			<NativeSelect
+				id="ban-expires"
+				bind:value={expiresIn}
 				disabled={isPending}
-			>
-				<SelectTrigger id="ban-expires">
-					<span>
-						{#if expiresIn === ''}
-							Permanente
-						{:else if expiresIn === '86400'}
-							1 día
-						{:else if expiresIn === '604800'}
-							7 días
-						{:else if expiresIn === '2592000'}
-							30 días
-						{/if}
-					</span>
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value="">Permanente</SelectItem>
-					<SelectItem value="86400">1 día</SelectItem>
-					<SelectItem value="604800">7 días</SelectItem>
-					<SelectItem value="2592000">30 días</SelectItem>
-				</SelectContent>
-			</Select>
+				options={[
+					{ value: '', label: 'Permanente' },
+					{ value: '86400', label: '1 día' },
+					{ value: '604800', label: '7 días' },
+					{ value: '2592000', label: '30 días' }
+				]}
+			/>
 		</Field>
 	</div>
 {/snippet}

@@ -20,6 +20,8 @@ export const BACKEND_MESSAGES: Record<string, string> = {
 	'GenericMessages.UPLOAD_SAVE_FAILED': 'No se pudo guardar el archivo subido. Inténtalo de nuevo.',
 	'GenericMessages.UPLOAD_URL_READY': 'URL de subida generada.',
 	'GenericMessages.EMAIL_SENT_SUCCESSFULLY': 'Correo enviado correctamente.',
+	'AuthMessages.OTP_SEND_FAILED':
+		'No se pudo enviar el correo de verificación. Inténtalo de nuevo.',
 	'GenericMessages.TEST_ROW_CREATED': 'Fila de prueba creada.',
 	'GenericMessages.OK': 'Listo.',
 	'GenericMessages.YOU_NEED_TO_CORRECT_FORM_ERRORS': 'Corrige los errores del formulario',
@@ -120,6 +122,7 @@ export const BACKEND_MESSAGES: Record<string, string> = {
 	'UpsellsMessages.RULE_EXISTS': 'Ya existe una sugerencia para este disparador.',
 	'UpsellsMessages.RULE_NOT_FOUND': 'No encontramos esa sugerencia.',
 	'UpsellsMessages.INVALID_TRIGGER': 'Ese disparador ya no está disponible.',
-	'UpsellsMessages.INVALID_ITEMS': 'Revisa los artículos sugeridos: algunos ya no están disponibles.',
+	'UpsellsMessages.INVALID_ITEMS':
+		'Revisa los artículos sugeridos: algunos ya no están disponibles.',
 	'UpsellsMessages.UPSELLS_DISABLED': 'Las sugerencias no están disponibles por el momento.'
 };

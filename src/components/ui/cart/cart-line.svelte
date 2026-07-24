@@ -7,6 +7,7 @@
 
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
+	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
 	import { CART_CONFIG } from '@/shared/config';
 
 	// ICONS
@@ -21,6 +22,8 @@
 	let { line, product }: { line: CartLine; product: ResolvedCartProduct } = $props();
 
 	const available = $derived(product.unitPriceMinor !== null);
+	// Display composition is the frontend's job — the backend returns raw fields.
+	const name = $derived(resolvedDisplayName({ ...product, ref: product.productRef }));
 	const money = (minor: number) => formatMoneyMinor(minor, product.currency);
 
 	function removeWithUndo() {
@@ -43,7 +46,7 @@
 	<div class="flex min-w-0 flex-1 flex-col gap-1.5">
 		<div class="flex items-start justify-between gap-3">
 			<div class="min-w-0">
-				<p class="truncate text-sm font-medium text-foreground">{product.name}</p>
+				<p class="truncate text-sm font-medium text-foreground">{name}</p>
 				{#if available && line.qty > 1}
 					<p class="mt-0.5 text-xs text-muted-foreground">
 						{`${money(product.unitPriceMinor!)} c/u`}
@@ -66,14 +69,14 @@
 						class="inline-flex size-9 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
 						onclick={() => cart.setQty(line.productRef, line.qty - 1)}
 						disabled={line.qty <= 1}
-						aria-label={`Disminuir cantidad de ${product.name}`}
+						aria-label={`Disminuir cantidad de ${name}`}
 					>
 						<MinusIcon class="size-4" />
 					</button>
 					<output
 						class="min-w-8 px-1 text-center text-sm font-medium tabular-nums"
 						aria-live="polite"
-						aria-label={`Cantidad de ${product.name}`}
+						aria-label={`Cantidad de ${name}`}
 					>
 						{line.qty}
 					</output>
@@ -82,7 +85,7 @@
 						class="inline-flex size-9 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
 						onclick={() => cart.setQty(line.productRef, line.qty + 1)}
 						disabled={line.qty >= CART_CONFIG.MAX_QTY_PER_LINE}
-						aria-label={`Aumentar cantidad de ${product.name}`}
+						aria-label={`Aumentar cantidad de ${name}`}
 					>
 						<PlusIcon class="size-4" />
 					</button>

@@ -3,6 +3,9 @@ import { v } from 'convex/values';
 import { R2, type R2Callbacks } from '@convex-dev/r2';
 import { components, internal } from '../../_generated/api';
 
+// CONFIG
+import { UPLOADS_CONFIG } from '@/shared/config.js';
+
 // HELPERS
 import { getAuthUserId } from '../../auth/helpers/getAuthUserId.js';
 import { logAudit } from '../../tables/auditLog/helpers/logAudit';
@@ -21,28 +24,13 @@ import type { ConvexMutationResult } from '../../types/convexTypes.js';
 export const r2 = new R2(components.r2);
 
 /**
- * Mirrors historical Convex-storage upload limits — keep caps aligned so production UX stays predictable.
+ * Upload limits — all knobs live in `UPLOADS_CONFIG`. Ownership lives in the DB rows
+ * (`uploadedFilesR2`, `products.images`, `productCategories.image`), not in the key path,
+ * so no per-entity-id folders are needed.
  */
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
-const ALLOWED_CONTENT_TYPES = new Set<string>([
-	'image/jpeg',
-	'image/png',
-	'image/webp',
-	'image/gif',
-	'application/pdf'
-]);
-
-/**
- * Object-key prefixes clients may request, so bucket contents stay browsable by entity type
- * (`products/<uuid>`, `categories/<uuid>`) instead of a flat pile of UUIDs. Strict
- * allowlist — a free-form prefix from the client would let a caller write anywhere in the
- * bucket namespace. Ownership lives in the DB rows (`uploadedFilesR2`, `products.images`,
- * `productCategories.image`), not in the key path, so no per-entity-id folders are needed.
- *
- * Keys are permanent: renaming a prefix here does NOT move existing objects, so add new
- * values rather than editing old ones.
- */
-const ALLOWED_KEY_PREFIX = /^(products|categories)$/;
+const { MAX_UPLOAD_BYTES } = UPLOADS_CONFIG;
+const ALLOWED_CONTENT_TYPES = new Set<string>(UPLOADS_CONFIG.ALLOWED_CONTENT_TYPES);
+const ALLOWED_KEY_PREFIXES = new Set<string>(UPLOADS_CONFIG.ALLOWED_KEY_PREFIXES);
 
 /**
  * Custom upload-URL minter (named `generateR2UploadUrl` so it doesn't collide with the
@@ -55,7 +43,7 @@ const ALLOWED_KEY_PREFIX = /^(products|categories)$/;
  */
 export const generateR2UploadUrl = authMutation('generateR2UploadUrl')({
 	args: {
-		/** Optional folder prefix for the object key — see {@link ALLOWED_KEY_PREFIX}. */
+		/** Optional folder prefix for the object key — see {@link ALLOWED_KEY_PREFIXES}. */
 		prefix: v.optional(v.string())
 	},
 	returns: v.object({
@@ -68,7 +56,7 @@ export const generateR2UploadUrl = authMutation('generateR2UploadUrl')({
 	}),
 	handler: async (_ctx, args): Promise<ConvexMutationResult<{ url: string; key: string }>> => {
 		// `authMutation` already handled auth + rate-limit before we got here.
-		if (args.prefix !== undefined && !ALLOWED_KEY_PREFIX.test(args.prefix)) {
+		if (args.prefix !== undefined && !ALLOWED_KEY_PREFIXES.has(args.prefix)) {
 			throw new Error(`Invalid upload key prefix: ${args.prefix}`);
 		}
 		const minted = await r2.generateUploadUrl(

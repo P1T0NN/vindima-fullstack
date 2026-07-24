@@ -1,5 +1,6 @@
 <script lang="ts">
 	// LIBRARIES
+	import { toast } from 'svelte-sonner';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
@@ -7,6 +8,7 @@
 
 	// UTILS
 	import { authClient } from '@/features/auth/lib/auth-client';
+	import { rateLimitMessage } from '@/shared/utils/rateLimitMessages';
 
 	// TYPES
 	import type { EmailVerificationResendConfig } from './emailVerificationFormTypes.js';
@@ -64,9 +66,14 @@
 			});
 			if (error) {
 				console.error('Email verification: resend failed:', error);
+				// Backend errors travel as wire-JSON message keys — rendered to Spanish here.
+				toast.error(
+					rateLimitMessage(error.message, 'No se pudo reenviar el código. Inténtalo de nuevo.')
+				);
 			}
 		} catch (error) {
 			console.error('Email verification: resend failed:', error);
+			toast.error('No se pudo reenviar el código. Inténtalo de nuevo.');
 		} finally {
 			resending = false;
 			onSendingChange?.(false);

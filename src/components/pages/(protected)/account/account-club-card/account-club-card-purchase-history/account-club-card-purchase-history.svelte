@@ -23,6 +23,7 @@
 	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 
 	// TYPES
+	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
 	import type { PurchaseHistoryRow } from '../accountClubCardTypes';
 
@@ -57,9 +58,13 @@
 					!!p && p.unitPriceMinor !== null
 			)
 	);
-	const claimName = $derived(
-		activeClaim ? (byRef.get(activeClaim.itemRef)?.name ?? activeClaim.itemRef) : ''
-	);
+	const claimName = $derived.by(() => {
+		if (!activeClaim) return '';
+		const resolved = byRef.get(activeClaim.itemRef);
+		return resolved
+			? resolvedDisplayName({ ...resolved, ref: activeClaim.itemRef })
+			: activeClaim.itemRef;
+	});
 
 	let selectedItem = $state<string | null>(null);
 	let isBusy = $state(false);
@@ -175,7 +180,9 @@
 						{#if item.imageUrl}
 							<img src={item.imageUrl} alt="" class="h-14 w-14 object-contain" />
 						{/if}
-						<span class="text-sm font-medium text-foreground">{item.name}</span>
+						<span class="text-sm font-medium text-foreground">
+							{resolvedDisplayName({ ...item, ref: item.productRef })}
+						</span>
 					</button>
 				{/each}
 			</div>

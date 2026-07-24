@@ -2,17 +2,13 @@
 import { internalMutation } from '@/convex/_generated/server';
 
 // CONFIG
-import { FEATURES } from '@/shared/config.js';
+import { BATCH_CONFIG, FEATURES } from '@/shared/config.js';
 
 // HELPERS
 import { applyConfirmedStamp } from '@/convex/tables/rewardAccounts/helpers/applyConfirmedStamp';
 
-/**
- * Max rows per run. One bounded batch per tick (same style as the storage cleanup crons —
- * no self-rescheduling). A full batch logs a warning: raise the cron frequency or this
- * constant if that recurs. Runs hourly (headroom ~4.8k/day).
- */
-const CONFIRM_BATCH = 200;
+/** Max rows per run — see `BATCH_CONFIG`. Runs hourly. */
+const CONFIRM_BATCH = BATCH_CONFIG.REWARD_STAMP_CONFIRM;
 
 /**
  * Promote pending stamps whose return window has elapsed. Scans the

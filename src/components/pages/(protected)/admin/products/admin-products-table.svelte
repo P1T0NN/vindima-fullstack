@@ -11,12 +11,7 @@
 	// COMPONENTS
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
 	import { Button } from '@/components/ui/button/index.js';
-	import {
-		Select,
-		SelectContent,
-		SelectItem,
-		SelectTrigger
-	} from '@/components/ui/select/index.js';
+	import { NativeSelect } from '@/components/ui/select/index.js';
 
 	// TABLE / DATA / UTILS
 	import { adminProductsColumns } from '@/features/products/tables/adminProductsTable.js';
@@ -38,14 +33,14 @@
 	let statusFilter = $state<'' | AdminProductRow['status']>('');
 	let categoryFilter = $state<string>('');
 
-	const statusTriggerLabel = $derived(
-		statusFilter ? productStatusLabel(statusFilter) : 'Estado: todos'
-	);
-	const categoryTriggerLabel = $derived(
-		categoryFilter
-			? (categoryOptions.nameBySlug.get(categoryFilter) ?? categoryFilter)
-			: 'Categoría: todas'
-	);
+	const statusFilterOptions = [
+		{ value: '', label: 'Estado: todos' },
+		...Object.entries(PRODUCT_STATUS_LABELS).map(([value, label]) => ({ value, label }))
+	];
+	const categoryFilterOptions = $derived([
+		{ value: '', label: 'Categoría: todas' },
+		...categoryOptions.options
+	]);
 
 	function editProductHref(row: AdminProductRow): string {
 		return appHref(ADMIN_PAGE_ENDPOINTS.EDIT_PRODUCT.replace(':id', row._id));
@@ -66,37 +61,19 @@
 />
 
 {#snippet filters()}
-	<Select
-		type="single"
-		value={statusFilter}
-		onValueChange={(v) => (statusFilter = v as typeof statusFilter)}
-	>
-		<SelectTrigger class="w-full md:w-40" aria-label="Filtrar por estado">
-			{statusTriggerLabel}
-		</SelectTrigger>
-		<SelectContent>
-			<SelectItem value="">Estado: todos</SelectItem>
-			{#each Object.entries(PRODUCT_STATUS_LABELS) as [value, label] (value)}
-				<SelectItem {value}>{label}</SelectItem>
-			{/each}
-		</SelectContent>
-	</Select>
+	<NativeSelect
+		class="w-full md:w-40"
+		ariaLabel="Filtrar por estado"
+		bind:value={() => statusFilter, (v) => (statusFilter = v as typeof statusFilter)}
+		options={statusFilterOptions}
+	/>
 
-	<Select
-		type="single"
-		value={categoryFilter}
-		onValueChange={(v) => (categoryFilter = v ?? '')}
-	>
-		<SelectTrigger class="w-full md:w-48" aria-label="Filtrar por categoría">
-			{categoryTriggerLabel}
-		</SelectTrigger>
-		<SelectContent>
-			<SelectItem value="">Categoría: todas</SelectItem>
-			{#each categoryOptions.options as opt (opt.value)}
-				<SelectItem value={opt.value}>{opt.label}</SelectItem>
-			{/each}
-		</SelectContent>
-	</Select>
+	<NativeSelect
+		class="w-full md:w-48"
+		ariaLabel="Filtrar por categoría"
+		bind:value={() => categoryFilter, (v) => (categoryFilter = v ?? '')}
+		options={categoryFilterOptions}
+	/>
 {/snippet}
 
 {#snippet nameCell({ row }: DataTableCellSnippetProps<AdminProductRow>)}
@@ -113,12 +90,7 @@
 {#snippet actionsCell({ row }: DataTableCellSnippetProps<AdminProductRow>)}
 	<!-- Same destination as the product name — a discoverable target for admins who don't
 	     expect the name itself to be a link. -->
-	<Button
-		variant="outline"
-		size="sm"
-		href={editProductHref(row)}
-		aria-label={`Editar ${row.name}`}
-	>
+	<Button variant="outline" size="sm" href={editProductHref(row)} aria-label={`Editar ${row.name}`}>
 		<PencilIcon class="size-4" />
 		Editar
 	</Button>

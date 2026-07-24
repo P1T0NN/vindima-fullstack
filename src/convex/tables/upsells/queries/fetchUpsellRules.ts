@@ -26,15 +26,8 @@ import type {
 
 const SPECIFICITY: Record<UpsellTrigger['kind'], number> = { product: 3, category: 2, global: 1 };
 
-/** 'boards-1-M' → 'Boards 1 M'. Fallback name for a ref/slug with no row (mirrors resolveRefs). */
-function titleCase(ref: string): string {
-	return ref
-		.replace(/[-_]+/g, ' ')
-		.trim()
-		.replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-/** Resolve one offered ref to the admin shape, distinguishing missing vs merely unavailable. */
+/** Resolve one offered ref to the admin shape, distinguishing missing vs merely unavailable.
+ *  Raw fields only — the frontend composes the display name (`variantDisplayName.ts`). */
 async function resolveAdminItem(
 	ctx: QueryCtx,
 	ref: string,
@@ -46,7 +39,14 @@ async function resolveAdminItem(
 		.unique();
 
 	if (!variant) {
-		return { ref, name: titleCase(ref), imageUrl: null, priceMinor: null, status: 'missing' };
+		return {
+			ref,
+			productName: null,
+			variantLabel: null,
+			imageUrl: null,
+			priceMinor: null,
+			status: 'missing'
+		};
 	}
 
 	let product = productCache.get(variant.productId);
@@ -60,11 +60,11 @@ async function resolveAdminItem(
 		product.status === 'active' &&
 		variant.available &&
 		variant.deletedAt === undefined;
-	const baseName = product ? product.name : titleCase(ref);
 
 	return {
 		ref,
-		name: variant.label ? `${baseName} · ${variant.label}` : baseName,
+		productName: product ? product.name : null,
+		variantLabel: variant.label ?? null,
 		imageUrl: product ? (product.images[0] ?? null) : null,
 		// Show the price whenever the variant exists (informative for the admin); null only when gone.
 		priceMinor: variant.priceMinor,
@@ -84,7 +84,9 @@ async function resolveTrigger(
 			.query('products')
 			.withIndex('by_slug', (q) => q.eq('slug', trigger.slug))
 			.unique();
-		return product ? { label: product.name, status: 'ok' } : { label: trigger.slug, status: 'missing' };
+		return product
+			? { label: product.name, status: 'ok' }
+			: { label: trigger.slug, status: 'missing' };
 	}
 
 	const category = await ctx.db

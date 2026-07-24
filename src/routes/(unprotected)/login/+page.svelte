@@ -6,6 +6,7 @@
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import { Card } from '@/components/ui/card/index.js';
 	import { Input } from '@/components/ui/input/index.js';
 	import { Label } from '@/components/ui/label/index.js';
@@ -29,8 +30,7 @@
 	] as const;
 
 	const form = createLoginForm({
-		signInFailed: () =>
-			'No pudimos iniciar sesión. Revisa tus datos e inténtalo de nuevo.',
+		signInFailed: () => 'No pudimos iniciar sesión. Revisa tus datos e inténtalo de nuevo.',
 		signedInToast: () => 'Sesión iniciada correctamente.'
 	});
 </script>
@@ -140,6 +140,7 @@
 						disabled={form.busy}
 						class="mt-2 h-auto w-full justify-center px-6 py-3.5 text-sm tracking-wider uppercase"
 					>
+						{#if form.busy}<Spinner class="size-3.5" />{/if}
 						Iniciar sesión
 					</Button>
 

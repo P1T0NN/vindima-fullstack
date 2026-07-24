@@ -42,9 +42,9 @@
 <label
 	data-invalid={invalid ? 'true' : undefined}
 	class={cn(
-		'border-input bg-muted/15 hover:bg-muted/25 focus-within:ring-ring/50 block cursor-pointer rounded-xl border border-dashed p-6 transition-colors outline-none focus-within:ring-[3px]',
-		dragOver && 'border-primary/60 bg-primary/5 ring-primary/20 ring-[3px]',
-		invalid && !dragOver && 'border-destructive bg-destructive/5 ring-destructive/20 ring-[3px]',
+		'block cursor-pointer rounded-xl border border-dashed border-input bg-muted/15 p-6 transition-colors outline-none focus-within:ring-[3px] focus-within:ring-ring/50 hover:bg-muted/25',
+		dragOver && 'border-primary/60 bg-primary/5 ring-[3px] ring-primary/20',
+		invalid && !dragOver && 'border-destructive bg-destructive/5 ring-[3px] ring-destructive/20',
 		className
 	)}
 	ondragenter={onDragEnter}
@@ -64,19 +64,21 @@
 	/>
 	<div class="pointer-events-none flex flex-col items-center gap-2 text-center">
 		<span
-			class="bg-background text-muted-foreground ring-border inline-flex size-11 items-center justify-center rounded-full shadow-sm ring-1"
+			class="inline-flex size-11 items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm ring-1 ring-border"
 		>
 			<UploadIcon class="size-5" aria-hidden="true" />
 		</span>
 		<div class="space-y-0.5">
-			<p class="text-foreground text-sm font-medium">
-				<span class="text-primary">{multipleFiles ? 'Elige archivos' : 'Elige un archivo'}</span>
-				<span class="text-muted-foreground font-normal">
-					{multipleFiles ? 'o arrástralos aquí' : 'o arrástralo aquí'}
+			<p class="text-sm font-medium text-foreground">
+				<span class="text-primary">
+					{#if multipleFiles}Elige archivos{:else}Elige un archivo{/if}
+				</span>
+				<span class="font-normal text-muted-foreground">
+					{#if multipleFiles}o arrástralos aquí{:else}o arrástralo aquí{/if}
 				</span>
 			</p>
 			{#if accept}
-				<p class="text-muted-foreground text-xs">Formatos aceptados: {accept}</p>
+				<p class="text-xs text-muted-foreground">Formatos aceptados: {accept}</p>
 			{/if}
 		</div>
 	</div>

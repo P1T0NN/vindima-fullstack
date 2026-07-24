@@ -1,4 +1,7 @@
 <script lang="ts">
+	// UTILS
+	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
+
 	// TYPES
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
 
@@ -9,6 +12,8 @@
 		product: ResolvedCartProduct;
 		money: (minor: number) => string;
 	} = $props();
+
+	const name = $derived(resolvedDisplayName({ ...product, ref: product.productRef }));
 </script>
 
 <li class="flex items-center justify-between gap-3 py-3 text-sm">
@@ -19,7 +24,7 @@
 			Gratis
 		</span>
 
-		<span class="truncate text-foreground">{product.name}</span>
+		<span class="truncate text-foreground">{name}</span>
 	</span>
 
 	<span class="shrink-0 text-chart-2 tabular-nums">{money(0)}</span>

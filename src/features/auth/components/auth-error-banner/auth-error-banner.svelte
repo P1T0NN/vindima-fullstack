@@ -4,7 +4,8 @@
 	import { goto } from '$app/navigation';
 
 	// COMPONENTS
-	import * as AlertDialog from '@/components/ui/alert-dialog/index.js';
+	import { AlertDialog } from '@/components/ui/alert-dialog/index.js';
+	import { Button } from '@/components/ui/button/index.js';
 
 	// LUCIDE ICONS
 	import ShieldAlertIcon from '@lucide/svelte/icons/shield-alert';
@@ -39,31 +40,30 @@
 	}
 </script>
 
-<AlertDialog.Root
+<AlertDialog
 	{open}
 	onOpenChange={(o) => {
 		if (!o) dismiss();
 	}}
+	hideTrigger
 >
-	<AlertDialog.Content>
-		<AlertDialog.Header>
+	{#snippet children()}
+		<div class="alert-dialog__header">
 			<div class="flex items-center gap-3">
 				<div
 					class="flex size-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive"
 				>
 					<ShieldAlertIcon class="size-5" />
 				</div>
-				<AlertDialog.Title>{title}</AlertDialog.Title>
+				<h2>{title}</h2>
 			</div>
 			{#if description}
-				<AlertDialog.Description class="pt-2">
-					{description}
-				</AlertDialog.Description>
+				<p class="pt-2">{description}</p>
 			{/if}
-		</AlertDialog.Header>
+		</div>
 
-		<AlertDialog.Footer>
-			<AlertDialog.Action onclick={dismiss}>Entendido</AlertDialog.Action>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
+		<div class="alert-dialog__footer">
+			<Button onclick={dismiss}>Entendido</Button>
+		</div>
+	{/snippet}
+</AlertDialog>

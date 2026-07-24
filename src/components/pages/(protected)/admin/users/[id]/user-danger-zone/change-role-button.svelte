@@ -54,5 +54,5 @@
 		? '¿Estás seguro de que quieres hacer esto? El usuario perderá los privilegios de admin de inmediato.'
 		: '¿Estás seguro de que quieres hacer esto? El usuario obtendrá privilegios completos de admin, incluida la capacidad de bloquear y eliminar otras cuentas.'}
 >
-	{demoting ? 'Degradar a usuario' : 'Promover a admin'}
+	{#if demoting}Degradar a usuario{:else}Promover a admin{/if}
 </ActionButton>

@@ -8,6 +8,7 @@
 	import * as Card from '@/components/ui/card/index.js';
 	import { FieldGroup, Field, FieldLabel, FieldError } from '@/components/ui/field/index.js';
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import * as InputOTP from '@/features/auth/components/input-otp/index.js';
 	import EmailVerificationResend from './email-verification-resend.svelte';
 
@@ -160,6 +161,7 @@
 
 				<Field>
 					<Button type="submit" class={fullWidthButtons ? 'w-full' : ''} disabled={busy}>
+						{#if busy}<Spinner class="size-3.5" />{/if}
 						Continuar
 					</Button>
 					<Button

@@ -17,7 +17,7 @@
 	// COMPONENTS
 	import ConvexMutationForm from '@/components/ui/mutation-form/convex-mutation-form.svelte';
 	import CheckoutSummary from './checkout-summary/checkout-summary.svelte';
-	import CheckoutCardSelect from './checkout-card-select.svelte';
+	import { CardSelect } from '@/components/ui/card-select/index.js';
 
 	// LUCIDE ICONS
 	import StoreIcon from '@lucide/svelte/icons/store';
@@ -165,7 +165,7 @@
 	},
 	meta: Record<string, { icon?: typeof StoreIcon; description?: string }>
 )}
-	<CheckoutCardSelect
+	<CardSelect
 		options={field.options ?? []}
 		selected={value as string}
 		name={field.id}

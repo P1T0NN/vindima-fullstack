@@ -25,7 +25,8 @@ export async function sendVerificationOTP({
 	try {
 		await sendViaResend(email, authOtpEmail(otp, type), `authOtp-${type}-${otp}`);
 	} catch {
-		// Surface a translatable failure to the auth flow (the user is waiting and can retry).
-		throw new Error('No se pudo enviar el correo de verificación');
+		// Wire-JSON message key (same format as convexCreateRateLimit) — the backend never
+		// returns display text; `rateLimitMessage`/`translateFromBackend` render it client-side.
+		throw new Error(JSON.stringify({ key: 'AuthMessages.OTP_SEND_FAILED' }));
 	}
 }

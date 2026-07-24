@@ -30,21 +30,21 @@ Ask one question per piece of data:
 
 ### Worked examples (from this project)
 
-| Data | Verdict | Why |
-|---|---|---|
-| Category options in the add/edit-product form | **One-shot** | Categories are edited on a *different* page. Getting back to the form remounts it → refetch. |
-| Slug→name lookup for a table column | **One-shot** | Same reasoning; the lookup set changes on another page. |
-| The admin orders table | **Subscription** | New orders arrive from *other people* while the admin is watching. |
-| The cart sidebar | **Subscription** | The same screen mutates it (add/remove) and server-side pruning can change it. |
-| A products table on the page where products are edited inline | **Subscription** | Display and mutation share the screen. |
-| Static-ish config, feature lists, country lists | **One-shot** (or build-time) | Changes require a deploy or an admin action elsewhere. |
+| Data                                                          | Verdict                      | Why                                                                                          |
+| ------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------- |
+| Category options in the add/edit-product form                 | **One-shot**                 | Categories are edited on a _different_ page. Getting back to the form remounts it → refetch. |
+| Slug→name lookup for a table column                           | **One-shot**                 | Same reasoning; the lookup set changes on another page.                                      |
+| The admin orders table                                        | **Subscription**             | New orders arrive from _other people_ while the admin is watching.                           |
+| The cart sidebar                                              | **Subscription**             | The same screen mutates it (add/remove) and server-side pruning can change it.               |
+| A products table on the page where products are edited inline | **Subscription**             | Display and mutation share the screen.                                                       |
+| Static-ish config, feature lists, country lists               | **One-shot** (or build-time) | Changes require a deploy or an admin action elsewhere.                                       |
 
 ## Companion rules
 
 1. **Fetch the shape you need, not the row.** A one-shot lookup endpoint returns the minimal
    projection (`{ slug, name }`), not full documents. Smaller payload, no accidental coupling
    to fields the consumer never reads.
-2. **Whole-set reads get a whole-set endpoint.** If a consumer needs *all* rows of a small set
+2. **Whole-set reads get a whole-set endpoint.** If a consumer needs _all_ rows of a small set
    (a `<select>`, a lookup map), give it a dedicated non-paginated query with a known-small
    bound — do not loop a paginated API to drain pages, and never silently render page 1 as if
    it were the whole set. (Paginated UI lists keep pagination + visible pager controls.)
@@ -80,7 +80,7 @@ data the difference is orders of magnitude, and the user cannot tell.
 > subscription), this section decides **HOW and WHERE** you actually wire that read for the
 > fastest possible perceived and real performance. Our app is **hybrid**: it is SPA-leaning,
 > but **some routes use a server loader (`+page.server.ts`) and some do not** — so the
-> mechanism choice includes *which loader file* the read goes in. Source framework:
+> mechanism choice includes _which loader file_ the read goes in. Source framework:
 > turtledev.io, "SvelteKit SPA — when to use load functions and onMount", reconciled with our
 > project and extended to cover server loaders.
 
@@ -107,16 +107,16 @@ The goal is a small, fixed budget: **start the request as early as possible, and
 something the instant navigation begins.** Two facts drive every rule below:
 
 - **The route loader starts earlier than the component.** SvelteKit begins running `+page.ts`
-  as soon as navigation is *decided* — before the page component is instantiated. `onMount`, by
-  contrast, only fires *after* the component has been created and mounted. Fetching in
-  `onMount` therefore inserts a guaranteed waterfall: mount → *then* fetch → *then* render.
+  as soon as navigation is _decided_ — before the page component is instantiated. `onMount`, by
+  contrast, only fires _after_ the component has been created and mounted. Fetching in
+  `onMount` therefore inserts a guaranteed waterfall: mount → _then_ fetch → _then_ render.
   The loader collapses that to: fetch (already in flight) → render.
 - **The loader is what preloading hooks into.** `data-sveltekit-preload-data` (hover/tap
   intent) can only prefetch data that lives in a loader. Data fetched in `onMount` cannot be
   preloaded, so it can never be "already settled by the time the user clicks." This is the
   single biggest free speed win in the app, and it is loader-only.
 
-**Consequence:** in an SPA, "no SSR" does *not* mean "fetch in the component." The loader still
+**Consequence:** in an SPA, "no SSR" does _not_ mean "fetch in the component." The loader still
 runs (in the browser), still starts before the component, and still enables preloading. Default
 one-shot reads to the loader, not to `onMount`.
 
@@ -149,7 +149,7 @@ Reach for it **only** when at least one is true:
 - It must read/write **server-side cookies, headers, or the session** during load.
 - You want to **hide the query shape or origin** from the client entirely.
 
-**The performance cost of a server loader:** on every *client-side* navigation SvelteKit must
+**The performance cost of a server loader:** on every _client-side_ navigation SvelteKit must
 make a round-trip to our own server to run `+page.server.ts` before the page can render — an
 extra hop the universal loader does not pay when it talks to the backend directly. It also
 constrains the return value to **serializable data** (devalue: no class instances, no
@@ -187,17 +187,17 @@ the data resolves into an `{#await}` block:
 ```ts
 // +page.ts
 export const load = ({ fetch }) => {
-  return { todos: getTodos(fetch) }; // NOT awaited — streams
+	return { todos: getTodos(fetch) }; // NOT awaited — streams
 };
 ```
 
 ```svelte
 {#await data.todos}
-  <TodosSkeleton />
+	<TodosSkeleton />
 {:then todos}
-  {#each todos as todo}...{/each}
+	{#each todos as todo}...{/each}
 {:catch}
-  <p>Could not load todos.</p>
+	<p>Could not load todos.</p>
 {/await}
 ```
 
@@ -224,7 +224,7 @@ Await inside the loader so `data` holds the concrete server value, not a promise
 ```ts
 // +page.ts
 export const load = async () => {
-  return { profile: await getProfile().then((r) => r.data) };
+	return { profile: await getProfile().then((r) => r.data) };
 };
 ```
 
@@ -263,18 +263,18 @@ the earlier start and the preloading win for nothing.
 
 ### Decision matrix
 
-| Data / scenario | Realtime verdict | Where | Loader file | Streamed / awaited |
-|---|---|---|---|---|
-| List, table, dashboard, search results, detail view | One-shot | Loader | `+page.ts` (unless secret/DB → `+page.server.ts`) | **Streamed** (Pattern A) |
-| Single-record edit form (profile, settings, onboarding) | One-shot | Loader | `+page.ts` (unless secret/DB → `+page.server.ts`) | **Awaited** (Pattern B) |
-| Small lookup / `<select>` options / slug→name map | One-shot | Loader | `+page.ts` (whole-set endpoint) | Streamed or awaited — small, either is fine |
-| Session / auth needed on ~every page | One-shot | Loader | `+layout.server.ts` if it reads httpOnly cookies/secrets; else `+layout.ts` | Awaited (gates the app) |
-| Read needing a secret / private env / direct DB access | One-shot | Loader | **`+page.server.ts`** (required) | Streamed or awaited per Pattern A/B |
-| Public read from our backend / Convex (most pages) | One-shot | Loader | **`+page.ts`** (one hop, no server middleman) | Streamed (Pattern A) |
-| Admin orders table, cart sidebar, inline-edit table | Subscription | Component | n/a | `onMount` / `useQuery` |
-| Chat, notifications, live presence | Subscription | Component | n/a | `onMount` (open + teardown) |
-| Polling refresh, upload progress, device/DOM APIs | Lifecycle | Component | n/a | `onMount` |
-| Initial paint + live updates on one screen | Both | Loader **+** component | loader (`+page.ts`/`.server.ts`) streams first paint | Streamed **+** `onMount` channel |
+| Data / scenario                                         | Realtime verdict | Where                  | Loader file                                                                 | Streamed / awaited                          |
+| ------------------------------------------------------- | ---------------- | ---------------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
+| List, table, dashboard, search results, detail view     | One-shot         | Loader                 | `+page.ts` (unless secret/DB → `+page.server.ts`)                           | **Streamed** (Pattern A)                    |
+| Single-record edit form (profile, settings, onboarding) | One-shot         | Loader                 | `+page.ts` (unless secret/DB → `+page.server.ts`)                           | **Awaited** (Pattern B)                     |
+| Small lookup / `<select>` options / slug→name map       | One-shot         | Loader                 | `+page.ts` (whole-set endpoint)                                             | Streamed or awaited — small, either is fine |
+| Session / auth needed on ~every page                    | One-shot         | Loader                 | `+layout.server.ts` if it reads httpOnly cookies/secrets; else `+layout.ts` | Awaited (gates the app)                     |
+| Read needing a secret / private env / direct DB access  | One-shot         | Loader                 | **`+page.server.ts`** (required)                                            | Streamed or awaited per Pattern A/B         |
+| Public read from our backend / Convex (most pages)      | One-shot         | Loader                 | **`+page.ts`** (one hop, no server middleman)                               | Streamed (Pattern A)                        |
+| Admin orders table, cart sidebar, inline-edit table     | Subscription     | Component              | n/a                                                                         | `onMount` / `useQuery`                      |
+| Chat, notifications, live presence                      | Subscription     | Component              | n/a                                                                         | `onMount` (open + teardown)                 |
+| Polling refresh, upload progress, device/DOM APIs       | Lifecycle        | Component              | n/a                                                                         | `onMount`                                   |
+| Initial paint + live updates on one screen              | Both             | Loader **+** component | loader (`+page.ts`/`.server.ts`) streams first paint                        | Streamed **+** `onMount` channel            |
 
 ### Speed checklist (run per page)
 
@@ -335,15 +335,15 @@ In this codebase — and any project citing this document — that default is **
    imperative call (`client.query(...)`, plain `fetch`, one-time read) inside `onMount` or
    the loader. Do NOT reach for the reactive/subscribing primitive first.
 2. **Before you write any subscribing call, state the justification** in a code comment on
-   that line, answering: *what changes this data while this exact screen is open, without
-   the user acting?* If the honest answer is "another user", "a background job/cron", or
+   that line, answering: _what changes this data while this exact screen is open, without
+   the user acting?_ If the honest answer is "another user", "a background job/cron", or
    "this same screen writes it" — subscribe. If the answer is "the user edits it on another
    page" or "rarely/never" — one-shot. No justification ⇒ one-shot.
 3. **Never render one page of a paginated API as the full set.** Either the UI has pager
    controls wired to the cursor/offset, or the consumer calls a dedicated non-paginated
    whole-set endpoint. Silently truncated lists are bugs, not simplifications.
 4. **Do not lift feature fetches into layouts or global stores** to "share" them. Fetch in
-   the page/component that uses the data. Shared *logic* goes in a feature-scoped hook that
+   the page/component that uses the data. Shared _logic_ goes in a feature-scoped hook that
    still fetches one-shot per mount. The only layout-level live data is session/auth-class
    information needed by effectively every page.
 5. **Minimal projection.** New lookup endpoints return only the fields consumers use.
@@ -354,3 +354,187 @@ In this codebase — and any project citing this document — that default is **
 Checklist to run mentally on every data wire-up:
 `changes-under-viewer? → subscribe (justify in comment) | else → one-shot, minimal shape,
 fetched where used, whole-set endpoint if a select/lookup needs all rows.`
+
+---
+
+## § DYNAMIC IMPORTS / CODE-SPLITTING — WHEN TO LAZY-LOAD FOR INITIAL PERFORMANCE
+
+> Status: **standing rule** (added 2026-07-24). Same philosophy as the realtime rule:
+> **lazy-loading is opt-in, not default.** Framework-aware but portable: any router that
+> code-splits per route (SvelteKit, Next, Nuxt, TanStack Router) gives you the first and
+> biggest split for free — everything below is about the _second_ split, inside a route.
+
+### What you already get for free
+
+**SvelteKit code-splits per route.** Every `+page.svelte` (with everything it statically
+imports) is its own chunk, downloaded only when that route is visited. An admin page's
+dialog, table, and form never reach a shopper's browser, no matter how big they are. This
+free split is why most components should just be imported statically — the route boundary
+already did the work.
+
+**Consequence:** a component only _candidates_ for a dynamic import when the route-level
+split isn't enough — i.e. it is heavy **relative to the route it lives in** and most visits
+to that route never use it.
+
+### The decision test
+
+A component earns `await import(...)` only when **ALL FOUR** are true:
+
+1. **Heavy.** It (or a dependency it drags in) is genuinely large: rich-text editor,
+   charting library, map SDK, PDF/video renderer, image cropper, QR/barcode scanner,
+   diagramming, syntax highlighter. Rule of thumb: the chunk is tens of KB min+gz or more.
+   A dialog made of Buttons and Inputs is NOT heavy — the primitives are already in the
+   shared bundle; its incremental cost is a few KB.
+2. **Interaction-gated.** It renders only after a deliberate user action (open editor,
+   expand preview, start scan) — not on first paint, not above the fold, not "usually
+   opened right away".
+3. **The saving reaches real users.** The route is public / high-traffic. On an admin-only
+   route the audience is a handful of staff who visit daily with a warm cache — route
+   splitting already protected everyone else, so shaving the admin chunk buys ~nothing.
+4. **Nothing needs it mounted before the interaction.** Critically: **native declarative
+   triggers require their target to already be in the DOM.** A `<button commandfor={id}>`
+   (dialog invoker) or `popovertarget` cannot open a component that hasn't been mounted
+   yet — lazy-loading such a target silently breaks the button. Same for anchors of CSS
+   anchor-positioning and any `bind:`/id contract established at page mount.
+
+Any test fails → **static import.** When in doubt, static: an unnecessary static import
+costs a few KB inside an already-split route chunk; an unnecessary dynamic import costs
+first-interaction latency (spinner flash on click), a second network round-trip, an extra
+error state to handle, and it silently opts out of the route preloader (which prefetches
+the route's static chunks on hover — a dynamic import only starts loading at the click).
+
+### Worked examples (from this project)
+
+| Component                                                             | Verdict     | Why                                                                                                                                            |
+| --------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AdminUpsellsCustomizeDialog` on `/admin/upsells`                     | **Static**  | Fails 1 (Buttons/Inputs, already-shared deps), fails 3 (admin-only route), fails 4 (opened by native `NativeDialogTrigger` → must be mounted). |
+| Hero carousel (embla) on `/`                                          | **Static**  | Fails 2 — above the fold, needed for first paint.                                                                                              |
+| Cart sidebar / upsell dialog on shop pages                            | **Static**  | Fails 1 — small components; the route chunk already carries them cheaply.                                                                      |
+| A future rich-text editor for product descriptions                    | **Dynamic** | Heavy (editor libs are 100KB+), behind an edit click… but note test 3: admin-only, so even this one is optional.                               |
+| A future map / store-locator behind a "Ver mapa" tab on a public page | **Dynamic** | Heavy SDK, interaction-gated, public traffic, JS-opened. Textbook case.                                                                        |
+| Chart library on the admin dashboard                                  | **Static**  | Charts ARE the page (fails 2), admin-only (fails 3). Route splitting already contains it.                                                      |
+
+### How to do it (when a candidate passes)
+
+Load on interaction, render through `{#await}`, keep the trigger JS-controlled:
+
+```svelte
+<script lang="ts">
+	let editorPromise = $state<Promise<typeof import('./heavy-editor.svelte')> | null>(null);
+	const openEditor = () => (editorPromise ??= import('./heavy-editor.svelte'));
+</script>
+
+<Button onclick={openEditor}>Editar descripción</Button>
+
+{#if editorPromise}
+	{#await editorPromise}
+		<Skeleton class="h-40 w-full" />
+	{:then { default: HeavyEditor }}
+		<HeavyEditor />
+	{:catch}
+		<p class="text-sm text-destructive">No se pudo cargar el editor. Inténtalo de nuevo.</p>
+	{/await}
+{/if}
+```
+
+Rules of the pattern: cache the promise (`??=`) so re-opens don't refetch; always render
+the pending skeleton and the `{:catch}` (a dynamic chunk is a network request that can
+fail); optionally warm it on hover/focus of the trigger (`onmouseenter={openEditor}`) to
+hide the latency. Never `await import()` at module top level — that just recreates a static
+import with extra steps.
+
+### Measure, don't guess
+
+Before adding a dynamic import, prove the weight: `bunx vite-bundle-visualizer` (or
+`rollup-plugin-visualizer`) on the build, and look at the actual route chunk. If the
+component you want to split is a few KB inside its route chunk, the split is complexity
+with no payoff. Re-check after: the win should be visible in the route's initial chunk size.
+
+### § FOR LLMs / AI ASSISTANTS — READ BEFORE ADDING A DYNAMIC IMPORT
+
+1. **Default = static import.** SvelteKit already code-splits per route; do not add
+   `await import(...)` unless the four-part test above passes, and say which tests pass in
+   a code comment on the import.
+2. **Never lazy-load the target of a native declarative trigger** (`commandfor`,
+   `popovertarget`, anchor-positioning anchors). Those need the element mounted before the
+   click; lazy-loading it makes the button silently do nothing (test 4).
+3. **Admin-only routes almost never qualify** (test 3) — the route split already protected
+   real users; staff have warm caches. Don't churn admin code into dynamic imports for
+   vanity bundle numbers.
+4. **"Dialog/modal" is not a heuristic for lazy.** Interaction-gated (test 2) is necessary
+   but not sufficient — a dialog of design-system primitives is a few KB (fails test 1).
+   The heuristic is the _dependency_: editor / chart / map / PDF / scanner SDKs.
+5. **When a candidate passes:** cache the promise, skeleton in `{#await}`, handle
+   `{:catch}`, consider hover-warming, and keep the trigger JS-controlled.
+6. **When uncertain, import statically and say so** in your summary, e.g. "imported
+   statically per GeneralSystemDesignRule.md § dynamic imports; say the word if this should
+   be lazy — it fails test N." Do not silently add the dynamic import.
+
+Mental checklist before any `await import(...)`:
+`heavy dep? + interaction-gated? + public traffic? + not a native-trigger target? → all
+four yes: lazy (cached promise, skeleton, catch) | any no: static import, route splitting
+already has you covered.`
+
+---
+
+## § BACKEND RETURNS DATA, FRONTEND RENDERS DISPLAY — NO SERVER-COMPOSED TEXT
+
+> Status: **standing rule** (added 2026-07-24). Backend-agnostic. Exists so i18n can later be
+> added ENTIRELY client-side: the backend never bundles translation machinery, and no display
+> string is baked server-side where a locale can't reach it.
+
+### The rule
+
+**Convex (any backend) returns raw data fields. The frontend is the only place display
+strings are composed, formatted, or fabricated.**
+
+- **Raw field passthrough is fine and unavoidable** — `product.name`, `variant.label`,
+  `category.name` are _content_ stored in the DB; returning them verbatim is returning data.
+- **Composition is display work** — concatenating `` `${product.name} · ${variant.label}` ``,
+  fabricating a readable name from a ref (`titleCase('boards-1-M')`), pluralizing, or
+  formatting money/dates for humans. None of that belongs in a query result.
+- **UI copy never comes from the backend** — errors and toasts travel as **message keys**
+  (`{ key: 'UpsellsMessages.RULE_CREATED' }`), translated client-side
+  (`translateFromBackend`). Never return a human-readable sentence from a mutation/query.
+
+### How it's wired in this project
+
+- Resolved shapes carry **`productName: string | null` + `variantLabel: string | null`**
+  (e.g. `ResolvedCartProduct`, `UpsellCatalogItem`, `UpsellAdminItem`, the search-picker
+  rows). `productName: null` = the ref no longer resolves.
+- The **frontend-only** composer lives in
+  `src/shared/features/productVariants/utils/variantDisplayName.ts`
+  (`formatVariantName`, `titleCaseRef`, `resolvedDisplayName`). Convex must NEVER import it —
+  it is the single client-side seam where display formatting (and future i18n) hooks in.
+
+### The three deliberate exceptions
+
+1. **Stored snapshots** — an order line's `name` is composed once at WRITE time
+   (`calculateOrderPrice.snapshotLineName`) and frozen into the order, like an invoice. That
+   is storage of a fact, not display; historical documents don't re-translate.
+2. **Emails** (`src/convex/emails/**`) — rendered server-side by nature; you cannot send an
+   email from the client. Future email i18n keys off the _recipient's_ locale server-side —
+   a separate concern from UI i18n, deliberately not shared with it.
+3. **Non-display strings** — search text blobs (`buildOrderSearchText`), slugs, refs, order
+   numbers, audit payloads. Machine-facing, not shown as prose.
+
+### § FOR LLMs / AI ASSISTANTS — READ BEFORE RETURNING ANYTHING FROM CONVEX
+
+1. **Never concatenate display strings in a Convex query/mutation result.** Return the raw
+   fields (`productName`, `variantLabel`, …) and let the consumer compose via
+   `variantDisplayName.ts`. If you write `` `${a} · ${b}` `` or `titleCase(...)` inside
+   `src/convex/**` and it flows to the client, it is a bug — unless it is one of the three
+   exceptions above, named in a code comment.
+2. **Never return raw human-readable messages.** Mutations return
+   `{ success, message: { key } }`; new user-facing strings get a new message key, translated
+   client-side.
+3. **Never import `variantDisplayName.ts` (or any display/i18n util) from `src/convex/**`.\*\*
+4. **New resolved shapes follow the convention:** `productName: string | null`,
+   `variantLabel: string | null` — not `name`/`label` pre-joined.
+5. **When uncertain, return the rawest shape and say so** in your summary, e.g. "returned raw
+   fields per GeneralSystemDesignRule.md § backend returns data; frontend composes."
+
+Mental checklist for every Convex return value:
+`is every string either a verbatim DB field, an id/ref/slug, or a message KEY? → good |
+composed/fabricated/pluralized/formatted for humans? → move it to the frontend (or name the
+exception: snapshot / email / machine-facing).`

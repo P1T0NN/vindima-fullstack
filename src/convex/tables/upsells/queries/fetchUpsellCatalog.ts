@@ -62,10 +62,12 @@ export const fetchUpsellCatalog = query({
 			const items = [];
 			for (const ref of rule.itemRefs) {
 				const r = byRef.get(ref);
-				if (!r || r.unitPriceMinor === null) continue; // drop archived/deleted/unavailable
+				// Drop archived/deleted/unavailable; a live ref always has its product (⇒ name).
+				if (!r || r.unitPriceMinor === null || r.productName === null) continue;
 				items.push({
 					ref,
-					name: r.name,
+					productName: r.productName,
+					variantLabel: r.variantLabel,
 					description: descByRef.get(ref) ?? null,
 					imageUrl: r.imageUrl,
 					priceMinor: r.unitPriceMinor

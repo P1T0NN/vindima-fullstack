@@ -1,7 +1,45 @@
 <script lang="ts">
-	import { AlertDialog as AlertDialogPrimitive } from 'bits-ui';
+	// COMPONENTS
+	import {
+		buttonVariants,
+		type ButtonSize,
+		type ButtonVariant
+	} from '@/components/ui/button/index.js';
 
-	let { ref = $bindable(null), ...restProps }: AlertDialogPrimitive.TriggerProps = $props();
+	// UTILS
+	import { cn } from '@/utils/utils.js';
+
+	// TYPES
+	import type { Snippet } from 'svelte';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
+
+	type Props = HTMLButtonAttributes & {
+		dialogId: string;
+		variant?: ButtonVariant;
+		size?: ButtonSize;
+		class?: string;
+		children?: Snippet;
+	};
+
+	let {
+		dialogId,
+		variant = 'default',
+		size = 'default',
+		class: className,
+		disabled,
+		children,
+		type = 'button',
+		...restProps
+	}: Props = $props();
 </script>
 
-<AlertDialogPrimitive.Trigger bind:ref data-slot="alert-dialog-trigger" {...restProps} />
+<button
+	{type}
+	command="show-modal"
+	commandfor={dialogId}
+	class={cn(buttonVariants({ variant, size }), className)}
+	{disabled}
+	{...restProps}
+>
+	{@render children?.()}
+</button>

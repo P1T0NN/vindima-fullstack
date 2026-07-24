@@ -24,7 +24,7 @@
 	// COMPONENTS
 	import Link from '@/components/ui/link/link.svelte';
 	import Logo from '@/components/ui/logo/logo.svelte';
-	import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+	import { NativeSheet } from '@/components/ui/native-sheet/index.js';
 	import LogoutButton from '@/features/auth/components/logout-button/logout-button.svelte';
 
 	// STATE
@@ -58,44 +58,43 @@
 	const cta = $derived(resolveHeaderCta(authClass.currentUser, isAuthenticated));
 </script>
 
-<Drawer bind:open={header.menuOpen} direction="right" shouldScaleBackground={false}>
-	<DrawerTrigger>
-		{#snippet child({ props })}
-			<button
-				{...props}
-				type="button"
-				class={cn(
-					'inline-flex size-9 touch-manipulation items-center justify-center rounded-sm text-accent transition-opacity hover:opacity-80 lg:hidden',
-					props.class as ClassValue
-				)}
-				aria-label={header.menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-			>
-				{#if header.menuOpen}
-					<XIcon class="size-5" strokeWidth={1.4} />
-				{:else}
-					<MenuIcon class="size-5" strokeWidth={1.4} />
-				{/if}
-			</button>
-		{/snippet}
-	</DrawerTrigger>
+<NativeSheet
+	bind:open={header.menuOpen}
+	side="right"
+	title="Menú"
+	showCloseButton={false}
+	class="flex h-full max-h-dvh w-full max-w-80 flex-col gap-5 overflow-x-hidden overflow-y-auto border-border bg-background p-5"
+>
+	{#snippet trigger({ props })}
+		<button
+			{...props}
+			type="button"
+			class={cn(
+				'inline-flex size-9 touch-manipulation items-center justify-center rounded-sm text-accent transition-opacity hover:opacity-80 lg:hidden',
+				props.class as ClassValue
+			)}
+			aria-label={header.menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+		>
+			{#if header.menuOpen}
+				<XIcon class="size-5" strokeWidth={1.4} />
+			{:else}
+				<MenuIcon class="size-5" strokeWidth={1.4} />
+			{/if}
+		</button>
+	{/snippet}
 
-	<DrawerContent
-		id="site-mobile-nav"
-		aria-describedby={undefined}
-		class="flex h-full max-h-dvh w-full max-w-80 flex-col gap-5 overflow-x-hidden overflow-y-auto border-border bg-background p-5 shadow-lg! data-[vaul-drawer-direction=right]:w-full sm:max-w-80"
-	>
+	{#snippet children({ close })}
 		<div class="flex min-w-0 items-center justify-between gap-2">
 			<Logo class="transition-opacity hover:opacity-90" onclick={header.closeMenu} />
 
-			<DrawerClose>
-				<button
-					type="button"
-					class="inline-flex size-9 shrink-0 touch-manipulation items-center justify-center rounded-sm text-accent hover:opacity-80"
-					aria-label="Cerrar menú"
-				>
-					<XIcon class="size-5" strokeWidth={1.4} />
-				</button>
-			</DrawerClose>
+			<button
+				type="button"
+				onclick={close}
+				class="inline-flex size-9 shrink-0 touch-manipulation items-center justify-center rounded-sm text-accent hover:opacity-80"
+				aria-label="Cerrar menú"
+			>
+				<XIcon class="size-5" strokeWidth={1.4} />
+			</button>
 		</div>
 
 		<nav aria-label="Principal móvil">
@@ -156,5 +155,5 @@
 				<LogoutButton onClick={header.closeMenu} />
 			{/if}
 		</div>
-	</DrawerContent>
-</Drawer>
+	{/snippet}
+</NativeSheet>

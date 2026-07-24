@@ -6,6 +6,7 @@
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import { Card } from '@/components/ui/card/index.js';
 	import { Input } from '@/components/ui/input/index.js';
 	import { BirthdayInput } from '@/components/ui/birthday-input/index.js';
@@ -237,6 +238,7 @@
 						disabled={form.busy}
 						class="mt-2 h-auto w-full justify-center px-6 py-3.5 text-sm tracking-wider uppercase"
 					>
+						{#if form.busy}<Spinner class="size-3.5" />{/if}
 						Crear mi cuenta
 					</Button>
 

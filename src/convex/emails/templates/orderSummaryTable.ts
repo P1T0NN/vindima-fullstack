@@ -19,7 +19,7 @@ import type { Doc } from '@/convex/_generated/dataModel';
  * `*Text` twin for the plain-text alternative.
  */
 
-const SANS = 'Arial,Helvetica,sans-serif';
+const SANS = EMAIL_CONFIG.FONT_SANS;
 
 /** One `label / value` row inside the summary, right-aligned value. `strong` for the total. */
 function row(

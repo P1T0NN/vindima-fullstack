@@ -2,12 +2,15 @@
 import { internalMutation } from '@/convex/_generated/server';
 import { AUDIT_RETENTION_DAYS, AUDIT_RETENTION_DEFAULT_DAYS } from '../auditLogConfigs';
 
+// CONFIG
+import { BATCH_CONFIG } from '@/shared/config.js';
+
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-/** Hard cap per run so a backlog after a long downtime can't blow the function budget. */
-const MAX_DELETES_PER_RUN = 5_000;
+/** Hard cap per run — see `BATCH_CONFIG`. */
+const MAX_DELETES_PER_RUN = BATCH_CONFIG.AUDIT_PURGE;
 
 /**
  * Retention sweep. Walks the `auditLogs` table from oldest to newest and

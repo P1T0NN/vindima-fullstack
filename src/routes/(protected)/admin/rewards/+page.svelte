@@ -12,7 +12,7 @@
 	description="Configura qué artículos pueden canjear los clientes con sus sellos de recompensa de Vindima."
 />
 
-<section class="flex w-full flex-col gap-4 p-4 md:p-6">
+<section class="flex w-full flex-col gap-6 p-4 md:p-6">
 	<AdminRewardsHeader />
 	<AdminRewardsAddForm />
 	<AdminRewardsTable />

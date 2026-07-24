@@ -3,7 +3,7 @@ import { internalMutation } from '@/convex/_generated/server';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG
-import { FEATURES, REWARDS_CONFIG } from '@/shared/config.js';
+import { BATCH_CONFIG, FEATURES, REWARDS_CONFIG } from '@/shared/config.js';
 
 // HELPERS
 import { isExpired, expiryWarning } from '@/shared/features/rewards/utils/rewardsUtils';
@@ -12,12 +12,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** Shortest possible month, used to build an over-inclusive scan cutoff; `isExpired` (calendar-accurate) makes the final call. */
 const MIN_DAYS_PER_MONTH = 28;
 
-/**
- * Max rows per run. One bounded batch per tick (same style as the storage cleanup crons —
- * no self-rescheduling). A full batch logs a warning: raise the cron frequency or this
- * constant if that recurs. Runs daily (off-peak).
- */
-const EXPIRE_BATCH = 500;
+/** Max rows per run — see `BATCH_CONFIG`. Runs daily (off-peak). */
+const EXPIRE_BATCH = BATCH_CONFIG.REWARD_CARD_EXPIRE;
 
 /**
  * Wipe cards + banked rewards for accounts inactive past `EXPIRY.INACTIVITY_MONTHS`.

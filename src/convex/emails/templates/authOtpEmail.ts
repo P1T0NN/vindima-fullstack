@@ -12,10 +12,10 @@ import type { EmailContent, OtpEmailType } from '@/shared/features/emails/types/
  * (`EmailSystemDesign.md` §5 A1). The code is the action, so there is no CTA button —
  * the OTP itself, large and centered, is the whole email.
  *
- * ponytail: OTP validity is better-auth's `emailOTP.expiresIn`, which this project leaves
- * at the default 5 minutes. Hardcoded here with a comment; bump both together if config changes.
+ * ponytail: OTP validity is better-auth's `emailOTP.expiresIn`, which this project leaves at
+ * its default. The printed window lives in `EMAIL_CONFIG`; bump both together if that changes.
  */
-const OTP_EXPIRY_MINUTES = 5;
+const { OTP_EXPIRY_MINUTES } = EMAIL_CONFIG;
 
 /** Per-type copy: subject verb, H1, and the context sentence. `{n}` filled with the expiry. */
 const COPY: Record<OtpEmailType, { subject: string; h1: string; context: string }> = {

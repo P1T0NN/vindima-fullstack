@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Sheet from '@/components/ui/sheet/index.js';
+	import { NativeSheet } from '@/components/ui/native-sheet/index.js';
 	import { cn, type WithElementRef } from '@/utils/utils.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SIDEBAR_WIDTH_MOBILE } from './constants.js';
@@ -34,28 +34,25 @@
 		{@render children?.()}
 	</div>
 {:else if sidebar.isMobile}
-	<Sheet.Root bind:open={() => sidebar.openMobile, (v) => sidebar.setOpenMobile(v)} {...restProps}>
-		<Sheet.Content
-			bind:ref
+	{#snippet sheetBody()}
+		<div
+			class="flex h-full w-full flex-col"
 			data-sidebar="sidebar"
 			data-slot="sidebar"
 			data-mobile="true"
-			class={cn(
-				'w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden',
-				className
-			)}
-			style="--sidebar-width: {SIDEBAR_WIDTH_MOBILE};"
-			{side}
 		>
-			<Sheet.Header class="sr-only">
-				<Sheet.Title>Barra lateral</Sheet.Title>
-				<Sheet.Description>Muestra la barra lateral en móvil.</Sheet.Description>
-			</Sheet.Header>
-			<div class="flex h-full w-full flex-col">
-				{@render children?.()}
-			</div>
-		</Sheet.Content>
-	</Sheet.Root>
+			{@render children?.()}
+		</div>
+	{/snippet}
+	<NativeSheet
+		bind:open={() => sidebar.openMobile, (v) => sidebar.setOpenMobile(v)}
+		{side}
+		title="Barra lateral"
+		showCloseButton={false}
+		class={cn('w-(--sidebar-width) max-w-none bg-sidebar p-0 text-sidebar-foreground', className)}
+		style="--sidebar-width: {SIDEBAR_WIDTH_MOBILE};"
+		children={sheetBody}
+	/>
 {:else}
 	<div
 		bind:this={ref}

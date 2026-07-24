@@ -3,7 +3,7 @@
  *
  * Args `{ refs }` — rejects more than `CART_CONFIG.MAX_RESOLVE_REFS` refs (a bigger request
  * can't be a real cart, so it's abuse). No auth — product data is public. Returns the final
- * `ResolvedCartProduct` shape (display name already `name · label`); the client uses rows directly.
+ * `ResolvedCartProduct` shape (raw `productName` + `variantLabel`; the client composes display).
  *
  * Subscription discipline (§5): the cart sidebar subscribes with its line refs only while open;
  * the checkout page subscribes with cart refs + active claim ref. Live price edits push into open

@@ -3,6 +3,7 @@
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import * as Card from '@/components/ui/card/index.js';
 	import * as InputOTP from '@/features/auth/components/input-otp/index.js';
 	import { Input } from '@/components/ui/input/index.js';
@@ -58,7 +59,10 @@
 					{/if}
 
 					<Field>
-						<Button type="submit" class="w-full" disabled={form.busy}>Enviar código</Button>
+						<Button type="submit" class="w-full" disabled={form.busy}>
+							{#if form.busy}<Spinner class="size-3.5" />{/if}
+							Enviar código
+						</Button>
 					</Field>
 				</FieldGroup>
 			</form>
@@ -97,13 +101,19 @@
 								</InputOTP.Group>
 							{/snippet}
 						</InputOTP.Root>
-						<FieldDescription>Ingresa el código de 8 dígitos de tu correo electrónico.</FieldDescription>
+						<FieldDescription
+							>Ingresa el código de 8 dígitos de tu correo electrónico.</FieldDescription
+						>
 						{#if form.fieldErrors.code}
 							<FieldError>{form.fieldErrors.code}</FieldError>
 						{/if}
 					</Field>
 
-					<FormField id="pr-new-pw-{id}" label="Nueva contraseña" error={form.fieldErrors.newPassword}>
+					<FormField
+						id="pr-new-pw-{id}"
+						label="Nueva contraseña"
+						error={form.fieldErrors.newPassword}
+					>
 						<PasswordInput
 							id="pr-new-pw-{id}"
 							name="newPassword"
@@ -134,7 +144,10 @@
 					{/if}
 
 					<Field>
-						<Button type="submit" class="w-full" disabled={form.busy}>Continuar</Button>
+						<Button type="submit" class="w-full" disabled={form.busy}>
+							{#if form.busy}<Spinner class="size-3.5" />{/if}
+							Continuar
+						</Button>
 						<Button
 							type="button"
 							variant="outline"

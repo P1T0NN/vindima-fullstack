@@ -10,8 +10,9 @@
  * unavailable variant, draft/archived product — resolves with `unitPriceMinor: null`, which
  * every consumer already renders as an "unavailable" line. No consumer branches on *why*.
  *
- * Returns the final display shape (`ResolvedCartProduct`): `name` is `product name · variant label`
- * (single-language plain text — product content is data, not translated UI copy).
+ * Returns RAW fields (`ResolvedCartProduct`): `productName` + `variantLabel`, never a composed
+ * display string — the frontend owns display composition (GeneralSystemDesignRule.md § backend
+ * returns data; see `variantDisplayName.ts`).
  */
 
 // CONFIG
@@ -34,11 +35,12 @@ export async function resolveRefs(ctx: QueryCtx, refs: string[]): Promise<Resolv
 			.unique();
 
 		if (!variant) {
-			// Unknown ref — never existed. Readable fallback name for the cart's "no longer
-			// available" line; price null.
+			// Unknown ref — never existed. `productName: null`; the frontend renders its own
+			// readable fallback for the "no longer available" line; price null.
 			results.push({
 				productRef: ref,
-				name: titleCaseRef(ref),
+				productName: null,
+				variantLabel: null,
 				imageUrl: null,
 				unitPriceMinor: null,
 				currency: CART_CONFIG.CURRENCY
@@ -59,10 +61,10 @@ export async function resolveRefs(ctx: QueryCtx, refs: string[]): Promise<Resolv
 			product.status === 'active' &&
 			variant.available &&
 			variant.deletedAt === undefined;
-		const baseName = product ? product.name : titleCaseRef(ref);
 		results.push({
 			productRef: ref,
-			name: variant.label ? `${baseName} · ${variant.label}` : baseName,
+			productName: product ? product.name : null,
+			variantLabel: variant.label ?? null,
 			imageUrl: product ? (product.images[0] ?? null) : null,
 			unitPriceMinor: purchasable ? variant.priceMinor : null,
 			currency: CART_CONFIG.CURRENCY
@@ -70,12 +72,4 @@ export async function resolveRefs(ctx: QueryCtx, refs: string[]): Promise<Resolv
 	}
 
 	return results;
-}
-
-/** 'boards-1-M' → 'Boards 1 M'. Fallback name only, for refs with no product row. */
-function titleCaseRef(ref: string): string {
-	return ref
-		.replace(/[-_]+/g, ' ')
-		.trim()
-		.replace(/\b\w/g, (c) => c.toUpperCase());
 }

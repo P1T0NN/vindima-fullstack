@@ -1,14 +1,7 @@
 <script lang="ts">
-	// LIBRARIES
-
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
-	import {
-		Select,
-		SelectContent,
-		SelectItem,
-		SelectTrigger
-	} from '@/components/ui/select/index.js';
+	import { NativeSelect } from '@/components/ui/select/index.js';
 
 	/**
 	 * Filter bar for `/admin/users`. Lives outside the route file so the page can
@@ -40,88 +33,54 @@
 	}
 </script>
 
-<Select
-	type="single"
-	value={searchField}
-	onValueChange={(v) => (searchField = (v as 'email' | 'name') || 'email')}
->
-	<SelectTrigger class="w-36">
-		<span>
-			{`Buscar: ${searchField === 'email' ? 'Correo' : 'Nombre'}`}
-		</span>
-	</SelectTrigger>
-	<SelectContent>
-		<SelectItem value="email">Correo</SelectItem>
-		<SelectItem value="name">Nombre</SelectItem>
-	</SelectContent>
-</Select>
+<NativeSelect
+	class="w-36"
+	ariaLabel="Campo de búsqueda"
+	bind:value={() => searchField, (v) => (searchField = (v as 'email' | 'name') || 'email')}
+	options={[
+		{ value: 'email', label: 'Buscar: Correo' },
+		{ value: 'name', label: 'Buscar: Nombre' }
+	]}
+/>
 
-<Select
-	type="single"
-	value={role ?? ''}
-	onValueChange={(v) => (role = v === '' ? undefined : (v as 'user' | 'admin'))}
->
-	<SelectTrigger class="w-32">
-		<span>
-			{#if role}
-				{`Rol: ${role === 'admin' ? 'Administrador' : 'Usuario'}`}
-			{:else}
-				Cualquier rol
-			{/if}
-		</span>
-	</SelectTrigger>
-	<SelectContent>
-		<SelectItem value="">Cualquier rol</SelectItem>
-		<SelectItem value="user">Usuario</SelectItem>
-		<SelectItem value="admin">Administrador</SelectItem>
-	</SelectContent>
-</Select>
+<NativeSelect
+	class="w-36"
+	ariaLabel="Filtrar por rol"
+	bind:value={() => role ?? '', (v) => (role = v === '' ? undefined : (v as 'user' | 'admin'))}
+	options={[
+		{ value: '', label: 'Cualquier rol' },
+		{ value: 'user', label: 'Usuario' },
+		{ value: 'admin', label: 'Administrador' }
+	]}
+/>
 
-<Select
-	type="single"
-	value={banned === undefined ? '' : String(banned)}
-	onValueChange={(v) => (banned = v === '' ? undefined : v === 'true')}
->
-	<SelectTrigger class="w-36">
-		<span>
-			{#if banned === undefined}
-				Cualquier estado
-			{:else if banned}
-				Bloqueado
-			{:else}
-				Activo
-			{/if}
-		</span>
-	</SelectTrigger>
-	<SelectContent>
-		<SelectItem value="">Cualquier estado</SelectItem>
-		<SelectItem value="true">Bloqueado</SelectItem>
-		<SelectItem value="false">Activo</SelectItem>
-	</SelectContent>
-</Select>
+<NativeSelect
+	class="w-36"
+	ariaLabel="Filtrar por estado"
+	bind:value={
+		() => (banned === undefined ? '' : String(banned)),
+		(v) => (banned = v === '' ? undefined : v === 'true')
+	}
+	options={[
+		{ value: '', label: 'Cualquier estado' },
+		{ value: 'true', label: 'Bloqueado' },
+		{ value: 'false', label: 'Activo' }
+	]}
+/>
 
-<Select
-	type="single"
-	value={emailVerified === undefined ? '' : String(emailVerified)}
-	onValueChange={(v) => (emailVerified = v === '' ? undefined : v === 'true')}
->
-	<SelectTrigger class="w-44">
-		<span>
-			{#if emailVerified === undefined}
-				Cualquier verificación
-			{:else if emailVerified}
-				Verificado
-			{:else}
-				Sin verificar
-			{/if}
-		</span>
-	</SelectTrigger>
-	<SelectContent>
-		<SelectItem value="">Cualquier verificación</SelectItem>
-		<SelectItem value="true">Verificado</SelectItem>
-		<SelectItem value="false">Sin verificar</SelectItem>
-	</SelectContent>
-</Select>
+<NativeSelect
+	class="w-44"
+	ariaLabel="Filtrar por verificación"
+	bind:value={
+		() => (emailVerified === undefined ? '' : String(emailVerified)),
+		(v) => (emailVerified = v === '' ? undefined : v === 'true')
+	}
+	options={[
+		{ value: '', label: 'Cualquier verificación' },
+		{ value: 'true', label: 'Verificado' },
+		{ value: 'false', label: 'Sin verificar' }
+	]}
+/>
 
 {#if hasActiveFilter}
 	<Button variant="ghost" size="sm" onclick={clearFilters}>Limpiar</Button>

@@ -38,7 +38,9 @@
 <div class="flex flex-col gap-4">
 	<header class="flex flex-col gap-0.5">
 		<h2 class="text-base font-semibold">Cuentas vinculadas</h2>
-		<p class="text-sm text-muted-foreground">Proveedores de inicio de sesión conectados a este usuario.</p>
+		<p class="text-sm text-muted-foreground">
+			Proveedores de inicio de sesión conectados a este usuario.
+		</p>
 	</header>
 
 	{#if accountsQuery.error}
@@ -58,7 +60,7 @@
 						<span class="text-sm font-medium">{capitalizeFirst(account.providerId)}</span>
 						{#if account.providerId === 'credential'}
 							<span class="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-								{account.hasPassword ? 'Contraseña establecida' : 'Sin contraseña'}
+								{#if account.hasPassword}Contraseña establecida{:else}Sin contraseña{/if}
 							</span>
 						{/if}
 					</div>

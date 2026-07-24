@@ -17,6 +17,19 @@ import type { DeliveryKind } from '@/shared/features/checkout/utils/checkoutUtil
 import type { MutationCtx } from '@/convex/_generated/server';
 import type { Id } from '@/convex/_generated/dataModel';
 import type { PricedLine, PriceResult } from '@/shared/features/orders/types/ordersTypes';
+import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
+
+/**
+ * Order-line snapshot name, composed at WRITE time — the ONE deliberate server-side display
+ * composition (GeneralSystemDesignRule.md § backend returns data): an order line is a stored
+ * fact, like an invoice, and emails render it server-side. Priced lines always resolved
+ * (`unitPriceMinor !== null` ⇒ product exists), so `productName` is present; the ref guard is
+ * belt-and-braces.
+ */
+function snapshotLineName(product: ResolvedCartProduct): string {
+	const base = product.productName ?? product.productRef;
+	return product.variantLabel ? `${base} · ${product.variantLabel}` : base;
+}
 
 /**
  * The single pricing pipeline (`CheckoutPageSystemDesign.md` §5). The server is the ONLY
@@ -58,7 +71,7 @@ export async function calculateOrderPrice(
 		}
 		lines.push({
 			productRef: product.productRef,
-			name: product.name,
+			name: snapshotLineName(product),
 			qty: line.qty,
 			unitPriceMinor: product.unitPriceMinor
 		});
@@ -81,7 +94,7 @@ export async function calculateOrderPrice(
 			} else {
 				lines.push({
 					productRef: rewardProduct.productRef,
-					name: rewardProduct.name,
+					name: snapshotLineName(rewardProduct),
 					qty: 1,
 					unitPriceMinor: 0,
 					isRewardLine: true

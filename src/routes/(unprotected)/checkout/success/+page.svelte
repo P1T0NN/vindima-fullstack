@@ -27,6 +27,7 @@
 
 	// TYPES
 	import type { Id } from '@/convex/_generated/dataModel';
+	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
 
 	const orderId = $derived(page.url.searchParams.get('order') ?? '');
@@ -58,10 +59,12 @@
 		return map;
 	});
 
-	/** Prefer the live localized name; fall back to the frozen snapshot if the ref is gone. */
+	/** Prefer the live catalog name (composed client-side); fall back to the frozen snapshot. */
 	function lineName(productRef: string, snapshot: string): string {
 		const resolved = byRef.get(productRef);
-		return resolved && resolved.unitPriceMinor !== null ? resolved.name : snapshot;
+		return resolved && resolved.unitPriceMinor !== null
+			? resolvedDisplayName({ ...resolved, ref: productRef })
+			: snapshot;
 	}
 </script>
 
@@ -71,10 +74,7 @@
 	description="Tu pedido de Vindima se realizó con éxito."
 />
 
-<Section
-	yPadding="none"
-	class="min-h-[calc(100dvh-3.5rem)] bg-background py-12 sm:py-16"
->
+<Section yPadding="none" class="min-h-[calc(100dvh-3.5rem)] bg-background py-12 sm:py-16">
 	{#if orderResponse.isLoading}
 		<p class="text-sm text-muted-foreground">…</p>
 	{:else if !order}
@@ -96,9 +96,7 @@
 				Pedido <span class="font-medium text-foreground">{order.number}</span>
 			</p>
 			<p class="text-sm text-accent">
-				{order.paymentPending
-					? 'Paga cuando recojas tu pedido.'
-					: 'Pago recibido — ¡gracias!'}
+				{order.paymentPending ? 'Paga cuando recojas tu pedido.' : 'Pago recibido — ¡gracias!'}
 			</p>
 		</div>
 

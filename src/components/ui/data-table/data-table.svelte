@@ -6,14 +6,8 @@
 	import DataTableSelectedItemsStatus from './data-table-selected-items-status.svelte';
 	import { PaginatedData } from '@/components/ui/paginated-data/index.js';
 	import { Input } from '@/components/ui/input/index.js';
-	import {
-		Select,
-		SelectContent,
-		SelectItem,
-		SelectTrigger
-	} from '@/components/ui/select/index.js';
+	import { NativeSelect } from '@/components/ui/select/index.js';
 	import SearchIcon from '@lucide/svelte/icons/search';
-	import ArrowUpDownIcon from '@lucide/svelte/icons/arrow-up-down';
 
 	// UTILS
 	import { defaultRowKey } from './dataTableUtils.js';
@@ -147,13 +141,6 @@
 		page = 1;
 	}
 
-	const activeSortLabel = $derived.by(() => {
-		if (!sortColumn || !sortDirection) return null;
-		const col = sortableColumns.find((c) => c.id === sortColumn);
-		if (!col) return null;
-		return { header: col.header, direction: sortDirection };
-	});
-
 	const selectedSet = $derived(new Set(selectedIds));
 
 	const currentPageIds = $derived(
@@ -240,31 +227,19 @@
 
 			{#if sortableColumns.length > 0}
 				<div class="md:hidden">
-					<Select
-						type="single"
-						value={mobileSortValue}
-						onValueChange={onMobileSortChange}
+					<NativeSelect
+						class="w-full"
+						ariaLabel="Ordenar por"
+						bind:value={() => mobileSortValue, onMobileSortChange}
 						disabled={isSearching}
-					>
-						<SelectTrigger class="w-full" aria-label="Ordenar por">
-							<ArrowUpDownIcon class="size-4 opacity-70" aria-hidden="true" />
-							<span class="truncate">
-								{#if activeSortLabel}
-									Ordenar por: {activeSortLabel.header}
-									{activeSortLabel.direction === 'asc' ? '↑' : '↓'}
-								{:else}
-									Ordenar por
-								{/if}
-							</span>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="">Orden predeterminado</SelectItem>
-							{#each sortableColumns as col (col.id)}
-								<SelectItem value={`${col.id}:desc`}>{col.header} ↓</SelectItem>
-								<SelectItem value={`${col.id}:asc`}>{col.header} ↑</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
+						options={[
+							{ value: '', label: 'Orden predeterminado' },
+							...sortableColumns.flatMap((col) => [
+								{ value: `${col.id}:desc`, label: `${col.header} ↓` },
+								{ value: `${col.id}:asc`, label: `${col.header} ↑` }
+							])
+						]}
+					/>
 				</div>
 			{/if}
 		</div>

@@ -12,6 +12,7 @@
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card/index.js';
 	import CheckoutSummaryLoading from '../loading/checkout-summary-loading.svelte';
 	import CheckoutSummaryUnresolvedError from './checkout-summary-unresolved-error.svelte';
@@ -151,7 +152,14 @@
 		class="h-12 w-full justify-center text-sm tracking-wider uppercase"
 		disabled={cantSubmit}
 	>
-		{busy ? 'Procesando pedido…' : loading ? submitVerb : `${submitVerb} — ${money(totalMinor)}`}
+		{#if busy}
+			<Spinner class="size-3.5" />
+			Procesando pedido…
+		{:else if loading}
+			{submitVerb}
+		{:else}
+			{submitVerb} — {money(totalMinor)}
+		{/if}
 	</Button>
 	<p class="text-center text-xs leading-snug text-muted-foreground">
 		{trustLine}

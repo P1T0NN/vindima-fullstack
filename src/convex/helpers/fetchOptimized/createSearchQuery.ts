@@ -79,6 +79,18 @@ export type CreateSearchQueryOptions<T extends TableNames, Extra extends Propert
 	 * `trustedSearchSecret` matching this Convex environment variable.
 	 */
 	trustedSecretEnvName?: string | null;
+	/**
+	 * Transform the searched page into the rows the client consumes. Runs after pagination and
+	 * MAY change cardinality — e.g. flatten a product page into per-variant rows (`isDone` /
+	 * `continueCursor` still reflect the searched-table pagination, which is what a dropdown
+	 * needs). `args` carries the caller's search args (incl. any `Extra`). Omit to return the
+	 * raw table docs unchanged.
+	 */
+	map?: (
+		ctx: QueryCtx,
+		page: Doc<T>[],
+		args: BuiltinArgs & ObjectType<Extra>
+	) => unknown[] | Promise<unknown[]>;
 };
 
 /**
@@ -127,7 +139,8 @@ function buildSearchQuery<
 		minQueryLength = 2,
 		defaultNumItems = PAGINATION_DATA.DEFAULT_PAGE_SIZE,
 		maxNumItems = PAGINATION_DATA.MAX_PAGE_SIZE,
-		trustedSecretEnvName = null
+		trustedSecretEnvName = null,
+		map
 	} = options;
 
 	const validators = {
@@ -139,7 +152,7 @@ function buildSearchQuery<
 
 	return query({
 		args: validators,
-		handler: async (ctx: QueryCtx, rawArgsRaw): Promise<SearchQueryResult<T>> => {
+		handler: async (ctx: QueryCtx, rawArgsRaw) => {
 			const rawArgs = rawArgsRaw as BuiltinArgs & ObjectType<Extra>;
 			assertTrustedSearchCaller(rawArgs.trustedSearchSecret, trustedSecretEnvName);
 
@@ -176,8 +189,9 @@ function buildSearchQuery<
 				)
 				.paginate(paginationOpts);
 
+			const docs = result.page as Doc<T>[];
 			return {
-				page: result.page as Doc<T>[],
+				page: map ? await map(ctx, docs, rawArgs) : docs,
 				isDone: result.isDone,
 				continueCursor: result.continueCursor
 			};

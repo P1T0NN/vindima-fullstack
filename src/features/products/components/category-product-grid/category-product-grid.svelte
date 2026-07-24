@@ -4,7 +4,7 @@
 
 	// CLASSES
 	import { cart } from '@/features/cart/cart.svelte';
-	import { upsells } from '@/features/upsells/upsells.svelte';
+	import { upsells } from '@/features/upsells/classes/upsells.svelte';
 
 	// COMPONENTS
 	import ProductCard from '../product-card.svelte';

@@ -1,118 +1,101 @@
 <script lang="ts">
+	// Add a reward item: search an addable product variant, pick it → it's set reward-eligible.
+	// One-shot search via SearchInputConvex over `fetchRewardProducts` (no drain-the-catalog
+	// subscription). The current-items list lives on `AdminRewardsTable` (live), so it reflects
+	// the add automatically.
+
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { usePaginatedQuery } from '@mmailaender/convex-svelte';
+	import { useConvexClient } from 'convex-svelte';
 
 	// CONFIG
-	import { PAGINATION_DATA } from '@/shared/config';
+	import { CART_CONFIG } from '@/shared/config';
 
 	// COMPONENTS
-	import ConvexMutationForm from '@/components/ui/mutation-form/convex-mutation-form.svelte';
-	import SelectField from '@/components/ui/mutation-form/select-field.svelte';
-	import { ErrorComponent } from '@/components/ui/error-component/index.js';
-	import AdminRewardsAddFormLoading from './loading/admin-rewards-add-form-loading.svelte';
+	import { SearchInputConvex } from '@/components/ui/search-input/index.js';
 
-	// SCHEMAS
-	import {
-		addRewardItemFormSchema,
-		type AddRewardItemFormInput
-	} from '@/shared/features/rewards/schemas/rewardsSchemas';
-
-	// FORMS
-	import { createAddRewardItemFields } from '@/shared/features/rewards/forms/addRewardItemForm';
+	// UTILS
+	import { formatMoneyMinor } from '@/utils/formatters.js';
+	import { formatVariantName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
+	import { safeMutation } from '@/utils/convexHelpers';
+	import { toastResult } from '@/utils/toastResult';
 
 	// TYPES
-	import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
-	import type { MutationFormFieldSnippetProps } from '@/components/ui/mutation-form/types';
+	import type { Id } from '@/convex/_generated/dataModel';
 
-	// Catalog for the add-picker; the current-items list lives on `AdminRewardsTable`
-	// (both are live, so they can't drift). Feeds a <select>, so we drain every page —
-	// a pager makes no sense inside a dropdown.
-	const catalogQuery = usePaginatedQuery(
-		api.tables.products.queries.fetchRewardCatalog.fetchRewardCatalog,
-		{},
-		{ initialNumItems: PAGINATION_DATA.DEFAULT_PAGE_SIZE }
-	);
-	$effect(() => {
-		if (catalogQuery.status === 'CanLoadMore')
-			catalogQuery.loadMore(PAGINATION_DATA.DEFAULT_PAGE_SIZE);
+	// LUCIDE ICONS
+	import PlusIcon from '@lucide/svelte/icons/plus';
+
+	const convex = useConvexClient();
+	const uid = $props.id();
+	const hintId = `${uid}-hint`;
+
+	let search = $state('');
+	/** Variant currently being added — the dropdown row spins on it until the write lands. */
+	let pendingId = $state<string | null>(null);
+
+	const money = (minor: number) => formatMoneyMinor(minor, CART_CONFIG.CURRENCY);
+
+	// One row per addable variant; its `_id` is what the mutation takes. Price goes in the
+	// description so it survives on mobile, and the badge carries the verb, which turns an
+	// ambiguous row into an obvious "picking this adds it".
+	const toItem = (row: {
+		variantId: string;
+		productName: string;
+		variantLabel: string | null;
+		priceMinor: number;
+		imageUrl: string | null;
+	}) => ({
+		id: row.variantId,
+		title: formatVariantName(row.productName, row.variantLabel),
+		description: money(row.priceMinor),
+		category: 'Añadir',
+		imageUrl: row.imageUrl ?? undefined
 	});
-	const catalog = $derived(catalogQuery.results as AdminProductRow[] | undefined);
 
-	// Active products with ≥1 available, not-yet-reward variant.
-	const candidates = $derived(
-		(catalog ?? []).filter(
-			(product) =>
-				product.status === 'active' &&
-				product.variants.some((variant) => variant.available && variant.rewardEligible !== true)
-		)
-	);
-
-	let values = $state<AddRewardItemFormInput>({ productId: '', variantId: '' });
-
-	const selectedProduct = $derived(candidates.find((p) => p._id === values.productId));
-	const addableVariants = $derived(
-		(selectedProduct?.variants ?? []).filter((v) => v.available && v.rewardEligible !== true)
-	);
-
-	const fields = $derived(
-		createAddRewardItemFields({
-			productOptions: candidates.map((p) => ({ value: p._id, label: p.name })),
-			variantOptions: addableVariants.map((v) => ({
-				value: v._id,
-				label: v.label ?? v.ref
-			})),
-			showVariant: addableVariants.length > 1,
-			disabled: candidates.length === 0
-		})
-	);
-
-	function syncVariantForProduct(productId: string) {
-		const product = candidates.find((p) => p._id === productId);
-		const variants = (product?.variants ?? []).filter(
-			(v) => v.available && v.rewardEligible !== true
-		);
-		// Single-variant products need no second pick — auto-select it.
-		values.variantId = variants.length === 1 ? variants[0]._id : '';
+	async function addReward(variantId: string) {
+		if (pendingId) return;
+		pendingId = variantId;
+		try {
+			const res = await safeMutation(
+				convex,
+				api.tables.productVariants.mutations.setVariantRewardEligible.setVariantRewardEligible,
+				{ variantId: variantId as Id<'productVariants'>, eligible: true }
+			);
+			// Clearing the term closes the dropdown (the item is now in the list below). A refusal
+			// keeps it open so the owner can read the toast against the row they picked.
+			if (toastResult(res)) search = '';
+		} finally {
+			pendingId = null;
+		}
 	}
 </script>
 
-{#if catalogQuery.error}
-	<ErrorComponent
-		variant="alert"
-		title="No se pudieron cargar los artículos de recompensa"
-		description="Algo salió mal al obtener el catálogo. Inténtalo de nuevo."
-	/>
-{:else if catalogQuery.status === 'LoadingFirstPage'}
-	<AdminRewardsAddFormLoading />
-{:else}
-	<ConvexMutationForm
-		bind:values
-		{fields}
-		schema={addRewardItemFormSchema}
-		runFunction={api.tables.productVariants.mutations.setVariantRewardEligible.setVariantRewardEligible}
-		transformArgs={(_args, v) => ({ variantId: v.variantId, eligible: true })}
-		submitLabel="Agregar artículo de recompensa"
-		customFields={{ productId: productIdField }}
-		class="max-w-lg gap-4"
-	/>
-{/if}
+<div class="flex flex-col gap-2.5 rounded-xl border bg-card p-4">
+	<h2 class="flex items-center gap-1.5 text-sm font-semibold">
+		<PlusIcon class="size-4 text-muted-foreground" aria-hidden="true" />
+		Añadir artículo de recompensa
+	</h2>
 
-{#snippet productIdField({
-	field,
-	value,
-	setValue,
-	error,
-	inputId
-}: MutationFormFieldSnippetProps<AddRewardItemFormInput>)}
-	<SelectField
-		{field}
-		{inputId}
-		{value}
-		setValue={(next) => {
-			setValue(next);
-			syncVariantForProduct(typeof next === 'string' ? next : '');
-		}}
-		invalid={!!error}
+	<SearchInputConvex
+		bind:value={search}
+		query={api.tables.productVariants.queries.fetchRewardProducts.fetchRewardProducts}
+		mapItem={toItem}
+		minQueryLength={2}
+		selectValueOnSelect={false}
+		keepOpenOnSelect
+		{pendingId}
+		placeholder="Busca un producto para añadir…"
+		aria-label="Buscar un producto para añadir a las recompensas"
+		aria-describedby={hintId}
+		emptyTitle="Sin resultados"
+		emptyDescription="Solo aparecen productos activos y disponibles que aún no son recompensa."
+		class="max-w-lg"
+		onSelect={(item) => addReward(item.id)}
 	/>
-{/snippet}
+
+	<p id={hintId} class="text-xs text-muted-foreground">
+		Escribe al menos dos letras. Solo aparecen productos activos y disponibles que aún no son
+		recompensa.
+	</p>
+</div>

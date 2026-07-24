@@ -1,26 +1,20 @@
 <script lang="ts">
-	// The /admin/upsells page — ONE subscription (`fetchUpsellRules`, display + mutation share
-	// the screen), the rule list, and the create/edit dialog. See UpsellsSystemDesign.md §8.
-
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
 	import { useQuery } from '@mmailaender/convex-svelte';
 
 	// COMPONENTS
-	import { Button } from '@/components/ui/button/index.js';
+	import CreateUpsellButton from '@/components/pages/(protected)/admin/upsells/create-upsell-button.svelte';
 	import { ErrorComponent } from '@/components/ui/error-component/index.js';
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
 	import AdminUpsellsHeader from '@/components/pages/(protected)/admin/upsells/admin-upsells-header.svelte';
-	import AdminUpsellsRuleCard from '@/components/pages/(protected)/admin/upsells/admin-upsells-rule-card/admin-upsells-rule-card.svelte';
+	import AdminUpsellCard from '@/components/pages/(protected)/admin/upsells/admin-upsell-card/admin-upsell-card.svelte';
 	import AdminUpsellsCustomizeDialog from '@/components/pages/(protected)/admin/upsells/admin-upsells-customize-dialog/admin-upsells-customize-dialog.svelte';
 	import AdminUpsellsEmpty from '@/components/pages/(protected)/admin/upsells/empty/admin-upsells-empty.svelte';
 	import AdminUpsellsLoading from '@/components/pages/(protected)/admin/upsells/loading/admin-upsells-loading.svelte';
 
 	// UTILS
 	import { buildTriggerKey } from '@/shared/features/upsells/utils/upsellsUtils';
-
-	// LUCIDE ICONS
-	import PlusIcon from '@lucide/svelte/icons/plus';
 
 	// TYPES
 	import type { UpsellAdminRule } from '@/shared/features/upsells/types/upsellsTypes';
@@ -29,17 +23,15 @@
 	const rules = $derived((rulesQuery.data?.rules ?? []) as UpsellAdminRule[]);
 	const existingKeys = $derived(rules.map((r) => buildTriggerKey(r.trigger)));
 
+	const dialogId = $props.id();
+
 	let builderOpen = $state(false);
 	let editingRule = $state<UpsellAdminRule | null>(null);
 
-	function create() {
-		editingRule = null;
-		builderOpen = true;
-	}
-	function edit(rule: UpsellAdminRule) {
-		editingRule = rule;
-		builderOpen = true;
-	}
+	// A natively-triggered open must seed CREATE mode — drop the previous edit's rule on close.
+	$effect(() => {
+		if (!builderOpen) editingRule = null;
+	});
 </script>
 
 <SvelteHead
@@ -51,12 +43,9 @@
 <section class="flex w-full flex-col gap-5 p-4 md:p-6">
 	<div class="flex items-start justify-between gap-4">
 		<AdminUpsellsHeader />
-		
+
 		{#if rules.length > 0}
-			<Button onclick={create} class="shrink-0">
-				<PlusIcon class="size-4" />
-				Nueva sugerencia
-			</Button>
+			<CreateUpsellButton {dialogId} />
 		{/if}
 	</div>
 
@@ -69,15 +58,20 @@
 	{:else if rulesQuery.isLoading}
 		<AdminUpsellsLoading />
 	{:else if rules.length === 0}
-		<AdminUpsellsEmpty oncreate={create} />
+		<AdminUpsellsEmpty {dialogId} />
 	{:else}
 		<div class="flex flex-col gap-3">
 			{#each rules as rule (rule.id)}
-				<AdminUpsellsRuleCard {rule} onedit={edit} />
+				<AdminUpsellCard {rule} bind:editingRule bind:builderOpen />
 			{/each}
 		</div>
 	{/if}
 </section>
 
 <!-- Always mounted so the close animation runs; `open` gates visibility. -->
-<AdminUpsellsCustomizeDialog bind:open={builderOpen} rule={editingRule} {existingKeys} />
+<AdminUpsellsCustomizeDialog 
+	bind:open={builderOpen} 
+	{dialogId} 
+	rule={editingRule} 
+	{existingKeys} 
+/>

@@ -17,7 +17,7 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
-	import { Sheet, SheetContent, SheetHeader, SheetFooter, SheetTitle } from '@/components/ui/sheet';
+	import { NativeSheet } from '@/components/ui/native-sheet/index.js';
 	import { Skeleton } from '@/components/ui/skeleton/index.js';
 	import { Button } from '@/components/ui/button/index.js';
 	import CartLine from './cart-line.svelte';
@@ -53,11 +53,12 @@
 		if (rows) cart.pruneUnavailable(rows);
 	});
 
-	/** Locale-agnostic unavailable fallback for a ref not yet in the resolved map. */
+	/** Unavailable fallback for a ref not yet in the resolved map (display composes client-side). */
 	function fallback(ref: string): ResolvedCartProduct {
 		return {
 			productRef: ref,
-			name: ref,
+			productName: null,
+			variantLabel: null,
 			imageUrl: null,
 			unitPriceMinor: null,
 			currency: CART_CONFIG.CURRENCY
@@ -78,9 +79,7 @@
 	const hasUnavailable = $derived(resolved.some((r) => r.product.unitPriceMinor === null));
 	const canCheckout = $derived(subtotalMinor > 0);
 
-	const productsLoading = $derived(
-		cart.isOpen && refs.length > 0 && productsQuery.isLoading
-	);
+	const productsLoading = $derived(cart.isOpen && refs.length > 0 && productsQuery.isLoading);
 	const showSkeleton = $derived((cart.loading && cart.lines.length === 0) || productsLoading);
 	const showEmpty = $derived(!cart.loading && cart.lines.length === 0);
 
@@ -95,13 +94,18 @@
 	}
 </script>
 
-<Sheet bind:open={cart.isOpen}>
-	<SheetContent side="right" class="w-full gap-0 p-0 sm:max-w-105">
-		<SheetHeader class="border-b border-border p-4">
-			<SheetTitle class="text-base font-semibold">
+<NativeSheet
+	bind:open={cart.isOpen}
+	side="right"
+	title="Carrito"
+	class="w-full gap-0 bg-background p-0 sm:max-w-105"
+>
+	{#snippet children()}
+		<div class="border-b border-border p-4">
+			<h2 class="text-base font-semibold">
 				Carrito{#if cart.count > 0}<span class="text-muted-foreground"> ({cart.count})</span>{/if}
-			</SheetTitle>
-		</SheetHeader>
+			</h2>
+		</div>
 
 		<!-- Scrollable line list -->
 		<div class="min-h-0 flex-1 overflow-y-auto px-4">
@@ -133,7 +137,7 @@
 		</div>
 
 		{#if !showEmpty && !showSkeleton}
-			<SheetFooter class="gap-3 border-t border-border p-4">
+			<div class="mt-auto flex flex-col gap-3 border-t border-border p-4">
 				<div class="flex items-baseline justify-between">
 					<span class="text-sm font-medium text-muted-foreground">Subtotal</span>
 					<span class="text-xl font-semibold text-foreground tabular-nums">
@@ -142,7 +146,7 @@
 				</div>
 				<p class="text-xs text-muted-foreground">
 					El envío y los impuestos se calculan al finalizar la compra.{#if hasUnavailable}&nbsp;Los
-					productos no disponibles no se incluyen en el subtotal.{/if}
+						productos no disponibles no se incluyen en el subtotal.{/if}
 				</p>
 
 				{#if FEATURES.CHECKOUT}
@@ -158,7 +162,7 @@
 				>
 					Seguir comprando
 				</Button>
-			</SheetFooter>
+			</div>
 		{/if}
-	</SheetContent>
-</Sheet>
+	{/snippet}
+</NativeSheet>

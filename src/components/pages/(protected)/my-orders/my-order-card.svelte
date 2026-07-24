@@ -6,6 +6,7 @@
 	// COMPONENTS
 	import { Card } from '@/components/ui/card/index.js';
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 
 	// UTILS
 	import { safeMutation } from '@/utils/convexHelpers';
@@ -157,12 +158,13 @@
 	{/if}
 
 	<!-- Ledger — one line per item, gold serif numerals, reward lines italicised. -->
-	<ul class="flex flex-col border-t border-accent/10 bg-gradient-to-b from-transparent to-primary/5 px-6 pt-4 pb-1">
+	<ul
+		class="flex flex-col border-t border-accent/10 bg-gradient-to-b from-transparent to-primary/5 px-6 pt-4 pb-1"
+	>
 		{#each order.lines as line, i (i)}
 			<li class="flex items-baseline justify-between gap-4 py-1.5 text-sm">
 				<span class="min-w-0 truncate text-foreground/90">
-					{line.name}{#if line.qty > 1}<span class="text-muted-foreground"> × {line.qty}</span
-						>{/if}
+					{line.name}{#if line.qty > 1}<span class="text-muted-foreground"> × {line.qty}</span>{/if}
 				</span>
 				<span
 					class="shrink-0 font-display text-base tabular-nums {line.isRewardLine
@@ -176,7 +178,9 @@
 	</ul>
 
 	<!-- The seal: total, set apart on a warm gold wash. -->
-	<div class="mt-2 flex items-baseline justify-between border-t border-accent/12 bg-primary/6 px-6 py-4">
+	<div
+		class="mt-2 flex items-baseline justify-between border-t border-accent/12 bg-primary/6 px-6 py-4"
+	>
 		<span class="text-[0.7rem] font-semibold tracking-[0.2em] text-accent uppercase">Total</span>
 		<span class="font-display text-[1.65rem] leading-none font-semibold text-accent tabular-nums">
 			{money(order.amounts.totalMinor)}
@@ -193,7 +197,10 @@
 				onmouseleave={() => (cancelArmed = false)}
 				disabled={cancelBusy}
 			>
-				{cancelArmed ? 'Confirmar cancelación' : 'Cancelar pedido'}
+				{#if cancelBusy}
+					<Spinner class="size-3.5" />
+				{/if}
+				{#if cancelArmed}Confirmar cancelación{:else}Cancelar pedido{/if}
 			</Button>
 		</div>
 	{/if}

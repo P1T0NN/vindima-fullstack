@@ -9,12 +9,7 @@
 	// COMPONENTS
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
 	import AdminOrderRefundButton from './admin-order-refund-button.svelte';
-	import {
-		Select,
-		SelectContent,
-		SelectItem,
-		SelectTrigger
-	} from '@/components/ui/select/index.js';
+	import { NativeSelect } from '@/components/ui/select/index.js';
 
 	// DATA
 	import { ORDER_STATUSES, ORDER_STATUS_LABELS } from '@/shared/features/orders/data/ordersData.js';
@@ -58,9 +53,10 @@
 	// views and back-button support come for free, and the dashboard's order alert cards
 	// deep-link here by setting the param.
 	const status = useQueryState('status', parseAsStringLiteral(ORDER_STATUSES));
-	const statusTriggerLabel = $derived(
-		status.current ? orderStatusLabel(status.current) : 'Estado: todos'
-	);
+	const statusOptions = [
+		{ value: '', label: 'Estado: todos' },
+		...ORDER_STATUSES.map((value) => ({ value, label: ORDER_STATUS_LABELS[value] }))
+	];
 </script>
 
 <ConvexDataTable
@@ -77,21 +73,14 @@
 />
 
 {#snippet filters()}
-	<Select
-		type="single"
-		value={status.current ?? ''}
-		onValueChange={(v) => (status.current = v ? (v as OrderRow['status']) : null)}
-	>
-		<SelectTrigger class="w-full md:w-48" aria-label="Filtrar por estado">
-			{statusTriggerLabel}
-		</SelectTrigger>
-		<SelectContent>
-			<SelectItem value="">Estado: todos</SelectItem>
-			{#each ORDER_STATUSES as value (value)}
-				<SelectItem {value}>{ORDER_STATUS_LABELS[value]}</SelectItem>
-			{/each}
-		</SelectContent>
-	</Select>
+	<NativeSelect
+		class="w-full md:w-48"
+		ariaLabel="Filtrar por estado"
+		bind:value={
+			() => status.current ?? '', (v) => (status.current = v ? (v as OrderRow['status']) : null)
+		}
+		options={statusOptions}
+	/>
 {/snippet}
 
 {#snippet numberCell({ row }: DataTableCellSnippetProps<OrderRow>)}

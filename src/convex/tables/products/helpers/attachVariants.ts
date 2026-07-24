@@ -6,13 +6,13 @@
  * O(perPage · variants), never O(table).
  */
 
+// CONFIG
+import { CATALOG_CONFIG } from '@/shared/config.js';
+
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';
 import type { Doc } from '@/convex/_generated/dataModel';
 import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
-
-/** One variant axis per product (ProductsTableSystemDesign.md §2); a handful of rows at most. */
-const MAX_VARIANTS_PER_PRODUCT = 64;
 
 export async function attachVariants(
 	ctx: QueryCtx,
@@ -24,7 +24,7 @@ export async function attachVariants(
 				await ctx.db
 					.query('productVariants')
 					.withIndex('by_product', (q) => q.eq('productId', product._id))
-					.take(MAX_VARIANTS_PER_PRODUCT)
+					.take(CATALOG_CONFIG.MAX_VARIANTS_PER_PRODUCT)
 			).filter((variant) => variant.deletedAt === undefined); // hide tombstones
 			variants.sort((a, b) => a.sortOrder - b.sortOrder);
 			return { ...product, variants };

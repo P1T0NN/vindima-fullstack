@@ -16,8 +16,10 @@ export type UpsellTrigger =
 export type UpsellCatalogItem = {
 	/** Variant ref — exactly what `cart.add()` takes. */
 	ref: string;
-	/** Display name, already `product · label` (same convention as the cart). */
-	name: string;
+	/** Product name, verbatim — the frontend composes the display name (`variantDisplayName.ts`). */
+	productName: string;
+	/** Variant label, verbatim. `null` = single-variant product. */
+	variantLabel: string | null;
 	/** Product description (one line under the name in the dialog). */
 	description: string | null;
 	imageUrl: string | null;
@@ -44,7 +46,10 @@ export type UpsellItemStatus = 'ok' | 'missing' | 'unavailable';
 
 export type UpsellAdminItem = {
 	ref: string;
-	name: string;
+	/** Product name, verbatim. `null` = the ref no longer resolves (frontend falls back to a readable ref). */
+	productName: string | null;
+	/** Variant label, verbatim. `null` = single-variant product (or unresolvable ref). */
+	variantLabel: string | null;
 	imageUrl: string | null;
 	/** Null when the ref no longer resolves to a live price. */
 	priceMinor: number | null;

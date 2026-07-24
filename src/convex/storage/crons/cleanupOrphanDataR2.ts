@@ -1,6 +1,9 @@
 // LIBRARIES
 import { internalMutation } from '../../_generated/server';
 
+// CONFIG
+import { BATCH_CONFIG } from '@/shared/config.js';
+
 // R2
 import { r2 } from '../r2/r2';
 
@@ -19,8 +22,8 @@ import { r2 } from '../r2/r2';
  * datasets larger than `PAGE_SIZE * MAX_PAGES` orphans accumulate beyond the sweep
  * window — bump the constants or split into a paginated-by-cron design.
  */
-const PAGE_SIZE = 200;
-const MAX_PAGES = 25;
+const PAGE_SIZE = BATCH_CONFIG.R2_CLEANUP_PAGE_SIZE;
+const MAX_PAGES = BATCH_CONFIG.R2_CLEANUP_MAX_PAGES;
 
 export const cleanupOrphanDataR2 = internalMutation({
 	args: {},
