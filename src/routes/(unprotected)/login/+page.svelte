@@ -168,6 +168,19 @@
 							Crear cuenta
 						</Link>
 					</p>
+
+					<!-- Catches the guest who clicked "account" looking for an order and hit a login
+					     form. Without this the trail ends here, since a guest has no account to sign
+					     into and no way back to their purchase. -->
+					<p class="text-center text-xs leading-snug text-muted-foreground/80">
+						¿Compraste como invitado?
+						<Link
+							href={UNPROTECTED_PAGE_ENDPOINTS.TRACK_ORDER}
+							class="text-chart-2 no-underline hover:underline"
+						>
+							Rastrear tu pedido
+						</Link>
+					</p>
 				</form>
 			{:else}
 				<EmailVerificationForm

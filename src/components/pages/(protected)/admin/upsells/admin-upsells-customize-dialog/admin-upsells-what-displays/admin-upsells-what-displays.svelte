@@ -6,12 +6,12 @@
 	// CONFIG
 	import { UPSELLS_CONFIG } from '@/shared/config.js';
 
-	// UTILS
-	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
-
 	// COMPONENTS
 	import AdminUpsellsSelectedItem from './admin-upsells-selected-item.svelte';
 	import AdminUpsellsWhatDisplaysSearch from './admin-upsells-what-displays-search.svelte';
+
+	// UTILS
+	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
 
 	// TYPES
 	import type { UpsellAdminRule } from '@/shared/features/upsells/types/upsellsTypes';

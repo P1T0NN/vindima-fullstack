@@ -16,6 +16,9 @@
 	import { authClass, type CurrentUser } from '@/features/auth/classes/authClass.svelte';
 	import { cart } from '@/features/cart/cart.svelte';
 
+	// VALIDATION
+	import { installZodMessages } from '@/features/validation/zodMessages';
+
 	// COMPONENTS
 	import { Toaster } from '@/components/ui/sonner';
 	import Header from '@/components/ui/header/header.svelte';
@@ -30,6 +33,11 @@
 
 	// Admin has its own shell (sidebar + site header) — hide the storefront chrome there.
 	const isAdminRoute = $derived(page.url.pathname.startsWith('/admin'));
+
+	// Human copy for the SHARED zod schemas, installed CLIENT-SIDE ONLY. The schemas themselves
+	// stay message-free so Convex can import them without dragging any translation code into the
+	// backend bundle — see `zodMessages.ts` for the full reasoning.
+	installZodMessages();
 
 	createSvelteAuthClient({
 		authClient,

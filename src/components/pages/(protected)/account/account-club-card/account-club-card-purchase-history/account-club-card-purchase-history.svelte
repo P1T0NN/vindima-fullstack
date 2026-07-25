@@ -106,13 +106,14 @@
 		<p class="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">
 			Historial de compras
 		</p>
-		<a
+
+		<Button
 			href={appHref(PROTECTED_PAGE_ENDPOINTS.MY_ORDERS)}
-			class="inline-flex items-center gap-1.5 text-xs font-medium tracking-wide text-chart-2 uppercase no-underline transition-colors hover:text-accent"
+			class="inline-flex items-center gap-1.5 text-xs font-medium tracking-wide uppercase"
 		>
 			Mis pedidos
 			<ArrowRightIcon class="size-3.5" />
-		</a>
+		</Button>
 	</div>
 
 	<div class="grid grid-cols-3 gap-x-0 text-sm">

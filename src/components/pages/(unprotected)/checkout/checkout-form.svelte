@@ -4,6 +4,7 @@
 
 	// LIBRARIES
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 	import { api } from '@/convex/_generated/api';
 
 	// CLASSES
@@ -35,18 +36,31 @@
 	import { createPlaceOrderForm } from '@/features/orders/forms/placeOrderForm';
 
 	// UTILS
-	import { toastResult } from '@/utils/toastResult';
+	import { toastError } from '@/utils/toastResult';
 	import { appGoto } from '@/utils/app-navigation.js';
+	import { safeMutation } from '@/utils/convexHelpers';
 	import { toPlaceOrderArgs } from '@/features/orders/utils/ordersUtils.js';
+	import {
+		readOrCreateAttemptId,
+		clearAttemptId
+	} from '@/features/orders/utils/checkoutAttempt.js';
 
 	// TYPES
 	import type { FunctionReturnType } from 'convex/server';
 
 	const auth = useAuth();
+	const convex = useConvexClient();
 
-	// Stable idempotency key for this checkout attempt (retries reuse it → one order). Must be
-	// globally unique — the server dedupes orders by it — so a UUID, never a per-instance DOM id.
-	const attemptId = crypto.randomUUID();
+	// The idempotency key is read fresh at every submit and PERSISTS across mounts/tabs
+	// (`StripeSystemDesign.md` §5.3): while the order is pending, resubmitting updates that same
+	// draft instead of creating a sibling — one live order per browser, no orphan pending rows,
+	// no superseded payment session. Cleared on the success page.
+	const placeOrderArgs = () =>
+		toPlaceOrderArgs(
+			values,
+			readOrCreateAttemptId(),
+			cart.lines.map((l) => ({ productRef: l.productRef, qty: l.qty }))
+		);
 
 	const canPickup = CHECKOUT_CONFIG.FULFILLMENT.PICKUP;
 	const canDeliver = CHECKOUT_CONFIG.FULFILLMENT.DELIVERY !== null;
@@ -55,8 +69,8 @@
 		...(canDeliver ? [{ value: 'delivery', label: 'Entrega a domicilio' }] : [])
 	];
 
-	// Payment methods: cash shows only when enabled; online always renders so the shopper sees
-	// the choice, but stays disabled ("Próximamente") until the Stripe adapter lands (config flag).
+	// Payment methods: cash shows only when enabled; online always renders so the shopper sees the
+	// choice, greyed out ("Próximamente") when a store runs cash-only (PAYMENT_METHODS.ONLINE).
 	const canCash = CHECKOUT_CONFIG.PAYMENT_METHODS.CASH;
 	const canOnline = CHECKOUT_CONFIG.PAYMENT_METHODS.ONLINE;
 	const paymentOptions = [
@@ -74,7 +88,10 @@
 		delivery: { icon: TruckIcon, description: 'Entregamos en la dirección que indiques abajo.' }
 	};
 	const paymentMeta = {
-		cash: { icon: BanknoteIcon, description: 'Paga al recoger o en la entrega. Sin pago en línea.' },
+		cash: {
+			icon: BanknoteIcon,
+			description: 'Paga al recoger o en la entrega. Sin pago en línea.'
+		},
 		online: { icon: CreditCardIcon, description: 'Paga con tarjeta en una página segura.' }
 	};
 
@@ -111,17 +128,37 @@
 
 	/** Placement navigates instead of staying put, so the result is handled here rather than by the
 	 *  form's default handling. */
-	async function handleResult(result: unknown) {
+	async function handleResult(result: unknown, allowRetry = true): Promise<boolean> {
 		const res = result as PlaceOrderResult;
+
+		// The stored attempt id points at a draft owned by somebody else (shared computer, or a
+		// draft started under a different session). Self-heal silently — forget it, mint a new one,
+		// place once more — so the shopper never sees this as an error.
+		if (allowRetry && !res.success && res.message?.key === 'CheckoutMessages.ATTEMPT_CONFLICT') {
+			clearAttemptId();
+			const retried = await safeMutation(
+				convex,
+				api.tables.orders.mutations.placeOrder.placeOrder,
+				placeOrderArgs()
+			);
+			if (!retried) return false;
+			return await handleResult(retried, false);
+		}
 
 		// Soft failures (checkout disabled, unavailable lines) toast their backend message and mark
 		// the offending lines in the summary.
-		if (!toastResult(res) || !res.data?.orderId) {
+		//
+		// Deliberately NOT `toastResult`: that also toasts the SUCCESS message, and every success
+		// path here navigates away immediately — so "Pedido realizado" only ever flashed for a
+		// frame on the way to Stripe or the confirmation page. The destination states it properly.
+		if (!res.success || !res.data?.orderId) {
+			toastError(res);
 			unavailableRefs = res.data?.unavailableRefs ?? [];
 			return false;
 		}
 
-		// Hosted payment provider (Stripe, later) → follow the redirect. Manual → success page.
+		// Online payment → our pay page, which mints the Stripe session and redirects on. Cash →
+		// straight to the confirmation page.
 		if (res.data.payment?.kind === 'redirect') {
 			window.location.href = res.data.payment.url;
 			return true;
@@ -130,7 +167,9 @@
 		cart.clear();
 		// Guests have no session to look the order up with, so the success page needs their email.
 		const email = auth.isAuthenticated ? '' : `&email=${encodeURIComponent(values.email)}`;
-		await appGoto(`${UNPROTECTED_PAGE_ENDPOINTS.CHECKOUT_SUCCESS}?order=${res.data.orderId}${email}`);
+		await appGoto(
+			`${UNPROTECTED_PAGE_ENDPOINTS.CHECKOUT_SUCCESS}?order=${res.data.orderId}${email}`
+		);
 		return true;
 	}
 </script>
@@ -140,13 +179,8 @@
 	{sections}
 	schema={placeOrderFormSchema}
 	runFunction={api.tables.orders.mutations.placeOrder.placeOrder}
-	transformArgs={(_args, v) =>
-		toPlaceOrderArgs(
-			v,
-			attemptId,
-			cart.lines.map((l) => ({ productRef: l.productRef, qty: l.qty }))
-		)}
-	onResult={handleResult}
+	transformArgs={() => placeOrderArgs()}
+	onResult={(result) => handleResult(result)}
 	resetOnSuccess={false}
 	customFields={{ mode: modeField, payment: paymentField }}
 	class="lg:grid lg:grid-cols-[1fr_380px] lg:items-start lg:gap-8"

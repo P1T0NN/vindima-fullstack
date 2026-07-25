@@ -32,9 +32,31 @@ export const cancelMyOrder = authMutation('cancelMyOrder')({
 			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' } };
 		}
 
-		await ctx.db.patch(order._id, { status: 'cancelled' });
+		await ctx.db.patch(order._id, {
+			status: 'cancelled',
+			// A cancelled order must not stay payable: drop the session ref so the webhook can
+			// never settle through it (`StripeSystemDesign.md` §8.2.3) and expire it at Stripe
+			// below. Bumping the attempt counter keeps the idempotency key from replaying it.
+			...(order.paymentSessionRef
+				? {
+						paymentSessionRef: undefined,
+						paymentSessionAttempt: (order.paymentSessionAttempt ?? 0) + 1
+					}
+				: {})
+		});
 		// Work-queue counter: pending → closed.
 		await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
+
+		// Commit-gated, so a rolled-back cancel expires nothing. The seconds before it lands are
+		// covered by the webhook's status check, which auto-refunds a payment for a dead order.
+		if (order.paymentSessionRef) {
+			void ctx.scheduler.runAfter(
+				0,
+				internal.stripe.actions.expireStripeSession.expireStripeSession,
+				{ sessionRef: order.paymentSessionRef }
+			);
+		}
+
 		if (order.claimId) {
 			await ctx.runMutation(
 				internal.tables.rewardClaims.mutations.releaseRewardClaim.releaseRewardClaim,

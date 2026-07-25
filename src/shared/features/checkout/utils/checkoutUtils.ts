@@ -43,16 +43,28 @@ export function orderTotalMinor(
 }
 
 /**
- * Collapse (lifecycle status, fulfillment) into the single badge the account UI shows
- * (spec §4.2). Pending/paid both read as "processing" until an admin advances fulfillment;
- * cancelled and refunded both read as "cancelled". Types come straight from `Doc<'orders'>`
- * (source of truth) and the derived `OrderDisplayStatus` in `ordersTypes.ts`.
+ * Collapse (lifecycle status, fulfillment, payment method) into the single badge the account UI
+ * shows (spec §4.2). Cancelled and refunded both read as "cancelled"; paid orders read as their
+ * fulfillment stage. Types come straight from `Doc<'orders'>` (source of truth) and the derived
+ * `OrderDisplayStatus` in `ordersTypes.ts`.
+ *
+ * `paymentMethod` splits the one case that used to be misreported. A `pending` order means two
+ * opposite things depending on how it is paid:
+ *   - **cash** — confirmed, we're preparing it, the shopper pays on pickup/delivery → `processing`.
+ *   - **online** — the shopper left the hosted payment page and nothing was charged → `unpaid`.
+ * Showing "en proceso" for the second was a lie, and it hid the fact that the order can still be
+ * paid (the pay-page link stays valid until the expiry cron cancels it).
+ *
+ * Optional so pre-existing callers and rows without the field keep the historical `cash`
+ * behaviour.
  */
 export function orderDisplayStatus(
 	status: OrderStatus,
-	fulfillment: Doc<'orders'>['fulfillment']
+	fulfillment: Doc<'orders'>['fulfillment'],
+	paymentMethod?: Doc<'orders'>['paymentMethod']
 ): OrderDisplayStatus {
 	if (status === 'cancelled' || status === 'refunded') return 'cancelled';
+	if (status === 'pending' && paymentMethod === 'online') return 'unpaid';
 	if (status === 'paid' && (fulfillment === 'shipped' || fulfillment === 'delivered')) {
 		return fulfillment;
 	}

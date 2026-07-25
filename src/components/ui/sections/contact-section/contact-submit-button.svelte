@@ -24,7 +24,9 @@
 		const data = {
 			name: contactSectionClass.contactInputs.name,
 			email: contactSectionClass.contactInputs.email,
-			message: contactSectionClass.contactInputs.message,
+			// Event details ride along inside the message (see `composedMessage`), so the contact
+			// action and its schema stay exactly as they were.
+			message: contactSectionClass.composedMessage,
 			website: contactSectionClass.contactInputs.website
 		};
 

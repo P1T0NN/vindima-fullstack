@@ -19,10 +19,10 @@
 ## 1. Goals
 
 1. **Low cognitive load, by structure.** A single vertical page, always in the same order:
-   *who you are → how you get it → what you pay*. No wizard, no steps indicator, no
+   _who you are → how you get it → what you pay_. No wizard, no steps indicator, no
    accordion, no coupon field, no account wall. Every discount the shopper is entitled to
    (welcome offer, claimed free item) is applied **automatically and shown as a line** —
-   the shopper never has to *do* anything to get what's theirs.
+   the shopper never has to _do_ anything to get what's theirs.
 2. **One honest number.** The total in the pay button is the total that will be charged.
    Shipping is computed before the button is pressable; taxes are included in prices
    (config note, §4.3). Nothing appears after the click. Surprise math at payment is the
@@ -111,30 +111,37 @@ orders: defineTable({
 
 	/** Money truth. pending = awaiting payment; terminal states never regress. */
 	status: v.union(
-		v.literal('pending'), v.literal('paid'),
-		v.literal('cancelled'), v.literal('refunded')
+		v.literal('pending'),
+		v.literal('paid'),
+		v.literal('cancelled'),
+		v.literal('refunded')
 	),
 	/** Admin-set progress AFTER payment; null until then. Drives the account UI badge. */
 	fulfillment: v.union(
-		v.null(), v.literal('processing'), v.literal('shipped'), v.literal('delivered')
+		v.null(),
+		v.literal('processing'),
+		v.literal('shipped'),
+		v.literal('delivered')
 	),
 
-	lines: v.array(v.object({
-		productRef: v.string(),
-		/** Display name frozen at placement — order history must not change when catalog does. */
-		name: v.string(),
-		qty: v.number(),
-		/** Unit price frozen at placement, minor units. 0 = the claimed free reward line. */
-		unitPriceMinor: v.number(),
-		/** Marks the free-item line from a reward claim (display + stamp-subtotal exclusion). */
-		isRewardLine: v.optional(v.boolean())
-	})),
+	lines: v.array(
+		v.object({
+			productRef: v.string(),
+			/** Display name frozen at placement — order history must not change when catalog does. */
+			name: v.string(),
+			qty: v.number(),
+			/** Unit price frozen at placement, minor units. 0 = the claimed free reward line. */
+			unitPriceMinor: v.number(),
+			/** Marks the free-item line from a reward claim (display + stamp-subtotal exclusion). */
+			isRewardLine: v.optional(v.boolean())
+		})
+	),
 
 	/** The full breakdown, all integer minor units. total = subtotal - discount + shipping. */
 	amounts: v.object({
-		subtotalMinor: v.number(),       // sum of non-reward lines
-		welcomeDiscountMinor: v.number(),// 0 when not applied
-		shippingMinor: v.number(),       // 0 for pickup / free-above threshold
+		subtotalMinor: v.number(), // sum of non-reward lines
+		welcomeDiscountMinor: v.number(), // 0 when not applied
+		shippingMinor: v.number(), // 0 for pickup / free-above threshold
 		totalMinor: v.number()
 	}),
 	currency: v.string(), // ISO 4217, snapshotted from CART_CONFIG.CURRENCY
@@ -144,8 +151,11 @@ orders: defineTable({
 		v.object({
 			kind: v.literal('delivery'),
 			address: v.object({
-				line1: v.string(), line2: v.optional(v.string()),
-				city: v.string(), postcode: v.string(), country: v.string()
+				line1: v.string(),
+				line2: v.optional(v.string()),
+				city: v.string(),
+				postcode: v.string(),
+				country: v.string()
 			})
 		})
 	),
@@ -163,11 +173,11 @@ orders: defineTable({
 })
 	.index('by_user', ['userId'])
 	.index('by_attempt', ['attemptId'])
-	.index('by_status', ['status'])
+	.index('by_status', ['status']);
 ```
 
-Why snapshots here when the cart forbids them: a cart is a *wishlist* (live prices keep it
-honest); an order is a *contract* (frozen prices keep it honest). Same principle, opposite
+Why snapshots here when the cart forbids them: a cart is a _wishlist_ (live prices keep it
+honest); an order is a _contract_ (frozen prices keep it honest). Same principle, opposite
 conclusions.
 
 ### 4.2 Status mapping for the existing account UI
@@ -176,12 +186,12 @@ conclusions.
 `'processing' | 'shipped' | 'delivered' | 'cancelled'`. Real orders derive that display
 status — do the mapping in one util (`ordersUtils.ts`), not in components:
 
-| `status` | `fulfillment` | Account badge |
-|---|---|---|
-| `pending` | — | `processing` ("awaiting payment/confirmation") |
-| `paid` | `null` or `processing` | `processing` |
-| `paid` | `shipped` / `delivered` | `shipped` / `delivered` |
-| `cancelled` / `refunded` | — | `cancelled` |
+| `status`                 | `fulfillment`           | Account badge                                  |
+| ------------------------ | ----------------------- | ---------------------------------------------- |
+| `pending`                | —                       | `processing` ("awaiting payment/confirmation") |
+| `paid`                   | `null` or `processing`  | `processing`                                   |
+| `paid`                   | `shipped` / `delivered` | `shipped` / `delivered`                        |
+| `cancelled` / `refunded` | —                       | `cancelled`                                    |
 
 ### 4.3 The single knob: `CHECKOUT_CONFIG` (+ `FEATURES.CHECKOUT`)
 
@@ -205,9 +215,10 @@ export const CHECKOUT_CONFIG = {
 	},
 
 	/** Payment methods offered as cards at checkout (§8.1); registry maps method → provider
-	 *  (cash → manual, online → redirect). Keep ONLINE false until Stripe lands — the card
-	 *  still renders, disabled, so no shopper hits a dead path. One method → no picker. */
-	PAYMENT_METHODS: { CASH: true, ONLINE: false },
+	 *  (cash → manual, online → Stripe Checkout). ONLINE needs the two Stripe env vars + the
+	 *  dashboard webhook (`StripeSystemDesign.md` §17); false renders the card disabled so no
+	 *  shopper hits a dead path. One method → no picker. */
+	PAYMENT_METHODS: { CASH: true, ONLINE: true },
 
 	/** Hours a 'pending' order lives before the cron cancels it (frees its claim). */
 	PENDING_EXPIRY_HOURS: 48,
@@ -259,32 +270,32 @@ burst — abuse protection, not flow control).
 
 ### 6.1 Public
 
-| Function | Behavior |
-|---|---|
-| `placeOrder` (mutation) | Args: `{ attemptId, lines: {productRef, qty}[], contact {name, email, phone?}, delivery, paymentMethod, note? }`. Guards: `FEATURES.CHECKOUT`; signed-out + `!ALLOW_GUEST_CHECKOUT` → `AUTH_REQUIRED`; empty lines → `EMPTY_ORDER`; delivery kind and `paymentMethod` must both be enabled in config (→ `INVALID_DELIVERY` / `INVALID_PAYMENT_METHOD` — a client can't pick a disabled card); clamp qty/lines to `CART_CONFIG` limits. **Idempotency:** existing order with this `attemptId` (`by_attempt`) → return it, do nothing (double-click, network retry, back-button resubmit all collapse to one order). Otherwise: run `calculateOrderPrice` (§5), insert the order (`pending`, generated `number`), call the method's provider `createPayment` (§8/§8.1), return `{ orderId, number, amounts, payment }`. |
-| `fetchMyOrders` (query) | Paginated orders for the signed-in user (`by_user`, newest first), mapped to the account-UI shape via §4.2. Replaces the `accountOrders` mock. |
-| `fetchOrder` (query) | One order by id — owner-checked for auth users. For guests: requires the `orderId` **and** matching `email` arg (possession of both ≈ the confirmation email; enough for a status page, no account system invented). |
-| `cancelMyOrder` (mutation) | Owner-checked, `pending` only → `cancelled` + release claim if present. Paid orders are refund territory (admin), not self-serve. |
+| Function                   | Behavior                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `placeOrder` (mutation)    | Args: `{ attemptId, lines: {productRef, qty}[], contact {name, email, phone?}, delivery, paymentMethod, note? }`. Guards: `FEATURES.CHECKOUT`; signed-out + `!ALLOW_GUEST_CHECKOUT` → `AUTH_REQUIRED`; empty lines → `EMPTY_ORDER`; delivery kind and `paymentMethod` must both be enabled in config (→ `INVALID_DELIVERY` / `INVALID_PAYMENT_METHOD` — a client can't pick a disabled card); clamp qty/lines to `CART_CONFIG` limits. **Idempotency — AMENDED by `StripeSystemDesign.md` §5.3 ("draft-until-paid"):** `attemptId` is persistent per browser (localStorage), and an existing `pending` order with this `attemptId` is a mutable draft — identical inputs → return it unchanged (pure retry); changed inputs → re-validate, re-price, and update it **in place** (invalidating any payment session). A `paid` match returns as-is; a `cancelled`/`refunded` match returns `ATTEMPT_CONFLICT` so the client mints a fresh attempt id (never short-circuit on a dead order — see `StripeSystemDesign.md` §5.3.3). One browser therefore never holds more than one live draft order. Otherwise: run `calculateOrderPrice` (§5), insert the order (`pending`, generated `number`), call the method's provider `createPayment` (§8/§8.1), return `{ orderId, number, amounts, payment }`. |
+| `fetchMyOrders` (query)    | Paginated orders for the signed-in user (`by_user`, newest first), mapped to the account-UI shape via §4.2. Replaces the `accountOrders` mock.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `fetchOrder` (query)       | One order by id — owner-checked for auth users. For guests: requires the `orderId` **and** matching `email` arg (possession of both ≈ the confirmation email; enough for a status page, no account system invented).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `cancelMyOrder` (mutation) | Owner-checked, `pending` only → `cancelled` + release claim if present. Paid orders are refund territory (admin), not self-serve.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ### 6.2 Internal
 
-| Function | Behavior |
-|---|---|
-| `markOrderPaid` | **THE settlement seam** — the only place side effects fire. Args `{ orderId, paymentRef? }`. Idempotent: already `paid` → no-op; `cancelled`/`refunded` → throw (`ORDER_NOT_PENDING` — a webhook for a dead order is an incident, not a silent success). Else, in this one transaction: status→`paid`, set `paymentRef`, then via `ctx.runMutation` (same transaction): `grantStampForOrder({ userId, orderId, subtotal: post-discount, non-reward lines })` · `recordFirstPurchase({ userId, orderId, discountMinorUnits: amounts.welcomeDiscountMinor })` · if `claimId`: `applyRewardClaim({ claimId, appliedTo: orderId })` · clear the user's server cart doc. All four are themselves idempotent, so even a partial-failure replay converges. Guest orders (`userId: null`) skip all reward calls. |
-| `markOrderRefunded` | Admin path. `paid → refunded` + `revokeStampForOrder({ orderId })` (`RewardSystem.md` §6). Welcome-offer row intentionally NOT restored (§15.7). Applied claims are not clawed back (§9). |
-| `setFulfillment` | Admin sets `processing → shipped → delivered`. Display only; no money logic. |
-| `expirePendingOrders` (cron, hourly) | `by_status` scan for `pending` older than `PENDING_EXPIRY_HOURS` (batched, scheduler continuation — same pattern as the rewards crons): status→`cancelled`, release claim if present (`releaseRewardClaim`). Abandoned checkouts must not hold a user's free-item claim hostage forever. |
+| Function                             | Behavior                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `markOrderPaid`                      | **THE settlement seam** — the only place side effects fire. Args `{ orderId, paymentRef? }`. Idempotent: already `paid` → no-op; `cancelled`/`refunded` → throw (`ORDER_NOT_PENDING` — a webhook for a dead order is an incident, not a silent success). Else, in this one transaction: status→`paid`, set `paymentRef`, then via `ctx.runMutation` (same transaction): `grantStampForOrder({ userId, orderId, subtotal: post-discount, non-reward lines })` · `recordFirstPurchase({ userId, orderId, discountMinorUnits: amounts.welcomeDiscountMinor })` · if `claimId`: `applyRewardClaim({ claimId, appliedTo: orderId })` · clear the user's server cart doc. All four are themselves idempotent, so even a partial-failure replay converges. Guest orders (`userId: null`) skip all reward calls. |
+| `markOrderRefunded`                  | Admin path. `paid → refunded` + `revokeStampForOrder({ orderId })` (`RewardSystem.md` §6). Welcome-offer row intentionally NOT restored (§15.7). Applied claims are not clawed back (§9).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `setFulfillment`                     | Admin sets `processing → shipped → delivered`. Display only; no money logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `expirePendingOrders` (cron, hourly) | `by_status` scan for `pending` older than `PENDING_EXPIRY_HOURS` (batched, scheduler continuation — same pattern as the rewards crons): status→`cancelled`, release claim if present (`releaseRewardClaim`). Abandoned checkouts must not hold a user's free-item claim hostage forever.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## 7. Rewards & Welcome-Offer Wiring (contract fulfillment)
 
 This module is the caller that `RewardSystem.md` has been waiting for. The complete
 coupling, all inside `markOrderPaid` / `markOrderRefunded`:
 
-| Event | Calls (in one transaction) |
-|---|---|
-| Order paid | `grantStampForOrder` (post-discount subtotal, reward line excluded) → `recordFirstPurchase` (always, even discount 0) → `applyRewardClaim` (if claim attached) → clear server cart |
-| Order refunded | `revokeStampForOrder` only |
-| Order cancelled/expired | `releaseRewardClaim` only (nothing else ever happened) |
+| Event                   | Calls (in one transaction)                                                                                                                                                         |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Order paid              | `grantStampForOrder` (post-discount subtotal, reward line excluded) → `recordFirstPurchase` (always, even discount 0) → `applyRewardClaim` (if claim attached) → clear server cart |
+| Order refunded          | `revokeStampForOrder` only                                                                                                                                                         |
+| Order cancelled/expired | `releaseRewardClaim` only (nothing else ever happened)                                                                                                                             |
 
 Nothing else in the checkout module touches reward tables, and the rewards module never
 imports order code. The two meet only at these internal-mutation calls — exactly the seam
@@ -296,8 +307,8 @@ One interface, one registry, in `src/convex/tables/orders/providers/`:
 
 ```ts
 export type PaymentInstruction =
-	| { kind: 'none' }                    // manual: order placed, pay offline
-	| { kind: 'redirect'; url: string };  // hosted payment page (Stripe Checkout et al.)
+	| { kind: 'none' } // manual: order placed, pay offline
+	| { kind: 'redirect'; url: string }; // hosted payment page (Stripe Checkout et al.)
 
 export type PaymentProvider = {
 	/** Called inside placeOrder. May talk to an external API via an action if needed. */
@@ -309,19 +320,20 @@ export type PaymentProvider = {
   order stays `pending`; the success page says "We've received your order — pay on
   pickup/delivery." Settlement happens when staff confirm (admin calls `markOrderPaid`).
   Zero external keys, works on first clone — and matches counter-service food retail.
-- **`redirect`:** `createPayment` creates a hosted session (via a Convex action — external
-  fetch), returns its URL; the client navigates there. The provider's **webhook** (HTTP
-  action in `src/convex/http.ts`, signature-verified) calls `markOrderPaid` with
-  `paymentRef`. Failure/expiry webhooks call nothing — the pending-expiry cron is the
-  single abandonment path, so there's no second state machine to keep consistent.
+- **`redirect`:** `createPayment` returns a URL the client navigates to; a
+  signature-verified **webhook** (HTTP action registered in `src/convex/http.ts`) calls
+  `markOrderPaid` with `paymentRef`. Failure/expiry webhooks call nothing — the
+  pending-expiry cron is the single abandonment path, so there's no second state machine to
+  keep consistent.
 
-  > **Decision (this project): the `redirect` provider will be Stripe Checkout —
-  > chosen, not yet implemented.** Build everything against the seam; do NOT implement
-  > the Stripe adapter until explicitly asked. When it lands: `createPayment` = Stripe
-  > Checkout Session (action, `line_items` from the order snapshot, `client_reference_id
-  > = orderId`), webhook = `checkout.session.completed` → `markOrderPaid({ orderId,
-  > paymentRef: session.id })`, signature via `STRIPE_WEBHOOK_SECRET`. Until then,
-  > `PAYMENT_PROVIDER` stays `'manual'`.
+  > **IMPLEMENTED (2026-07-25): the `redirect` provider is Stripe Checkout. See
+  > `StripeSystemDesign.md` — it is the authority for everything payment-related and
+  > amends this section.** One correction to the sketch above: `createPayment` does NOT
+  > create the hosted session, because `placeOrder` is a mutation and mutations cannot
+  > fetch. It returns our own `/checkout/pay` URL; that page calls the
+  > `createCheckoutSession` **action**, which mints the session. The webhook
+  > (`POST /stripe/webhook`) settles only when the paying session is the order's current
+  > session at the expected amount, and auto-refunds every other case.
 
 The client never learns which provider is active beyond the `PaymentInstruction` it must
 follow. Adding a provider = one file implementing the type + one registry entry + keys.
@@ -332,16 +344,14 @@ The provider is **not** a single build-time choice — the shopper picks per ord
 **Cash** and **Online**, and that choice is snapshotted on the order (`paymentMethod`, §4.1)
 like every other order fact. This is a pure re-mapping onto the seam above, not a new state
 machine: `cash` → the `manual` provider (`{ kind: 'none' }`, settle offline), `online` → the
-`redirect` provider (Stripe). `getPaymentProvider(order.paymentMethod)` does the dispatch;
-`markOrderPaid`, `SETTLE_ON_PLACE`, and the expiry cron are all untouched.
+`redirect` provider (Stripe Checkout). `getPaymentProvider(order.paymentMethod)` does the
+dispatch; `markOrderPaid`, `SETTLE_ON_PLACE`, and the expiry cron are all untouched.
 
 - **Config gates which cards are offered** (`PAYMENT_METHODS`, §4.3). A single enabled method
   renders no picker and is used directly.
-- **Online ships as a disabled card until Stripe lands.** `PAYMENT_METHODS.ONLINE = false`
-  keeps the "Pago en línea" card visible but greyed ("Próximamente"), so shoppers see the
-  full choice without a dead path. Triple-guarded: the disabled card, the server
-  `INVALID_PAYMENT_METHOD` check, and the registry throw for `online`. Flip the flag the day
-  the Stripe adapter (§8) is implemented — no schema or UI rework.
+- **A cash-only store sets `PAYMENT_METHODS.ONLINE = false`**, which keeps the "Pago en línea"
+  card visible but greyed ("Próximamente") — shoppers see the full choice without a dead path.
+  Double-guarded: the disabled card plus the server-side `INVALID_PAYMENT_METHOD` check.
 - **Refund copy follows the method**, not global config: `online` refunds land back on the
   card in a few business days; `cash` refunds are coordinated offline (`orderRefundedEmail`).
 - **UI:** one generic `checkout-card-select.svelte` (a card-radio taking a per-value
@@ -372,8 +382,8 @@ tap-to-expand total bar pinned above the pay button — the total is **always vi
 │    Delivery is selected                │  + "new address" fallback
 ├────────────────────────────────────────┤
 │ 3  Payment                             │  [ ◉ Efectivo   ○ Pago en línea ]
-│    two cards, mutually exclusive       │  online card disabled until Stripe
-│    (§8.1); one method → no picker      │  is wired (config flag)
+│    two cards, mutually exclusive       │  online = Stripe Checkout; the card
+│    (§8.1); one method → no picker      │  greys out in a cash-only store
 ├────────────────────────────────────────┤
 │ 4  Order summary  (read-only)          │  line: name × qty ····· price
 │    ✦ free item line at $0 (removable)  │  ── discount line (auto, green)
@@ -431,29 +441,29 @@ The page is refresh-safe and shareable — everything renders from the order doc
 
 ## 10. Edge Cases (explicit decisions)
 
-| Case | Decision |
-|---|---|
-| Double-click / retry / back-resubmit of Place order | `attemptId` idempotency (§6.1): one order, always. The button disable is UX, not the guarantee. |
-| Webhook replay / duplicate `markOrderPaid` | Status check makes it a no-op; the nested reward calls are independently idempotent (sourceKey / row-exists / status checks). Triple defense, zero double stamps. |
-| Price changes between cart and placement | Server prices win at `placeOrder`; response carries the fresh breakdown; page re-renders with the "Prices were updated" notice. No blocking modal — the user re-reads one number and clicks again. |
-| Product becomes unavailable mid-checkout | `UNAVAILABLE_LINES` rejection with refs; UI marks those summary lines; user removes them (which also updates the cart) and retries. |
-| Claim's item goes unavailable | Same path — the reward line is rejected like any line; the claim stays `active` (never silently cancel a choice — `RewardSystem.md` §9); user picks a different reward from the account page or removes the line. |
-| Claim cancelled (other tab) between placement and payment | `applyRewardClaim` throws inside `markOrderPaid` → catch, log, settle the order anyway (customer already paid a total that included the $0 line; honoring it costs one item, breaking settlement costs trust). The honest-debt principle. |
-| Guest orders and rewards | `userId: null` → no stamp, no welcome offer, no claim (all account-only by definition). Guests still get a full order + status page. |
-| Two concurrent checkouts, both eligible for welcome discount | Both may carry it; first `recordFirstPurchase` wins; bounded loss accepted per `RewardSystem.md` §15.7. Nothing for checkout to add. |
-| `pending` order expires while user is on hosted payment page | Cron cancelled it; a late webhook hits `markOrderPaid` → throws `ORDER_NOT_PENDING` → surfaces in logs as the refund-needed incident it genuinely is. Set `PENDING_EXPIRY_HOURS` comfortably above any provider session lifetime (48h ≫ Stripe's 24h). |
-| User deletes account with orders | Orders keep `userId` (they're commercial records, not profile data) — the user-deletion cascade nulls nothing here; `fetchMyOrders` simply has no caller. Note this in the deletion-flow docs. |
-| Currency | Single-currency store (`CART_CONFIG.CURRENCY`), snapshotted per order so a future currency switch can't rewrite history. |
-| Malicious client | Server recomputes every price, discount, and fee from refs + config; clamps qty/lines; rate-limits placement; validates delivery config server-side (can't order delivery when disabled). The entire client payload is refs, quantities, and contact text. |
+| Case                                                         | Decision                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Double-click / retry / back-resubmit of Place order          | `attemptId` idempotency (§6.1): one order, always. The button disable is UX, not the guarantee.                                                                                                                                                            |
+| Webhook replay / duplicate `markOrderPaid`                   | Status check makes it a no-op; the nested reward calls are independently idempotent (sourceKey / row-exists / status checks). Triple defense, zero double stamps.                                                                                          |
+| Price changes between cart and placement                     | Server prices win at `placeOrder`; response carries the fresh breakdown; page re-renders with the "Prices were updated" notice. No blocking modal — the user re-reads one number and clicks again.                                                         |
+| Product becomes unavailable mid-checkout                     | `UNAVAILABLE_LINES` rejection with refs; UI marks those summary lines; user removes them (which also updates the cart) and retries.                                                                                                                        |
+| Claim's item goes unavailable                                | Same path — the reward line is rejected like any line; the claim stays `active` (never silently cancel a choice — `RewardSystem.md` §9); user picks a different reward from the account page or removes the line.                                          |
+| Claim cancelled (other tab) between placement and payment    | `applyRewardClaim` throws inside `markOrderPaid` → catch, log, settle the order anyway (customer already paid a total that included the $0 line; honoring it costs one item, breaking settlement costs trust). The honest-debt principle.                  |
+| Guest orders and rewards                                     | `userId: null` → no stamp, no welcome offer, no claim (all account-only by definition). Guests still get a full order + status page.                                                                                                                       |
+| Two concurrent checkouts, both eligible for welcome discount | Both may carry it; first `recordFirstPurchase` wins; bounded loss accepted per `RewardSystem.md` §15.7. Nothing for checkout to add.                                                                                                                       |
+| `pending` order expires while user is on hosted payment page | Cron cancelled it; a late webhook hits `markOrderPaid` → throws `ORDER_NOT_PENDING` → surfaces in logs as the refund-needed incident it genuinely is. Set `PENDING_EXPIRY_HOURS` comfortably above any provider session lifetime (48h ≫ Stripe's 24h).     |
+| User deletes account with orders                             | Orders keep `userId` (they're commercial records, not profile data) — the user-deletion cascade nulls nothing here; `fetchMyOrders` simply has no caller. Note this in the deletion-flow docs.                                                             |
+| Currency                                                     | Single-currency store (`CART_CONFIG.CURRENCY`), snapshotted per order so a future currency switch can't rewrite history.                                                                                                                                   |
+| Malicious client                                             | Server recomputes every price, discount, and fee from refs + config; clamps qty/lines; rate-limits placement; validates delivery config server-side (can't order delivery when disabled). The entire client payload is refs, quantities, and contact text. |
 
 ## 11. Why This Holds Under Load
 
-| Vector | Answer |
-|---|---|
+| Vector                     | Answer                                                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Flash-sale placement spike | Each `placeOrder` = a handful of indexed point-reads + one insert, all on the caller's own docs. No shared counter, no hot row. |
-| Webhook bursts / replays | `markOrderPaid` is one indexed read + idempotent writes. Replays no-op at the status check. |
-| Pending-order buildup | Hourly batched cron with scheduler continuation — same proven pattern as the rewards/storage crons. |
-| Order history growth | Paginated `by_user` queries only; nothing ever scans the table except the status-indexed cron. |
+| Webhook bursts / replays   | `markOrderPaid` is one indexed read + idempotent writes. Replays no-op at the status check.                                     |
+| Pending-order buildup      | Hourly batched cron with scheduler continuation — same proven pattern as the rewards/storage crons.                             |
+| Order history growth       | Paginated `by_user` queries only; nothing ever scans the table except the status-indexed cron.                                  |
 
 ## 12. Backend Message Keys
 
@@ -478,9 +488,8 @@ Each step shippable and testable before the next:
 4. **`calculateOrderPrice` helper + `placeOrder`** with `attemptId` idempotency + rate limit.
 5. **`markOrderPaid` / `markOrderRefunded` / `setFulfillment` / `cancelMyOrder`** + the
    reward wiring (§7) + expiry cron + registration.
-6. **Provider seam**: `manual` provider + registry. (`redirect` = Stripe Checkout for this
-   project — decided but deferred, see §8. The seam ships now; the Stripe adapter ships
-   only when explicitly requested.)
+6. **Provider seam**: `manual` provider + registry. (`redirect` = Stripe Checkout, implemented
+   2026-07-25 — build it from `StripeSystemDesign.md`, not from §8's original sketch.)
 7. **Checkout page** (§9) + success page; wire the cart sidebar button state to
    `FEATURES.CHECKOUT`.
 8. **Account integration**: replace the `accountOrders` mock with `fetchMyOrders` /

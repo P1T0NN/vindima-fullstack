@@ -116,10 +116,23 @@ Still open:
   skeleton on first load; live order-count updates from a second session).
 - Note: rollup history starts 2026-07-23 — pre-existing orders don't appear in KPIs/charts.
 
-### 6. Stripe Checkout — ⏸ ON HOLD (unchanged)
-Already decided as the payment provider — **do NOT implement until explicitly asked.**
-It slots into the existing provider seam (`src/convex/tables/orders/providers/manual.ts`).
-Note: Stripe is what makes #1's "Mark paid" + pending-order lifecycle real.
+### 6. Stripe Checkout — 🟨 CODE-COMPLETE (2026-07-25), UNTESTED END-TO-END
+Implemented per `docs/StripeSystemDesign.md`: `/checkout/pay` → `createCheckoutSession` action →
+hosted Stripe page → `POST /stripe/webhook` → the unchanged `markOrderPaid`. Also shipped with
+it: **draft-until-paid** placement (persistent `attemptId`; a pending order is edited in place,
+so no duplicate pending orders and no superseded payable session), auto-refund for every
+non-settling webhook branch, and online refunds that move money before flipping status.
+`PAYMENT_METHODS.ONLINE` is now `true`.
+
+**Before it can work on any deployment** (`StripeSystemDesign.md` §17):
+```bash
+bunx convex env set STRIPE_SECRET_KEY sk_test_…      # not set on dev yet
+bunx convex env set STRIPE_WEBHOOK_SECRET whsec_…    # from `stripe listen`
+stripe listen --forward-to <deployment>.convex.site/stripe/webhook
+```
+Then run §16's verification checklist — especially: reward-claim order (a $0 line item at
+Stripe), draft edit expiring the old session, superseded-session payment auto-refunding, and
+the second-Stripe-account switch test. Nothing here has been exercised against real Stripe yet.
 
 ### 7. Later, deliberately (YAGNI until real demand)
 - Inventory / stock counts (the `available` hand-switch is fine until then)
@@ -155,8 +168,9 @@ Note: Stripe is what makes #1's "Mark paid" + pending-order lifecycle real.
 4. **Production environment config** — `PUBLIC_SITE_URL` (Vercel env + Convex prod env;
    only the dev deployment is configured), and the R2 bucket is still the template's
    test bucket (`svelte-components-test`) — a real bucket + credentials are needed.
-5. **Payments** — manual (pay on pickup) is fine for launch-lite; "any scale" means
-   Stripe (#5), which also activates pending orders, Mark-paid, and customer Cancel.
+5. **Payments** — Stripe Checkout is now code-complete (#6) but has never run against real
+   Stripe: it needs the two Convex env vars, the dashboard/CLI webhook, and a pass through
+   `StripeSystemDesign.md` §16 before it counts. Cash (pay on pickup) remains fully verified.
 6. 🟩 **Emails** (#3) — live-verified in dev 2026-07-22 (O2 receipt, S1 owner, O4 pickup-ready,
    O7 refund all received + correct). **Launch blocker remains:** `RESEND_EMAIL` is still the
    sandbox sender (`onboarding@resend.dev`) — only delivers to the Resend account owner, so real

@@ -71,6 +71,7 @@
 		"embla-carousel-autoplay": "^8.6.0",
 		"nuqs-svelte": "^1.2.2",
 		"resend": "^6.12.2",
+		"stripe": "^22.3.2",
 		"zod": "^4.4.3"
 	}
 }

@@ -62,7 +62,7 @@ export const COMPANY_DATA = {
 		'Vinícola orgánica · vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
-	INSTAGRAM_URL: "https://www.instagram.com/vindima.ags/",
+	INSTAGRAM_URL: 'https://www.instagram.com/vindima.ags/',
 	PHONE: '1 449 940 9233',
 	OG_IMAGE: '/assets/og-image.png',
 	OG_IMAGE_WIDTH: 1200,
@@ -315,15 +315,19 @@ export const CHECKOUT_CONFIG = {
 	/**
 	 * Payment methods offered at checkout — the shopper picks one as a card (spec §8.1). The
 	 * provider registry maps method → settlement provider: `CASH` → the manual provider (order
-	 * placed `pending`, paid offline on pickup/delivery; staff settle it), `ONLINE` → the
-	 * `redirect` provider (a hosted page — this project's is Stripe Checkout, chosen but NOT yet
-	 * implemented). Keep `ONLINE: false` until the Stripe adapter lands: the card still renders
-	 * but stays disabled ("Próximamente"), so no shopper can reach a dead payment path. With a
-	 * single method enabled the checkout shows no picker and uses it directly.
+	 * placed `pending`, paid offline on pickup/delivery; staff settle it), `ONLINE` → Stripe
+	 * Checkout (hosted redirect, settled by webhook — see `StripeSystemDesign.md`). With a single
+	 * method enabled the checkout shows no picker and uses it directly.
+	 *
+	 * `ONLINE: true` REQUIRES two Convex env vars and one dashboard webhook per deployment
+	 * (`StripeSystemDesign.md` §17): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and an endpoint
+	 * at `https://<deployment>.convex.site/stripe/webhook`. Set it back to `false` for a
+	 * cash-only store: the card renders disabled ("Próximamente") and the server rejects the
+	 * method, so no shopper can reach a dead payment path.
 	 */
 	PAYMENT_METHODS: {
 		CASH: true,
-		ONLINE: false
+		ONLINE: true
 	},
 
 	/**
@@ -341,6 +345,82 @@ export const CHECKOUT_CONFIG = {
 
 	/** Documentation, not a subsystem: prices are tax-inclusive. See spec §2. */
 	TAX_MODE: 'included' as const
+} as const;
+
+/**
+ * Stripe Checkout config — every Stripe value setting in one place (see
+ * `StripeSystemDesign.md`). Reached only when a shopper picks `CHECKOUT_CONFIG.PAYMENT_METHODS
+ * .ONLINE`; a cash-only store ignores this block entirely.
+ *
+ * Secrets are NOT here and never can be: `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` live in
+ * Convex env (`npx convex env set …`, §17). This file is bundled to the browser.
+ *
+ * Nothing here is account-scoped either — no `price_…`/`coupon_…`/`acct_…` ids — which is what
+ * makes swapping Stripe accounts a two-env-var change (§2, the Portability Contract).
+ */
+export const STRIPE_CONFIG = {
+	/**
+	 * Stripe API version, pinned so a Stripe release can never change behaviour under an
+	 * already-deployed store. Must match what the installed `stripe` package ships (its types
+	 * only describe that one version) — bump this together with the package, never alone.
+	 */
+	API_VERSION: '2026-06-24.dahlia',
+
+	/**
+	 * Checkout Session lifetime (§7.3.4). The rule the session builder applies:
+	 * `expires_at = min(now + MAX_HOURS, order expiry − ORDER_EXPIRY_MARGIN_HOURS)`.
+	 */
+	SESSION: {
+		/** Stripe PLATFORM limit — the longest a session may live. Not a preference; raising it
+		 *  makes Stripe reject the call. */
+		MAX_HOURS: 24,
+		/** Stripe PLATFORM limit — the shortest a session may live. Below this we refuse to create
+		 *  one and tell the shopper to place a fresh order. */
+		MIN_MINUTES: 30,
+		/** Our safety margin against the ceiling, so second-rounding can't land 1s past Stripe's
+		 *  24h limit. */
+		CEILING_MARGIN_MINUTES: 1,
+		/**
+		 * Our safety margin against the ORDER's own expiry: a payment session always dies this
+		 * long before `expirePendingOrders` may cancel its order. Load-bearing — it is why the
+		 * cron needs zero Stripe awareness and can never cancel an order mid-payment. Only
+		 * shorten it if the cron interval shortens too.
+		 */
+		ORDER_EXPIRY_MARGIN_HOURS: 1
+	},
+
+	/**
+	 * Per-account Stripe behaviours we pin, so identical code charges an identical number on ANY
+	 * Stripe account instead of inheriting each dashboard's settings (§2).
+	 *
+	 * ⚠ Both are coupled to the §7.4 amount assertion: the session's `amount_total` must equal
+	 * the order's `totalMinor`, or no payment URL is handed out. Enabling either makes Stripe add
+	 * to or re-present that total, so flipping one here REQUIRES revisiting that assertion (and,
+	 * for tax, `CHECKOUT_CONFIG.TAX_MODE` + how catalog prices are entered).
+	 */
+	ACCOUNT_BEHAVIOR: {
+		/** Re-present the total in the shopper's local currency. Off: this template is
+		 *  deliberately single-currency (`CART_CONFIG.CURRENCY`). */
+		ADAPTIVE_PRICING: false,
+		/** Let Stripe Tax ADD tax on top. Off: prices here are tax-inclusive, so the order total
+		 *  is already final. */
+		AUTOMATIC_TAX: false
+	},
+
+	/**
+	 * Copy rendered on Stripe's hosted page — the one surface whose text we send to a third party
+	 * instead of rendering ourselves (same category as email templates, which are the documented
+	 * exception in `GeneralSystemDesignRule.md` § backend returns data). Line-item names are NOT
+	 * here: those are the order's frozen snapshot names.
+	 */
+	LABELS: {
+		/** Shipping row for a pickup order (always 0 — shown so the total itemises honestly). */
+		PICKUP: 'Recoger en tienda',
+		/** Shipping row for a delivery order. */
+		SHIPPING: 'Envío',
+		/** Name of the ad-hoc first-purchase coupon (§7.2). */
+		WELCOME_DISCOUNT: 'Descuento primer pedido'
+	}
 } as const;
 
 /**

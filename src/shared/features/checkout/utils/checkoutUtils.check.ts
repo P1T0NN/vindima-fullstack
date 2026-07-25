@@ -28,6 +28,16 @@ assert.equal(orderTotalMinor(1000, 5000, 0), 0); // discount never drives it neg
 // Display-status mapping (spec §4.2).
 assert.equal(orderDisplayStatus('pending', null), 'processing');
 assert.equal(orderDisplayStatus('paid', null), 'processing');
+// A pending ONLINE order was never charged — it must not read as "en proceso".
+assert.equal(orderDisplayStatus('pending', null, 'online'), 'unpaid');
+// A pending CASH order IS underway; the shopper simply pays on pickup.
+assert.equal(orderDisplayStatus('pending', null, 'cash'), 'processing');
+// Only `pending` is unpaid — once settled, the fulfillment stage wins.
+assert.equal(orderDisplayStatus('paid', null, 'online'), 'processing');
+assert.equal(orderDisplayStatus('paid', 'shipped', 'online'), 'shipped');
+// Terminal states outrank payment method.
+assert.equal(orderDisplayStatus('cancelled', null, 'online'), 'cancelled');
+assert.equal(orderDisplayStatus('refunded', null, 'online'), 'cancelled');
 assert.equal(orderDisplayStatus('paid', 'processing'), 'processing');
 assert.equal(orderDisplayStatus('paid', 'shipped'), 'shipped');
 assert.equal(orderDisplayStatus('paid', 'delivered'), 'delivered');

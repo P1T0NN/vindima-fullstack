@@ -8,11 +8,14 @@
 	import ShopSection from '@/components/pages/(unprotected)/root/shop-section/shop-section.svelte';
 	import AboutSection from '@/components/pages/(unprotected)/root/about-section/about-section.svelte';
 	import RecommendationsSection from '@/components/pages/(unprotected)/root/recommendations-section/recommendations-section.svelte';
-	import EventsSection from '@/components/pages/(unprotected)/root/events-section/events-section.svelte';
-	import ContactSection from '@/components/pages/(unprotected)/root/contact-section/contact-section.svelte';
+	import ContactSection from '@/components/ui/sections/contact-section/contact-section.svelte';
 </script>
 
-<SvelteHead title={COMPANY_DATA.NAME} suffixSiteName={false} description={COMPANY_DATA.DESCRIPTION} />
+<SvelteHead
+	title={COMPANY_DATA.NAME}
+	suffixSiteName={false}
+	description={COMPANY_DATA.DESCRIPTION}
+/>
 
 <HeroSection />
 
@@ -21,7 +24,5 @@
 <RecommendationsSection />
 
 <AboutSection />
-
-<EventsSection />
 
 <ContactSection />

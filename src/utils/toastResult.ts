@@ -33,3 +33,18 @@ export function toastResult(
 	toast.error(message);
 	return false;
 }
+
+/**
+ * Failure-only sibling of {@link toastResult}, for flows whose success path NAVIGATES.
+ *
+ * A success toast fired immediately before a redirect never gets read: it paints for a frame and
+ * dies with the page. Worse, it competes with the destination, which states the outcome properly
+ * (a confirmation page, or the payment page the shopper is being sent to). Use this wherever the
+ * happy path leaves the current view, and let the destination do the confirming.
+ */
+export function toastError(
+	result: { success: boolean; message: TranslatableMessage } | null
+): void {
+	if (!result || result.success) return;
+	toast.error(translateFromBackend(result.message));
+}

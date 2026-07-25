@@ -28,12 +28,17 @@ export const UNPROTECTED_PAGE_ENDPOINTS = {
 	// The cart's Checkout button points here; wire the route when checkout lands.
 	CHECKOUT: resolve('/checkout'),
 	CHECKOUT_SUCCESS: resolve('/checkout/success'),
+	// Online payment hand-off. Convex builds this URL server-side too (orders/helpers/orderUrls.ts)
+	// because `resolve()` doesn't exist there — keep the two in sync.
+	CHECKOUT_PAY: resolve('/checkout/pay'),
+	// Guest order lookup. Named for ONE order on purpose: "Mis pedidos" promises a list, which a
+	// guest has no identity to build. Signed-in shoppers get the real list at MY_ORDERS.
+	TRACK_ORDER: resolve('/rastrear-pedido'),
 	LOGIN: resolve('/login'),
 	SIGNUP: resolve('/signup'),
 	FORGOT_PASSWORD: resolve('/forgot-password'),
 	CONTACT: '#contact',
 	SHOP: '#shop',
 	ABOUT: '#about',
-	MARIDAJES: '#maridajes',
-	EVENTS: '#events'
+	MARIDAJES: '#maridajes'
 } as const;

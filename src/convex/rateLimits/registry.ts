@@ -137,6 +137,9 @@ export const convexRateLimitRegistry = {
 	// by attemptId idempotency + the pending-expiry cron (no per-user key exists for guests).
 	placeOrder: limitPresets.interactiveWrite,
 	cancelMyOrder: limitPresets.interactiveWrite,
+	// Stripe Checkout session minting — keyed by ORDER, not user, so guests are covered too.
+	// It creates objects on an external API, so it gets the external-action preset.
+	createCheckoutSession: limitPresets.externalAction,
 	refundOrder: limitPresets.interactiveWrite,
 	settleOrder: limitPresets.interactiveWrite,
 	setOrderFulfillment: limitPresets.interactiveWrite,

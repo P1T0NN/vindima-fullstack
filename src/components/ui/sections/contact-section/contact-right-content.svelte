@@ -1,8 +1,37 @@
 <script lang="ts">
 	// LIBRARIES
 
+	// CONFIG
+	import { COMPANY_DATA } from '@/shared/config.js';
+
 	// CLASSES
-	import { contactSectionClass } from './contactSection.svelte.ts';
+	import { contactSectionClass, EVENT_TYPES } from './contactSection.svelte.ts';
+
+	// LUCIDE ICONS
+	import MessageCircleIcon from '@lucide/svelte/icons/message-circle';
+
+	/**
+	 * WhatsApp is the second route the old events section offered, kept because it is how this
+	 * business actually talks to people. It sends the SAME composed message as the email button,
+	 * so neither channel carries less information than the other.
+	 */
+	function sendViaWhatsApp() {
+		const { name } = contactSectionClass.contactInputs;
+		const text = [
+			`¡Hola ${COMPANY_DATA.NAME}!`,
+			name ? `Soy ${name}.` : null,
+			'',
+			contactSectionClass.composedMessage
+		]
+			.filter((line): line is string => line !== null)
+			.join('\n');
+
+		window.open(
+			`${COMPANY_DATA.WHATSAPP_CONTACT_URL}?text=${encodeURIComponent(text)}`,
+			'_blank',
+			'noopener,noreferrer'
+		);
+	}
 
 	// COMPONENTS
 	import * as Card from '@/components/ui/card/index.js';
@@ -14,6 +43,7 @@
 		FieldLabel,
 		FieldSet
 	} from '@/components/ui/field';
+	import { Button } from '@/components/ui/button/index.js';
 	import { Input } from '@/components/ui/input/index.js';
 	import { Textarea } from '@/components/ui/textarea/index.js';
 	import ContactSubmitButton from './contact-submit-button.svelte';
@@ -96,6 +126,73 @@
 						{/if}
 					</FieldContent>
 				</Field>
+
+				<!--
+					Progressive disclosure instead of a second form: most senders are asking a plain
+					question, so the three event fields stay folded away until someone says the visit
+					is an occasion. That keeps one section honest for both audiences without making
+					the common case fill in a date and a headcount it doesn't have.
+				-->
+				<div class="flex flex-col gap-4 rounded-lg border border-border bg-muted/30 p-4">
+					<label class="flex cursor-pointer items-start gap-3 text-sm text-foreground">
+						<input
+							type="checkbox"
+							bind:checked={contactSectionClass.eventInputs.isEvent}
+							class="mt-0.5 size-4 shrink-0 rounded-sm border-input accent-primary"
+						/>
+						<span>
+							Es para un evento privado
+							<span class="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+								Cumpleaños, cata, cena de empresa o celebración. Nos ayuda a responderte con
+								disponibilidad y precio de una vez.
+							</span>
+						</span>
+					</label>
+
+					{#if contactSectionClass.eventInputs.isEvent}
+						<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+							<Field class="sm:col-span-2">
+								<FieldLabel for="event-type">Tipo de evento</FieldLabel>
+								<FieldContent>
+									<select
+										id="event-type"
+										bind:value={contactSectionClass.eventInputs.type}
+										class="h-auto w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+									>
+										{#each EVENT_TYPES as type (type.value)}
+											<option value={type.value}>{type.label}</option>
+										{/each}
+									</select>
+								</FieldContent>
+							</Field>
+
+							<Field>
+								<FieldLabel for="event-date">Fecha tentativa</FieldLabel>
+								<FieldContent>
+									<Input
+										id="event-date"
+										bind:value={contactSectionClass.eventInputs.date}
+										placeholder="14 / 08 / 2026"
+										autocomplete="off"
+									/>
+								</FieldContent>
+							</Field>
+
+							<Field>
+								<FieldLabel for="event-guests">No. de personas</FieldLabel>
+								<FieldContent>
+									<Input
+										id="event-guests"
+										bind:value={contactSectionClass.eventInputs.guests}
+										placeholder="12"
+										inputmode="numeric"
+										autocomplete="off"
+									/>
+								</FieldContent>
+							</Field>
+						</div>
+					{/if}
+				</div>
 			</FieldGroup>
 		</FieldSet>
 
@@ -120,8 +217,19 @@
 
 		<ContactSubmitButton />
 
+		<Button
+			type="button"
+			variant="whatsapp"
+			class="mt-3 w-full justify-center shadow-none"
+			onclick={sendViaWhatsApp}
+		>
+			<MessageCircleIcon class="size-4" strokeWidth={2} />
+			Enviar por WhatsApp
+		</Button>
+
 		<p class="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
-			Sin spam — solo una respuesta cuando volvamos a revisar tu mensaje.
+			Sin spam, solo una respuesta cuando revisemos tu mensaje. WhatsApp se abre con el mensaje
+			listo para enviar.
 		</p>
 	</Card.Content>
 </Card.Root>

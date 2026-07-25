@@ -114,6 +114,19 @@ export const BACKEND_MESSAGES: Record<string, string> = {
 	'CheckoutMessages.ORDER_MARKED_PAID': 'Pedido marcado como pagado.',
 	'CheckoutMessages.ORDER_FULFILLMENT_UPDATED': 'Estado de entrega actualizado.',
 
+	// Online payment (Stripe) — StripeSystemDesign.md §14
+	'CheckoutMessages.PAYMENT_SESSION_FAILED':
+		'No pudimos abrir la página de pago. Inténtalo de nuevo o elige pago en efectivo.',
+	// Should never reach a shopper — the action refuses to hand out a payment URL whose amount
+	// disagrees with the order. It exists so the refusal has a translatable face if it ever does.
+	'CheckoutMessages.PAYMENT_AMOUNT_MISMATCH':
+		'No pudimos confirmar el importe de tu pedido. Vuelve a intentarlo.',
+	'CheckoutMessages.ORDER_REFUND_STARTED':
+		'Reembolso enviado a Stripe. El pedido se marcará como reembolsado al confirmarse.',
+	// Handled silently by the client (clears the stored attempt id and resubmits once); it never
+	// renders as a toast, but every key needs an entry.
+	'CheckoutMessages.ATTEMPT_CONFLICT': 'Iniciamos un pedido nuevo. Inténtalo de nuevo.',
+
 	// Upsells (add-to-cart suggestions) — UpsellsSystemDesign.md §11
 	'UpsellsMessages.RULE_CREATED': 'Sugerencia creada.',
 	'UpsellsMessages.RULE_UPDATED': 'Sugerencia actualizada.',

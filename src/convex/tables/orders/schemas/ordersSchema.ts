@@ -69,8 +69,21 @@ export const ordersTable = defineTable({
 
 	/** Reward claim consumed by this order, if any (applied on settle, released on cancel). */
 	claimId: v.optional(v.id('rewardClaims')),
-	/** Provider's payment reference (intent/session id). Absent for the 'manual' provider. */
+	/** Provider's payment reference — the Stripe PaymentIntent id, set at settlement. Absent
+	 *  for the 'manual' provider. A historical fact, never re-read as a live reference. */
 	paymentRef: v.optional(v.string()),
+
+	/** Stripe Checkout Session currently attached to this order (`StripeSystemDesign.md` §6).
+	 *  Cleared — and the session expired — whenever the draft changes or is cancelled; the
+	 *  webhook only settles a payment whose session matches this value (§8.2). Retained on
+	 *  settled orders as audit history. Meaningless for cash orders. */
+	paymentSessionRef: v.optional(v.string()),
+	/** Monotonic counter, bumped every time a payment session is invalidated. It seeds the
+	 *  Stripe idempotency key (`sess:{orderId}:{attempt}`), which is what makes two racing
+	 *  session creations collapse to ONE session while still minting a genuinely new session
+	 *  after an edit — a key that never rotated would replay the stale (expired, wrongly
+	 *  priced) session for 24h. See `StripeSystemDesign.md` §7.3.2. */
+	paymentSessionAttempt: v.optional(v.number()),
 
 	/** Denormalized "number + name + email" blob, written at placement (see
 	 *  `buildOrderSearchText`). Powers the admin table's full-text search only — never
@@ -80,5 +93,8 @@ export const ordersTable = defineTable({
 	.index('by_user', ['userId'])
 	.index('by_attempt', ['attemptId'])
 	.index('by_status', ['status'])
+	// Guest order lookup: the shopper types the number printed on their receipt. Exact-match
+	// only — the email must still match too, so this index is a finder, not an authenticator.
+	.index('by_number', ['number'])
 	// Admin order search: match number/customer, still filterable by status.
 	.searchIndex('search_text', { searchField: 'searchText', filterFields: ['status'] });

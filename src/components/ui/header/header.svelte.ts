@@ -10,7 +10,9 @@ export const navItems = [
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.SHOP, label: 'Tienda' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.ABOUT, label: 'Nosotros' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.MARIDAJES, label: 'Maridajes' },
-	{ href: UNPROTECTED_PAGE_ENDPOINTS.EVENTS, label: 'Eventos' },
+	// Events folded into the contact section, so its anchor is gone. This slot now carries the
+	// one thing a shopper hunts for in a header and previously could not reach: their order.
+	{ href: UNPROTECTED_PAGE_ENDPOINTS.TRACK_ORDER, label: 'Rastrear pedido' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.CONTACT, label: 'Contacto' }
 ] as const;
 
@@ -52,7 +54,11 @@ export function resolveHeaderCta(
 		return { href: UNPROTECTED_PAGE_ENDPOINTS.SIGNUP, label: 'Únete al Club', variant: 'club' };
 	}
 	if (user?.role === 'admin') {
-		return { href: ADMIN_PAGE_ENDPOINTS.DASHBOARD, label: 'Panel de administración', variant: 'admin' };
+		return {
+			href: ADMIN_PAGE_ENDPOINTS.DASHBOARD,
+			label: 'Panel de administración',
+			variant: 'admin'
+		};
 	}
 	return { href: PROTECTED_PAGE_ENDPOINTS.ACCOUNT, label: 'Mis Recompensas', variant: 'rewards' };
 }

@@ -46,10 +46,7 @@
 	description="Completa tu pedido de Vindima para recoger en tienda o entrega a domicilio."
 />
 
-<Section
-	yPadding="none"
-	class="min-h-[calc(100dvh-3.5rem)] bg-background py-8 sm:py-12"
->
+<Section yPadding="none" class="min-h-[calc(100dvh-3.5rem)] bg-background py-8 sm:py-12">
 	<CheckoutHeader />
 
 	{#if checkoutOff}
