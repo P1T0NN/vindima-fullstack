@@ -8,7 +8,6 @@
 
 	// COMPONENTS
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
-	import AdminOrderRefundButton from './admin-order-refund-button.svelte';
 	import { NativeSelect } from '@/components/ui/select/index.js';
 
 	// DATA
@@ -43,10 +42,10 @@
 		{
 			id: 'total',
 			header: 'Total',
-			accessor: (r) => formatMoneyMinor(r.amounts.totalMinor, r.currency)
+			accessor: (r) => formatMoneyMinor(r.amounts.totalMinor, r.currency),
+			cellClass: 'tabular-nums'
 		},
-		{ id: 'status', header: 'Estado', accessor: (r) => orderStatusLabel(r.status) },
-		{ id: 'actions', header: '', accessor: () => '', wrap: true }
+		{ id: 'status', header: 'Estado', accessor: (r) => orderStatusLabel(r.status) }
 	];
 
 	// Status filter is URL-synced (`?status=`): null = all. Bookmarkable/shareable filtered
@@ -68,7 +67,7 @@
 	searchPlaceholder="Buscar por número o cliente…"
 	{columns}
 	getRowId={(r) => r._id}
-	customCells={{ number: numberCell, status: statusCell, actions: actionsCell }}
+	customCells={{ number: numberCell, status: statusCell }}
 	{filters}
 />
 
@@ -77,7 +76,10 @@
 		class="w-full md:w-48"
 		ariaLabel="Filtrar por estado"
 		bind:value={
-			() => status.current ?? '', (v) => (status.current = v ? (v as OrderRow['status']) : null)
+			// `ORDER_STATUSES`, not `OrderRow['status']` — the latter also carries `draft`, which is
+			// not a filterable state (an unpaid online order is not an order yet).
+			() => status.current ?? '',
+			(v) => (status.current = v ? (v as (typeof ORDER_STATUSES)[number]) : null)
 		}
 		options={statusOptions}
 	/>
@@ -98,8 +100,4 @@
 	>
 		{orderStatusLabel(row.status)}
 	</span>
-{/snippet}
-
-{#snippet actionsCell({ row }: DataTableCellSnippetProps<OrderRow>)}
-	<AdminOrderRefundButton order={row} />
 {/snippet}

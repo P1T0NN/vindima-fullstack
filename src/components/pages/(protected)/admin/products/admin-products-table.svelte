@@ -80,7 +80,13 @@
 	<a href={editProductHref(row)} class="flex items-center gap-2 hover:underline">
 		<span class="size-7 shrink-0 overflow-hidden rounded-md bg-muted">
 			{#if row.images[0]}
-				<img src={row.images[0]} alt="" class="size-full object-cover" />
+				<img
+					src={row.images[0]}
+					alt=""
+					class="size-full object-cover"
+					loading="lazy"
+					decoding="async"
+				/>
 			{/if}
 		</span>
 		<span class="font-medium">{row.name}</span>
@@ -99,7 +105,7 @@
 {#snippet statusCell({ row }: DataTableCellSnippetProps<AdminProductRow>)}
 	<span
 		class={row.status === 'active'
-			? 'inline-flex rounded-sm bg-chart-2/15 px-2 py-0.5 text-xs font-medium text-chart-2'
+			? 'inline-flex rounded-sm bg-chart-2/15 px-2 py-0.5 text-xs font-medium text-gold-ink'
 			: row.status === 'archived'
 				? 'inline-flex rounded-sm bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive'
 				: 'inline-flex rounded-sm bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground'}

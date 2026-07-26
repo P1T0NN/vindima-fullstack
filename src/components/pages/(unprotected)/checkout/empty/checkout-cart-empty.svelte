@@ -29,7 +29,7 @@
 		Tu carrito está vacío
 	</h2>
 	<p class="mb-8 max-w-sm text-sm leading-relaxed text-muted-foreground">
-		Aún no hay nada. Explora la tienda y agrega algunos productos — aparecerán aquí, listos para
+		Aún no hay nada. Explora la tienda y agrega algunos productos: aparecerán aquí, listos para
 		pagar.
 	</p>
 

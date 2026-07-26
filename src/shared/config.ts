@@ -103,20 +103,25 @@ export const EMAIL_CONFIG = {
 	OTP_EXPIRY_MINUTES: 5
 } as const;
 
+/**
+ * Decorative art renders at ≤220px wide, so the 640w WebP variants are already
+ * oversized for every call site — the raw PNGs (up to 917 KB each) stay in
+ * `static/assets/` only as source material for regenerating `opt/`.
+ */
 export const ASSETS_DATA = {
-	BOARD: '/assets/board.png',
-	BOTTLE_OUTLINE: '/assets/bottle-outline.png',
-	BOTTLE: '/assets/bottle.png',
-	BOWL_PLATTER: '/assets/bowl-platter.png',
-	CHEESE: '/assets/cheese.png',
-	DESSERT: '/assets/dessert.png',
-	GLASS_SOFT: '/assets/glass-soft.png',
-	GLASS: '/assets/glass.png',
-	HOGAZA: '/assets/hogaza.png',
-	OLIVE: '/assets/olive.png',
-	OLIVES: '/assets/olives.png',
-	TAPA: '/assets/tapa.png',
-	WINE_BOTTLE: '/assets/wine-bottle.png'
+	BOARD: '/assets/opt/board-640w.webp',
+	BOTTLE_OUTLINE: '/assets/opt/bottle-outline-640w.webp',
+	BOTTLE: '/assets/opt/bottle-640w.webp',
+	BOWL_PLATTER: '/assets/opt/bowl-platter-640w.webp',
+	CHEESE: '/assets/opt/cheese-640w.webp',
+	DESSERT: '/assets/opt/dessert-640w.webp',
+	GLASS_SOFT: '/assets/opt/glass-soft-640w.webp',
+	GLASS: '/assets/opt/glass-640w.webp',
+	HOGAZA: '/assets/opt/hogaza-640w.webp',
+	OLIVE: '/assets/opt/olive-640w.webp',
+	OLIVES: '/assets/opt/olives-640w.webp',
+	TAPA: '/assets/opt/tapa-640w.webp',
+	WINE_BOTTLE: '/assets/opt/wine-bottle-640w.webp'
 } as const;
 
 /**
@@ -340,8 +345,17 @@ export const CHECKOUT_CONFIG = {
 	 */
 	SETTLE_ON_PLACE: false,
 
-	/** Hours a `pending` order lives before the cron cancels it (and frees any reward claim). */
+	/** Hours a `pending` CASH order lives before the cron cancels it (and frees any reward
+	 *  claim). Cash orders wait for the customer to show up, so they get the long window. */
 	PENDING_EXPIRY_HOURS: 48,
+
+	/**
+	 * Hours a `pending` ONLINE order lives before the cron cancels it. Shorter than the cash
+	 * window: an online order nobody paid is an abandoned Stripe redirect, not a customer on
+	 * their way. 24 h also matches Stripe's maximum Checkout Session lifetime, so the order
+	 * and its last possible payment session die together.
+	 */
+	PENDING_EXPIRY_HOURS_ONLINE: 24,
 
 	/** Documentation, not a subsystem: prices are tax-inclusive. See spec §2. */
 	TAX_MODE: 'included' as const

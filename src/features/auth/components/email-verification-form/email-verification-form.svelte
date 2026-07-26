@@ -189,7 +189,10 @@
 	>
 		<FieldGroup>
 			<div class="flex flex-col items-center gap-1 text-center">
-				<h1 class="text-2xl font-bold">Revisa tu correo electrónico</h1>
+				<!-- h2: the host page keeps its own h1 mounted while this step is shown. -->
+				<h2 class="font-display text-3xl font-semibold tracking-wide text-accent uppercase">
+					Revisa tu correo electrónico
+				</h2>
 				<p class="text-sm text-balance text-muted-foreground">
 					{`Enviamos un código de verificación a ${email}. Ingrésalo abajo para continuar.`}
 				</p>

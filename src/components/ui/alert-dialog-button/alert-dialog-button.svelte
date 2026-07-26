@@ -67,12 +67,12 @@
 	{triggerClass}
 	class={isDestructive ? 'ring-destructive/30' : undefined}
 >
-	{#snippet children()}
+	{#snippet children({ dialogId })}
 		<div class="alert-dialog__header">
-			<h2 class={isDestructive ? 'text-destructive' : undefined}>
+			<h2 id="{dialogId}-title" class={isDestructive ? 'text-destructive' : undefined}>
 				{title ?? 'Esta acción no se puede revertir'}
 			</h2>
-			<p>
+			<p id="{dialogId}-description">
 				{description ??
 					'¿Estás seguro de que quieres hacer esto? Esta acción no se puede deshacer.'}
 			</p>

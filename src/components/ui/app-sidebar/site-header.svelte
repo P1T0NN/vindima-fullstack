@@ -59,7 +59,13 @@
 
 <header class="sticky top-0 z-50 flex w-full items-center border-b bg-background">
 	<div class="flex h-(--header-height) w-full items-center gap-2 px-4">
-		<Button class="size-8" variant="ghost" size="icon" onclick={sidebar.toggle}>
+		<Button
+			class="size-8"
+			variant="ghost"
+			size="icon"
+			onclick={sidebar.toggle}
+			aria-label="Alternar barra lateral"
+		>
 			<SidebarIcon />
 		</Button>
 

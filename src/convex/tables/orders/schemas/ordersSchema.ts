@@ -40,8 +40,17 @@ export const ordersTable = defineTable({
 	/** Client-generated idempotency key. The same attempt replayed → the same order. */
 	attemptId: v.string(),
 
-	/** Money truth. `pending` = awaiting payment; terminal states never regress. */
+	/** Money truth. `pending` = awaiting payment; terminal states never regress.
+	 *
+	 *  `draft` is NOT an order yet — it is the pre-payment state of an `online` order, and it
+	 *  exists only because `placeOrder` is a mutation (it cannot call Stripe) and a Checkout
+	 *  Session cannot carry the lines, contact, delivery and reward claim the settlement needs.
+	 *  A draft is excluded from every customer, admin, counter, search and email surface, and is
+	 *  hard-deleted by the cron if abandoned — so "the order is created when Stripe confirms it"
+	 *  holds observably. The webhook turns it into a real order by flipping it straight to
+	 *  `paid`; it never passes through `pending`. Cash orders are never drafts. */
 	status: v.union(
+		v.literal('draft'),
 		v.literal('pending'),
 		v.literal('paid'),
 		v.literal('cancelled'),
@@ -91,6 +100,8 @@ export const ordersTable = defineTable({
 	searchText: v.optional(v.string())
 })
 	.index('by_user', ['userId'])
+	// Customer order tabs: one user's orders narrowed to a status, newest first.
+	.index('by_user_and_status', ['userId', 'status'])
 	.index('by_attempt', ['attemptId'])
 	.index('by_status', ['status'])
 	// Guest order lookup: the shopper types the number printed on their receipt. Exact-match

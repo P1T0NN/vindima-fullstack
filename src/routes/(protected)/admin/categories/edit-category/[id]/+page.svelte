@@ -4,7 +4,7 @@
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery } from 'convex-svelte';
+	import { useQuery } from '@mmailaender/convex-svelte';
 
 	// CONFIG
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';

@@ -15,7 +15,9 @@
 		side?: Side;
 		/** Skip the tooltip entirely (still renders the trigger). */
 		disabled?: boolean;
-		/** Set false when the trigger itself is focusable (button/link) — :focus-within still reveals. */
+		/** Set true ONLY when the trigger is not itself focusable (plain text/icon). For
+		    button/link triggers the wrapper must stay out of the tab order — a second stop
+		    with no role or action is a phantom for keyboard users. */
 		focusable?: boolean;
 		/** Classes on the trigger wrapper. */
 		class?: string;
@@ -28,7 +30,7 @@
 		children,
 		side = 'top',
 		disabled = false,
-		focusable = true,
+		focusable = false,
 		class: className,
 		contentClass
 	}: Props = $props();
@@ -88,7 +90,7 @@
 		color: var(--popover-foreground, #fff);
 		font-size: 0.75rem;
 		line-height: 1rem;
-		box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+		box-shadow: var(--shadow-brand-lift);
 		z-index: 50;
 
 		/* Hidden until hovered/focused; visibility (not display) keeps the transition. */

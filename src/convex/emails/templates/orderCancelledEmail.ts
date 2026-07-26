@@ -28,9 +28,15 @@ export function orderCancelledEmail(
 		? p('Tu artículo gratis volvió a tu cuenta — úsalo cuando quieras.', true)
 		: '';
 
+	// The hold window differs by payment method (missing paymentMethod = historical cash).
+	const holdHours =
+		order.paymentMethod === 'online'
+			? CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE
+			: CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS;
+
 	const context =
 		reason === 'expired'
-			? `${greeting}tu pedido <strong>${esc(order.number)}</strong> quedó pendiente de pago por más de ${CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS} horas, así que lo liberamos.`
+			? `${greeting}tu pedido <strong>${esc(order.number)}</strong> quedó pendiente de pago por más de ${holdHours} horas, así que lo liberamos.`
 			: `${greeting}confirmamos que cancelaste el pedido <strong>${esc(order.number)}</strong>.`;
 
 	const nextLine =

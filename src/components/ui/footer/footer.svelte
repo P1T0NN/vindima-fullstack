@@ -35,17 +35,17 @@
 
 <footer
 	class={cn(
-		'w-full max-w-full overflow-x-clip bg-[#3a0a22] pt-[54px] pb-[38px] text-[#C8C8C8]',
+		'w-full max-w-full overflow-x-clip bg-chart-5 pt-[54px] pb-[38px] text-accent-surface-muted',
 		className
 	)}
 >
 	<div
 		class={cn(
 			PAGE_CONTAINER,
-			'grid grid-cols-1 items-start gap-8 sm:grid-cols-2 sm:gap-[30px] lg:grid-cols-[1.4fr_1fr_1fr]'
+			'grid grid-cols-1 items-start gap-8 sm:grid-cols-2 sm:gap-[30px] md:grid-cols-3 lg:grid-cols-[1.4fr_1fr_1fr]'
 		)}
 	>
-		<div class="min-w-0">
+		<div class="min-w-0 sm:col-span-2 md:col-span-1">
 			<Logo class="mb-3.5 transition-opacity hover:opacity-90" />
 			<p class={footerBodyTextClass}>{COMPANY_DATA.DESCRIPTION}</p>
 			<a
@@ -53,7 +53,7 @@
 				target="_blank"
 				rel="noopener noreferrer"
 				aria-label="Instagram"
-				class="mt-4 inline-flex text-[#C8C8C8] transition-opacity hover:opacity-100 opacity-70"
+				class="mt-1.5 -ml-2.5 inline-flex p-2.5 text-accent-surface-muted transition-opacity hover:opacity-100 opacity-70"
 			>
 				<Instagram class="size-5" />
 			</a>
@@ -84,7 +84,7 @@
 	<div
 		class={cn(
 			PAGE_CONTAINER,
-			'mt-[34px] border-t border-primary/20 pt-[18px] text-xs leading-normal text-[#C8C8C8]/50'
+			'mt-[34px] border-t border-primary/20 pt-[18px] text-xs leading-normal text-accent-surface-muted/80'
 		)}
 	>
 		{`© ${year} ${COMPANY_DATA.NAME} · Hecho en Aguascalientes`}

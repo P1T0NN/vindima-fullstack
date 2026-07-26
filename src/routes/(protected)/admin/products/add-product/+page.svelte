@@ -105,7 +105,7 @@
 		<CardHeader>
 			<CardTitle>Variantes</CardTitle>
 			<CardDescription>
-				Lo que vendes — al menos una. La referencia es permanente una vez creada.
+				Lo que vendes: al menos una. La referencia es permanente una vez creada.
 			</CardDescription>
 		</CardHeader>
 		

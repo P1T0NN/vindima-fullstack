@@ -83,5 +83,5 @@
 />
 
 {#if hasActiveFilter}
-	<Button variant="ghost" size="sm" onclick={clearFilters}>Limpiar</Button>
+	<Button variant="outline" size="sm" onclick={clearFilters}>Limpiar</Button>
 {/if}

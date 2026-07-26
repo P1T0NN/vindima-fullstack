@@ -28,7 +28,9 @@ export function orderDetail(order: Doc<'orders'>) {
 		currency: order.currency,
 		delivery: order.delivery,
 		note: order.note ?? null,
-		paymentPending: order.status === 'pending',
+		/** True while money is still owed — `draft` (online, unpaid) or `pending` (cash, or a
+		 *  pre-draft-rule online row). */
+		paymentPending: order.status === 'pending' || order.status === 'draft',
 		/** Raw field passthrough — lets the UI tell "awaiting the webhook" from "pay at pickup". */
 		paymentMethod: order.paymentMethod ?? 'cash'
 	};

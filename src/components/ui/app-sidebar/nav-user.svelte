@@ -25,6 +25,12 @@
 	const showUserLoading = $derived(
 		auth.isLoading || userLoading || (auth.isAuthenticated && user === undefined)
 	);
+
+	const initials = $derived(
+		(user?.name || user?.email || '')
+			.slice(0, 2)
+			.toUpperCase()
+	);
 </script>
 
 <Sidebar.Menu>
@@ -47,7 +53,7 @@
 						{:else}
 							<Avatar.Root class="size-8 rounded-lg">
 								<Avatar.Image src={user?.image} alt={user?.name ?? ''} />
-								<Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
+								<Avatar.Fallback class="rounded-lg">{initials}</Avatar.Fallback>
 							</Avatar.Root>
 
 							<div class="grid flex-1 text-start text-sm leading-tight">

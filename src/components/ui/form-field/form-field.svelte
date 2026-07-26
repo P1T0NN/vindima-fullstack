@@ -26,8 +26,8 @@
 	<FieldLabel for={id}>{label}</FieldLabel>
 	{@render children()}
 	{#if error}
-		<FieldError>{error}</FieldError>
+		<FieldError id="{id}-error">{error}</FieldError>
 	{:else if description}
-		<FieldDescription>{description}</FieldDescription>
+		<FieldDescription id="{id}-desc">{description}</FieldDescription>
 	{/if}
 </Field>

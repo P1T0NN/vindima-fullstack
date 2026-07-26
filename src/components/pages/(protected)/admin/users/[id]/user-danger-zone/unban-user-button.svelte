@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';

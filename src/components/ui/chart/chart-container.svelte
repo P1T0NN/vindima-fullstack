@@ -12,9 +12,12 @@
 		class: className,
 		children,
 		config,
+		ariaLabel,
 		...restProps
 	}: WithElementRef<HTMLAttributes<HTMLElement>> & {
 		config: ChartConfig;
+		/** When set, the chart wrapper is exposed to AT as a single labelled image. */
+		ariaLabel?: string;
 	} = $props();
 
 	const chartId = $derived(`chart-${id || uid.replace(/:/g, "")}`);
@@ -30,6 +33,8 @@
 	bind:this={ref}
 	data-chart={chartId}
 	data-slot="chart"
+	role={ariaLabel ? "img" : undefined}
+	aria-label={ariaLabel}
 	class={cn(
 		"flex aspect-video justify-center overflow-visible text-xs",
 		// Overrides

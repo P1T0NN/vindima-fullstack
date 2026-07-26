@@ -30,6 +30,30 @@ import { mutationResultWith } from '@/convex/helpers/mutationResult';
 import type { MutationCtx } from '@/convex/_generated/server';
 import type { Doc } from '@/convex/_generated/dataModel';
 
+type OrderPaymentMethod = NonNullable<Doc<'orders'>['paymentMethod']>;
+
+/**
+ * The status an unpaid order carries, as a pure function of how it will be paid.
+ *
+ * **Online is never placed as a real order.** Nothing is charged yet, so the row is a `draft`:
+ * invisible to the customer, the admin, the counters, the search index and every email, and
+ * hard-deleted by the cron if abandoned. Stripe's webhook is what turns it into an order, by
+ * flipping it straight to `paid`. Cash is the opposite — the shopper committed to paying at the
+ * counter, so it is a real `pending` order the moment it is placed, exactly as before.
+ *
+ * Because it is a function of `paymentMethod` alone, a shopper switching method mid-checkout
+ * moves the SAME row between the two worlds with no extra branches: cash → online demotes it to
+ * a draft, online → cash promotes it to a real order (and sends the O1 it never got).
+ */
+function unpaidStatus(paymentMethod: OrderPaymentMethod): 'draft' | 'pending' {
+	return paymentMethod === 'online' ? 'draft' : 'pending';
+}
+
+/** Is this row still an in-progress checkout the same attempt may keep editing? */
+function isLiveDraft(status: Doc<'orders'>['status']): boolean {
+	return status === 'pending' || status === 'draft';
+}
+
 /**
  * Does the draft still hold exactly the reward claim the caller has active right now?
  *
@@ -58,8 +82,12 @@ async function holdsCurrentClaim(
  * The server is the price authority: it re-resolves and re-prices everything via
  * `calculateOrderPrice` (checkout spec §5), ignoring any client-computed amounts.
  *
+ * **An `online` order is not created here** — it is placed as a `draft` (see `unpaidStatus`), so
+ * nothing is emailed, listed, counted or searchable until Stripe confirms the payment. Cash is
+ * unchanged: a real `pending` order, immediately.
+ *
  * **Idempotency is now draft-shaped.** `attemptId` persists per browser, so while an order is
- * `pending` this mutation resolves to that SAME order every time:
+ * live (`pending` or `draft`) this mutation resolves to that SAME order every time:
  *   - identical request  → returned untouched (double-click / retry / resubmit), no writes;
  *   - changed request    → re-priced and patched IN PLACE, invalidating any Stripe session;
  *   - already settled    → returned as-is;
@@ -115,7 +143,8 @@ export const placeOrder = mutation({
 			.withIndex('by_attempt', (q) => q.eq('attemptId', args.attemptId))
 			.first();
 
-		// A match that is no longer pending. The two cases are NOT the same:
+		// A match that is no longer live (neither `pending` nor `draft`). The two cases are NOT
+		// the same:
 		//
 		// `paid` — a genuine replay (stale form resubmitted after settling). Return it so the
 		// shopper lands on their receipt; an online order's pay-page URL short-circuits there too
@@ -128,7 +157,7 @@ export const placeOrder = mutation({
 		// their own order, or the pending-expiry cron cancels an abandoned one 48h later. So the
 		// attempt is spent — hand the client the same self-heal it already performs for a draft
 		// owned by someone else: forget the id, mint a new one, resubmit once.
-		if (existing && existing.status !== 'pending') {
+		if (existing && !isLiveDraft(existing.status)) {
 			if (existing.status !== 'paid') {
 				return { success: false, message: { key: 'CheckoutMessages.ATTEMPT_CONFLICT' } };
 			}
@@ -224,11 +253,17 @@ export const placeOrder = mutation({
 			// mints a genuinely new session instead of replaying this one (§7.3.2/§7.3.3).
 			const staleSessionRef = existing.paymentSessionRef;
 
+			// Switching payment method moves this row between the two worlds (see `unpaidStatus`).
+			// `searchText` follows it: the admin search index must never surface a draft, and the
+			// blob is what puts a row in that index at all.
+			const status = unpaidStatus(args.paymentMethod);
+
 			await ctx.db.patch(existing._id, {
 				userId: userId ?? existing.userId,
 				email: args.contact.email,
 				name: args.contact.name,
 				phone: args.contact.phone,
+				status,
 				lines: priced.lines,
 				amounts: priced.amounts,
 				currency: priced.currency,
@@ -236,11 +271,14 @@ export const placeOrder = mutation({
 				paymentMethod: args.paymentMethod,
 				note: args.note,
 				claimId: priced.claimId,
-				searchText: buildOrderSearchText({
-					number: existing.number,
-					name: args.contact.name,
-					email: args.contact.email
-				}),
+				searchText:
+					status === 'draft'
+						? undefined
+						: buildOrderSearchText({
+								number: existing.number,
+								name: args.contact.name,
+								email: args.contact.email
+							}),
 				...(staleSessionRef
 					? {
 							paymentSessionRef: undefined,
@@ -259,10 +297,14 @@ export const placeOrder = mutation({
 				);
 			}
 
-			// The order stays `pending`, so its work-queue bucket is unchanged — no aggregate
-			// write needed here (only status/fulfillment transitions move buckets).
-
 			const updated = (await ctx.db.get(existing._id))!;
+
+			// Work-queue counter: unchanged for an ordinary edit, but a method switch moves the row
+			// between the `draft` and `pending` buckets, so the aggregate has to follow.
+			if (status !== existing.status) {
+				await orderCountAggregate.replaceOrInsert(ctx, existing, updated);
+			}
+
 			const payment = await getPaymentProvider(args.paymentMethod).createPayment(updated);
 
 			// Same settle-on-place rule as a fresh cash order (idempotent; no-op if already paid).
@@ -272,8 +314,18 @@ export const placeOrder = mutation({
 				});
 			}
 
-			// No second O1 email on an update — the one already sent points at the pay page, which
-			// always reflects the current draft (§5.3.7).
+			// O1 fires here in exactly one case: a draft just became a real order because the
+			// shopper switched to cash. It got no email as a draft, and it is now a pending order
+			// the store will prepare — so it needs the same "order received" a fresh cash order
+			// gets. Every other edit stays silent (anti-spam, §5.3.7), and a settle-on-place store
+			// skips it because O2 already covers a settled order.
+			const promoted = await ctx.db.get(existing._id);
+			if (existing.status === 'draft' && promoted?.status === 'pending') {
+				void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
+					kind: 'orderReceived',
+					orderId: existing._id
+				});
+			}
 
 			return {
 				success: true,
@@ -301,6 +353,8 @@ export const placeOrder = mutation({
 			};
 		}
 
+		const status = unpaidStatus(args.paymentMethod);
+
 		const orderId = await ctx.db.insert('orders', {
 			userId: userId ?? null,
 			email: args.contact.email,
@@ -308,7 +362,9 @@ export const placeOrder = mutation({
 			phone: args.contact.phone,
 			number: 'PENDING', // patched below once we have the id
 			attemptId: args.attemptId,
-			status: 'pending',
+			// Online → `draft`: nothing has been charged, so no order exists yet as far as the
+			// customer, the store and the books are concerned. Cash → `pending`, unchanged.
+			status,
 			fulfillment: null,
 			lines: priced.lines,
 			amounts: priced.amounts,
@@ -325,16 +381,24 @@ export const placeOrder = mutation({
 			.toUpperCase()}`;
 		await ctx.db.patch(orderId, {
 			number,
-			// Number only exists post-insert, so the search blob is written with it.
-			searchText: buildOrderSearchText({
-				number,
-				name: args.contact.name,
-				email: args.contact.email
-			})
+			// Number only exists post-insert, so the search blob is written with it. A draft gets
+			// none: writing the blob is what places a row in the admin `search_text` index, so
+			// withholding it keeps unpaid online orders out of admin search by construction.
+			// (The number itself IS assigned now, so it stays stable through payment and receipts.)
+			...(status === 'draft'
+				? {}
+				: {
+						searchText: buildOrderSearchText({
+							number,
+							name: args.contact.name,
+							email: args.contact.email
+						})
+					})
 		});
 
 		const order = (await ctx.db.get(orderId))!;
-		// Work-queue counter: a fresh order enters the 'pending' bucket.
+		// Work-queue counter: a fresh order enters the 'pending' bucket — or the 'draft' bucket,
+		// which nothing reads.
 		await orderCountAggregate.insert(ctx, order);
 
 		const payment = await getPaymentProvider(order.paymentMethod ?? 'cash').createPayment(order);
@@ -350,14 +414,15 @@ export const placeOrder = mutation({
 		}
 
 		// O1 "order received" — ONLY when the order is still pending (the collapse rule,
-		// `EmailSystemDesign.md` §4.2). A settle-on-place order is already paid → O2 covers it,
-		// so we send nothing here and avoid two emails for one click.
+		// `EmailSystemDesign.md` §4.2). This now excludes online orders on both counts: they are
+		// `draft`, and telling someone we received an order we were never paid for is the exact
+		// behaviour this rule exists to stop. Their receipt is O2, sent by the webhook. A
+		// settle-on-place cash order is already paid → O2 covers it too.
 		const settled = await ctx.db.get(orderId);
 		if (settled?.status === 'pending') {
 			void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
 				kind: 'orderReceived',
-				orderId,
-				paymentUrl: payment.kind === 'redirect' ? payment.url : undefined
+				orderId
 			});
 		}
 

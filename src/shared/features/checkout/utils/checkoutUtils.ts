@@ -48,12 +48,16 @@ export function orderTotalMinor(
  * fulfillment stage. Types come straight from `Doc<'orders'>` (source of truth) and the derived
  * `OrderDisplayStatus` in `ordersTypes.ts`.
  *
+ * `draft` — an online order that has not been paid yet — is `unpaid` by definition. It reaches
+ * this function on exactly one surface, the success page mid-webhook, since no list ever carries
+ * a draft (`ordersSchema.ts`).
+ *
  * `paymentMethod` splits the one case that used to be misreported. A `pending` order means two
  * opposite things depending on how it is paid:
  *   - **cash** — confirmed, we're preparing it, the shopper pays on pickup/delivery → `processing`.
  *   - **online** — the shopper left the hosted payment page and nothing was charged → `unpaid`.
- * Showing "en proceso" for the second was a lie, and it hid the fact that the order can still be
- * paid (the pay-page link stays valid until the expiry cron cancels it).
+ * Since online orders are now placed as `draft`, that second case only remains reachable for
+ * rows placed before the draft rule shipped; it is kept so their history still reads honestly.
  *
  * Optional so pre-existing callers and rows without the field keep the historical `cash`
  * behaviour.
@@ -64,6 +68,7 @@ export function orderDisplayStatus(
 	paymentMethod?: Doc<'orders'>['paymentMethod']
 ): OrderDisplayStatus {
 	if (status === 'cancelled' || status === 'refunded') return 'cancelled';
+	if (status === 'draft') return 'unpaid';
 	if (status === 'pending' && paymentMethod === 'online') return 'unpaid';
 	if (status === 'paid' && (fulfillment === 'shipped' || fulfillment === 'delivered')) {
 		return fulfillment;

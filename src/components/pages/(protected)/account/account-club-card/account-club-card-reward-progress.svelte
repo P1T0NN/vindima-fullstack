@@ -12,7 +12,9 @@
 	const stampsPerReward = $derived(rewards?.stampsPerReward ?? 5);
 	const stamps = $derived(rewards?.stamps ?? 0);
 	const pending = $derived(rewards?.pendingStamps ?? 0);
+	const availableRewards = $derived(rewards?.availableRewards ?? 0);
 	const remaining = $derived(Math.max(0, stampsPerReward - stamps));
+	const rewardReady = $derived(availableRewards > 0 || remaining === 0);
 
 	const dots = $derived(Array.from({ length: stampsPerReward }, (_, i) => i));
 
@@ -32,12 +34,12 @@
 {:else if featureOn}
 	<div class="border-b border-accent/10 px-8 py-9 sm:px-10">
 		<div class="mb-5 flex flex-wrap items-center justify-between gap-4">
-			<p class="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">
+			<p class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
 				Tu recompensa · {stamps} de {stampsPerReward} compras
 			</p>
 
-			<p class="text-sm text-chart-2">
-				Te faltan {remaining} compras
+			<p class="text-sm text-gold-ink">
+				{rewardReady ? 'Recompensa lista: elígela abajo' : `Te faltan ${remaining} compras`}
 			</p>
 		</div>
 
@@ -48,7 +50,7 @@
 					class={state === 'filled'
 						? 'size-8 rounded-full bg-accent'
 						: state === 'pending'
-							? 'size-8 animate-pulse rounded-full border-2 border-dashed border-accent bg-accent/15'
+							? 'size-8 rounded-full border-2 border-dashed border-accent bg-accent/15 motion-safe:animate-pulse'
 							: 'size-8 rounded-full border-2 border-primary bg-transparent'}
 					aria-hidden="true"
 				></span>
@@ -80,7 +82,7 @@
 		</div>
 
 		{#if pending > 0}
-			<p class="mt-3 text-xs text-muted-foreground/70">
+			<p class="mt-3 text-xs text-muted-foreground">
 				{pending} en camino · se confirma después de la entrega
 			</p>
 		{/if}

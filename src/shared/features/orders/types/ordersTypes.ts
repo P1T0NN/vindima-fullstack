@@ -1,8 +1,26 @@
 // TYPES
 import type { Doc, Id } from '@/convex/_generated/dataModel';
+import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
 
 /** Money-lifecycle status stored on an order row (`pending | paid | cancelled | refunded`). */
 export type OrderStatus = Doc<'orders'>['status'];
+
+/**
+ * The status slices a customer can filter /my-orders by. Derived from `OrderStatus` so a
+ * schema change surfaces here at compile time; `closed` collapses the two terminal states
+ * (cancelled + refunded) into one customer-facing list.
+ */
+export const MY_ORDERS_STATUS_FILTERS = ['pending', 'paid', 'closed'] as const satisfies readonly (
+	| OrderStatus
+	| 'closed'
+)[];
+export type MyOrdersStatusFilter = (typeof MY_ORDERS_STATUS_FILTERS)[number];
+
+/** One /my-orders tab — a status slice or the unfiltered list. */
+export type MyOrdersTab = MyOrdersStatusFilter | 'all';
+
+/** `fetchMyOrders` row: the frozen order plus live catalog rows for its lines (images, current names). */
+export type MyOrderRow = Doc<'orders'> & { products: ResolvedCartProduct[] };
 
 /** One priced order line as `calculateOrderPrice` snapshots it (name + unit price frozen at placement). */
 export type PricedLine = {

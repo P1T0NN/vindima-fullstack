@@ -113,7 +113,7 @@
 	const trustLine = $derived(
 		payment === 'online'
 			? 'Serás redirigido a una página de pago segura.'
-			: 'Sin pago en línea — paga al recoger o en la entrega.'
+			: 'Sin pago en línea: paga al recoger o en la entrega.'
 	);
 </script>
 
@@ -158,7 +158,7 @@
 		{:else if loading}
 			{submitVerb}
 		{:else}
-			{submitVerb} — {money(totalMinor)}
+			{submitVerb} · {money(totalMinor)}
 		{/if}
 	</Button>
 	<p class="text-center text-xs leading-snug text-muted-foreground">

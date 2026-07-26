@@ -1,5 +1,5 @@
 // LIBRARIES
-import { toast } from 'svelte-sonner';
+import { tick } from 'svelte';
 
 // CONFIG
 import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -17,6 +17,12 @@ import { rateLimitMessage } from '@/shared/utils/rateLimitMessages';
 // TYPES
 import type { PasswordResetFormStep, PasswordResetField } from './passwordResetFormTypes.js';
 import type { FieldErrors } from '@/shared/types/types';
+
+// Wait for aria-invalid to hit the DOM, then move focus to the first bad field.
+async function focusFirstInvalid() {
+	await tick();
+	document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+}
 
 export function createPasswordResetForm() {
 	let step = $state<PasswordResetFormStep>('forgot');
@@ -42,6 +48,7 @@ export function createPasswordResetForm() {
 		if (!p.success) {
 			fieldErrors = zodIssuesToFieldErrors<PasswordResetField>(p.error.issues);
 			errorMessage = null;
+			await focusFirstInvalid();
 			return;
 		}
 
@@ -82,6 +89,7 @@ export function createPasswordResetForm() {
 		if (!p.success) {
 			fieldErrors = zodIssuesToFieldErrors<PasswordResetField>(p.error.issues);
 			errorMessage = null;
+			await focusFirstInvalid();
 			return;
 		}
 
@@ -90,6 +98,7 @@ export function createPasswordResetForm() {
 				confirmPassword: 'Las contraseñas deben coincidir.'
 			};
 			errorMessage = null;
+			await focusFirstInvalid();
 			return;
 		}
 
@@ -125,7 +134,6 @@ export function createPasswordResetForm() {
 			return;
 		}
 
-		toast.success('Contraseña restablecida correctamente.');
 		await appGoto(UNPROTECTED_PAGE_ENDPOINTS.ROOT);
 		busy = false;
 	}

@@ -6,6 +6,7 @@
 	import { page } from '$app/state';
 
 	// LIBRARIES
+	import { NuqsAdapter } from 'nuqs-svelte/adapters/svelte-kit';
 	import { createSvelteAuthClient } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { authClient } from '@/features/auth/lib/auth-client';
 	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
@@ -90,8 +91,10 @@
 	<link rel="icon" href="/favicon.ico" sizes="any" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<!-- ital axis included: the hero/about quotes use font-display italic, and without the
+	     real italic face browsers synthesize a slant that visibly deforms the serif. -->
 	<link
-		href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Jost:wght@400;500;600&display=swap"
+		href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Jost:wght@400;500;600&display=swap"
 		rel="stylesheet"
 	/>
 	{#if !dev}
@@ -103,17 +106,28 @@
 	{/if}
 </svelte:head>
 
-<div class="flex min-h-dvh flex-col">
-	{#if !isAdminRoute}
-		<Header />
-	{/if}
-	<div class="min-h-0 flex-1">
-		{@render children()}
+<!-- NuqsAdapter: app-wide `useQueryState` URL-synced state (admin filters, order tabs). -->
+<NuqsAdapter>
+	<div class="flex min-h-dvh flex-col">
+		<a
+			href="#contenido"
+			class="sr-only rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus-visible:not-sr-only focus-visible:absolute focus-visible:top-2 focus-visible:left-2 focus-visible:z-100"
+		>
+			Saltar al contenido
+		</a>
+		{#if !isAdminRoute}
+			<Header />
+		{/if}
+		<!-- Admin renders its own <main> inside the sidebar inset — nesting two mains is invalid,
+		     so the storefront landmark steps down to a div there. -->
+		<svelte:element this={isAdminRoute ? 'div' : 'main'} id="contenido" class="min-h-0 flex-1">
+			{@render children()}
+		</svelte:element>
+		{#if !isAdminRoute}
+			<Footer />
+		{/if}
 	</div>
-	{#if !isAdminRoute}
-		<Footer />
-	{/if}
-</div>
-<CartSidebar />
-<Toaster richColors />
-<AuthErrorBanner />
+	<CartSidebar />
+	<Toaster richColors />
+	<AuthErrorBanner />
+</NuqsAdapter>

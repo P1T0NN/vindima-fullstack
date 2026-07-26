@@ -6,7 +6,7 @@
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 
 	// CONFIG
 	import { CART_CONFIG } from '@/shared/config';

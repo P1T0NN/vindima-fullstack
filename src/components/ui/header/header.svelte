@@ -72,7 +72,7 @@
 <header
 	bind:this={headerEl}
 	class={cn(
-		'z-50 w-full max-w-full overflow-x-clip border-b border-border bg-background/93 backdrop-blur-[10px]',
+		'z-50 w-full max-w-full overflow-x-clip border-b border-border bg-background',
 		isSticky ? 'sticky top-0' : 'relative',
 		className
 	)}
@@ -116,13 +116,13 @@
 			<button
 				type="button"
 				onclick={() => cart.toggle()}
-				class="relative flex rounded-sm text-accent transition-opacity outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary/40"
+				class="relative flex items-center justify-center rounded-sm p-3 text-accent transition-opacity outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary/40"
 				aria-label={cart.count === 1 ? `Carrito, ${cart.count} artículo` : `Carrito, ${cart.count} artículos`}
 			>
 				<ShoppingBagIcon class="size-[21px]" strokeWidth={1.4} />
 				{#if cart.count > 0}
 					<span
-						class="absolute -top-[7px] -right-[9px] flex h-4 min-w-4 items-center justify-center rounded-[9px] bg-accent px-[3px] text-center text-xs leading-4 font-semibold text-primary tabular-nums"
+						class="absolute top-[5px] right-[3px] flex h-4 min-w-4 items-center justify-center rounded-[9px] bg-accent px-[3px] text-center text-xs leading-4 font-semibold text-primary tabular-nums"
 						aria-hidden="true"
 					>
 						{cart.count > 99 ? '99+' : cart.count}

@@ -1,5 +1,5 @@
 // LIBRARIES
-import { toast } from 'svelte-sonner';
+import { tick } from 'svelte';
 
 // CONFIG
 import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -17,7 +17,6 @@ import type { FieldErrors } from '@/shared/types/types';
 
 export type LoginFormCopy = {
 	signInFailed: () => string;
-	signedInToast: () => string;
 };
 
 export function createLoginForm(copy: LoginFormCopy) {
@@ -44,6 +43,9 @@ export function createLoginForm(copy: LoginFormCopy) {
 		if (!p.success) {
 			fieldErrors = zodIssuesToFieldErrors<LoginField>(p.error.issues);
 			errorMessage = null;
+			// Wait for aria-invalid to hit the DOM, then move focus to the first bad field.
+			await tick();
+			document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
 			return;
 		}
 
@@ -59,10 +61,18 @@ export function createLoginForm(copy: LoginFormCopy) {
 			if (error) {
 				const code = (error as { code?: string }).code ?? '';
 				if (code === 'EMAIL_NOT_VERIFIED') {
-					await authClient.emailOtp.sendVerificationOtp({
+					const { error: otpError } = await authClient.emailOtp.sendVerificationOtp({
 						email: p.data.email,
 						type: 'email-verification'
 					});
+					if (otpError) {
+						console.error('Login: send verification OTP failed:', otpError);
+						errorMessage = rateLimitMessage(
+							otpError.message,
+							'No se pudo enviar el código de verificación. Inténtalo de nuevo.'
+						);
+						return;
+					}
 					emailDraft = p.data.email;
 					verifyContext = { email: p.data.email, password: p.data.password };
 					step = { email: p.data.email };
@@ -89,7 +99,6 @@ export function createLoginForm(copy: LoginFormCopy) {
 	}
 
 	async function onVerifySuccess() {
-		toast.success(copy.signedInToast());
 		await appGoto(UNPROTECTED_PAGE_ENDPOINTS.ROOT);
 	}
 

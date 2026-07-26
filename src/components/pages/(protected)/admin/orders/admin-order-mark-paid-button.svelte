@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 
 	// COMPONENTS
 	import ActionButton from '@/components/ui/action-button/action-button.svelte';
@@ -70,7 +70,7 @@
 				{/if}
 
 				{#if hasRewardLine}
-					<li class="flex items-start gap-2.5 rounded-md bg-chart-2/10 px-2.5 py-2 text-chart-2">
+					<li class="flex items-start gap-2.5 rounded-md bg-chart-2/10 px-2.5 py-2 text-gold-ink">
 						<GiftIcon class="mt-0.5 size-4 shrink-0" />
 						<span>Se aplica el artículo de recompensa gratis de este pedido.</span>
 					</li>

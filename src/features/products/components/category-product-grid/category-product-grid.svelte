@@ -49,7 +49,10 @@
 		if (!shown) cart.open();
 	}
 
-	const gridClass = $derived(cn('grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3', className));
+	// Single column below ~420px — two columns there can't hold the uppercase CTA.
+	const gridClass = $derived(
+		cn('grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:gap-5 lg:grid-cols-3', className)
+	);
 </script>
 
 {#if products.length === 0}
@@ -103,7 +106,7 @@
 								{/each}
 							</div>
 
-							<span class="font-display text-2xl leading-none font-semibold text-chart-2">
+							<span class="font-display text-2xl leading-none font-semibold text-gold-ink">
 								{money(variant.priceMinor)}
 							</span>
 						</div>

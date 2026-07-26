@@ -6,7 +6,7 @@
 </script>
 
 <div class="mb-5 pr-8">
-	<p class="mb-2.5 text-[10.5px] font-medium tracking-[0.22em] text-chart-2 uppercase">
+	<p class="mb-2.5 text-[10.5px] font-medium tracking-[0.22em] text-gold-ink uppercase">
 		La casa sugiere
 	</p>
 	<h2

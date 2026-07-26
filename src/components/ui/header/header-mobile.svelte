@@ -70,7 +70,7 @@
 			{...props}
 			type="button"
 			class={cn(
-				'inline-flex size-9 touch-manipulation items-center justify-center rounded-sm text-accent transition-opacity hover:opacity-80 lg:hidden',
+				'inline-flex size-11 touch-manipulation items-center justify-center rounded-sm text-accent transition-opacity hover:opacity-80 lg:hidden',
 				props.class as ClassValue
 			)}
 			aria-label={header.menuOpen ? 'Cerrar menú' : 'Abrir menú'}
@@ -90,7 +90,7 @@
 			<button
 				type="button"
 				onclick={close}
-				class="inline-flex size-9 shrink-0 touch-manipulation items-center justify-center rounded-sm text-accent hover:opacity-80"
+				class="inline-flex size-11 shrink-0 touch-manipulation items-center justify-center rounded-sm text-accent hover:opacity-80"
 				aria-label="Cerrar menú"
 			>
 				<XIcon class="size-5" strokeWidth={1.4} />
@@ -106,7 +106,7 @@
 						<Link
 							id={i === 0 ? 'site-mobile-nav-first' : undefined}
 							href={item.href}
-							class={cn(navLinkClass, 'block w-full px-1', active && navLinkActiveClass)}
+							class={cn(navLinkClass, 'block w-full px-1 py-3', active && navLinkActiveClass)}
 							aria-current={active ? 'page' : undefined}
 							onclick={header.closeMenu}
 						>
@@ -118,7 +118,11 @@
 		</nav>
 
 		<div class="mt-auto flex flex-col gap-4">
-			<Link href={accountHref} class={cn(navLinkCompactClass, 'px-1')} onclick={header.closeMenu}>
+			<Link
+				href={accountHref}
+				class={cn(navLinkCompactClass, 'px-1 py-3')}
+				onclick={header.closeMenu}
+			>
 				{accountLabel}
 			</Link>
 
@@ -133,11 +137,14 @@
 
 			<button
 				type="button"
-				class={cn(navLinkCompactClass, 'inline-flex items-center gap-2 px-1 text-left')}
+				class={cn(navLinkCompactClass, 'inline-flex items-center gap-2 px-1 py-3 text-left')}
 				onclick={() => {
 					header.closeMenu();
 					cart.open();
 				}}
+				aria-label={cart.count === 1
+					? `Carrito, ${cart.count} artículo`
+					: `Carrito, ${cart.count} artículos`}
 			>
 				<ShoppingBagIcon class="size-4 shrink-0" strokeWidth={1.4} />
 				Carrito

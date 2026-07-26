@@ -32,6 +32,9 @@ assert.equal(orderDisplayStatus('paid', null), 'processing');
 assert.equal(orderDisplayStatus('pending', null, 'online'), 'unpaid');
 // A pending CASH order IS underway; the shopper simply pays on pickup.
 assert.equal(orderDisplayStatus('pending', null, 'cash'), 'processing');
+// A draft is an online order awaiting its first payment — unpaid regardless of what else is set.
+assert.equal(orderDisplayStatus('draft', null, 'online'), 'unpaid');
+assert.equal(orderDisplayStatus('draft', null), 'unpaid');
 // Only `pending` is unpaid — once settled, the fulfillment stage wins.
 assert.equal(orderDisplayStatus('paid', null, 'online'), 'processing');
 assert.equal(orderDisplayStatus('paid', 'shipped', 'online'), 'shipped');

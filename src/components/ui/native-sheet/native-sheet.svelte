@@ -74,11 +74,46 @@
 		if (open !== undefined) setOpen(false);
 	}
 
-	// Controlled mode only: mirror the native open/close back into external state.
-	// Everything else — open, backdrop, Esc, click-outside, focus — stays native/CSS.
-	// Need focus trapping? Import `trapFocus` from '@/shared/utils/focusTrap.js'.
+	// Mirror native open/close back into external state (controlled mode), and own the focus
+	// contract `aria-modal` promises: popovers, unlike `<dialog>.showModal()`, neither move
+	// focus in nor trap it, so without this a keyboard user stays in the page behind the scrim.
+	let previouslyFocused: HTMLElement | null = null;
+
 	function handleToggle(event: ToggleEvent) {
-		if (controlled) setOpen(event.newState === 'open');
+		const isOpen = event.newState === 'open';
+		if (controlled) setOpen(isOpen);
+
+		if (isOpen) {
+			previouslyFocused = document.activeElement as HTMLElement | null;
+			panel?.focus();
+		} else {
+			previouslyFocused?.focus();
+			previouslyFocused = null;
+		}
+	}
+
+	// Minimal Tab cycle — Esc/light-dismiss stay native (`popover="auto"`).
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key !== 'Tab' || !panel) return;
+
+		const focusables = Array.from(
+			panel.querySelectorAll<HTMLElement>(
+				'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+			)
+		).filter((el) => el.offsetParent !== null);
+		if (focusables.length === 0) return;
+
+		const first = focusables[0];
+		const last = focusables[focusables.length - 1];
+		const active = document.activeElement;
+
+		if (event.shiftKey && (active === first || active === panel)) {
+			event.preventDefault();
+			last.focus();
+		} else if (!event.shiftKey && active === last) {
+			event.preventDefault();
+			first.focus();
+		}
 	}
 
 	// Runs only in controlled mode — bridges external `open` to the native popover.
@@ -114,6 +149,7 @@
 	{style}
 	class={cn('native-sheet', className)}
 	ontoggle={handleToggle}
+	onkeydown={handleKeydown}
 >
 	{@render children({ popoverId, close })}
 
@@ -126,7 +162,7 @@
 			popovertargetaction="hide"
 		>
 			<XIcon />
-			<span class="sr-only">Close</span>
+			<span class="sr-only">Cerrar</span>
 		</Button>
 	{/if}
 	</div>
@@ -166,7 +202,7 @@
 		border: 0;
 		max-height: none;
 		overflow: auto;
-		box-shadow: 0 10px 40px rgb(0 0 0 / 0.2);
+		box-shadow: var(--shadow-brand-panel);
 		/* NOTE: do NOT set `display` here — that would override the UA's
 		   `[popover]:not(:popover-open){display:none}` and leave the panel visible while
 		   closed. `display: flex` is set only on `:popover-open` below. */
@@ -191,7 +227,8 @@
 
 	/* Dimmed backdrop (free with popover). */
 	.native-sheet:global([popover])::backdrop {
-		background: rgb(0 0 0 / 0.5);
+		/* Posos-tinted scrim, never neutral black (No Pure Ink Rule) */
+		background: rgba(28, 20, 24, 0.5);
 		opacity: 0;
 		transition:
 			opacity 0.3s ease,

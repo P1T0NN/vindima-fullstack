@@ -42,7 +42,6 @@
 			console.error('Sign out error:', result.error);
 			toast.error(result.error.message as string);
 		} else {
-			toast.success('Sesión cerrada correctamente.');
 			appGoto(UNPROTECTED_PAGE_ENDPOINTS.LOGIN);
 		}
 

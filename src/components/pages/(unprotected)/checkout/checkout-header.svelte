@@ -11,7 +11,7 @@
 
 <a
 	href={appHref(UNPROTECTED_PAGE_ENDPOINTS.SHOP)}
-	class="mb-6 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-chart-2 uppercase no-underline transition-colors hover:text-accent"
+	class="mb-6 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-gold-ink uppercase no-underline transition-colors hover:text-accent"
 >
 	<ArrowLeft class="size-4" /> Volver a la tienda
 </a>

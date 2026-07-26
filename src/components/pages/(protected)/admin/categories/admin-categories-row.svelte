@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -92,9 +92,8 @@
 
 			<ActionButton
 				function={remove}
-				variant="ghost"
+				variant="destructive"
 				size="sm"
-				class="text-destructive hover:text-destructive"
 				isDestructive
 				isPending={busy}
 				title={`¿Eliminar ${category.name}?`}
@@ -108,7 +107,7 @@
 						<li class="flex items-start gap-2.5 text-foreground">
 							<PackageIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
 							<span>
-								Solo se pueden eliminar categorías vacías — si algún producto aún usa esta, la
+								Solo se pueden eliminar categorías vacías: si algún producto aún usa esta, la
 								eliminación se rechaza y no cambia nada.
 							</span>
 						</li>

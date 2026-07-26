@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery, useConvexClient } from 'convex-svelte';
+	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
 
 	// CONFIG
 	import { REWARDS_CONFIG } from '@/shared/config';
@@ -128,10 +128,11 @@
 					r.rewardsDelta ? `${signed(r.rewardsDelta)} recompensas` : null
 				]
 					.filter(Boolean)
-					.join(', ') || '—',
+					.join(', ') || '–',
+			cellClass: 'tabular-nums',
 			hideBelow: 'md'
 		},
-		{ id: 'status', header: 'Estado', accessor: (r) => r.status ?? '—', hideBelow: 'lg' },
+		{ id: 'status', header: 'Estado', accessor: (r) => r.status ?? '–', hideBelow: 'lg' },
 		{ id: 'note', header: 'Nota', accessor: (r) => r.note ?? '', hideBelow: 'md', wrap: true }
 	];
 </script>
@@ -145,7 +146,9 @@
 					<span class="text-xs font-medium tracking-wide text-muted-foreground uppercase">
 						{stat.label}
 					</span>
-					<span class="font-display text-2xl leading-none font-semibold">{stat.value}</span>
+					<span class="font-display text-2xl leading-none font-semibold tabular-nums">
+						{stat.value}
+					</span>
 				</CardContent>
 			</Card>
 		{/each}
@@ -153,7 +156,7 @@
 
 	{#if account === null}
 		<p class="text-sm text-muted-foreground">
-			Aún no hay actividad de recompensas — la cuenta se crea automáticamente con el primer sello
+			Aún no hay actividad de recompensas: la cuenta se crea automáticamente con el primer sello
 			(o con un ajuste manual abajo).
 		</p>
 	{/if}
@@ -163,7 +166,7 @@
 		<CardHeader>
 			<CardTitle>Ajuste manual</CardTitle>
 			<CardDescription>
-				Cambios con signo en el saldo de este cliente — p. ej. un sello de cortesía, o recuperar
+				Cambios con signo en el saldo de este cliente: p. ej. un sello de cortesía, o recuperar
 				una recompensa tras un reembolso abusivo. Las tarjetas completas se convierten en
 				recompensas automáticamente, y cada ajuste queda registrado en el historial de abajo.
 			</CardDescription>
@@ -206,7 +209,7 @@
 					variant="outline"
 					isPending={busy}
 					title="¿Reconstruir cuenta de recompensas?"
-					description="Recalcula el saldo reproduciendo todo el historial de este cliente. Seguro en cualquier momento — en una cuenta sana no cambia nada. Úsalo si los contadores parecen incorrectos."
+					description="Recalcula el saldo reproduciendo todo el historial de este cliente. Seguro en cualquier momento: en una cuenta sana no cambia nada. Úsalo si los contadores parecen incorrectos."
 				>
 					Reconstruir desde historial
 				</ActionButton>

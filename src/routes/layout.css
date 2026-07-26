@@ -10,7 +10,22 @@
 :root {
 	--radius: 0.625rem;
 
-	/* Base Colors - Light Mode */
+	/* ── Named palette (DESIGN.md "The Cellar Ledger") ─────────────────────────
+	   vino-tinto  #510128  ink: headings, borders, structure
+	   barrica     #3a0a22  deep ground (footer, dark bands)
+	   oro-viejo   #d9af50  the seal: committed/actionable fills only
+	   oro-claro   #e7c069  seal hover lift
+	   oro-tostado #b8902f  earned gold (fills/tints only — fails AA as text)
+	   gold-ink    #7a5c14  the ONLY gold safe for text on paper (≈5.2:1)
+	   ceniza      #f2f1ed  page ground
+	   pergamino   #fbfaf7  raised sheet (cards, popovers)
+	   lias        #edebe3  secondary surfaces
+	   posos       #1c1418  body ink
+	   hoja        #1f7a4d  growth/reward confirmations
+	   lacre       #c81e1e  destructive tint + text
+	─────────────────────────────────────────────────────────────────────────── */
+
+	/* Base surfaces */
 	--background: #f2f1ed;
 	--foreground: #1c1418;
 	--card: #fbfaf7;
@@ -18,37 +33,43 @@
 	--popover: #fbfaf7;
 	--popover-foreground: #1c1418;
 
-	/* Primary - Refined Deep Blue (Professional AI) */
+	/* Primary — Oro Viejo, the seal */
 	--primary: #d9af50;
 	--primary-foreground: #510128;
+	--primary-hover: #e7c069;
 
-	/* Secondary - Cool Slate */
+	/* Secondary — Lías */
 	--secondary: #edebe3;
 	--secondary-foreground: #510128;
 
-	/* Muted - Neutral Backgrounds */
+	/* Muted — same ink at lower alpha, never a separate gray.
+	   0.7 alpha ≈ 5.4:1 on pergamino; 0.6 fails AA on lías. */
 	--muted: #edebe3;
-	--muted-foreground: rgba(28, 20, 24, 0.6);
+	--muted-foreground: rgba(28, 20, 24, 0.7);
 
-	/* Accent - Sophisticated Purple (Subtle Energy) */
+	/* Accent — Vino Tinto, the ink */
 	--accent: #510128;
 	--accent-foreground: #f2f1ed;
 
-	/* Destructive - Professional Red */
-	--destructive: #dc2626;
+	/* Destructive — Lacre. #dc2626 measures 4.48:1 on card; this passes. */
+	--destructive: #c81e1e;
 	--destructive-foreground: #f2f1ed;
 
-	/* Borders & Inputs */
+	/* Gold as ink: text-gold-ink wherever gold TEXT is semantically required
+	   (earned rewards, prices). oro-viejo/tostado stay fills only. */
+	--gold-ink: #7a5c14;
+
+	/* Borders & Inputs — burgundy at low alpha, never gray */
 	--border: rgba(81, 1, 40, 0.13);
 	--input: rgba(81, 1, 40, 0.22);
 	--ring: #d9af50;
 
-	/* Chart Colors - Professional Palette */
-	--chart-1: #d9af50; /* Deep Blue */
-	--chart-2: #b8902f; /* Purple */
-	--chart-3: #510128; /* Teal */
-	--chart-4: #1f7a4d; /* Subtle Pink */
-	--chart-5: #3a0a22; /* Green */
+	/* Chart Colors */
+	--chart-1: #d9af50; /* Oro Viejo */
+	--chart-2: #b8902f; /* Oro Tostado — fills/tints only, use --gold-ink for text */
+	--chart-3: #510128; /* Vino Tinto */
+	--chart-4: #1f7a4d; /* Hoja */
+	--chart-5: #3a0a22; /* Barrica */
 
 	/* Sidebar */
 	--sidebar: #fbfaf7;
@@ -60,18 +81,14 @@
 	--sidebar-border: rgba(81, 1, 40, 0.13);
 	--sidebar-ring: #d9af50;
 
-	/* Custom Emotional Design Tokens */
-	--color-viral: #3a0a22; /* Subtle magenta for trending */
-	--color-engagement: #d9af50; /* Soft coral for interactions */
-	--color-ai: #510128; /* Deep blue for AI features */
-	--color-growth: #1f7a4d; /* Professional green */
-	--color-whatsapp: #25d366; /* WhatsApp brand green */
-	--color-whatsapp-foreground: #ffffff;
-	--color-warning: #d9af50; /* Refined amber */
-	--color-info: #1f7a4d; /* Clear blue */
+	/* WhatsApp CTA (brand green is external; foreground is pergamino, not #fff) */
+	--color-whatsapp: #25d366;
+	--color-whatsapp-foreground: #fbfaf7;
 
-	/* Root page section tokens */
-	--accent-surface-muted: #c8c8c8;
+	/* Body copy on bg-accent (burgundy) surfaces — warm parchment tint, not neutral gray */
+	--accent-surface-muted: color-mix(in oklab, #fbfaf7 82%, #510128);
+
+	/* Shadows — always burgundy-tinted, never neutral */
 	--shadow-brand-subtle: 0 1px 0 color-mix(in oklab, var(--accent) 4%, transparent);
 	--shadow-brand-lift: 0 22px 40px -22px color-mix(in oklab, var(--accent) 45%, transparent);
 	--shadow-brand-elevated: 0 30px 70px -34px color-mix(in oklab, var(--accent) 50%, transparent);
@@ -79,68 +96,9 @@
 	--shadow-brand-form: 0 30px 70px -34px color-mix(in oklab, var(--foreground) 60%, transparent);
 	--drop-shadow-brand-lg: 0 26px 34px color-mix(in oklab, var(--accent) 28%, transparent);
 	--drop-shadow-brand-md: 0 18px 24px color-mix(in oklab, var(--accent) 24%, transparent);
-}
 
-.dark {
-	/* Base Colors - Dark Mode */
-	--background: #3a0a22;
-	--foreground: #f2f1ed;
-	--card: #510128;
-	--card-foreground: #f2f1ed;
-	--popover: #510128;
-	--popover-foreground: #f2f1ed;
-
-	/* Primary - Refined Bright Blue */
-	--primary: #d9af50;
-	--primary-foreground: #510128;
-
-	/* Secondary - Elevated Surface */
-	--secondary: #510128;
-	--secondary-foreground: #f2f1ed;
-
-	/* Muted - Subtle Elevation */
-	--muted: #510128;
-	--muted-foreground: #c8c8c8;
-
-	/* Accent - Professional Purple */
-	--accent: #d9af50;
-	--accent-foreground: #510128;
-
-	/* Destructive - Clear Red */
-	--destructive: #f87171;
-	--destructive-foreground: #f2f1ed;
-
-	/* Borders & Inputs - Refined */
-	--border: rgba(217, 175, 80, 0.22);
-	--input: rgba(217, 175, 80, 0.22);
-	--ring: #d9af50;
-
-	/* Chart Colors - Elegant Dark Mode */
-	--chart-1: #d9af50; /* Bright Blue */
-	--chart-2: #e7c069; /* Bright Purple */
-	--chart-3: #b8902f; /* Bright Teal */
-	--chart-4: #23895a; /* Soft Pink */
-	--chart-5: #c8c8c8; /* Bright Green */
-
-	/* Sidebar - Professional Dark */
-	--sidebar: #3a0a22;
-	--sidebar-foreground: #f2f1ed;
-	--sidebar-primary: #d9af50;
-	--sidebar-primary-foreground: #510128;
-	--sidebar-accent: #510128;
-	--sidebar-accent-foreground: #f2f1ed;
-	--sidebar-border: rgba(217, 175, 80, 0.22);
-	--sidebar-ring: #d9af50;
-
-	/* Custom Emotional Design Tokens - Dark Mode */
-	--color-viral: #510128; /* Refined magenta */
-	--color-engagement: #e7c069; /* Clear coral */
-	--color-ai: #d9af50; /* Bright blue */
-	--color-growth: #23895a; /* Professional green */
-	--color-whatsapp: #2dd36f; /* WhatsApp brand green */
-	--color-whatsapp-foreground: #ffffff;
-	--color-warning: #e7c069; /* Clear amber */
-	--color-info: #23895a; /* Bright info blue */
+	/* Overlay scrim — posos-tinted, one value for every backdrop */
+	--overlay: rgba(28, 20, 24, 0.55);
 }
 
 @theme inline {
@@ -160,6 +118,7 @@
 	--color-popover-foreground: var(--popover-foreground);
 	--color-primary: var(--primary);
 	--color-primary-foreground: var(--primary-foreground);
+	--color-primary-hover: var(--primary-hover);
 	--color-secondary: var(--secondary);
 	--color-secondary-foreground: var(--secondary-foreground);
 	--color-muted: var(--muted);
@@ -168,6 +127,7 @@
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-gold-ink: var(--gold-ink);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -185,15 +145,8 @@
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 
-	/* Custom Token Mappings */
-	--color-viral: var(--color-viral);
-	--color-engagement: var(--color-engagement);
-	--color-ai: var(--color-ai);
-	--color-growth: var(--color-growth);
 	--color-whatsapp: var(--color-whatsapp);
 	--color-whatsapp-foreground: var(--color-whatsapp-foreground);
-	--color-warning: var(--color-warning);
-	--color-info: var(--color-info);
 
 	--color-accent-surface-muted: var(--accent-surface-muted);
 
@@ -213,6 +166,11 @@
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
+	}
+
+	html {
+		/* Sticky header is ~62px; keep #about / #maridajes anchors from scrolling under it */
+		scroll-padding-top: 5rem;
 	}
 
 	body {
@@ -239,5 +197,17 @@
 
 	::-webkit-scrollbar-thumb:hover {
 		background: var(--accent);
+	}
+
+	/* Global reduced-motion floor: individual components may opt into richer
+	   guards, but nothing may animate for users who asked it not to. */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		::before,
+		::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+		}
 	}
 }

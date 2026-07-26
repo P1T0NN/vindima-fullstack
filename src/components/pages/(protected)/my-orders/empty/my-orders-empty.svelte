@@ -22,12 +22,12 @@
 		</span>
 	</div>
 
-	<p class="mb-3 text-[0.7rem] font-medium tracking-[0.3em] text-chart-2 uppercase">Historial de pedidos</p>
+	<p class="mb-3 text-[0.7rem] font-medium tracking-[0.3em] text-gold-ink uppercase">Historial de pedidos</p>
 	<h2 class="mb-3 font-display text-3xl font-semibold tracking-wide text-accent sm:text-4xl">
 		Aún no tienes pedidos
 	</h2>
 	<p class="mb-9 max-w-sm text-sm leading-relaxed text-muted-foreground">
-		Tus pedidos aparecerán aquí en cuanto realices uno — con seguimiento en vivo desde que se
+		Tus pedidos aparecerán aquí en cuanto realices uno, con seguimiento en vivo desde que se
 		procesa hasta tu puerta.
 	</p>
 

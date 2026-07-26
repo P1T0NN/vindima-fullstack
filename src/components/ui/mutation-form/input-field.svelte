@@ -7,13 +7,15 @@
 		inputId,
 		value,
 		setValue,
-		invalid
+		invalid,
+		describedby
 	}: {
 		field: MutationFormFieldDef;
 		inputId: string;
 		value: unknown;
 		setValue: (next: unknown) => void;
 		invalid: boolean;
+		describedby?: string;
 	} = $props();
 </script>
 
@@ -36,4 +38,5 @@
 				: e.currentTarget.value
 		)}
 	aria-invalid={invalid ? 'true' : undefined}
+	aria-describedby={describedby}
 />

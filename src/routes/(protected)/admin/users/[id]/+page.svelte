@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery } from 'convex-svelte';
+	import { useQuery } from '@mmailaender/convex-svelte';
 	import { page } from '$app/state';
 	import { authClient } from '@/features/auth/lib/auth-client';
 

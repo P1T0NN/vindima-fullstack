@@ -8,10 +8,10 @@
 </script>
 
 <Button
-	variant="ghost"
-	size="xs"
+	variant="outline"
+	size="sm"
 	onclick={onClose}
-	class="mx-auto mt-5 tracking-wide text-muted-foreground normal-case hover:bg-transparent hover:text-accent"
+	class="mx-auto mt-5 min-h-11 px-5 tracking-wide text-muted-foreground normal-case"
 >
 	No, gracias
 </Button>

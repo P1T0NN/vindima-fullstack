@@ -34,7 +34,7 @@
 		</span>
 	</span>
 	{#if !unavailable}
-		<span class="shrink-0 text-foreground tabular-nums">
+		<span class="shrink-0 font-display text-foreground tabular-nums">
 			{money((product.unitPriceMinor ?? 0) * line.qty)}
 		</span>
 	{/if}

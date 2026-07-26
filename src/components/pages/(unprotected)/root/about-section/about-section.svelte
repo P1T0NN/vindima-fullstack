@@ -15,6 +15,7 @@
 
 <Section
 	id="about"
+	ariaLabelledby="about-heading"
 	contain={false}
 	yPadding="none"
 	surface="background"
@@ -38,8 +39,9 @@
 			decoding="async"
 		/>
 
-		<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">La casa</p>
+		<p class="mb-4 text-xs font-medium tracking-widest text-gold-ink uppercase">La casa</p>
 		<h2
+			id="about-heading"
 			class="font-display text-4xl leading-none font-semibold tracking-wide text-accent uppercase sm:text-5xl"
 		>
 			Experiencia Vindima
@@ -55,11 +57,14 @@
 				alt="Retrato de Alby"
 				class="rounded-lg object-contain"
 				decoding="async"
-				src="/root/about-image.png"
+				loading="lazy"
+				width="640"
+				height="690"
+				src="/root/opt/about-image-640w.webp"
 			/>
 
 			<div>
-				<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">La anfitriona</p>
+				<p class="mb-4 text-xs font-medium tracking-widest text-gold-ink uppercase">La anfitriona</p>
 				<h3
 					class="mb-5 font-display text-3xl leading-none font-semibold tracking-[0.01em] text-accent uppercase sm:text-4xl lg:text-[44px]"
 				>
@@ -73,7 +78,7 @@
 				<p class="mb-6 max-w-md text-[15px] leading-[1.85] text-foreground/75">
 					Hoy cura cada tabla, elige cada botella y recibe a cada mesa como recibe en su casa.
 				</p>
-				<blockquote class="border-l-2 border-primary pl-5">
+				<blockquote class="pl-5">
 					<p
 						class="max-w-md font-display text-xl leading-snug text-accent italic sm:text-[22px] sm:leading-normal"
 					>
@@ -116,7 +121,7 @@
 				fermentamos nuestro propio pan y curamos charcutería de temporada.
 			</p>
 			<p class="text-[15px] leading-[1.9] text-accent-surface-muted">
-				Cada tabla, cada copa y cada tapa está pensada para grandes anfitriones — para esos momentos
+				Cada tabla, cada copa y cada tapa está pensada para grandes anfitriones: para esos momentos
 				en que la mesa se vuelve el mejor lugar de la casa.
 			</p>
 		</div>
@@ -125,16 +130,15 @@
 	<div class={cn(PAGE_CONTAINER, 'py-20 sm:py-21')}>
 		<div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
 			<div>
-				<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">El origen</p>
+				<p class="mb-4 text-xs font-medium tracking-widest text-gold-ink uppercase">El origen</p>
 				<h3
-					class="mb-5 font-display text-3xl leading-tight font-semibold tracking-[0.01em] text-accent uppercase sm:text-4xl lg:text-[44px]"
+					class="mb-5 font-display text-3xl leading-tight font-semibold tracking-[0.01em] text-balance text-accent uppercase sm:text-4xl lg:text-[44px]"
 				>
-					El viñedo y<br />
-					Bodegas de la Parra
+					El viñedo y Bodegas de la Parra
 				</h3>
 				<p class="mb-4 max-w-md text-[15px] leading-[1.85] text-foreground/75">
 					Nuestro vino nace a unos kilómetros de la mesa, en Bodegas de la Parra: un viñedo orgánico
-					de Aguascalientes donde la uva se trabaja a mano y la vendimia — la vindima — le dio nombre
+					de Aguascalientes donde la uva se trabaja a mano y la vendimia, la vindima, le dio nombre
 					a esta casa.
 				</p>
 				<p class="mb-8 max-w-md text-[15px] leading-[1.85] text-foreground/75">
@@ -146,10 +150,16 @@
 				</Button>
 			</div>
 
+			<!-- ponytail: stand-in — no dedicated vineyard photo exists yet (the design mockup
+			     shipped an empty image-slot here); swap src when the client provides one. -->
 			<img
 				alt="Foto del viñedo"
 				class="h-110 w-full rounded-lg object-cover"
 				decoding="async"
+				loading="lazy"
+				width="960"
+				height="384"
+				src="/root/opt/hero-carousel-3-960w.webp"
 			/>
 		</div>
 	</div>

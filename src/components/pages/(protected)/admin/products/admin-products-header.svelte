@@ -11,7 +11,7 @@
 		<h1 class="text-2xl font-semibold tracking-tight">Productos</h1>
 		
 		<p class="text-sm text-muted-foreground">
-			Administra tu catálogo — productos, variantes, precios y disponibilidad.
+			Administra tu catálogo: productos, variantes, precios y disponibilidad.
 		</p>
 	</div>
 

@@ -9,9 +9,11 @@
 	}: WithoutChildren<WithElementRef<HTMLAttributes<HTMLDivElement>>> = $props();
 </script>
 
+<!-- Decorative placeholder: hidden from AT; wrappers announce loading via aria-busy. -->
 <div
 	bind:this={ref}
 	data-slot="skeleton"
+	aria-hidden="true"
 	class={cn('animate-pulse rounded-md bg-muted', className)}
 	{...restProps}
 ></div>

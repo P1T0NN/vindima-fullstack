@@ -8,6 +8,7 @@ import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';
 
 // HELPERS
 import { orderCountAggregate } from '../helpers/orderCountAggregate';
+import { buildOrderSearchText } from '../helpers/buildOrderSearchText';
 
 // TYPES
 import type { MutationCtx } from '@/convex/_generated/server';
@@ -39,7 +40,10 @@ export const markOrderPaid = internalMutation({
 		}
 
 		if (order.status === 'paid') return null; // already settled — idempotent no-op
-		if (order.status !== 'pending') {
+		// `draft` settles exactly like `pending`: it IS the payable state of an online order, and
+		// this is the moment it becomes a real order (see `ordersSchema.ts`). Everything below —
+		// counters, analytics, stamps, emails — then fires for the first and only time.
+		if (order.status !== 'pending' && order.status !== 'draft') {
 			throw new ConvexError({
 				code: 'ORDER_NOT_PENDING',
 				message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' }
@@ -48,7 +52,19 @@ export const markOrderPaid = internalMutation({
 
 		await ctx.db.patch(order._id, {
 			status: 'paid',
-			paymentRef: args.paymentRef ?? order.paymentRef
+			paymentRef: args.paymentRef ?? order.paymentRef,
+			// A draft carries no search blob (that is what keeps it out of admin search). Settling
+			// is when it becomes a real order, so this is where it earns its place in the index —
+			// without it, every card-paid order would be invisible to the admin search box.
+			...(order.searchText
+				? {}
+				: {
+						searchText: buildOrderSearchText({
+							number: order.number,
+							name: order.name,
+							email: order.email
+						})
+					})
 		});
 		// Work-queue counter: pending → open (paid, not yet delivered).
 		await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);

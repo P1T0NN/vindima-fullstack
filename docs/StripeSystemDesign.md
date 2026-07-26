@@ -18,6 +18,64 @@
 
 ---
 
+## 0. Amendment №3 (2026-07-26) — **an online order is not created until it is paid**
+
+Everything below still describes the machinery correctly. One rule changed: **placing an
+`online` order no longer creates an order.** Read the rest of this document with this in force —
+where it says a fresh online order is `pending`, it is now `draft`.
+
+**Why.** The old behaviour sent the O1 "recibimos tu pedido" email and listed the order under
+"Mis pedidos" the moment the shopper reached the pay page. Abandon the payment and the store had
+emailed a receipt-shaped message, and the customer had a permanent-looking order, for money that
+was never taken. That is a lie the system tells on the shopper's behalf, so it goes.
+
+**The rule.** `placeOrder` writes an unpaid online order as `status: 'draft'`
+(`unpaidStatus()` in `placeOrder.ts` — a pure function of `paymentMethod`). Cash is untouched:
+still a real `pending` order, immediately, with its O1.
+
+A `draft` exists only because `placeOrder` is a mutation (it cannot call Stripe) and a Checkout
+Session cannot carry the lines, contact, delivery and reward claim the settlement needs. It is
+not an order in any observable sense:
+
+| Surface                          | How the draft is excluded                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| O1 email                         | Not sent — the `status === 'pending'` guard in `placeOrder` covers it                          |
+| `/my-orders` (incl. "Todos")     | `fetchMyOrders` enumerates the four real statuses instead of walking `by_user`                 |
+| Club-card purchase history       | `fetchMyLatestOrders` filters `status !== 'draft'`                                             |
+| Admin order list                 | `fetchOrders` unions the four real statuses — never the default table order                    |
+| Admin order search               | A draft is written **without** `searchText`, so it is not in the `search_text` index at all    |
+| Admin order detail               | `fetchOrderForAdmin` returns `null` for a draft                                                 |
+| Guest tracking by number         | `fetchOrderByNumber` returns `null` for a draft                                                 |
+| Dashboard work queue             | `orderCountAggregate` gives drafts their own `draft` namespace, which nothing reads            |
+| Analytics / stamps / claims      | All fire in `markOrderPaid`, which a draft only reaches by being paid                          |
+
+**Settlement is unchanged in shape.** `markOrderPaid` now accepts `draft` alongside `pending`
+and flips it straight to `paid` (assigning the `searchText` it withheld). The webhook decision
+tree (§8.2) is edited in exactly one place: branch 4's "payable" test widens from `pending` to
+`pending | draft`. Every refund branch is untouched. Order creation deliberately did **not**
+move into the webhook — the webhook still just flips a row that already exists.
+
+**Abandoned drafts are DELETED, not cancelled** (`sweepAbandonedDrafts`, same cron run as the
+pending sweep, same `PENDING_EXPIRY_HOURS_ONLINE` window). A cancelled row would be a record of
+an order that never happened, and one would accumulate per abandoned checkout forever. Deleting
+cannot eat a real payment: `stripeSessionExpiresAt` already caps a session at
+`order expiry − 1h`, so the session is dead at least an hour before its draft is old enough to
+sweep; the sweep expires the session anyway; and if a payment still landed, §8.2 branch 1
+auto-refunds it. Three independent guards, and the outermost one returns the money.
+
+**What this costs.** The O1 payment-resume email for online orders is gone — §5.1's "O1 email
+CTA" row and §10.4 no longer apply, and `orderReceivedEmail`'s `paymentUrl` branch is
+unreachable (kept for forks). A shopper who abandons simply checks out again; the persistent
+`attemptId` resolves to the same draft, so nothing duplicates. §12.2's ledger row for the draft
+order now reads "deleted by the cron" rather than "cancelled by the cron".
+
+**Switching method mid-checkout** moves the same row between the two worlds, because the status
+is a function of `paymentMethod` alone: `online → cash` promotes the draft to a real `pending`
+order (writes `searchText`, moves the counter bucket, and sends the O1 it never got);
+`cash → online` demotes it back to a draft.
+
+---
+
 ## 1. Goals
 
 1. **Money is never wrong.** The amount Stripe charges is asserted equal to
@@ -430,6 +488,13 @@ the dashboard, but tolerate noise.
 For a settling event carrying session `S` (skip if `S.payment_status !== 'paid'` — a
 `completed` event for a still-unpaid delayed method must not settle):
 
+> **One sandbox per deployment is a hard requirement** (learned live, 2026-07-25). Stripe fans
+> every event out to EVERY endpoint registered in an account. With dev and prod endpoints in one
+> sandbox, a prod payment also reached dev, which looked the order id up in its own database,
+> found nothing, took branch 1, and refunded a real customer. Two payments were refunded before
+> it was caught. Branch 1 below is only safe because each deployment owns its own sandbox and
+> therefore only ever receives its own events. See §17.
+
 ```
 order = db.get(S.metadata.orderId)
 1  no order                                → AUTO-REFUND S, error log, 200   (can't occur; total anyway)
@@ -768,6 +833,14 @@ New store, from zero to taking cards:
 
 1. Stripe dashboard → get keys. `npx convex env set STRIPE_SECRET_KEY sk_…` and (after step 2) `npx convex env set STRIPE_WEBHOOK_SECRET whsec_…`. Repeat per deployment (dev/prod
    each have their own pair).
+
+   > ⚠ **One Stripe sandbox per deployment — not negotiable.** Never register a dev endpoint and a
+   > prod endpoint in the same Stripe account. Stripe delivers every event to every endpoint in
+   > that account, so the other deployment receives payments for orders it has never heard of, and
+   > §8.2's branch-1 auto-refund fires on a real customer's money. This happened on 2026-07-25 and
+   > cost two live payments. Give each deployment its own sandbox, with its own key pair and its
+   > own endpoint, and the two event streams can never touch.
+
 2. Dashboard → Developers → Webhooks → Add endpoint:
    `https://<deployment>.convex.site/stripe/webhook`, events `checkout.session.completed`,
    `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`.

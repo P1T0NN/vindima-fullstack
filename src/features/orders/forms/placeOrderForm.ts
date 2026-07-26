@@ -49,6 +49,7 @@ const ADDRESS_FIELDS: MutationFormFieldDef[] = [
 		id: 'line1',
 		label: 'Dirección',
 		kind: 'input',
+		required: true,
 		autocomplete: 'address-line1',
 		placeholder: 'Calle Principal 123'
 	},
@@ -64,6 +65,7 @@ const ADDRESS_FIELDS: MutationFormFieldDef[] = [
 		id: 'city',
 		label: 'Ciudad',
 		kind: 'input',
+		required: true,
 		autocomplete: 'address-level2',
 		placeholder: 'Aguascalientes',
 		colSpan: 1
@@ -72,6 +74,7 @@ const ADDRESS_FIELDS: MutationFormFieldDef[] = [
 		id: 'postcode',
 		label: 'Código postal',
 		kind: 'input',
+		required: true,
 		autocomplete: 'postal-code',
 		placeholder: '20000',
 		colSpan: 1
@@ -80,6 +83,7 @@ const ADDRESS_FIELDS: MutationFormFieldDef[] = [
 		id: 'country',
 		label: 'País',
 		kind: 'input',
+		required: true,
 		autocomplete: 'country-name',
 		placeholder: 'México'
 	}

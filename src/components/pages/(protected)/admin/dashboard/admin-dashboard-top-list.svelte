@@ -51,7 +51,7 @@
 						<div class="h-2 w-full overflow-hidden rounded-full bg-muted">
 							<div
 								class="h-full rounded-full transition-[width] duration-500"
-								style="width: {(item.revenueMinor / max) * 100}%; background: var(--chart-2);"
+								style="width: {(item.revenueMinor / max) * 100}%; background: var(--chart-3);"
 							></div>
 						</div>
 					</li>

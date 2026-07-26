@@ -66,7 +66,7 @@
 		<ErrorComponent
 			variant="alert"
 			title="Inicia sesión para continuar"
-			description="Inicia sesión para hacer tu pedido — tu carrito está guardado."
+			description="Inicia sesión para hacer tu pedido. Tu carrito está guardado."
 			showRetry={false}
 		>
 			<Button href={UNPROTECTED_PAGE_ENDPOINTS.LOGIN}>Iniciar sesión</Button>

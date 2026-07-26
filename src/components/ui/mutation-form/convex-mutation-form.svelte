@@ -1,6 +1,6 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
 	// LIBRARIES
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 	import { toast } from 'svelte-sonner';
 	import type { ZodIssue, ZodType } from 'zod';
 

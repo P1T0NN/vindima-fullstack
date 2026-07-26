@@ -16,6 +16,7 @@
 		FieldError
 	} from '@/components/ui/field/index.js';
 	import { FormField } from '@/components/ui/form-field/index.js';
+	import Logo from '@/components/ui/logo/logo.svelte';
 	import EmailVerificationResend from '@/features/auth/components/email-verification-form/email-verification-resend.svelte';
 
 	import { createPasswordResetForm } from './password-reset-form-model.svelte.js';
@@ -31,7 +32,10 @@
 {#if form.step === 'forgot'}
 	<Card.Root class="mx-auto w-full max-w-sm">
 		<Card.Header>
-			<Card.Title class="text-2xl">Restablece tu contraseña</Card.Title>
+			<Logo class="mb-2 self-start" />
+			<Card.Title class="font-display text-3xl font-semibold tracking-wide text-accent uppercase"
+				>Restablece tu contraseña</Card.Title
+			>
 			<Card.Description
 				>Ingresa el correo electrónico de tu cuenta. Te enviaremos un código de un solo uso para
 				elegir una nueva contraseña.</Card.Description
@@ -47,16 +51,23 @@
 							type="email"
 							autocomplete="email"
 							placeholder="m@example.com"
-							autofocus
 							bind:value={form.emailDraft}
 							aria-invalid={form.fieldErrors.email ? 'true' : undefined}
+							aria-describedby={form.fieldErrors.email ? `pr-email-${id}-error` : undefined}
+							class="h-auto rounded-sm px-3 py-3"
 						/>
 					</FormField>
 
 					<input type="hidden" name="flow" value="reset" />
-					{#if form.errorMessage}
-						<FieldError>{form.errorMessage}</FieldError>
-					{/if}
+					<!-- Always-mounted live region so failures are announced; -mt-7 collapses the
+					     group gap it would otherwise add while empty. -->
+					<div
+						role="status"
+						aria-live="polite"
+						class="text-sm font-normal text-destructive{form.errorMessage ? '' : ' -mt-7'}"
+					>
+						{form.errorMessage ?? ''}
+					</div>
 
 					<Field>
 						<Button type="submit" class="w-full" disabled={form.busy}>
@@ -71,7 +82,10 @@
 {:else}
 	<Card.Root class="mx-auto w-full max-w-sm">
 		<Card.Header>
-			<Card.Title class="text-2xl">Elige una nueva contraseña</Card.Title>
+			<Logo class="mb-2 self-start" />
+			<Card.Title class="font-display text-3xl font-semibold tracking-wide text-accent uppercase"
+				>Elige una nueva contraseña</Card.Title
+			>
 			<Card.Description class="text-balance">
 				{`Enviamos un código a ${form.step.email}. Ingrésalo abajo junto con tu nueva contraseña. El código es válido por 5 minutos.`}
 			</Card.Description>
@@ -120,6 +134,8 @@
 							autocomplete="new-password"
 							bind:value={form.newPassword}
 							aria-invalid={form.fieldErrors.newPassword ? 'true' : undefined}
+							aria-describedby={form.fieldErrors.newPassword ? `pr-new-pw-${id}-error` : undefined}
+							class="h-auto rounded-sm px-3 py-3"
 						/>
 					</FormField>
 
@@ -130,18 +146,40 @@
 					>
 						<PasswordInput
 							id="pr-confirm-pw-{id}"
+							name="confirmPassword"
 							autocomplete="new-password"
 							bind:value={form.confirmPassword}
 							aria-invalid={form.fieldErrors.confirmPassword ? 'true' : undefined}
+							aria-describedby={form.fieldErrors.confirmPassword
+								? `pr-confirm-pw-${id}-error`
+								: undefined}
+							class="h-auto rounded-sm px-3 py-3"
 						/>
 					</FormField>
 
-					<input type="hidden" name="email" value={form.step.email} />
+					<!-- Visually hidden (not type="hidden") so password managers pair the saved
+					     username with the new password. -->
+					<input
+						type="text"
+						name="email"
+						value={form.step.email}
+						autocomplete="username"
+						readonly
+						tabindex="-1"
+						aria-hidden="true"
+						class="sr-only"
+					/>
 					<input type="hidden" name="flow" value="reset-verification" />
 
-					{#if form.errorMessage}
-						<FieldError>{form.errorMessage}</FieldError>
-					{/if}
+					<!-- Always-mounted live region so failures are announced; -mt-7 collapses the
+					     group gap it would otherwise add while empty. -->
+					<div
+						role="status"
+						aria-live="polite"
+						class="text-sm font-normal text-destructive{form.errorMessage ? '' : ' -mt-7'}"
+					>
+						{form.errorMessage ?? ''}
+					</div>
 
 					<Field>
 						<Button type="submit" class="w-full" disabled={form.busy}>

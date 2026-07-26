@@ -42,15 +42,12 @@
 			<div class="flex items-center gap-2 text-sm">
 				<span class="text-muted-foreground">{user.email}</span>
 				{#if user.emailVerified}
-					<span
-						class="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200"
-					>
+					<span class="rounded bg-chart-4/15 px-1.5 py-0.5 text-xs font-medium text-chart-4">
 						Verificado
 					</span>
 				{:else}
-					<span
-						class="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-900/40 dark:text-amber-200"
-					>
+					<!-- Muted, not amber: unverified is informational — the admin can't act on it. -->
+					<span class="rounded bg-accent/10 px-1.5 py-0.5 text-xs font-medium text-accent">
 						Sin verificar
 					</span>
 				{/if}

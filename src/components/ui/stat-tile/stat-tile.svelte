@@ -24,8 +24,10 @@
 
 	let { label, value, delta, note, class: className }: Props = $props();
 
+	// `good` uses hoja (chart-4), not gold: gold text reads as clickable/brand, and
+	// text-chart-2 fails AA on its own tint.
 	const sentimentClass = {
-		good: 'bg-chart-2/15 text-chart-2',
+		good: 'bg-chart-4/15 text-chart-4',
 		bad: 'bg-destructive/10 text-destructive',
 		neutral: 'bg-muted text-muted-foreground'
 	} as const;
@@ -62,6 +64,6 @@
 	{/if}
 
 	{#if note}
-		<span class="text-[0.65rem] text-muted-foreground">{note}</span>
+		<span class="text-xs text-muted-foreground">{note}</span>
 	{/if}
 </div>

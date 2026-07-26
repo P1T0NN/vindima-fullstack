@@ -23,15 +23,14 @@
 	const id = $props.id();
 
 	const benefits = [
-		() => '10% de descuento en toda la tienda',
-		() => 'Regalo de cumpleaños',
-		() => '5 compras = 1 recompensa',
-		() => 'Maridajes pensados para tu mesa'
+		'10% de descuento en toda la tienda',
+		'Regalo de cumpleaños',
+		'5 compras = 1 recompensa',
+		'Maridajes pensados para tu mesa'
 	] as const;
 
 	const form = createLoginForm({
-		signInFailed: () => 'No pudimos iniciar sesión. Revisa tus datos e inténtalo de nuevo.',
-		signedInToast: () => 'Sesión iniciada correctamente.'
+		signInFailed: () => 'No pudimos iniciar sesión. Revisa tus datos e inténtalo de nuevo.'
 	});
 </script>
 
@@ -46,7 +45,7 @@
 		class="grid w-full gap-0 overflow-hidden rounded-xl border-0 p-0 shadow-brand-elevated lg:grid-cols-2"
 	>
 		<div
-			class="flex flex-col justify-center bg-accent px-8 py-12 text-accent-surface-muted sm:px-11"
+			class="order-2 flex flex-col justify-center bg-accent px-8 py-12 text-accent-surface-muted sm:px-11 lg:order-1"
 		>
 			<Logo size="lg" class="mb-8 self-start" />
 
@@ -58,17 +57,17 @@
 			</h1>
 
 			<ul class="flex flex-col gap-4">
-				{#each benefits as benefit (benefit())}
+				{#each benefits as benefit (benefit)}
 					<li class="flex items-start gap-3 text-sm leading-snug">
 						<span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"
 						></span>
-						{benefit()}
+						{benefit}
 					</li>
 				{/each}
 			</ul>
 		</div>
 
-		<div class="bg-card px-8 py-12 sm:px-11">
+		<div class="order-1 bg-card px-8 py-12 sm:px-11 lg:order-2">
 			{#if form.step === 'signIn'}
 				<h2 class="mb-1.5 font-display text-3xl font-semibold tracking-wide text-accent uppercase">
 					Iniciar sesión
@@ -91,13 +90,13 @@
 							type="email"
 							autocomplete="email"
 							placeholder="mariana@email.com"
-							autofocus
 							bind:value={form.emailDraft}
 							aria-invalid={form.fieldErrors.email ? 'true' : undefined}
+							aria-describedby={form.fieldErrors.email ? `login-email-${id}-error` : undefined}
 							class="h-auto rounded-sm px-3 py-3"
 						/>
 						{#if form.fieldErrors.email}
-							<FieldError>{form.fieldErrors.email}</FieldError>
+							<FieldError id="login-email-{id}-error">{form.fieldErrors.email}</FieldError>
 						{/if}
 					</div>
 
@@ -111,7 +110,7 @@
 							</Label>
 							<Link
 								href={UNPROTECTED_PAGE_ENDPOINTS.FORGOT_PASSWORD}
-								class="text-xs text-chart-2 no-underline hover:underline"
+								class="text-xs text-gold-ink no-underline hover:underline"
 							>
 								¿Olvidaste tu contraseña?
 							</Link>
@@ -120,20 +119,28 @@
 							id="login-password-{id}"
 							name="password"
 							autocomplete="current-password"
-							placeholder="••••••••"
 							aria-invalid={form.fieldErrors.password ? 'true' : undefined}
+							aria-describedby={form.fieldErrors.password
+								? `login-password-${id}-error`
+								: undefined}
 							class="h-auto rounded-sm px-3 py-3"
 						/>
 						{#if form.fieldErrors.password}
-							<FieldError>{form.fieldErrors.password}</FieldError>
+							<FieldError id="login-password-{id}-error">{form.fieldErrors.password}</FieldError>
 						{/if}
 					</div>
 
 					<input type="hidden" name="flow" value="signIn" />
 
-					{#if form.errorMessage}
-						<FieldError>{form.errorMessage}</FieldError>
-					{/if}
+					<!-- Always-mounted live region so failures are announced; -mt-4 collapses the
+					     flex gap it would otherwise add while empty. -->
+					<div
+						role="status"
+						aria-live="polite"
+						class="text-sm font-normal text-destructive{form.errorMessage ? '' : ' -mt-4'}"
+					>
+						{form.errorMessage ?? ''}
+					</div>
 
 					<Button
 						type="submit"
@@ -159,11 +166,11 @@
 						class="h-auto w-full justify-center px-6 py-3.5 text-sm tracking-wider uppercase"
 					/>
 
-					<p class="text-center text-xs leading-snug text-muted-foreground/80">
+					<p class="text-center text-xs leading-snug text-muted-foreground">
 						¿No tienes cuenta?
 						<Link
 							href={UNPROTECTED_PAGE_ENDPOINTS.SIGNUP}
-							class="text-chart-2 no-underline hover:underline"
+							class="text-gold-ink no-underline hover:underline"
 						>
 							Crear cuenta
 						</Link>
@@ -172,11 +179,11 @@
 					<!-- Catches the guest who clicked "account" looking for an order and hit a login
 					     form. Without this the trail ends here, since a guest has no account to sign
 					     into and no way back to their purchase. -->
-					<p class="text-center text-xs leading-snug text-muted-foreground/80">
+					<p class="text-center text-xs leading-snug text-muted-foreground">
 						¿Compraste como invitado?
 						<Link
 							href={UNPROTECTED_PAGE_ENDPOINTS.TRACK_ORDER}
-							class="text-chart-2 no-underline hover:underline"
+							class="text-gold-ink no-underline hover:underline"
 						>
 							Rastrear tu pedido
 						</Link>

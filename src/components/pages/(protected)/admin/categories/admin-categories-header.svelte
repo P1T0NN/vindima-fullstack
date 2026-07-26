@@ -11,7 +11,7 @@
 		<h1 class="text-2xl font-semibold tracking-tight">Categorías</h1>
 
 		<p class="text-sm text-muted-foreground">
-			Los grupos a los que pertenecen los productos — las páginas de la tienda y los formularios de
+			Los grupos a los que pertenecen los productos. Las páginas de la tienda y los formularios de
 			producto las usan.
 		</p>
 	</div>

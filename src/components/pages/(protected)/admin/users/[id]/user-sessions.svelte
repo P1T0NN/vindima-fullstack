@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery, useConvexClient } from 'convex-svelte';
+	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
 	import { authClient } from '@/features/auth/lib/auth-client';
 	import { SvelteSet } from 'svelte/reactivity';
 
@@ -14,7 +14,7 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
-	import { Button } from '@/components/ui/button/index.js';
+	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 	import { Skeleton } from '@/components/ui/skeleton/index.js';
 
 	// UTILS
@@ -26,7 +26,7 @@
 	// TYPES
 	import type { Doc } from '@/convex/auth/component/_generated/dataModel';
 
-	let { userId }: { userId: string } = $props();
+	let { userId, userEmail }: { userId: string; userEmail: string } = $props();
 
 	const convex = useConvexClient();
 
@@ -101,13 +101,18 @@
 				Dispositivos con sesión iniciada. Revocar cierra la sesión de inmediato.
 			</p>
 		</div>
-		<Button
+		<ActionButton
+			function={revokeAll}
 			variant="destructive"
-			onclick={revokeAll}
-			disabled={isRevokingAll || sessions.length === 0}
+			size="default"
+			isDestructive
+			isPending={isRevokingAll}
+			actionDisabled={sessions.length === 0}
+			title={`¿Revocar todas las sesiones de ${userEmail}?`}
+			description="Se cierran de inmediato todas las sesiones de este usuario en todos sus dispositivos. Si estás revocando tus propias sesiones, tu cuenta también se desconecta y volverás a la pantalla de inicio de sesión."
 		>
 			Revocar todas
-		</Button>
+		</ActionButton>
 	</header>
 
 	{#if sessionsQuery.error}
@@ -131,20 +136,23 @@
 						</span>
 
 						<div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-							<span>IP: {session.ipAddress || '—'}</span>
+							<span>IP: {session.ipAddress || '–'}</span>
 							<span>Creado: {formatTs(session.createdAt)}</span>
 							<span>Expira: {formatTs(session.expiresAt)}</span>
 						</div>
 					</div>
 
-					<Button
+					<ActionButton
+						function={() => revokeOne(session)}
 						variant="outline"
 						size="sm"
-						onclick={() => revokeOne(session)}
-						disabled={revokingTokens.has(session.token)}
+						isDestructive
+						isPending={revokingTokens.has(session.token)}
+						title="¿Revocar esta sesión?"
+						description={`Se cierra de inmediato la sesión de ${userEmail} en este dispositivo. Si es la sesión que estás usando ahora, tu cuenta se desconecta y volverás a la pantalla de inicio de sesión.`}
 					>
 						Revocar
-					</Button>
+					</ActionButton>
 				</li>
 			{/each}
 		</ul>

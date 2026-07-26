@@ -28,6 +28,7 @@
 		name,
 		meta = {},
 		class: className,
+		labelledby,
 		onselect
 	}: {
 		/** Selectable values — value + display label (+ optional `disabled`). */
@@ -39,6 +40,8 @@
 		/** Per-value icon + blurb. Missing entries render label-only — never breaks. */
 		meta?: Record<string, CardSelectMeta>;
 		class?: string;
+		/** Id of the element naming this group — without it AT announces bare, ungrouped radios. */
+		labelledby?: string;
 		onselect: (value: string) => void;
 	} = $props();
 
@@ -46,7 +49,11 @@
 	const groupName = $derived(name ?? uid);
 </script>
 
-<div class={cn('grid grid-cols-1 gap-3 sm:grid-cols-2', className)}>
+<div
+	role="radiogroup"
+	aria-labelledby={labelledby}
+	class={cn('grid grid-cols-1 gap-3 sm:grid-cols-2', className)}
+>
 	{#each options as option (option.value)}
 		{@const m = meta[option.value]}
 		{@const Icon = m?.icon}
@@ -54,7 +61,7 @@
 
 		<label
 			class={cn(
-				'relative flex gap-3 rounded-xl border p-4 transition-all',
+				'relative flex gap-3 rounded-xl border p-4 transition-[color,background-color,border-color,box-shadow]',
 				option.disabled
 					? 'cursor-not-allowed opacity-55'
 					: 'cursor-pointer has-focus-visible:ring-2 has-focus-visible:ring-ring',

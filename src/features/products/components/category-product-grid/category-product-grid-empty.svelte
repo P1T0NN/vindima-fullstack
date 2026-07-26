@@ -14,7 +14,7 @@
 	let {
 		class: className,
 		title = 'No hay productos disponibles por ahora',
-		description = 'Vuelve pronto — actualizamos el menú con frecuencia.',
+		description = 'Vuelve pronto: actualizamos el menú con frecuencia.',
 		showShopLink = true
 	}: {
 		class?: string;

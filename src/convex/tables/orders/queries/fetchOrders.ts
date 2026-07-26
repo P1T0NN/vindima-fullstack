@@ -5,8 +5,12 @@
  *
  * Optional admin controls (one access pattern per request, so they switch by args):
  *  - `search` non-empty → full-text `search_text` index (number / customer), status-filterable.
- *  - else `status` set  → `by_status` index.
- *  - else               → default newest-first table order.
+ *  - else               → a `by_status` union: the one requested status, or all four real ones.
+ *
+ * **Never the default table order.** That would include `draft` rows — unpaid online orders that
+ * are not orders yet (`ordersSchema.ts`) — so the unfiltered list enumerates the four real
+ * statuses instead. Search mode excludes them for a different reason: a draft is written without
+ * a `searchText` blob, so it is not in the `search_text` index at all.
  */
 
 // LIBRARIES
@@ -15,12 +19,10 @@ import { v } from 'convex/values';
 // HELPERS
 import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
 
-const orderStatus = v.union(
-	v.literal('pending'),
-	v.literal('paid'),
-	v.literal('cancelled'),
-	v.literal('refunded')
-);
+/** The statuses an admin can see. `draft` is deliberately not one of them. */
+const REAL_STATUSES = ['pending', 'paid', 'cancelled', 'refunded'] as const;
+
+const orderStatus = v.union(...REAL_STATUSES.map((s) => v.literal(s)));
 
 export const fetchOrders = fetchOptimized({
 	table: 'orders',
@@ -39,9 +41,9 @@ export const fetchOrders = fetchOptimized({
 			eq: args.status ? { status: args.status } : {}
 		};
 	},
-	where: (_ctx, args) => {
+	union: (_ctx, args) => {
 		if (args.search?.trim()) return null; // search mode owns this request
-		if (args.status) return { index: 'by_status', eq: { status: args.status } };
-		return null; // no filter → default table order
+		const statuses = args.status ? [args.status] : REAL_STATUSES;
+		return { specs: statuses.map((status) => ({ index: 'by_status' as const, eq: { status } })) };
 	}
 });

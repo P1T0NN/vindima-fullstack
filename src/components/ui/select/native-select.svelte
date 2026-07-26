@@ -31,6 +31,7 @@
 		class?: string;
 		ariaLabel?: string;
 		ariaInvalid?: boolean;
+		ariaDescribedby?: string;
 		onChange?: (value: string) => void;
 		/** Custom content per option (rich markup); falls back to `label`. */
 		option?: Snippet<[SelectOption]>;
@@ -47,6 +48,7 @@
 		class: className,
 		ariaLabel,
 		ariaInvalid,
+		ariaDescribedby,
 		onChange,
 		option
 	}: Props = $props();
@@ -76,6 +78,7 @@
 		{required}
 		aria-label={ariaLabel}
 		aria-invalid={ariaInvalid}
+		aria-describedby={ariaDescribedby}
 		class={cn('select', className)}
 		onchange={(e) => onChange?.(e.currentTarget.value)}
 	>
@@ -108,6 +111,7 @@
 			class={cn('w-full', className)}
 			aria-label={ariaLabel}
 			aria-invalid={ariaInvalid ? 'true' : undefined}
+			aria-describedby={ariaDescribedby}
 		>
 			{#if selectedOption}
 				{#if option}
@@ -153,7 +157,7 @@
 		cursor: pointer;
 		outline: none;
 		/* Chevron (native arrow is removed by appearance:none). */
-		background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+		background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23510128' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
 		background-repeat: no-repeat;
 		background-position: right 0.625rem center;
 	}
@@ -185,7 +189,7 @@
 			border-radius: var(--radius, 0.5rem);
 			background: var(--popover);
 			color: var(--popover-foreground);
-			box-shadow: 0 10px 30px rgb(0 0 0 / 0.12);
+			box-shadow: var(--shadow-brand-elevated);
 			padding: 0.25rem;
 			margin-top: 0.25rem;
 			/* Open/close animation. */

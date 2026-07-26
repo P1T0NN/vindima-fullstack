@@ -132,6 +132,12 @@
 			fieldErrors = zodIssuesToFieldErrors<keyof T & string>(validation.error.issues);
 			issues = validation.error.issues;
 			toast.error('Corrige los errores del formulario');
+			// Land keyboard/SR users on the first problem — the submit button can be a full
+			// viewport away from the invalid field (sticky checkout aside).
+			const firstInvalid = resolvedSections
+				.flatMap((s) => s.fields)
+				.find((f) => f.id in fieldErrors);
+			if (firstInvalid) document.getElementById(`${firstInvalid.id}-${id}`)?.focus();
 			return;
 		}
 		fieldErrors = {};
@@ -219,8 +225,14 @@
 			{/if}
 		</FieldSet>
 	{:else}
+		{@const describedby = err
+			? `${inputId}-error`
+			: field.description
+				? `${inputId}-desc`
+				: undefined}
 		<Field class={field.fieldClass}>
-			<FieldLabel for={inputId}>{field.label}</FieldLabel>
+			<!-- The id lets custom group widgets (CardSelect) point aria-labelledby here. -->
+			<FieldLabel id="{inputId}-label" for={inputId}>{field.label}</FieldLabel>
 			{#if custom}
 				{@render custom({
 					field,
@@ -233,6 +245,7 @@
 				<TextareaField
 					{field}
 					{inputId}
+					{describedby}
 					value={getValue(field.id)}
 					setValue={(v) => setValue(field.id, v)}
 					invalid={!!err}
@@ -249,6 +262,7 @@
 				<SelectField
 					{field}
 					{inputId}
+					{describedby}
 					value={getValue(field.id)}
 					setValue={(v) => setValue(field.id, v)}
 					invalid={!!err}
@@ -257,15 +271,16 @@
 				<InputField
 					{field}
 					{inputId}
+					{describedby}
 					value={getValue(field.id)}
 					setValue={(v) => setValue(field.id, v)}
 					invalid={!!err}
 				/>
 			{/if}
 			{#if err}
-				<FieldError>{err}</FieldError>
+				<FieldError id="{inputId}-error">{err}</FieldError>
 			{:else if field.description}
-				<FieldDescription>{field.description}</FieldDescription>
+				<FieldDescription id="{inputId}-desc">{field.description}</FieldDescription>
 			{/if}
 		</Field>
 	{/if}

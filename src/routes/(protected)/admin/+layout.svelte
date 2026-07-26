@@ -1,7 +1,4 @@
 <script lang="ts">
-	// LIBRARIES
-	import { NuqsAdapter } from 'nuqs-svelte/adapters/svelte-kit';
-
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
@@ -14,8 +11,8 @@
 	import type { AppSidebarNavItems } from '@/components/ui/app-sidebar/types.js';
 
 	// LUCIDE ICONS
-	import FrameIcon from '@lucide/svelte/icons/frame';
-	import PieChartIcon from '@lucide/svelte/icons/pie-chart';
+	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
+	import UsersIcon from '@lucide/svelte/icons/users';
 	import PackageIcon from '@lucide/svelte/icons/package';
 	import TagIcon from '@lucide/svelte/icons/tag';
 	import GiftIcon from '@lucide/svelte/icons/gift';
@@ -35,12 +32,12 @@
 					{
 						name: 'Panel',
 						url: ADMIN_PAGE_ENDPOINTS.DASHBOARD,
-						icon: FrameIcon
+						icon: LayoutDashboardIcon
 					},
 					{
 						name: 'Usuarios',
 						url: ADMIN_PAGE_ENDPOINTS.USERS,
-						icon: PieChartIcon
+						icon: UsersIcon
 					}
 				]
 			},
@@ -88,20 +85,17 @@
 	};
 </script>
 
-<!-- NuqsAdapter: enables `useQueryState` URL-synced state for admin pages (e.g. the orders
-     status filter). Scoped here — only the admin area uses URL-as-state. -->
-<NuqsAdapter>
-	<Sidebar.Provider
-		style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
-	>
-		<AppSidebar variant="inset" {navItems} />
+<!-- URL-synced state (`useQueryState`) is provided by the root layout's NuqsAdapter. -->
+<Sidebar.Provider
+	style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
+>
+	<AppSidebar variant="inset" {navItems} />
 
-		<Sidebar.Inset>
-			<SiteHeader hidePaths={['/admin']} />
+	<Sidebar.Inset>
+		<SiteHeader hidePaths={['/admin']} />
 
-			<div class="flex min-h-0 flex-1 flex-col">
-				{@render children()}
-			</div>
-		</Sidebar.Inset>
-	</Sidebar.Provider>
-</NuqsAdapter>
+		<div class="flex min-h-0 flex-1 flex-col">
+			{@render children()}
+		</div>
+	</Sidebar.Inset>
+</Sidebar.Provider>

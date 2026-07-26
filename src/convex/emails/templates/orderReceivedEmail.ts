@@ -18,15 +18,22 @@ import type { EmailContent } from '@/shared/features/emails/types/emailsTypes';
  * O1 — order received, PENDING orders only (`EmailSystemDesign.md` §5 O1). Its whole reason
  * to exist is the "what happens next" line: manual = pay on pickup/delivery; redirect = finish
  * payment (with a CTA to `paymentUrl`). With `SETTLE_ON_PLACE` on, this rarely fires — the
- * receipt (O2) collapses it. Ready for when Stripe makes orders genuinely wait.
+ * receipt (O2) collapses it.
+ *
+ * **`paymentUrl` is currently unreachable in this app, on purpose.** Online orders are placed as
+ * `draft` (`ordersSchema.ts`) and get no O1 at all: emailing someone that we received an order
+ * they never paid for is exactly what that rule exists to stop. Their first email is the O2
+ * receipt, sent by the webhook. The branch stays because the argument is part of `sendEmail`'s
+ * contract and a fork of this template may want a "finish your payment" nudge.
  */
 export function orderReceivedEmail(order: Doc<'orders'>, paymentUrl?: string): EmailContent {
 	const hi = firstName(order.name);
 	const context = `${hi ? `Hola ${esc(hi)}, ` : 'Hola, '}tu pedido <strong>${esc(order.number)}</strong> está reservado.`;
 
 	const receiveVerb = order.delivery.kind === 'pickup' ? 'recoger' : 'recibir';
+	// `paymentUrl` only exists for online orders, so the reservation window is the online one.
 	const nextLine = paymentUrl
-		? `Completa tu pago para confirmarlo — tu pedido se reserva por ${CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS} horas.`
+		? `Completa tu pago para confirmarlo — tu pedido se reserva por ${CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE} horas.`
 		: `Pagas al ${receiveVerb} tu pedido. Te avisaremos cuando esté ${order.delivery.kind === 'pickup' ? 'listo' : 'en camino'}.`;
 
 	const cta = paymentUrl ? button('Completar pago', paymentUrl) : '';

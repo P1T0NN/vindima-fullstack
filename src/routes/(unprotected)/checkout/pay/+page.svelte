@@ -115,13 +115,18 @@
 		</div>
 	{:else}
 		<div class="flex w-full max-w-sm flex-col items-center gap-7 text-center">
-			<!-- The wordmark holds the moment: the shopper is between our page and Stripe's, and
+			<!-- The logo holds the moment: the shopper is between our page and Stripe's, and
 			     seeing who they're paying is the reassurance that matters here. -->
-			<p
-				class="font-display text-[2rem] leading-none font-semibold tracking-[0.22em] text-accent uppercase"
-			>
-				{COMPANY_DATA.NAME}
-			</p>
+			<img
+				src={COMPANY_DATA.LOGO}
+				alt={COMPANY_DATA.NAME}
+				class="h-20 w-auto max-w-[min(14rem,60vw)] object-contain"
+				width="160"
+				height="36"
+				loading="eager"
+				decoding="async"
+				draggable="false"
+			/>
 
 			<!-- Indeterminate rule: a gold sliver travelling a hairline track. Transform-only, so
 			     it never triggers layout, and it simply doesn't run under reduced-motion. -->

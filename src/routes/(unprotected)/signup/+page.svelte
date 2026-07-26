@@ -24,16 +24,15 @@
 	const id = $props.id();
 
 	const benefits = [
-		() => '10% de descuento en toda la tienda',
-		() => 'Regalo de cumpleaños',
-		() => '5 compras = 1 recompensa',
-		() => 'Maridajes pensados para tu mesa'
+		'10% de descuento en toda la tienda',
+		'Regalo de cumpleaños',
+		'5 compras = 1 recompensa',
+		'Maridajes pensados para tu mesa'
 	] as const;
 
 	const form = createSignUpPageForm({
 		signUpFailed: () =>
-			'No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo, o inicia sesión si ya tienes una.',
-		accountCreatedToast: () => 'Cuenta creada correctamente.'
+			'No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo, o inicia sesión si ya tienes una.'
 	});
 </script>
 
@@ -43,12 +42,12 @@
 	description="Únete al club Vindima para obtener recompensas, ahorros para miembros y maridajes pensados para tu mesa."
 />
 
-<Section yPadding="none" class="bg-secondary py-16 pb-24 sm:pb-28">
+<Section yPadding="none" fillViewport centerContent class="bg-secondary py-16 pb-24 sm:pb-28">
 	<Card
-		class="grid gap-0 overflow-hidden rounded-xl border-0 p-0 shadow-brand-elevated lg:grid-cols-2"
+		class="grid w-full gap-0 overflow-hidden rounded-xl border-0 p-0 shadow-brand-elevated lg:grid-cols-2"
 	>
 		<div
-			class="flex flex-col justify-center bg-accent px-8 py-12 text-accent-surface-muted sm:px-11"
+			class="order-2 flex flex-col justify-center bg-accent px-8 py-12 text-accent-surface-muted sm:px-11 lg:order-1"
 		>
 			<Logo size="lg" class="mb-8 self-start" />
 
@@ -60,17 +59,17 @@
 			</h1>
 
 			<ul class="flex flex-col gap-4">
-				{#each benefits as benefit (benefit())}
+				{#each benefits as benefit (benefit)}
 					<li class="flex items-start gap-3 text-sm leading-snug">
 						<span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"
 						></span>
-						{benefit()}
+						{benefit}
 					</li>
 				{/each}
 			</ul>
 		</div>
 
-		<div class="bg-card px-8 py-12 sm:px-11">
+		<div class="order-1 bg-card px-8 py-12 sm:px-11 lg:order-2">
 			{#if form.step === 'signUp'}
 				<h2 class="mb-1.5 font-display text-3xl font-semibold tracking-wide text-accent uppercase">
 					Crear mi cuenta
@@ -94,12 +93,16 @@
 								type="text"
 								autocomplete="given-name"
 								placeholder="Mariana"
-								autofocus
 								aria-invalid={form.fieldErrors.firstName ? 'true' : undefined}
+								aria-describedby={form.fieldErrors.firstName
+									? `signup-first-name-${id}-error`
+									: undefined}
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.firstName}
-								<FieldError>{form.fieldErrors.firstName}</FieldError>
+								<FieldError id="signup-first-name-{id}-error"
+									>{form.fieldErrors.firstName}</FieldError
+								>
 							{/if}
 						</div>
 
@@ -117,10 +120,14 @@
 								autocomplete="family-name"
 								placeholder="Reyes"
 								aria-invalid={form.fieldErrors.lastName ? 'true' : undefined}
+								aria-describedby={form.fieldErrors.lastName
+									? `signup-last-name-${id}-error`
+									: undefined}
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.lastName}
-								<FieldError>{form.fieldErrors.lastName}</FieldError>
+								<FieldError id="signup-last-name-{id}-error">{form.fieldErrors.lastName}</FieldError
+								>
 							{/if}
 						</div>
 
@@ -139,10 +146,11 @@
 								placeholder="mariana@email.com"
 								bind:value={form.emailDraft}
 								aria-invalid={form.fieldErrors.email ? 'true' : undefined}
+								aria-describedby={form.fieldErrors.email ? `signup-email-${id}-error` : undefined}
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.email}
-								<FieldError>{form.fieldErrors.email}</FieldError>
+								<FieldError id="signup-email-{id}-error">{form.fieldErrors.email}</FieldError>
 							{/if}
 						</div>
 
@@ -157,12 +165,15 @@
 								id="signup-password-{id}"
 								name="password"
 								autocomplete="new-password"
-								placeholder="••••••••"
 								aria-invalid={form.fieldErrors.password ? 'true' : undefined}
+								aria-describedby={form.fieldErrors.password
+									? `signup-password-${id}-error`
+									: undefined}
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.password}
-								<FieldError>{form.fieldErrors.password}</FieldError>
+								<FieldError id="signup-password-{id}-error">{form.fieldErrors.password}</FieldError
+								>
 							{/if}
 						</div>
 
@@ -177,12 +188,16 @@
 								id="signup-confirm-password-{id}"
 								name="confirmPassword"
 								autocomplete="new-password"
-								placeholder="••••••••"
 								aria-invalid={form.fieldErrors.confirmPassword ? 'true' : undefined}
+								aria-describedby={form.fieldErrors.confirmPassword
+									? `signup-confirm-password-${id}-error`
+									: undefined}
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.confirmPassword}
-								<FieldError>{form.fieldErrors.confirmPassword}</FieldError>
+								<FieldError id="signup-confirm-password-{id}-error"
+									>{form.fieldErrors.confirmPassword}</FieldError
+								>
 							{/if}
 						</div>
 
@@ -200,10 +215,11 @@
 								autocomplete="tel"
 								placeholder="449 000 0000"
 								aria-invalid={form.fieldErrors.phone ? 'true' : undefined}
+								aria-describedby={form.fieldErrors.phone ? `signup-phone-${id}-error` : undefined}
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.phone}
-								<FieldError>{form.fieldErrors.phone}</FieldError>
+								<FieldError id="signup-phone-{id}-error">{form.fieldErrors.phone}</FieldError>
 							{/if}
 						</div>
 
@@ -219,19 +235,29 @@
 								name="birthday"
 								placeholder="DD/MM"
 								aria-invalid={form.fieldErrors.birthday ? 'true' : undefined}
+								aria-describedby={form.fieldErrors.birthday
+									? `signup-birthday-${id}-error`
+									: undefined}
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.birthday}
-								<FieldError>{form.fieldErrors.birthday}</FieldError>
+								<FieldError id="signup-birthday-{id}-error">{form.fieldErrors.birthday}</FieldError
+								>
 							{/if}
 						</div>
 					</div>
 
 					<input type="hidden" name="flow" value="signUp" />
 
-					{#if form.errorMessage}
-						<FieldError>{form.errorMessage}</FieldError>
-					{/if}
+					<!-- Always-mounted live region so failures are announced; -mt-4 collapses the
+					     flex gap it would otherwise add while empty. -->
+					<div
+						role="status"
+						aria-live="polite"
+						class="text-sm font-normal text-destructive{form.errorMessage ? '' : ' -mt-4'}"
+					>
+						{form.errorMessage ?? ''}
+					</div>
 
 					<Button
 						type="submit"
@@ -257,11 +283,11 @@
 						class="h-auto w-full justify-center px-6 py-3.5 text-sm tracking-wider uppercase"
 					/>
 
-					<p class="text-center text-xs leading-snug text-muted-foreground/80">
+					<p class="text-center text-xs leading-snug text-muted-foreground">
 						¿Ya eres miembro?
 						<Link
 							href={UNPROTECTED_PAGE_ENDPOINTS.LOGIN}
-							class="text-chart-2 no-underline hover:underline"
+							class="text-gold-ink no-underline hover:underline"
 						>
 							Iniciar sesión
 						</Link>

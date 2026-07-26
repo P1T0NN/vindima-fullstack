@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 
 	// CONFIG
 	import { CART_CONFIG } from '@/shared/config';
@@ -77,9 +77,9 @@
 
 	<ActionButton
 		function={remove}
-		variant="ghost"
+		variant="destructive"
 		size="sm"
-		class="shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+		class="shrink-0"
 		isDestructive
 		isPending={busy}
 		title={`¿Quitar ${displayName} de las recompensas?`}

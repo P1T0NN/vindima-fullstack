@@ -8,10 +8,16 @@
  *   - `placeOrderFormSchema` — the flat FORM shape (one key per rendered field);
  *     `transformArgs` on the checkout form nests it into the wire shape. Address fields
  *     are only required when the delivery mode needs them, so they validate conditionally.
+ *   - `trackOrderFormSchema` — the guest tracking form. Client-only: `fetchOrderByNumber` is a
+ *     query and declares its own `v.` args, so this schema exists to keep an unparseable number
+ *     or a malformed address from ever becoming a round trip.
  */
 
 // LIBRARIES
 import { z } from 'zod';
+
+// UTILS
+import { normalizeOrderNumber } from '../utils/orderNumber';
 
 /** Where/how the customer receives the order (mirrors `orderDeliveryValidator`). */
 export const orderDeliverySchema = z.discriminatedUnion('kind', [
@@ -75,3 +81,17 @@ export const placeOrderFormSchema = z
 	});
 
 export type PlaceOrderFormInput = z.infer<typeof placeOrderFormSchema>;
+
+/**
+ * Guest order lookup — the two things that together prove possession of a confirmation.
+ *
+ * `normalizeOrderNumber` is the same parser the query runs, so a number the server could never
+ * match is rejected in the browser instead of costing a round trip. Both fields are required:
+ * the query fails closed on a missing or mismatched email, and the form must say so first.
+ */
+export const trackOrderFormSchema = z.object({
+	number: z.string().refine((value) => normalizeOrderNumber(value) !== ''),
+	email: z.email()
+});
+
+export type TrackOrderFormInput = z.infer<typeof trackOrderFormSchema>;

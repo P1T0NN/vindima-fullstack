@@ -13,7 +13,7 @@ export function showColumnInMobileCard<T>(col: ColumnDef<T>): boolean {
 }
 
 export function formatCellValue(value: unknown): string {
-	if (value === null || value === undefined) return '—';
+	if (value === null || value === undefined) return '–';
 	if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
 		return String(value);
 	}

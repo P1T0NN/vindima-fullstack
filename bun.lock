@@ -16,7 +16,6 @@
         "browser-image-compression": "^2.0.2",
         "convex": "^1.36.1",
         "convex-helpers": "^0.1.115",
-        "convex-svelte": "^0.0.12",
         "d3-scale": "^4.0.2",
         "embla-carousel-autoplay": "^8.6.0",
         "nuqs-svelte": "^1.2.2",

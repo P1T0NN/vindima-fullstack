@@ -63,7 +63,10 @@
 	id={dialogId}
 	closedby="any"
 	aria-label={title}
-	class={cn('native-dialog rounded-2xl bg-card p-6 text-foreground shadow-2xl sm:p-7', className)}
+	class={cn(
+		'native-dialog rounded-2xl bg-card p-6 text-foreground shadow-brand-elevated sm:p-7',
+		className
+	)}
 	onclose={() => setOpen(false)}
 	ontoggle={(event) => {
 		if ((event as ToggleEvent).newState === 'open') setOpen(true);
@@ -116,7 +119,8 @@
 	}
 
 	.native-dialog::backdrop {
-		background: rgb(0 0 0 / 0.55);
+		/* Posos-tinted scrim, never neutral black (No Pure Ink Rule) */
+		background: rgba(28, 20, 24, 0.55);
 		opacity: 0;
 		transition:
 			opacity 0.15s ease,

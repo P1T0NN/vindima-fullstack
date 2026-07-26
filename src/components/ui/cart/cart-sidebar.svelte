@@ -4,9 +4,9 @@
 
 	// LIBRARIES
 	import { flip } from 'svelte/animate';
-	import { slide } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { useQuery } from 'convex-svelte';
+	import { useQuery } from '@mmailaender/convex-svelte';
 	import { api } from '@/convex/_generated/api';
 
 	// STATE
@@ -101,7 +101,8 @@
 	class="w-full gap-0 bg-background p-0 sm:max-w-105"
 >
 	{#snippet children()}
-		<div class="border-b border-border p-4">
+		<!-- pr-12 keeps the sheet's own "Cerrar" button clear of the title row. -->
+		<div class="border-b border-border p-4 pr-12">
 			<h2 class="text-base font-semibold">
 				Carrito{#if cart.count > 0}<span class="text-muted-foreground"> ({cart.count})</span>{/if}
 			</h2>
@@ -128,7 +129,7 @@
 			{:else}
 				<ul class="divide-y divide-border">
 					{#each resolved as { line, product } (line.productRef)}
-						<li animate:flip={{ duration: 200 }} transition:slide={{ duration: 200 }}>
+						<li animate:flip={{ duration: 200 }} transition:fade={{ duration: 200 }}>
 							<CartLine {line} {product} />
 						</li>
 					{/each}
@@ -140,7 +141,7 @@
 			<div class="mt-auto flex flex-col gap-3 border-t border-border p-4">
 				<div class="flex items-baseline justify-between">
 					<span class="text-sm font-medium text-muted-foreground">Subtotal</span>
-					<span class="text-xl font-semibold text-foreground tabular-nums">
+					<span class="font-display text-xl font-semibold text-foreground tabular-nums">
 						{formatMoneyMinor(subtotalMinor, currency)}
 					</span>
 				</div>
@@ -155,7 +156,7 @@
 					>
 				{/if}
 				<Button
-					variant="ghost"
+					variant="outline"
 					size="sm"
 					class="w-full text-muted-foreground"
 					onclick={() => cart.close()}

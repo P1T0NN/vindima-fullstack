@@ -24,7 +24,7 @@
 
 <script lang="ts" generics="TRow extends Record<string, unknown>">
 	// LIBRARIES
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 
 	// COMPONENTS
 	import SearchInput from './search-input.svelte';

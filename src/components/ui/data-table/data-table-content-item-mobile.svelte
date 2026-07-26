@@ -37,7 +37,6 @@
 		isSelected && 'bg-muted/40 ring-1 ring-primary/40'
 	)}
 	role="listitem"
-	aria-selected={selectable ? isSelected : undefined}
 >
 	{#if selectable}
 		<div class="mb-3 flex items-center">
@@ -75,7 +74,7 @@
 							{/if}
 						</div>
 						{#if col.hasCopy}
-							<CopyButton value={formatCellValue(value)} label={`Copy ${col.header}`} />
+							<CopyButton value={formatCellValue(value)} label={`Copiar ${col.header}`} />
 						{/if}
 					</div>
 				</dd>

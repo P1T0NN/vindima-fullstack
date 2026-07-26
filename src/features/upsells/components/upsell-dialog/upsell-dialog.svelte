@@ -37,7 +37,7 @@
 		<UpsellDialogHeader />
 
 		<!-- Pairing suggestions: image carries the desire, price removes the hesitation. -->
-		<div class="flex flex-col gap-2.5">
+		<div class="flex flex-col divide-y divide-border">
 			{#each upsells.items as item (item.ref)}
 				<UpsellDialogItem {item} />
 			{/each}

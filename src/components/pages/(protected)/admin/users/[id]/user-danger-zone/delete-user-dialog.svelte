@@ -1,11 +1,12 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 
 	// COMPONENTS
 	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 	import { Input } from '@/components/ui/input/index.js';
+	import { Label } from '@/components/ui/label/index.js';
 
 	// UTILS
 	import { appGoto } from '@/utils/app-navigation.js';
@@ -38,6 +39,8 @@
 
 	const convex = useConvexClient();
 
+	const uid = $props.id();
+
 	let typedConfirm = $state('');
 	let isPending = $state(false);
 
@@ -60,7 +63,19 @@
 
 {#snippet deleteForm()}
 	{#if role !== 'admin'}
-		<Input bind:value={typedConfirm} placeholder={userEmail} disabled={isPending} />
+		<div class="flex flex-col gap-1.5">
+			<Label for="{uid}-confirm">Escribe el correo para confirmar</Label>
+			<Input
+				id="{uid}-confirm"
+				bind:value={typedConfirm}
+				placeholder={userEmail}
+				disabled={isPending}
+				aria-describedby="{uid}-confirm-hint"
+			/>
+			<p id="{uid}-confirm-hint" class="text-xs text-muted-foreground">
+				Escribe {userEmail} exactamente. La eliminación es permanente.
+			</p>
+		</div>
 	{/if}
 {/snippet}
 

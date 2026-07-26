@@ -140,7 +140,7 @@
 		<CardHeader>
 			<CardTitle>Variantes</CardTitle>
 			<CardDescription>
-				Lo que vendes — al menos una. Las referencias guardadas están bloqueadas; las nuevas deben
+				Lo que vendes: al menos una. Las referencias guardadas están bloqueadas; las nuevas deben
 				ser únicas.
 			</CardDescription>
 		</CardHeader>

@@ -42,7 +42,7 @@
 <div class="flex flex-col gap-6">
 	<!-- Header: back + number + status. -->
 	<div class="flex flex-col gap-4">
-		<Button href={resolve('/admin/orders')} variant="ghost" size="sm" class="w-fit">
+		<Button href={resolve('/admin/orders')} variant="outline" size="sm" class="w-fit">
 			<ArrowLeftIcon class="size-4" strokeWidth={1.75} />
 			Pedidos
 		</Button>
@@ -97,7 +97,7 @@
 							{line.name}{#if line.qty > 1}<span class="text-muted-foreground"> × {line.qty}</span
 								>{/if}
 						</span>
-						<span class={`shrink-0 tabular-nums ${line.isRewardLine ? 'text-chart-2 italic' : ''}`}>
+						<span class={`shrink-0 tabular-nums ${line.isRewardLine ? 'text-gold-ink italic' : ''}`}>
 							{line.isRewardLine ? 'Gratis' : money(line.unitPriceMinor * line.qty)}
 						</span>
 					</li>
@@ -132,7 +132,7 @@
 				<h2 class="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
 					Cliente
 				</h2>
-				<p class="text-sm font-medium">{order.name || '—'}</p>
+				<p class="text-sm font-medium">{order.name || '–'}</p>
 				<a href={`mailto:${order.email}`} class="text-sm text-accent break-all hover:underline">
 					{order.email}
 				</a>

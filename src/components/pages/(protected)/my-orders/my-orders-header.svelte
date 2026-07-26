@@ -11,14 +11,14 @@
 
 <a
 	href={appHref(PROTECTED_PAGE_ENDPOINTS.ACCOUNT)}
-	class="group mb-8 inline-flex items-center gap-1.5 text-xs font-medium tracking-wide text-chart-2 uppercase no-underline transition-colors hover:text-accent"
+	class="group -mx-2 -mt-2 mb-6 inline-flex items-center gap-1.5 p-2 text-xs font-medium tracking-wide text-gold-ink uppercase no-underline transition-colors hover:text-accent"
 >
 	<ArrowLeftIcon class="size-3.5 transition-transform group-hover:-translate-x-0.5" />
 	Volver a la cuenta
 </a>
 
 <header class="mb-10">
-	<p class="mb-3 text-[0.7rem] font-medium tracking-[0.3em] text-chart-2 uppercase">Tu cuenta</p>
+	<p class="mb-3 text-[0.7rem] font-medium tracking-[0.3em] text-gold-ink uppercase">Tu cuenta</p>
 	<h1 class="font-display text-4xl leading-[0.95] font-semibold tracking-wide text-accent sm:text-5xl">
 		Historial de pedidos
 	</h1>

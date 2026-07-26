@@ -22,6 +22,10 @@ export const fetchOrderForAdmin = query({
 		const id = ctx.db.normalizeId('orders', args.orderId);
 		if (!id) return null;
 
-		return await ctx.db.get(id);
+		const order = await ctx.db.get(id);
+		// A `draft` is an unpaid online order, not an order (`ordersSchema.ts`). Nothing in the
+		// admin links to one, but a hand-typed id must not be the back door into the list's
+		// exclusion either.
+		return order?.status === 'draft' ? null : order;
 	}
 });

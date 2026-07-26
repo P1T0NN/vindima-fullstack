@@ -22,6 +22,10 @@ export const fetchMyLatestOrders = query({
 		return await ctx.db
 			.query('orders')
 			.withIndex('by_user', (q) => q.eq('userId', userId))
+			// Unpaid online orders are `draft` — not the customer's history until Stripe confirms
+			// them (`ordersSchema.ts`). Filtering after the index is fine here: the take limit is a
+			// handful of rows, and a shopper can hold at most one live draft.
+			.filter((q) => q.neq(q.field('status'), 'draft'))
 			.order('desc')
 			.take(SHOP_CONFIG.MY_ORDERS_PREVIEW_LIMIT);
 	}

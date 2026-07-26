@@ -5,7 +5,7 @@
 
 	// LIBRARIES
 	import { SvelteMap } from 'svelte/reactivity';
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
 	import { api } from '@/convex/_generated/api';
 
 	// STATE
@@ -37,20 +37,20 @@
 	const orderId = $derived(page.url.searchParams.get('order') ?? '');
 	const email = $derived(page.url.searchParams.get('email') ?? undefined);
 
-	// A subscription, deliberately: an online order is usually still `pending` when Stripe sends
-	// the shopper here, and the webhook flips it to `paid` a second or two later — data that moves
+	// A subscription, deliberately: an online order is still a `draft` when Stripe sends the
+	// shopper here, and the webhook flips it to `paid` a second or two later — data that moves
 	// under the viewer without them acting (GeneralSystemDesignRule.md's own subscription test).
 	const orderResponse = useQuery(api.tables.orders.queries.fetchOrder.fetchOrder, () =>
 		orderId ? { orderId: orderId as Id<'orders'>, email } : 'skip'
 	);
 	const order = $derived(orderResponse.data ?? null);
 
-	/** Online order whose payment webhook hasn't landed yet — the only non-final state here. */
-	const confirmingPayment = $derived(
-		order?.status === 'pending' && order?.paymentMethod === 'online'
-	);
+	/** Online order whose payment webhook hasn't landed yet — the only non-final state here.
+	 *  `draft` is the normal case (an online order only becomes a real one when Stripe confirms
+	 *  it); `pending` covers rows placed before that rule shipped. */
+	const confirmingPayment = $derived(!!order?.paymentPending && order?.paymentMethod === 'online');
 	/** Cash order: confirmed, paid in person on handover. */
-	const paysOnPickup = $derived(order?.status === 'pending' && order?.paymentMethod !== 'online');
+	const paysOnPickup = $derived(!!order?.paymentPending && order?.paymentMethod !== 'online');
 	const isPickup = $derived(order?.delivery.kind === 'pickup');
 
 	/** First name only — a thank-you reads as a person speaking, not a system. */
@@ -68,18 +68,28 @@
 		order ? formatMoneyMinor(minor, order.currency) : formatMoneyMinor(minor);
 
 	// Resolve the order's refs against the live catalog for names AND images; dead refs fall back
-	// to the order's frozen snapshot below. One subscription already exists on this page for the
-	// order itself, and this second one resolves alongside it for a single order's handful of refs.
+	// to the order's frozen snapshot below. One-shot query, not a subscription (the default per
+	// GeneralSystemDesignRule.md) — catalog names/images don't change under the viewer. Runs once
+	// the order subscription delivers the refs, hence an effect rather than onMount.
+	const convex = useConvexClient();
 	const orderRefs = $derived(
 		order ? order.lines.map((l: { productRef: string }) => l.productRef) : []
 	);
-	const productsQuery = useQuery(
-		api.tables.cart.queries.resolveCartProducts.resolveCartProducts,
-		() => (orderRefs.length > 0 ? { refs: orderRefs } : 'skip')
-	);
+	let resolvedRows = $state<ResolvedCartProduct[]>([]);
+	let resolvedOnce = false;
+	$effect(() => {
+		if (resolvedOnce || orderRefs.length === 0) return;
+		resolvedOnce = true;
+		convex
+			.query(api.tables.cart.queries.resolveCartProducts.resolveCartProducts, {
+				refs: orderRefs
+			})
+			.then((rows) => (resolvedRows = rows))
+			.catch(() => {}); // the frozen snapshot covers a failed resolve
+	});
 	const byRef = $derived.by(() => {
 		const map = new SvelteMap<string, ResolvedCartProduct>();
-		for (const row of productsQuery.data ?? []) map.set(row.productRef, row);
+		for (const row of resolvedRows) map.set(row.productRef, row);
 		return map;
 	});
 
@@ -138,19 +148,28 @@
 		const handover: StepState =
 			fulfillment === 'delivered' ? 'done' : fulfillment === 'shipped' ? 'current' : 'pending';
 
-		return [
+		const rows = [
 			{
 				label: paymentLabel,
 				state: (confirmingPayment ? 'current' : 'done') as StepState,
 				spinner: confirmingPayment
-			},
-			{ label: 'Preparando tu pedido', state: preparing, spinner: false },
-			{
-				label: isPickup ? 'Listo para recoger' : 'En camino',
-				state: handover,
-				spinner: false
 			}
 		];
+
+		// Fulfillment only once the money side is settled (paid, or cash paid on handover) —
+		// while the webhook is still confirming, the payment row is the whole story.
+		if (isPaid || paysOnPickup) {
+			rows.push(
+				{ label: 'Preparando tu pedido', state: preparing, spinner: false },
+				{
+					label: isPickup ? 'Listo para recoger' : 'En camino',
+					state: handover,
+					spinner: false
+				}
+			);
+		}
+
+		return rows;
 	});
 </script>
 
@@ -181,7 +200,7 @@
 		<div class="grid gap-10 lg:grid-cols-[1fr_minmax(0,26rem)] lg:gap-16">
 			<!-- Left: the human half. Thanks, then what happens next, then one way onward. -->
 			<div class="flex flex-col">
-				<p class="text-[0.7rem] font-semibold tracking-[0.2em] text-primary uppercase">
+				<p class="text-[0.7rem] font-semibold tracking-[0.2em] text-gold-ink uppercase">
 					{eyebrow}
 				</p>
 
@@ -224,7 +243,10 @@
 				{#if !isCancelled}
 					<ol class="mt-10 flex flex-col gap-4 border-t border-accent/10 pt-8">
 						{#each steps as step (step.label)}
-							<li class="flex items-center gap-3.5">
+							<li
+								class="flex items-center gap-3.5"
+								aria-current={step.state === 'current' ? 'step' : undefined}
+							>
 								<span
 									class="relative flex size-2 shrink-0 rounded-full {step.state === 'done'
 										? 'bg-primary'
@@ -240,10 +262,18 @@
 								</span>
 								<span
 									class="text-sm {step.state === 'pending'
-										? 'text-muted-foreground/60'
+										? 'text-muted-foreground'
 										: 'text-accent'}"
 								>
 									{step.label}
+								</span>
+								<!-- Step state is otherwise color-only — name it for AT. -->
+								<span class="sr-only">
+									{step.state === 'done'
+										? 'Completado'
+										: step.state === 'current'
+											? 'En curso'
+											: 'Pendiente'}
 								</span>
 								{#if step.spinner}
 									<Spinner class="size-3 text-primary" />
@@ -263,7 +293,7 @@
 					<Button href="{UNPROTECTED_PAGE_ENDPOINTS.ROOT}{UNPROTECTED_PAGE_ENDPOINTS.SHOP}">
 						Seguir comprando
 					</Button>
-					{#if order.status === 'pending' && email}
+					{#if order.paymentPending && email}
 						<Button variant="outline" href={UNPROTECTED_PAGE_ENDPOINTS.SIGNUP}>Crear cuenta</Button>
 					{/if}
 				</div>
@@ -310,7 +340,7 @@
 								<p class="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
 									{#if line.isRewardLine}
 										<SparklesIcon class="size-3 text-chart-2" strokeWidth={2} />
-										<span class="text-chart-2">Recompensa</span>
+										<span class="text-gold-ink">Recompensa</span>
 									{:else}
 										{line.qty} × {money(line.unitPriceMinor)}
 									{/if}
@@ -318,7 +348,7 @@
 							</div>
 							<span
 								class="shrink-0 text-sm tabular-nums {line.isRewardLine
-									? 'text-chart-2 italic'
+									? 'text-gold-ink italic'
 									: 'text-foreground'}"
 							>
 								{line.isRewardLine ? 'Gratis' : money(line.unitPriceMinor * line.qty)}
@@ -333,7 +363,7 @@
 						<span class="tabular-nums">{money(order.amounts.subtotalMinor)}</span>
 					</div>
 					{#if order.amounts.welcomeDiscountMinor > 0}
-						<div class="flex justify-between text-chart-2">
+						<div class="flex justify-between text-gold-ink">
 							<span>Descuento por primer pedido</span>
 							<span class="tabular-nums">−{money(order.amounts.welcomeDiscountMinor)}</span>
 						</div>

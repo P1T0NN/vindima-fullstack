@@ -104,7 +104,10 @@ export const createCheckoutSession = action({
 				data: { url: successPageUrl(order) }
 			};
 		}
-		if (order.status !== 'pending') {
+		// `draft` is the normal state here — an online order awaiting its first payment. `pending`
+		// stays accepted for rows placed before the draft rule shipped (and for a cash order that
+		// was switched to online after it was already placed).
+		if (order.status !== 'pending' && order.status !== 'draft') {
 			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' } };
 		}
 
@@ -166,7 +169,7 @@ export const createCheckoutSession = action({
 			// 2 ── The order must have enough life left to be payable (§7.3.4).
 			const expiresAt = stripeSessionExpiresAt({
 				orderCreatedAt: order._creationTime,
-				pendingExpiryHours: CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS,
+				pendingExpiryHours: CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE,
 				now: Date.now()
 			});
 			if (expiresAt === null) {

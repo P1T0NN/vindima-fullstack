@@ -7,8 +7,9 @@ import { internal } from '@/convex/_generated/api';
  * Internal — attach a freshly created Stripe Checkout Session to its order
  * (`StripeSystemDesign.md` §7.3.2).
  *
- * Only a `pending` order gets a session ref: if the order settled or died while the session was
- * being created, the ref would be meaningless and — worse — could make the webhook's
+ * Only a live order (`draft` — the normal case for online — or `pending`) gets a session ref: if
+ * the order settled or died while the session was being created, the ref would be meaningless
+ * and — worse — could make the webhook's
  * session-match check (§8.2.4a) pass for a session nobody should be able to pay. In that case
  * we expire the just-created session instead, so nothing payable is left behind.
  */
@@ -18,7 +19,7 @@ export const setPaymentSession = internalMutation({
 		const order = await ctx.db.get(args.orderId);
 		if (!order) return null;
 
-		if (order.status !== 'pending') {
+		if (order.status !== 'pending' && order.status !== 'draft') {
 			void ctx.scheduler.runAfter(
 				0,
 				internal.stripe.actions.expireStripeSession.expireStripeSession,

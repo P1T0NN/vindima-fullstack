@@ -8,7 +8,7 @@
 <SvelteHead
 	title="Productos"
 	noindex
-	description="Administra tu catálogo de Vindima — productos, variantes, precios y disponibilidad."
+	description="Administra tu catálogo de Vindima: productos, variantes, precios y disponibilidad."
 />
 
 <section class="flex w-full flex-col gap-4 p-4 md:p-6">

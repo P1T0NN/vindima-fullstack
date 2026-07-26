@@ -110,12 +110,13 @@ export const handleStripeEvent = internalAction({
 			return await refundOrphan('second payment for an already-paid order', order._id);
 		}
 
-		// 3 ── Dead order.
-		if (order.status !== 'pending') {
+		// 3 ── Dead order. `draft` is NOT dead — it is the payable state of an online order, and
+		// settling it is what creates the order in the first place.
+		if (order.status !== 'pending' && order.status !== 'draft') {
 			return await refundOrphan(`payment for a ${order.status} order`, order._id);
 		}
 
-		// 4 ── Pending: settle only the current session, at the expected amount.
+		// 4 ── Payable: settle only the current session, at the expected amount.
 		if (session.id !== order.paymentSessionRef) {
 			return await refundOrphan('payment through a superseded session', order._id);
 		}

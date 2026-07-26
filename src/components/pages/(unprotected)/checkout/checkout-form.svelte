@@ -191,11 +191,13 @@
 	{
 		field,
 		value,
-		setValue
+		setValue,
+		inputId
 	}: {
 		field: { id: string; options?: { value: string; label: string; disabled?: boolean }[] };
 		value: unknown;
 		setValue: (next: unknown) => void;
+		inputId: string;
 	},
 	meta: Record<string, { icon?: typeof StoreIcon; description?: string }>
 )}
@@ -203,6 +205,7 @@
 		options={field.options ?? []}
 		selected={value as string}
 		name={field.id}
+		labelledby={`${inputId}-label`}
 		{meta}
 		onselect={setValue}
 	/>
@@ -218,7 +221,7 @@
 
 <!-- The summary carries the submit button, so it is the form's `actions` rather than a sibling. -->
 {#snippet actions({ busy }: { busy: boolean })}
-	<aside class="lg:sticky lg:top-6 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+	<aside class="lg:sticky lg:top-6 lg:col-start-2 lg:row-span-full lg:row-start-1">
 		<CheckoutSummary mode={values.mode} payment={values.payment} {unavailableRefs} {busy} />
 	</aside>
 {/snippet}

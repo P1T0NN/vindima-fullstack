@@ -22,7 +22,13 @@ export const adminProductsColumns = (
 	},
 	{ id: 'status', header: 'Estado', accessor: (r) => r.status },
 	{ id: 'variants', header: 'Variantes', accessor: (r) => r.variants.length, hideBelow: 'md' },
-	{ id: 'price', header: 'Precio', accessor: (r) => priceRange(r.variants), hideBelow: 'sm' },
+	{
+		id: 'price',
+		header: 'Precio',
+		accessor: (r) => priceRange(r.variants),
+		cellClass: 'tabular-nums',
+		hideBelow: 'sm'
+	},
 	{
 		id: 'actions',
 		header: '',

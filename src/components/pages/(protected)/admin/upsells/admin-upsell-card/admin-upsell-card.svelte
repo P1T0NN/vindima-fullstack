@@ -4,7 +4,7 @@
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 
 	// COMPONENTS
 	import { Switch } from '@/components/ui/switch/index.js';
@@ -147,7 +147,8 @@
 			<TriangleAlertIcon class="size-3.5" />
 			{brokenItems === 1
 				? '1 artículo ya no está disponible'
-				: `${brokenItems} artículos ya no están disponibles`} — edítalo para corregirlo.
+				: `${brokenItems} artículos ya no están disponibles`}. Edita la sugerencia para
+			corregirlo.
 		</p>
 	{/if}
 
@@ -159,12 +160,13 @@
 
 		<ActionButton
 			function={remove}
-			variant="ghost"
+			variant="destructive"
 			size="sm"
-			class="text-destructive hover:text-destructive"
 			isDestructive
 			isPending={deletePending}
-			title="¿Eliminar esta sugerencia?"
+			title={rule.trigger.kind === 'global'
+				? '¿Eliminar la sugerencia general?'
+				: `¿Eliminar la sugerencia de «${rule.triggerLabel}»?`}
 			description="Dejará de mostrarse a los clientes. Esta acción no se puede deshacer."
 		>
 			<Trash2Icon class="size-4" />

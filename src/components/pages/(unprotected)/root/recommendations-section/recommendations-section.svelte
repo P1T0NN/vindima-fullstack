@@ -164,7 +164,6 @@
 	};
 
 	let selectedWine = $state<WinePick>('blanc');
-	const activeRecs = $derived(wineRecs[selectedWine]);
 
 	const chipClass =
 		'rounded-full border border-primary/50 bg-primary/14 px-3.5 py-2 text-[11.5px] font-medium tracking-wide text-accent no-underline transition-colors hover:bg-primary/25';
@@ -174,6 +173,7 @@
 
 <Section
 	id="maridajes"
+	ariaLabelledby="maridajes-heading"
 	contain={false}
 	yPadding="none"
 	surface="background"
@@ -198,10 +198,11 @@
 
 	<div class={cn(PAGE_CONTAINER, 'relative')}>
 		<div class="mb-12.5 text-center">
-			<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">
+			<p class="mb-4 text-xs font-medium tracking-widest text-gold-ink uppercase">
 				De la copa a la mesa
 			</p>
 			<h2
+				id="maridajes-heading"
 				class="font-display text-4xl leading-none font-semibold tracking-wide text-accent uppercase sm:text-5xl"
 			>
 				Maridajes
@@ -243,7 +244,7 @@
 						<p
 							class={cn(
 								'mb-1.5 text-[9.5px] font-semibold tracking-[0.18em] uppercase',
-								wine.featured ? 'text-primary' : 'text-chart-2'
+								wine.featured ? 'text-primary' : 'text-gold-ink'
 							)}
 						>
 							Nota de cata
@@ -257,7 +258,7 @@
 						<span
 							class={cn(
 								'text-[9.5px] font-semibold tracking-[0.18em] uppercase',
-								wine.featured ? 'text-primary' : 'text-chart-2'
+								wine.featured ? 'text-primary' : 'text-gold-ink'
 							)}
 						>
 							Servicio
@@ -276,7 +277,7 @@
 						<p
 							class={cn(
 								'mb-2.5 text-[9.5px] font-semibold tracking-[0.18em] uppercase',
-								wine.featured ? 'text-primary' : 'text-chart-2'
+								wine.featured ? 'text-primary' : 'text-gold-ink'
 							)}
 						>
 							Marida con
@@ -319,7 +320,7 @@
 
 		<div class="mx-auto mt-17.5 max-w-205">
 			<div class="mb-3.5 text-center">
-				<p class="mb-4 text-xs font-medium tracking-widest text-chart-2 uppercase">Guía rápida</p>
+				<p class="mb-4 text-xs font-medium tracking-widest text-gold-ink uppercase">Guía rápida</p>
 				<h3
 					class="font-display text-3xl font-semibold tracking-[0.01em] text-accent uppercase sm:text-4xl"
 				>
@@ -330,7 +331,7 @@
 			{#each guide as row, i (row.dish)}
 				<div
 					class={cn(
-						'flex items-baseline gap-3.5 py-4',
+						'flex flex-col gap-1.5 py-4 sm:flex-row sm:items-baseline sm:gap-3.5',
 						i < guide.length - 1 && 'border-b border-accent/12'
 					)}
 				>
@@ -340,17 +341,17 @@
 						{row.dish}
 						{#if row.note}
 							<span
-								class="font-sans text-xs font-normal tracking-normal text-foreground/50 normal-case"
+								class="font-sans text-xs font-normal tracking-normal text-foreground/70 normal-case"
 							>
 								{row.note}
 							</span>
 						{/if}
 					</span>
 					<span
-						class="min-w-4 flex-1 -translate-y-1 border-b border-dotted border-accent/30"
+						class="hidden min-w-4 flex-1 -translate-y-1 border-b border-dotted border-accent/30 sm:block"
 						aria-hidden="true"
 					></span>
-					<span class="shrink-0 text-right text-sm leading-snug text-chart-2">{row.wines}</span>
+					<span class="min-w-0 text-sm leading-snug text-gold-ink sm:text-right">{row.wines}</span>
 				</div>
 			{/each}
 		</div>
@@ -387,13 +388,13 @@
 
 			<Tabs.Root bind:value={selectedWine} class="items-center gap-0">
 				<Tabs.List
-					class="h-auto flex-wrap justify-center rounded-none border border-primary bg-white/4 p-0 text-accent-foreground"
+					class="h-auto flex-wrap justify-center rounded-none border border-primary bg-accent-foreground/5 p-0 text-accent-foreground"
 				>
 					{#each winePicks as pick, i (pick.id)}
 						<Tabs.Trigger
 							value={pick.id}
 							class={cn(
-								'rounded-none border-0 px-4 py-2.5 text-sm text-accent-foreground shadow-none data-[state=active]:bg-primary/20 data-[state=active]:text-accent-foreground data-[state=active]:shadow-none',
+								'rounded-none border-0 px-4 py-2.5 text-sm text-accent-foreground shadow-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none',
 								i < winePicks.length - 1 && 'border-r border-primary/40'
 							)}
 						>
@@ -401,28 +402,32 @@
 						</Tabs.Trigger>
 					{/each}
 				</Tabs.List>
-			</Tabs.Root>
 
-			<div class="mt-9 grid grid-cols-1 gap-4.5 text-left sm:grid-cols-2 lg:grid-cols-3">
-				{#each activeRecs as rec (rec.name)}
-					<a
-						href={shopHref(rec.href)}
-						class="flex flex-col gap-2.5 rounded-lg border border-primary bg-card px-5 py-5.5 no-underline transition-colors hover:bg-card/95"
-					>
-						<span
-							class="font-display text-[22px] leading-tight font-semibold tracking-[0.02em] text-accent uppercase"
-						>
-							{rec.name}
-						</span>
-						<span class="text-[12.5px] leading-snug text-foreground/60">{rec.desc}</span>
-						<span
-							class="mt-auto pt-1.5 text-[10.5px] font-semibold tracking-[0.14em] text-chart-2 uppercase"
-						>
-							Ver en la tienda →
-						</span>
-					</a>
+				{#each winePicks as pick (pick.id)}
+					<Tabs.Content value={pick.id} class="w-full">
+						<div class="mt-9 grid grid-cols-1 gap-4.5 text-left sm:grid-cols-2 lg:grid-cols-3">
+							{#each wineRecs[pick.id] as rec (rec.name)}
+								<a
+									href={shopHref(rec.href)}
+									class="flex flex-col gap-2.5 rounded-lg border border-primary bg-card px-5 py-5.5 no-underline transition-colors hover:bg-card/95"
+								>
+									<span
+										class="font-display text-[22px] leading-tight font-semibold tracking-[0.02em] text-accent uppercase"
+									>
+										{rec.name}
+									</span>
+									<span class="text-[12.5px] leading-snug text-foreground/60">{rec.desc}</span>
+									<span
+										class="mt-auto pt-1.5 text-[10.5px] font-semibold tracking-[0.14em] text-gold-ink uppercase"
+									>
+										Ver en la tienda →
+									</span>
+								</a>
+							{/each}
+						</div>
+					</Tabs.Content>
 				{/each}
-			</div>
+			</Tabs.Root>
 		</div>
 	</div>
 </Section>

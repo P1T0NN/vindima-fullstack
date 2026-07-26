@@ -78,10 +78,11 @@
 	id={dialogId}
 	bind:this={dialog}
 	class={cn(
-		'alert-dialog max-w-[calc(100%-2rem)] gap-4 rounded-xl bg-popover p-4 text-popover-foreground ring-1 ring-foreground/10 sm:max-w-sm',
+		'alert-dialog max-w-[calc(100%-2rem)] gap-4 rounded-xl bg-popover p-4 text-popover-foreground shadow-brand-elevated ring-1 ring-foreground/10 sm:max-w-sm',
 		className
 	)}
-	oncancel={(event) => event.preventDefault()}
+	aria-labelledby="{dialogId}-title"
+	aria-describedby="{dialogId}-description"
 	ontoggle={(event) => setOpen(event.newState === 'open')}
 >
 	{#if open}
@@ -91,7 +92,8 @@
 
 <style>
 	dialog.alert-dialog::backdrop {
-		background: rgb(0 0 0 / 0.1);
+		/* Posos-tinted, never neutral black (No Pure Ink Rule) */
+		background: rgba(28, 20, 24, 0.12);
 		backdrop-filter: blur(2px);
 	}
 

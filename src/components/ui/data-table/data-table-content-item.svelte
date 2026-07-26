@@ -79,7 +79,7 @@
 					{/if}
 				</div>
 				{#if col.hasCopy}
-					<CopyButton value={formatCellValue(value)} label={`Copy ${col.header}`} />
+					<CopyButton value={formatCellValue(value)} label={`Copiar ${col.header}`} />
 				{/if}
 			</div>
 		</TableCell>

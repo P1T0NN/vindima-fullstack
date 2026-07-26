@@ -4,11 +4,11 @@
 	import { type VariantProps, tv } from 'tailwind-variants';
 
 	export const buttonVariants = tv({
-		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-[2px] border border-transparent bg-clip-padding text-xs font-semibold leading-none tracking-[0.13em] uppercase focus-visible:ring-3 active:not-aria-[haspopup]:translate-y-px aria-invalid:ring-3 [&_svg:not([class*='size-'])]:size-4 group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap transition-all outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-[2px] border border-transparent bg-clip-padding text-xs font-semibold leading-none tracking-[0.13em] uppercase focus-visible:ring-3 active:not-aria-[haspopup]:translate-y-px aria-invalid:ring-3 [&_svg:not([class*='size-'])]:size-4 group/button inline-flex shrink-0 items-center justify-center whitespace-nowrap transition-[color,background-color,border-color,box-shadow,transform,opacity] outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 		variants: {
 			variant: {
 				default:
-					'border-primary bg-primary text-primary-foreground hover:border-[#e7c069] hover:bg-[#e7c069] [a]:hover:border-[#e7c069] [a]:hover:bg-[#e7c069]',
+					'border-primary bg-primary text-primary-foreground hover:border-primary-hover hover:bg-primary-hover [a]:hover:border-primary-hover [a]:hover:bg-primary-hover',
 				outline:
 					'border-accent/40 bg-transparent text-accent hover:border-accent hover:bg-accent/5 aria-expanded:border-accent aria-expanded:bg-accent/5',
 				secondary:

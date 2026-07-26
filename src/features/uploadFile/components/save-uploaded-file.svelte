@@ -1,6 +1,6 @@
 <script lang="ts">
 	// LIBRARIES
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient } from '@mmailaender/convex-svelte';
 	import { toast } from 'svelte-sonner';
 
 	// COMPONENTS

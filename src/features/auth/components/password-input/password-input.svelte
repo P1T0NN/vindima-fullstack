@@ -33,14 +33,15 @@
 		bind:ref
 		bind:value
 		type={visible ? 'text' : 'password'}
-		class={cn('pe-9', className)}
+		class={cn('pe-12', className)}
 		{disabled}
 		{...restProps}
 	/>
+	<!-- icon-lg = 44px hit target; pe-12 above keeps typed text clear of it. -->
 	<Button
 		type="button"
 		variant="ghost"
-		size="icon-sm"
+		size="icon-lg"
 		class="absolute end-1 top-1/2 z-10 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 		onclick={() => (visible = !visible)}
 		aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}

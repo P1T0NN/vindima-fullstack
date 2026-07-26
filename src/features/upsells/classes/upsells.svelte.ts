@@ -9,15 +9,11 @@ import { browser } from '$app/environment';
 // CONFIG
 import { UPSELLS_CONFIG } from '@/shared/config';
 
-// LIBRARIES
-import { toast } from 'svelte-sonner';
-
 // STATE
 import { cart } from '@/features/cart/cart.svelte';
 
 // UTILS
 import { matchUpsellRule, visibleUpsellItems } from '@/shared/features/upsells/utils/upsellsUtils';
-import { formatVariantName } from '@/shared/features/productVariants/utils/variantDisplayName';
 
 // TYPES
 import type {
@@ -67,15 +63,12 @@ class UpsellsState {
 	}
 
 	/**
-	 * One-tap add from the dialog: add to the cart (optimistic), confirm with a toast, close the
-	 * dialog and open the cart so the shopper sees what they built. No chained dialog.
+	 * One-tap add from the dialog: add to the cart (optimistic), close the dialog and open the
+	 * cart so the shopper sees what they built — the cart showing the new line IS the
+	 * confirmation, no toast on top. No chained dialog.
 	 */
 	addItem(ref: string) {
-		const item = this.items.find((i) => i.ref === ref);
 		cart.add(ref);
-		toast.success(
-			`Se agregó ${item ? formatVariantName(item.productName, item.variantLabel) : 'el producto'} a tu carrito`
-		);
 		this.isOpen = false;
 		cart.open();
 	}

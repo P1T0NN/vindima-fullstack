@@ -39,14 +39,14 @@
 		{
 			id: 'resource',
 			header: 'Recurso',
-			accessor: (r) => (r.resource ? `${r.resource.table}#${r.resource.id}` : '—'),
+			accessor: (r) => (r.resource ? `${r.resource.table}#${r.resource.id}` : '–'),
 			hideBelow: 'lg',
 			cellClass: 'max-w-[16rem]'
 		},
 		{
 			id: 'ip',
 			header: 'IP',
-			accessor: (r) => r.ip ?? '—',
+			accessor: (r) => r.ip ?? '–',
 			hideBelow: 'lg'
 		},
 		{

@@ -19,7 +19,7 @@
 		class: className,
 		imgClass,
 		href = UNPROTECTED_PAGE_ENDPOINTS.ROOT,
-		alt = `${COMPANY_DATA.NAME} logo`,
+		alt = `Inicio de ${COMPANY_DATA.NAME}`,
 		size = 'md',
 		...restProps
 	}: Props = $props();

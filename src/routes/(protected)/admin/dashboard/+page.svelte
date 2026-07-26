@@ -1,7 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { useConvexClient, useQuery } from '@mmailaender/convex-svelte';
 
 	// COMPONENTS
 	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';

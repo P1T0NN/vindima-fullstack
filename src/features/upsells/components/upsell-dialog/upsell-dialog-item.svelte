@@ -23,9 +23,7 @@
 	const name = $derived(formatVariantName(item.productName, item.variantLabel));
 </script>
 
-<div
-	class="group flex items-center gap-3.5 rounded-xl border border-border bg-background p-2.5 transition-colors hover:border-primary"
->
+<div class="group flex items-center gap-3.5 py-2.5">
 	<div
 		class="flex size-15 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary"
 	>
@@ -57,7 +55,7 @@
 				{item.description}
 			</p>
 		{/if}
-		<p class="mt-1 font-display text-[15px] font-semibold text-chart-2">
+		<p class="mt-1 font-display text-[15px] font-semibold text-gold-ink">
 			{price(item.priceMinor)}
 		</p>
 	</div>

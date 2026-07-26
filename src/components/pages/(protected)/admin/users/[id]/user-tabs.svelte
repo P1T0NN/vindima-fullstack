@@ -37,7 +37,7 @@
 	</TabsContent>
 
 	<TabsContent value="sessions" class="pt-2">
-		<UserSessions userId={user._id} />
+		<UserSessions userId={user._id} userEmail={user.email} />
 	</TabsContent>
 
 	<TabsContent value="accounts" class="pt-2">

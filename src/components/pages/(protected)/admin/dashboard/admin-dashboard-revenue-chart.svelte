@@ -64,28 +64,52 @@
 {#if !hasSales}
 	<AdminDashboardRevenueChartEmpty {title} class={className} />
 {:else}
-	<AreaChart
-		{data}
-		x="date"
-		{config}
-		{title}
-		axis="both"
-		cardClass={cn('gap-3', className)}
-		containerClass="aspect-auto h-64 w-full"
-		xAxisFormat={formatTime}
-		yAxisFormat={yTick}
-	>
-		{#snippet tooltip()}
-			<!-- indicator="dot" keeps the label un-nested so the hovered DATE renders above the
-			     money row (a custom formatter snippet swallows a nested label). -->
-			<Chart.Tooltip labelFormatter={formatTime} indicator="dot" nameKey="revenue">
-				{#snippet formatter({ value })}
-					<div class="flex w-full items-center justify-between gap-3">
-						<span class="text-muted-foreground">Ventas</span>
-						<span class="font-mono font-medium tabular-nums text-foreground">{money(value)}</span>
-					</div>
-				{/snippet}
-			</Chart.Tooltip>
-		{/snippet}
-	</AreaChart>
+	<!-- role="img" flattens the drawn chart for AT into one labelled graphic; the sr-only
+	     table below carries the actual series data. (AreaChart doesn't forward an ariaLabel
+	     to Chart.Container, so the wrapper div carries the role.) -->
+	<div role="img" aria-label={`${title}: gráfico de ventas. Los datos están en la tabla siguiente.`}>
+		<AreaChart
+			{data}
+			x="date"
+			{config}
+			{title}
+			axis="both"
+			cardClass={cn('gap-3', className)}
+			containerClass="aspect-auto h-64 w-full"
+			xAxisFormat={formatTime}
+			yAxisFormat={yTick}
+		>
+			{#snippet tooltip()}
+				<!-- indicator="dot" keeps the label un-nested so the hovered DATE renders above the
+				     money row (a custom formatter snippet swallows a nested label). -->
+				<Chart.Tooltip labelFormatter={formatTime} indicator="dot" nameKey="revenue">
+					{#snippet formatter({ value })}
+						<div class="flex w-full items-center justify-between gap-3">
+							<span class="text-muted-foreground">Ventas</span>
+							<span class="font-mono font-medium tabular-nums text-foreground">{money(value)}</span>
+						</div>
+					{/snippet}
+				</Chart.Tooltip>
+			{/snippet}
+		</AreaChart>
+	</div>
+
+	<!-- Screen-reader data equivalent of the drawn chart. -->
+	<table class="sr-only">
+		<caption>{title}</caption>
+		<thead>
+			<tr>
+				<th scope="col">{hourly ? 'Hora' : 'Fecha'}</th>
+				<th scope="col">Ventas</th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each data as point (point.date.getTime())}
+				<tr>
+					<td>{formatTime(point.date)}</td>
+					<td>{money(point.revenue)}</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
 {/if}

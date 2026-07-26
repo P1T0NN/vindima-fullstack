@@ -61,7 +61,7 @@
 	this={href ? 'a' : 'div'}
 	{href}
 	class={cn(
-		'group/card relative flex flex-col overflow-hidden rounded-xl border border-primary bg-card text-left no-underline shadow-brand-subtle transition-all duration-200',
+		'group/card relative flex flex-col overflow-hidden rounded-xl border border-primary bg-card text-left no-underline shadow-brand-subtle transition-[transform,box-shadow] duration-200',
 		href && 'hover:-translate-y-1 hover:shadow-brand-lift focus-visible:-translate-y-1',
 		className
 	)}
@@ -118,7 +118,7 @@
 				{@render footer()}
 			{:else if price}
 				<div class="flex items-baseline gap-2">
-					<span class="font-display text-2xl leading-none font-semibold text-chart-2">
+					<span class="font-display text-2xl leading-none font-semibold text-gold-ink">
 						{price}
 					</span>
 					{#if priceNote}

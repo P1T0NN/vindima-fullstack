@@ -7,6 +7,6 @@
 </script>
 
 <p class="flex items-center gap-2 text-sm text-muted-foreground">
-	<CircleCheckIcon class="size-4 text-chart-2" aria-hidden="true" />
-	Todo al día — no hay pedidos esperándote.
+	<CircleCheckIcon class="size-4 text-gold-ink" aria-hidden="true" />
+	Todo al día: no hay pedidos esperándote.
 </p>

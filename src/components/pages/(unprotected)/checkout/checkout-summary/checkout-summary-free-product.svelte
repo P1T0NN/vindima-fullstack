@@ -27,5 +27,5 @@
 		<span class="truncate text-foreground">{name}</span>
 	</span>
 
-	<span class="shrink-0 text-chart-2 tabular-nums">{money(0)}</span>
+	<span class="shrink-0 text-gold-ink tabular-nums">{money(0)}</span>
 </li>

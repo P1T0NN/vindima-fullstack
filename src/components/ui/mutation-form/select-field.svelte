@@ -7,13 +7,15 @@
 		inputId,
 		value,
 		setValue,
-		invalid
+		invalid,
+		describedby
 	}: {
 		field: MutationFormFieldDef;
 		inputId: string;
 		value: unknown;
 		setValue: (next: unknown) => void;
 		invalid: boolean;
+		describedby?: string;
 	} = $props();
 
 	const current = $derived(value as string | undefined);
@@ -23,8 +25,9 @@
 	id={inputId}
 	bind:value={() => current ?? '', (v) => setValue(v)}
 	options={field.options ?? []}
-	placeholder={field.selectPlaceholder ?? field.placeholder ?? 'Select...'}
+	placeholder={field.selectPlaceholder ?? field.placeholder ?? 'Selecciona...'}
 	disabled={field.disabled}
 	ariaInvalid={invalid}
+	ariaDescribedby={describedby}
 	class="w-full"
 />

@@ -96,7 +96,8 @@
 			aria-busy={isLoading}
 			aria-label={caption ?? 'Tabla de datos'}
 		>
-			<Table class="min-w-lg">
+			<!-- caption-top: the caption is styled as a top bar; the base table defaults to caption-bottom. -->
+			<Table class="min-w-lg caption-top">
 				{#if caption}
 					<TableCaption
 						class="mt-0 border-b px-4 py-3 text-left text-sm font-medium text-muted-foreground"

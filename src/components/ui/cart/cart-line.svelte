@@ -39,7 +39,15 @@
 	<!-- Image / placeholder -->
 	<div class="size-16 shrink-0 overflow-hidden rounded-md bg-muted">
 		{#if product.imageUrl}
-			<img src={product.imageUrl} alt="" class="size-full object-cover" />
+			<img
+				src={product.imageUrl}
+				alt=""
+				width="64"
+				height="64"
+				loading="lazy"
+				decoding="async"
+				class="size-full object-cover"
+			/>
 		{/if}
 	</div>
 
@@ -54,7 +62,7 @@
 				{/if}
 			</div>
 			{#if available}
-				<p class="shrink-0 text-sm font-semibold text-foreground tabular-nums">
+				<p class="shrink-0 font-display text-sm font-semibold text-foreground tabular-nums">
 					{money(product.unitPriceMinor! * line.qty)}
 				</p>
 			{/if}
@@ -66,7 +74,7 @@
 				<div class="inline-flex items-center rounded-md border border-border">
 					<button
 						type="button"
-						class="inline-flex size-9 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
+						class="inline-flex size-11 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
 						onclick={() => cart.setQty(line.productRef, line.qty - 1)}
 						disabled={line.qty <= 1}
 						aria-label={`Disminuir cantidad de ${name}`}
@@ -82,7 +90,7 @@
 					</output>
 					<button
 						type="button"
-						class="inline-flex size-9 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
+						class="inline-flex size-11 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
 						onclick={() => cart.setQty(line.productRef, line.qty + 1)}
 						disabled={line.qty >= CART_CONFIG.MAX_QTY_PER_LINE}
 						aria-label={`Aumentar cantidad de ${name}`}
@@ -96,7 +104,7 @@
 
 			<button
 				type="button"
-				class="text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+				class="inline-flex min-h-11 items-center px-2 text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
 				onclick={removeWithUndo}
 			>
 				Eliminar

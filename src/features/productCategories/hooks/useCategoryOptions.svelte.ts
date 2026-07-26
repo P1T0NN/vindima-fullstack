@@ -8,7 +8,7 @@ import { SvelteMap } from 'svelte/reactivity';
 
 // LIBRARIES
 import { api } from '@/convex/_generated/api';
-import { useConvexClient } from 'convex-svelte';
+import { useConvexClient } from '@mmailaender/convex-svelte';
 
 export function useCategoryOptions() {
 	const convex = useConvexClient();

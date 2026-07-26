@@ -21,7 +21,7 @@
 	</div>
 
 	{#if discountMinor > 0}
-		<div class="flex justify-between text-chart-2">
+		<div class="flex justify-between text-gold-ink">
 			<span>Descuento por primer pedido</span>
 			<span class="tabular-nums">−{money(discountMinor)}</span>
 		</div>
@@ -40,7 +40,7 @@
 			Total
 		</span>
 
-		<span class="font-display text-2xl font-semibold text-chart-2 tabular-nums">
+		<span class="font-display text-2xl font-semibold text-gold-ink tabular-nums">
 			{money(totalMinor)}
 		</span>
 	</div>

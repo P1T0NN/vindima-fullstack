@@ -19,12 +19,13 @@ import { normalizeOrderNumber } from '@/shared/features/orders/utils/orderNumber
  * guess still yields nothing without the matching email. Misses return `null` rather than an
  * error, so the page cannot be used to test whether a number or an address exists.
  *
- * Access mirrors `fetchOrder` EXACTLY, deliberately: an order that belongs to an account is
- * readable only by that account, and a matching email is NOT a substitute. Accepting number +
- * email for account orders would quietly weaken them — anyone holding a receipt could read a
- * registered customer's order without signing in — and a lookup form must never be an easier
- * door than the one it mirrors. Account holders reach their orders through `/my-orders`, which
- * the page points them at.
+ * Access is `fetchOrder`'s rule plus one: an order that belongs to an account is readable only
+ * by that account (a matching email is NOT a substitute — accepting number + email for account
+ * orders would quietly weaken them, since anyone holding a receipt could then read a registered
+ * customer's order without signing in), AND the email must match regardless. That second
+ * requirement is strictly narrower than `fetchOrder`, on purpose: a lookup form must never be an
+ * easier door than the one it mirrors, and it must actually enforce what it asks for. Account
+ * holders reach their orders through `/my-orders`, which the page points them at.
  */
 export const fetchOrderByNumber = query({
 	args: { number: v.string(), email: v.optional(v.string()) },
@@ -37,12 +38,30 @@ export const fetchOrderByNumber = query({
 			.withIndex('by_number', (q) => q.eq('number', number))
 			.first();
 		if (!order) return null;
+		// A draft is an unpaid online order — it has a number, but it is not an order anyone can
+		// track yet (`ordersSchema.ts`). `null`, same as a miss, so this can't be used to probe.
+		if (order.status === 'draft') return null;
 
+		// BOTH checks, always — never one or the other.
+		//
+		// The email is checked first and for every order, account or guest. This page's entire
+		// promise to the shopper is "the number and the email must match your confirmation", and
+		// until 2026-07-26 that was a lie for account orders: the branch below returned them on
+		// ownership alone, so a signed-in customer could type their own order number with any
+		// email at all and be let straight through. No one could ever read an order that was not
+		// theirs, so this was never a leak — but a form that ignores a field it demands is a form
+		// nobody can trust, and "wrong email" has to mean "no".
+		//
+		// A missing email fails closed (`guestEmailMatches` returns false for undefined), so the
+		// optional arg cannot be used to skip the check.
+		if (!guestEmailMatches(order, args.email)) return null;
+
+		// Ownership on top, unchanged: an order belonging to an account stays readable only by
+		// that account. A matching email is NOT a substitute — it never was, and adding the check
+		// above only narrows what gets through, it can never widen it.
 		if (order.userId) {
 			const userId = await getAuthUserId(ctx);
 			if (userId !== order.userId) return null;
-		} else if (!guestEmailMatches(order, args.email)) {
-			return null;
 		}
 
 		return orderDetail(order);

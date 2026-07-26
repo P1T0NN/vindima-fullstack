@@ -27,7 +27,7 @@ export const navLinkActiveClass = 'opacity-100 border-b-primary';
 export const navLinkCompactClass = `${navLinkClass} tracking-normal`;
 
 export const btnGoldClass =
-	'text-xs font-semibold leading-none tracking-widest uppercase bg-primary text-accent border border-primary px-3.5 py-2.5 rounded-sm inline-flex items-center gap-2 whitespace-nowrap no-underline transition-colors duration-200 hover:bg-[#e7c069] hover:border-[#e7c069] outline-none focus-visible:ring-2 focus-visible:ring-primary/40';
+	'text-xs font-semibold leading-none tracking-widest uppercase bg-primary text-accent border border-primary px-3.5 py-2.5 rounded-[2px] inline-flex items-center gap-2 whitespace-nowrap no-underline transition-colors duration-200 hover:bg-primary-hover hover:border-primary-hover outline-none focus-visible:ring-2 focus-visible:ring-primary/40';
 
 export type HeaderCta = {
 	href: string;

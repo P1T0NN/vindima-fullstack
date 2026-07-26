@@ -1,5 +1,6 @@
 // TYPES
 import type { Id } from '@/convex/_generated/dataModel';
+import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
 
 /**
  * Per-user rewards state for every rewards UI surface (account card + picker, checkout line).
@@ -14,6 +15,9 @@ export type RewardsSnapshot = {
 	lifetimeStamps: number;
 	activeClaim: { claimId: Id<'rewardClaims'>; itemRef: string } | null;
 	eligibleItems: string[];
+	/** Live catalog rows for `eligibleItems` + the active claim's ref, resolved server-side —
+	 *  the snapshot's eligibility scan already reads those docs, so reward UIs never re-fetch. */
+	rewardProducts: ResolvedCartProduct[];
 	/** Set only while the account has stamps/rewards to lose — feed it to `expiryWarning()`
 	 *  client-side, so the warning is computed against the viewer's clock at render time. */
 	lastActivityAt: number | null;

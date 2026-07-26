@@ -1,5 +1,5 @@
 // LIBRARIES
-import { toast } from 'svelte-sonner';
+import { tick } from 'svelte';
 
 // CONFIG
 import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -17,8 +17,13 @@ import type { FieldErrors } from '@/shared/types/types';
 
 export type SignUpFormCopy = {
 	signUpFailed: () => string;
-	accountCreatedToast: () => string;
 };
+
+// Wait for aria-invalid to hit the DOM, then move focus to the first bad field.
+async function focusFirstInvalid() {
+	await tick();
+	document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+}
 
 export function createSignUpForm(copy: SignUpFormCopy) {
 	let step = $state<SignUpFormStep>('signUp');
@@ -47,12 +52,14 @@ export function createSignUpForm(copy: SignUpFormCopy) {
 		if (!p.success) {
 			fieldErrors = zodIssuesToFieldErrors<SignUpField>(p.error.issues);
 			errorMessage = null;
+			await focusFirstInvalid();
 			return;
 		}
 
 		if (p.data.password !== p.data.confirmPassword) {
 			fieldErrors = { confirmPassword: 'Las contraseñas deben coincidir.' };
 			errorMessage = null;
+			await focusFirstInvalid();
 			return;
 		}
 
@@ -101,7 +108,6 @@ export function createSignUpForm(copy: SignUpFormCopy) {
 	}
 
 	async function onVerifySuccess() {
-		toast.success(copy.accountCreatedToast());
 		await appGoto(UNPROTECTED_PAGE_ENDPOINTS.ROOT);
 	}
 
@@ -168,12 +174,14 @@ export function createSignUpPageForm(copy: SignUpFormCopy) {
 		if (!p.success) {
 			fieldErrors = zodIssuesToFieldErrors<SignUpPageField>(p.error.issues);
 			errorMessage = null;
+			await focusFirstInvalid();
 			return;
 		}
 
 		if (p.data.password !== p.data.confirmPassword) {
 			fieldErrors = { confirmPassword: 'Las contraseñas deben coincidir.' };
 			errorMessage = null;
+			await focusFirstInvalid();
 			return;
 		}
 
@@ -225,7 +233,6 @@ export function createSignUpPageForm(copy: SignUpFormCopy) {
 	}
 
 	async function onVerifySuccess() {
-		toast.success(copy.accountCreatedToast());
 		await appGoto(UNPROTECTED_PAGE_ENDPOINTS.ROOT);
 	}
 
