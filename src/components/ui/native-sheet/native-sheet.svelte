@@ -216,13 +216,17 @@
 			display 0.3s ease allow-discrete;
 	}
 
-	/* Overridable defaults — 0 specificity (`:where`) so consumer utilities like `p-4`,
-	   `bg-background`, `gap-*` win instead of being clobbered by the component. */
-	:where(.native-sheet):global([popover]) {
-		padding: 0;
-		gap: 1rem;
-		background: var(--popover);
-		color: var(--popover-foreground);
+	/* Overridable defaults — consumer utilities like `p-5`, `bg-background`, `gap-*` must win.
+	   `:where()` alone is NOT enough: Tailwind v4 emits utilities inside `@layer utilities`,
+	   and ANY unlayered rule beats a layered one no matter how low its specificity. So these
+	   defaults live in `base` (declared before `utilities` by `@import 'tailwindcss'`). */
+	@layer base {
+		:where(.native-sheet[popover]) {
+			padding: 0;
+			gap: 1rem;
+			background: var(--popover);
+			color: var(--popover-foreground);
+		}
 	}
 
 	/* Dimmed backdrop (free with popover). */

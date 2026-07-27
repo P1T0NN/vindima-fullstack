@@ -99,7 +99,10 @@
 			</ul>
 		</nav>
 
-		<div class="flex items-center justify-end gap-3">
+		<!-- -mr-3 cancels the trailing icon button's own 12px inset (cart `p-3`, menu `size-11`
+		     around a 20px glyph) so the glyph — not its tap target — lines up with the gutter
+		     the logo starts at. Tap targets stay full size. -->
+		<div class="-mr-3 flex items-center justify-end gap-3">
 			<Link href={accountHref} class={cn(navLinkCompactClass, 'hidden sm:inline-flex')}>
 				{accountLabel}
 			</Link>

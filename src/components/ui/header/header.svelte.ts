@@ -8,12 +8,12 @@ import {
 export const navItems = [
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.ROOT, label: 'Inicio' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.SHOP, label: 'Tienda' },
-	{ href: UNPROTECTED_PAGE_ENDPOINTS.ABOUT, label: 'Nosotros' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.MARIDAJES, label: 'Maridajes' },
+	{ href: UNPROTECTED_PAGE_ENDPOINTS.ABOUT, label: 'Nosotros' },
+	{ href: UNPROTECTED_PAGE_ENDPOINTS.CONTACT, label: 'Contacto' },
 	// Events folded into the contact section, so its anchor is gone. This slot now carries the
 	// one thing a shopper hunts for in a header and previously could not reach: their order.
-	{ href: UNPROTECTED_PAGE_ENDPOINTS.TRACK_ORDER, label: 'Rastrear pedido' },
-	{ href: UNPROTECTED_PAGE_ENDPOINTS.CONTACT, label: 'Contacto' }
+	{ href: UNPROTECTED_PAGE_ENDPOINTS.TRACK_ORDER, label: 'Rastrear pedido' }
 ] as const;
 
 export const headerBrandClass =
@@ -23,6 +23,9 @@ export const navLinkClass =
 	'text-xs leading-none font-normal tracking-wide uppercase text-accent no-underline whitespace-nowrap opacity-70 transition-opacity duration-200 py-1.5 border-b-2 border-transparent hover:opacity-100 outline-none focus-visible:opacity-100 focus-visible:border-primary/50';
 
 export const navLinkActiveClass = 'opacity-100 border-b-primary';
+
+/** Drawer variant: a full gold chip reads at arm's length where a 2px underline doesn't. */
+export const navLinkMobileActiveClass = 'opacity-100 bg-primary text-accent';
 
 export const navLinkCompactClass = `${navLinkClass} tracking-normal`;
 

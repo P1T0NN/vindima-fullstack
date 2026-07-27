@@ -14,8 +14,8 @@
 		header,
 		isNavActive,
 		navItems,
-		navLinkActiveClass,
 		navLinkClass,
+		navLinkMobileActiveClass,
 		navLinkCompactClass,
 		resolveHeaderCta,
 		scrollSpy
@@ -106,7 +106,13 @@
 						<Link
 							id={i === 0 ? 'site-mobile-nav-first' : undefined}
 							href={item.href}
-							class={cn(navLinkClass, 'block w-full px-1 py-3', active && navLinkActiveClass)}
+							class={cn(
+								navLinkClass,
+								// -mx-2 px-2: the chip bleeds into the drawer's padding so the label itself
+								// stays flush with the logo above it.
+								'-mx-2 block rounded-sm border-b-0 px-2 py-3',
+								active && navLinkMobileActiveClass
+							)}
 							aria-current={active ? 'page' : undefined}
 							onclick={header.closeMenu}
 						>
