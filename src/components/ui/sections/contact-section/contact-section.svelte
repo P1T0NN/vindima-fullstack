@@ -41,11 +41,12 @@
 			<h3
 				class="mb-3.5 font-display text-3xl leading-tight font-semibold text-accent-foreground uppercase sm:text-[34px]"
 			>
-				Reserva o haz<br />tu pedido
+				Reserva, ordena<br />o arma tu evento
 			</h3>
-			<p class="mb-7 max-w-85 text-[13.5px] leading-relaxed text-accent-surface-muted">
-				La forma más rápida de reservar mesa, ordenar tablas o preguntar por vino es por WhatsApp.
-				Te respondemos en minutos.
+			<p class="mb-7 max-w-100 text-[13.5px] leading-relaxed text-accent-surface-muted">
+				Mesa para esta noche, tablas para llevar, una recomendación de vino o un evento privado
+				—cumpleaños, catas, cenas de empresa, celebraciones íntimas—. Todo por WhatsApp, y te
+				respondemos en minutos.
 			</p>
 			<Button
 				href={COMPANY_DATA.WHATSAPP_CONTACT_URL}
@@ -55,7 +56,7 @@
 				class="self-start"
 			>
 				<MessageCircleIcon class="size-4" strokeWidth={2} />
-				WhatsApp
+				Escríbenos directo
 			</Button>
 		</Card>
 
