@@ -70,8 +70,11 @@
 
 		<div class="flex min-w-0 flex-col gap-2.5">
 			<div class={cn(footerHeadingClass, 'mb-1')}>Visítanos</div>
-			<span class={footerMetaLineClass}>Aguascalientes, México</span>
-			<span class={footerMetaLineClass}>Mié – Dom · 1:00 PM – 11:00 PM</span>
+			<span class={footerMetaLineClass}>{COMPANY_DATA.ADDRESS.LINE_1}</span>
+			<span class={footerMetaLineClass}>{COMPANY_DATA.ADDRESS.LINE_2}</span>
+			{#each COMPANY_DATA.HOURS as h (h.DAYS)}
+				<span class={footerMetaLineClass}>{h.DAYS}: {h.TIME}</span>
+			{/each}
 			<a
 				href="mailto:{COMPANY_DATA.EMAIL}"
 				class={cn(footerMetaLineClass, 'transition-opacity hover:opacity-100')}

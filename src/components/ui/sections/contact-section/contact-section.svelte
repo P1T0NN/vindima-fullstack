@@ -12,8 +12,11 @@
 
 	/** Practical facts, one ruled block each. Links render for the contact block only. */
 	const facts = [
-		{ label: 'Dónde estamos', lines: ['Centro, Aguascalientes', 'Aguascalientes, México'] },
-		{ label: 'Horario', lines: ['Martes a Domingo', '13:00 – 23:00'] }
+		{
+			label: 'Dónde estamos',
+			lines: [COMPANY_DATA.ADDRESS.LINE_1, COMPANY_DATA.ADDRESS.LINE_2]
+		},
+		{ label: 'Horario', lines: COMPANY_DATA.HOURS.map((h) => `${h.DAYS}: ${h.TIME}`) }
 	] as const;
 </script>
 

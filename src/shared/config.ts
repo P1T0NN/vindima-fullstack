@@ -48,6 +48,18 @@ export const UPLOADS_CONFIG = {
 
 const WHATSAPP_NUMBER = '5214499409233';
 
+/** Address parts, kept separate because schema.org `PostalAddress` needs them individually. */
+const ADDRESS = {
+	STREET: 'Monte Everest 501',
+	NEIGHBORHOOD: 'Los Bosques',
+	POSTAL_CODE: '20120',
+	CITY: 'Aguascalientes',
+	REGION: 'Ags.',
+	COUNTRY: 'México',
+	/** ISO 3166-1 alpha-2, for `addressCountry`. */
+	COUNTRY_CODE: 'MX'
+} as const;
+
 /**
  * Branding / contact strings used by emails, headers, etc.
  * Single source of truth — imported by both client and Convex.
@@ -62,6 +74,42 @@ export const COMPANY_DATA = {
 		'Vinícola orgánica · vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
+	ADDRESS: {
+		...ADDRESS,
+		/** The two display lines, composed from the parts above so nothing is written twice. */
+		LINE_1: `${ADDRESS.STREET}, ${ADDRESS.NEIGHBORHOOD}`,
+		LINE_2: `${ADDRESS.POSTAL_CODE} ${ADDRESS.CITY}, ${ADDRESS.REGION}, ${ADDRESS.COUNTRY}`
+	},
+	/**
+	 * Opening hours, one entry per day group. `DAYS`/`TIME` are display copy; `SCHEMA_DAYS`
+	 * (English day names) and 24h `OPENS`/`CLOSES` feed the `openingHoursSpecification` in the
+	 * home page's JSON-LD. Edit both halves of an entry together — nothing derives one from
+	 * the other, since parsing localised "1:00 PM" copy back into a machine time is more code
+	 * than restating four characters.
+	 */
+	HOURS: [
+		{
+			DAYS: 'Martes y Miércoles',
+			TIME: '1:00 PM – 9:15 PM',
+			SCHEMA_DAYS: ['Tuesday', 'Wednesday'],
+			OPENS: '13:00',
+			CLOSES: '21:15'
+		},
+		{
+			DAYS: 'Jueves, Viernes y Sábado',
+			TIME: '1:00 PM – 10:30 PM',
+			SCHEMA_DAYS: ['Thursday', 'Friday', 'Saturday'],
+			OPENS: '13:00',
+			CLOSES: '22:30'
+		},
+		{
+			DAYS: 'Domingo',
+			TIME: '1:00 PM – 5:00 PM',
+			SCHEMA_DAYS: ['Sunday'],
+			OPENS: '13:00',
+			CLOSES: '17:00'
+		}
+	],
 	INSTAGRAM_URL: 'https://www.instagram.com/vindima.ags/',
 	PHONE: '1 449 940 9233',
 	OG_IMAGE: '/assets/og-image.png',

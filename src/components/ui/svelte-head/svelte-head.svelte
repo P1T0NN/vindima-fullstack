@@ -57,6 +57,48 @@
 	const isCustomImage = $derived(image !== undefined && image !== COMPANY_DATA.OG_IMAGE);
 	const imagePath = $derived(image ?? COMPANY_DATA.OG_IMAGE);
 	const imageUrl = $derived(/^https?:\/\//.test(imagePath) ? imagePath : `${origin}${imagePath}`);
+
+	/**
+	 * `Winery` structured data. The business itself is not a per-page entity, so exactly one page
+	 * may declare it — the home page, matched by route id rather than by pathname so locale
+	 * prefixes or a moved root never silently drop it. Every value comes from `COMPANY_DATA`.
+	 */
+	const isHome = $derived(page.route.id === '/');
+
+	const localBusinessLd = $derived({
+		'@context': 'https://schema.org',
+		'@type': 'Winery',
+		name: COMPANY_DATA.NAME,
+		description: COMPANY_DATA.DESCRIPTION,
+		url: origin,
+		image: `${origin}${COMPANY_DATA.OG_IMAGE}`,
+		logo: `${origin}${COMPANY_DATA.LOGO}`,
+		email: COMPANY_DATA.EMAIL,
+		telephone: `+52${COMPANY_DATA.PHONE.replace(/\s/g, '')}`,
+		address: {
+			'@type': 'PostalAddress',
+			streetAddress: `${COMPANY_DATA.ADDRESS.STREET}, ${COMPANY_DATA.ADDRESS.NEIGHBORHOOD}`,
+			postalCode: COMPANY_DATA.ADDRESS.POSTAL_CODE,
+			addressLocality: COMPANY_DATA.ADDRESS.CITY,
+			addressRegion: COMPANY_DATA.ADDRESS.REGION,
+			addressCountry: COMPANY_DATA.ADDRESS.COUNTRY_CODE
+		},
+		openingHoursSpecification: COMPANY_DATA.HOURS.map((h) => ({
+			'@type': 'OpeningHoursSpecification',
+			dayOfWeek: h.SCHEMA_DAYS,
+			opens: h.OPENS,
+			closes: h.CLOSES
+		})),
+		sameAs: [COMPANY_DATA.INSTAGRAM_URL]
+	});
+
+	// `<` is escaped so a config string containing a closing script tag can't break out of it.
+	// `TAG` is interpolated rather than written literally for the same reason: a spelled-out
+	// closing script tag anywhere in this block would end the block.
+	const TAG = 'script';
+	const localBusinessTag = $derived(
+		`<${TAG} type="application/ld+json">${JSON.stringify(localBusinessLd).replace(/</g, '\\u003c')}</${TAG}>`
+	);
 </script>
 
 <svelte:head>
@@ -86,5 +128,11 @@
 
 	{#if noindex}
 		<meta name="robots" content="noindex, nofollow" />
+	{/if}
+
+	{#if isHome}
+		<!-- Serialized static config with `<` escaped, no user input: the one safe use of @html. -->
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html localBusinessTag}
 	{/if}
 </svelte:head>
