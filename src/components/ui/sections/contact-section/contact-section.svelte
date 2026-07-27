@@ -56,7 +56,7 @@
 				class="self-start"
 			>
 				<MessageCircleIcon class="size-4" strokeWidth={2} />
-				Escríbenos directo
+				WhatsApp
 			</Button>
 		</Card>
 
