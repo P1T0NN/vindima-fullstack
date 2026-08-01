@@ -1,41 +1,16 @@
 <script lang="ts">
-	// LIBRARIES
-	import Autoplay from 'embla-carousel-autoplay';
-
 	// CONFIG
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 	import { ASSETS_DATA } from '@/shared/config.js';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
-	import * as Carousel from '@/components/ui/carousel/index.js';
 	import Section from '@/components/ui/section/section.svelte';
 
 	// UTILS
 	import { appHref } from '@/utils/app-navigation.js';
 	import { cn } from '@/utils/utils.js';
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
-
-	const HERO_CAROUSEL_SLIDES = [
-		{
-			src: '/root/opt/hero-carousel-1-1280w.webp',
-			alt: 'Foto del lugar 1'
-		},
-		{
-			src: '/root/opt/hero-carousel-2-1280w.webp',
-			alt: 'Foto del lugar 2'
-		},
-		{
-			src: '/root/opt/hero-carousel-3-1280w.webp',
-			alt: 'Foto del lugar 3'
-		}
-	] as const;
-
-	const autoplay = Autoplay({
-		delay: 1500,
-		stopOnInteraction: false,
-		stopOnMouseEnter: false
-	});
 </script>
 
 <Section
@@ -86,9 +61,7 @@
 				</p>
 
 				<div class="flex flex-wrap gap-3.5">
-					<Button href={appHref(UNPROTECTED_PAGE_ENDPOINTS.SHOP)} size="lg">
-						Ir a la tienda
-					</Button>
+					<Button href={appHref(UNPROTECTED_PAGE_ENDPOINTS.SHOP)} size="lg">Ir a la tienda</Button>
 
 					<Button href={appHref(UNPROTECTED_PAGE_ENDPOINTS.MARIDAJES)} variant="outline" size="lg">
 						Ver maridajes
@@ -115,30 +88,5 @@
 				decoding="async"
 			/>
 		</div>
-
-		<Carousel.Root
-			opts={{ loop: true }}
-			plugins={[autoplay]}
-			class="mt-7 border border-primary/60"
-			aria-label="Galería del lugar"
-		>
-			<Carousel.Content class="ms-0">
-				{#each HERO_CAROUSEL_SLIDES as slide (slide.src)}
-					<Carousel.Item class="ps-0">
-						<img
-							src={slide.src}
-							alt={slide.alt}
-							class="h-96 w-full object-cover"
-							width="1280"
-							height="384"
-							loading="lazy"
-							decoding="async"
-						/>
-					</Carousel.Item>
-				{/each}
-			</Carousel.Content>
-			<Carousel.Previous class="start-3 border-primary/60 bg-background/80" />
-			<Carousel.Next class="end-3 border-primary/60 bg-background/80" />
-		</Carousel.Root>
 	</div>
 </Section>

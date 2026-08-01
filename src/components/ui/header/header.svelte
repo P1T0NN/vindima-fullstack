@@ -77,12 +77,13 @@
 		className
 	)}
 >
-	<div
-		class={cn(PAGE_CONTAINER, 'grid grid-cols-[auto_1fr_auto] items-center gap-4 py-[15px]')}
-	>
+	<div class={cn(PAGE_CONTAINER, 'grid grid-cols-[auto_1fr_auto] items-center gap-4 py-[15px]')}>
 		<Logo class="transition-opacity hover:opacity-90" />
 
-		<nav class="hidden min-w-0 lg:flex" aria-label="Principal">
+		<!-- The rail switches at `xl`, not `lg`: seven labels plus the account link, the gold
+		     CTA and the cart need ~1110px, and `lg` only offers 972px of container. Between
+		     1024px and 1280px the drawer carries the same `navItems`, so nothing is lost. -->
+		<nav class="hidden min-w-0 xl:flex" aria-label="Principal">
 			<ul class="mx-auto flex max-w-full min-w-0 flex-wrap items-center justify-center gap-[18px]">
 				{#each navItems as item (item.href)}
 					{@const active = isNavActive(pathnameLogical, scrollSpy.active, item.href)}
@@ -120,7 +121,9 @@
 				type="button"
 				onclick={() => cart.toggle()}
 				class="relative flex items-center justify-center rounded-sm p-3 text-accent transition-opacity outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary/40"
-				aria-label={cart.count === 1 ? `Carrito, ${cart.count} artículo` : `Carrito, ${cart.count} artículos`}
+				aria-label={cart.count === 1
+					? `Carrito, ${cart.count} artículo`
+					: `Carrito, ${cart.count} artículos`}
 			>
 				<ShoppingBagIcon class="size-[21px]" strokeWidth={1.4} />
 				{#if cart.count > 0}

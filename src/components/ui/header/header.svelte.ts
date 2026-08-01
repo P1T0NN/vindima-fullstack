@@ -5,9 +5,14 @@ import {
 	UNPROTECTED_PAGE_ENDPOINTS
 } from '@/config/pageEndpoints.js';
 
+// Seven items is what the desktop rail holds: the labels stay one word each (the section
+// masthead reads "Nuestro espacio"; the nav says "Espacio") and the rail moves to `xl` in
+// header.svelte, because at `lg` seven items plus the CTA overflow the 972px of content.
+// An eighth item needs one of those two decisions revisited, not just another line here.
 export const navItems = [
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.ROOT, label: 'Inicio' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.SHOP, label: 'Tienda' },
+	{ href: UNPROTECTED_PAGE_ENDPOINTS.ESPACIO, label: 'Espacio' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.MARIDAJES, label: 'Maridajes' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.ABOUT, label: 'Nosotros' },
 	{ href: UNPROTECTED_PAGE_ENDPOINTS.CONTACT, label: 'Contacto' },

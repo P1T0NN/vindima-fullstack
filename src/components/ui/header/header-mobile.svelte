@@ -70,7 +70,9 @@
 			{...props}
 			type="button"
 			class={cn(
-				'inline-flex size-11 touch-manipulation items-center justify-center rounded-sm text-accent transition-opacity hover:opacity-80 lg:hidden',
+				// `xl:hidden` mirrors the desktop rail's `xl:flex` in header.svelte — the two
+				// breakpoints must move together or the nav vanishes between them.
+				'inline-flex size-11 touch-manipulation items-center justify-center rounded-sm text-accent transition-opacity hover:opacity-80 xl:hidden',
 				props.class as ClassValue
 			)}
 			aria-label={header.menuOpen ? 'Cerrar menú' : 'Abrir menú'}

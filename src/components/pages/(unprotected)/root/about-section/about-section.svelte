@@ -159,7 +159,7 @@
 				loading="lazy"
 				width="960"
 				height="384"
-				src="/root/opt/hero-carousel-3-960w.webp"
+				src="/root/opt/espacio-3-960w.webp"
 			/>
 		</div>
 	</div>

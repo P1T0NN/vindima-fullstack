@@ -39,6 +39,7 @@ export const UNPROTECTED_PAGE_ENDPOINTS = {
 	FORGOT_PASSWORD: resolve('/forgot-password'),
 	CONTACT: '#contact',
 	SHOP: '#shop',
+	ESPACIO: '#espacio',
 	ABOUT: '#about',
 	MARIDAJES: '#maridajes'
 } as const;
