@@ -56,7 +56,7 @@
 				<SparklesIcon class="size-3 text-gold-ink" strokeWidth={2} />
 				<span class="text-gold-ink">Recompensa</span>
 			{:else}
-				{line.qty} × {money(line.unitPriceMinor)}
+				{line.qty} x {money(line.unitPriceMinor)}
 			{/if}
 		</p>
 	</div>

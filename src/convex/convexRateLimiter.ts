@@ -1,7 +1,7 @@
-// LIBRARIES
+﻿// LIBRARIES
 import { RateLimiter } from '@convex-dev/rate-limiter';
 import { components } from './_generated/api';
-import { convexRateLimitRegistry } from './rateLimits/registry';
+import { convexRateLimitRegistry } from '@/shared/features/rateLimits/data/rateLimitsRegistry';
 
 /**
  * App rate limiter backed by {@link convexRateLimitRegistry}.
@@ -11,5 +11,3 @@ import { convexRateLimitRegistry } from './rateLimits/registry';
  * {@link import('./helpers/convexGetRateLimitedUserId').convexGetRateLimitedUserId}.
  */
 export const convexRateLimiter = new RateLimiter(components.rateLimiter, convexRateLimitRegistry);
-
-export type { ConvexRateLimitName } from './rateLimits/registry';

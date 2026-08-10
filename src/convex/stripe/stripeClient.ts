@@ -42,7 +42,7 @@ export function getStripe(): Stripe {
 	if (!apiKey) {
 		throw new Error(
 			'STRIPE_SECRET_KEY is not set on this Convex deployment. Run: ' +
-				'npx convex env set STRIPE_SECRET_KEY sk_… (see StripeSystemDesign.md §17)'
+				'npx convex env set STRIPE_SECRET_KEY sk_... (see StripeSystemDesign.md #17)'
 		);
 	}
 

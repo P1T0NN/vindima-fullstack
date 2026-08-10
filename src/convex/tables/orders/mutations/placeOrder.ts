@@ -1,7 +1,7 @@
 // LIBRARIES
 import { v } from 'convex/values';
 import { zodToConvexFields } from 'convex-helpers/server/zod4';
-import { mutation } from '@/convex/_generated/server';
+import { mutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG
@@ -14,7 +14,6 @@ import { convexRateLimiter } from '@/convex/convexRateLimiter';
 // HELPERS / PROVIDERS
 import { calculateOrderPrice } from '../helpers/calculateOrderPrice';
 import { buildOrderSearchText } from '../helpers/buildOrderSearchText';
-import { orderCountAggregate } from '../helpers/orderCountAggregate';
 import { isSameDraftInput } from '../helpers/isSameDraftInput';
 import { getPaymentProvider } from '../providers/registry';
 
@@ -299,12 +298,6 @@ export const placeOrder = mutation({
 
 			const updated = (await ctx.db.get(existing._id))!;
 
-			// Work-queue counter: unchanged for an ordinary edit, but a method switch moves the row
-			// between the `draft` and `pending` buckets, so the aggregate has to follow.
-			if (status !== existing.status) {
-				await orderCountAggregate.replaceOrInsert(ctx, existing, updated);
-			}
-
 			const payment = await getPaymentProvider(args.paymentMethod).createPayment(updated);
 
 			// Same settle-on-place rule as a fresh cash order (idempotent; no-op if already paid).
@@ -397,9 +390,6 @@ export const placeOrder = mutation({
 		});
 
 		const order = (await ctx.db.get(orderId))!;
-		// Work-queue counter: a fresh order enters the 'pending' bucket — or the 'draft' bucket,
-		// which nothing reads.
-		await orderCountAggregate.insert(ctx, order);
 
 		const payment = await getPaymentProvider(order.paymentMethod ?? 'cash').createPayment(order);
 

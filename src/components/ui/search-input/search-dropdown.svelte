@@ -17,7 +17,7 @@
 		dropdownClass,
 		loading = false,
 		error = null,
-		loadingText = 'Buscando…',
+		loadingText = 'Buscando...',
 		emptyTitle,
 		emptyDescription,
 		pendingId = null,

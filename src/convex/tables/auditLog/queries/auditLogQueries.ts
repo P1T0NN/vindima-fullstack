@@ -2,7 +2,7 @@
 import { v } from 'convex/values';
 
 // HELPERS
-import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
+import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
 
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';

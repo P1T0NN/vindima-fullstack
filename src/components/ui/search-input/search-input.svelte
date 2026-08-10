@@ -20,7 +20,7 @@
 		error = null,
 		showEmpty = true,
 		minQueryLength = 1,
-		placeholder = 'Buscar…',
+		placeholder = 'Buscar...',
 		class: className,
 		dropdownClass,
 		loadingText,

@@ -23,7 +23,7 @@ import { validateUpsellRule } from '../helpers/validateUpsellRule';
 
 // VALIDATORS
 import { mutationResult } from '@/convex/helpers/mutationResult';
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 export const editUpsellRule = adminMutation('editUpsellRule')({
 	args: {
@@ -37,7 +37,8 @@ export const editUpsellRule = adminMutation('editUpsellRule')({
 		}
 
 		const parsed = editUpsellRuleSchema.safeParse(args);
-		if (!parsed.success) return { success: false, message: { key: 'UpsellsMessages.INVALID_ITEMS' } };
+		if (!parsed.success)
+			return { success: false, message: { key: 'UpsellsMessages.INVALID_ITEMS' } };
 
 		const rule = await ctx.db.get(args.ruleId);
 		if (!rule) return { success: false, message: { key: 'UpsellsMessages.RULE_NOT_FOUND' } };

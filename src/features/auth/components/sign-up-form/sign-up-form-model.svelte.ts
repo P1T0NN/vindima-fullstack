@@ -7,13 +7,13 @@ import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 // UTILS
 import { appGoto } from '@/utils/app-navigation.js';
 import { authClient } from '@/features/auth/lib/auth-client';
-import { signUpFormSchema, signUpPageSchema } from './sign-up-form-schema.js';
-import { zodIssuesToFieldErrors } from '@/shared/utils/validationUtils.js';
-import { rateLimitMessage } from '@/shared/utils/rateLimitMessages';
+import { signUpPageSchema, signUpSchema } from '@/shared/features/auth/schemas/signUpSchema.js';
+import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
+import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
 
 // TYPES
 import type { SignUpFormStep, SignUpField, SignUpPageField } from './signUpFormTypes.js';
-import type { FieldErrors } from '@/shared/types/types';
+import type { FieldErrors } from '@/shared/features/validations/types/validationsTypes';
 
 export type SignUpFormCopy = {
 	signUpFailed: () => string;
@@ -41,7 +41,7 @@ export function createSignUpForm(copy: SignUpFormCopy) {
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
 
-		const p = signUpFormSchema.safeParse({
+		const p = signUpSchema.safeParse({
 			name: String(formData.get('name') ?? ''),
 			email: String(formData.get('email') ?? ''),
 			password: String(formData.get('password') ?? ''),
@@ -51,13 +51,6 @@ export function createSignUpForm(copy: SignUpFormCopy) {
 
 		if (!p.success) {
 			fieldErrors = zodIssuesToFieldErrors<SignUpField>(p.error.issues);
-			errorMessage = null;
-			await focusFirstInvalid();
-			return;
-		}
-
-		if (p.data.password !== p.data.confirmPassword) {
-			fieldErrors = { confirmPassword: 'Las contraseñas deben coincidir.' };
 			errorMessage = null;
 			await focusFirstInvalid();
 			return;
@@ -173,13 +166,6 @@ export function createSignUpPageForm(copy: SignUpFormCopy) {
 
 		if (!p.success) {
 			fieldErrors = zodIssuesToFieldErrors<SignUpPageField>(p.error.issues);
-			errorMessage = null;
-			await focusFirstInvalid();
-			return;
-		}
-
-		if (p.data.password !== p.data.confirmPassword) {
-			fieldErrors = { confirmPassword: 'Las contraseñas deben coincidir.' };
 			errorMessage = null;
 			await focusFirstInvalid();
 			return;

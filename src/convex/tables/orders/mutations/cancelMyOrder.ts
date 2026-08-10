@@ -5,9 +5,6 @@ import { internal } from '@/convex/_generated/api';
 // MIDDLEWARE
 import { authMutation } from '@/convex/auth/middleware/authMiddleware';
 
-// HELPERS
-import { orderCountAggregate } from '../helpers/orderCountAggregate';
-
 // VALIDATORS
 import { mutationResult } from '@/convex/helpers/mutationResult';
 
@@ -44,8 +41,6 @@ export const cancelMyOrder = authMutation('cancelMyOrder')({
 					}
 				: {})
 		});
-		// Work-queue counter: pending → closed.
-		await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
 
 		// Commit-gated, so a rolled-back cancel expires nothing. The seconds before it lands are
 		// covered by the webhook's status check, which auto-refunds a payment for a dead order.

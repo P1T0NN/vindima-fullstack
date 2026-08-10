@@ -23,7 +23,7 @@
 	{#if discountMinor > 0}
 		<div class="flex justify-between text-gold-ink">
 			<span>Descuento por primer pedido</span>
-			<span class="tabular-nums">−{money(discountMinor)}</span>
+			<span class="tabular-nums">-{money(discountMinor)}</span>
 		</div>
 	{/if}
 

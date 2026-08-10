@@ -11,7 +11,13 @@ app.use(rateLimiter);
 app.use(betterAuth);
 app.use(r2);
 app.use(analytics);
+// One component instance per counter (each is its own B-tree). Register a new one here for
+// every surface that needs exact counts or page jumps at scale, then declare its
+// `counter(...)` entry in `counters.ts` — the trigger comes with it.
 // O(log n) live order counters for the dashboard work queue (orders by bucket).
 app.use(aggregate, { name: 'orderCounts' });
+// Creation-time B-tree over real (non-draft) orders — exact totals + O(log n) page jumps
+// for the /admin/orders browse at any order volume. See `counters.ts`.
+app.use(aggregate, { name: 'orderBrowse' });
 
 export default app;

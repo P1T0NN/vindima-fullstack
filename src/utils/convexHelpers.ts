@@ -22,8 +22,13 @@
 import { toast } from 'svelte-sonner';
 import { ConvexError } from 'convex/values';
 import { isRateLimitError } from '@convex-dev/rate-limiter';
-import { rateLimitMessage } from '@/shared/utils/rateLimitMessages';
-import { hasTranslatableMessage, translateFromBackend } from '@/utils/translateFromBackend';
+
+// HELPERS
+import {
+	rateLimitMessage,
+	translateFromBackend
+} from '@/features/validations/utils/translateFromBackend';
+import { hasTranslatableMessage } from '@/shared/features/validations/utils/translatableMessage';
 
 // TYPES
 import type { FunctionReference, FunctionArgs, FunctionReturnType } from 'convex/server';

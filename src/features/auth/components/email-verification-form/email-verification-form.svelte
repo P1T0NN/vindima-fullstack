@@ -12,13 +12,14 @@
 	import * as InputOTP from '@/features/auth/components/input-otp/index.js';
 	import EmailVerificationResend from './email-verification-resend.svelte';
 
-	const OTP_MAX_LENGTH = 8;
+	// CONFIG
+	import { AUTH_DATA } from '@/shared/config';
 
 	// UTILS
-	import { emailVerificationFormSchema } from './email-verification-form-schema.js';
+	import { emailVerificationSchema } from '@/shared/features/auth/schemas/emailVerificationSchema.js';
 	import { cn, type WithElementRef } from '@/utils/utils.js';
-	import { zodIssuesToFieldErrors } from '@/shared/utils/validationUtils.js';
-	import { rateLimitMessage } from '@/shared/utils/rateLimitMessages';
+	import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
+	import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
 
 	// TYPES
 	import type { HTMLFormAttributes } from 'svelte/elements';
@@ -26,7 +27,9 @@
 		EmailVerificationField,
 		EmailVerificationResendConfig
 	} from './emailVerificationFormTypes.js';
-	import type { FieldErrors } from '@/shared/types/types';
+	import type { FieldErrors } from '@/shared/features/validations/types/validationsTypes';
+
+	const OTP_MAX_LENGTH = AUTH_DATA.OTP_LENGTH;
 
 	const id = $props.id();
 
@@ -64,7 +67,7 @@
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
 
-		const p = emailVerificationFormSchema.safeParse({
+		const p = emailVerificationSchema.safeParse({
 			code: String(formData.get('code') ?? ''),
 			email: String(formData.get('email') ?? ''),
 			flow: String(formData.get('flow') ?? '')

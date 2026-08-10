@@ -28,7 +28,7 @@ import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
  */
 function snapshotLineName(product: ResolvedCartProduct): string {
 	const base = product.productName ?? product.productRef;
-	return product.variantLabel ? `${base} · ${product.variantLabel}` : base;
+	return product.variantLabel ? `${base} - ${product.variantLabel}` : base;
 }
 
 /**

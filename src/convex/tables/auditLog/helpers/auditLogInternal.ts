@@ -2,7 +2,7 @@
 import { v } from 'convex/values';
 
 // UTILS
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 import { components } from '@/convex/_generated/api';
 
 /**

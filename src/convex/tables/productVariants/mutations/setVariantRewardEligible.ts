@@ -17,7 +17,7 @@ import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
 
 // VALIDATORS
 import { mutationResult } from '@/convex/helpers/mutationResult';
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 export const setVariantRewardEligible = adminMutation('setVariantRewardEligible')({
 	args: {

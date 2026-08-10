@@ -56,15 +56,27 @@
 		{ value: '', label: 'Estado: todos' },
 		...ORDER_STATUSES.map((value) => ({ value, label: ORDER_STATUS_LABELS[value] }))
 	];
+
+	let search = $state('');
+
+	// MUST mirror `fetchOrders`' strategy function: the unfiltered browse is offset-paginated
+	// against the `orderBrowse` aggregate (exact totals + page jumps at any volume); search and
+	// status filters are cursor mode (search indexes are paginate-only, filtered sets have no
+	// counter). Caller and server derive the same predicate, so they always agree on which of
+	// `page` / `cursor` drives the request.
+	const optimizationStrategy = $derived(search.trim() || status.current ? 'cursor' : 'offset');
 </script>
 
 <ConvexDataTable
 	caption="Pedidos"
 	query={api.tables.orders.queries.fetchOrders.fetchOrders}
 	queryArgs={{ status: status.current ?? undefined }}
+	{optimizationStrategy}
+	numbered
 	controlsPlace="top"
 	searchable
-	searchPlaceholder="Buscar por número o cliente…"
+	bind:search
+	searchPlaceholder="Buscar por número o cliente..."
 	{columns}
 	getRowId={(r) => r._id}
 	customCells={{ number: numberCell, status: statusCell }}
@@ -72,12 +84,12 @@
 />
 
 {#snippet filters()}
+	<!-- Setter casts to `ORDER_STATUSES`, not `OrderRow['status']` — the latter also carries
+	     `draft`, which is not a filterable state (an unpaid online order is not an order yet). -->
 	<NativeSelect
 		class="w-full md:w-48"
 		ariaLabel="Filtrar por estado"
 		bind:value={
-			// `ORDER_STATUSES`, not `OrderRow['status']` — the latter also carries `draft`, which is
-			// not a filterable state (an unpaid online order is not an order yet).
 			() => status.current ?? '',
 			(v) => (status.current = v ? (v as (typeof ORDER_STATUSES)[number]) : null)
 		}

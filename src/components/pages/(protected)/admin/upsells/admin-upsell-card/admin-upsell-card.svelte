@@ -95,7 +95,7 @@
 				<span class="font-medium">{rule.triggerLabel}</span>
 			{:else if rule.trigger.kind === 'category'}
 				<span class="text-muted-foreground">cualquier producto de</span>
-				<span class="font-medium">«{rule.triggerLabel}»</span>
+				<span class="font-medium">"{rule.triggerLabel}"</span>
 			{:else}
 				<span class="font-medium">cualquier producto</span>
 				<span class="text-muted-foreground">(regla general)</span>
@@ -166,7 +166,7 @@
 			isPending={deletePending}
 			title={rule.trigger.kind === 'global'
 				? '¿Eliminar la sugerencia general?'
-				: `¿Eliminar la sugerencia de «${rule.triggerLabel}»?`}
+				: `¿Eliminar la sugerencia de "${rule.triggerLabel}"?`}
 			description="Dejará de mostrarse a los clientes. Esta acción no se puede deshacer."
 		>
 			<Trash2Icon class="size-4" />

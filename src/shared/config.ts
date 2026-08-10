@@ -3,7 +3,77 @@ export const PAGINATION_DATA = {
 	/** Server-side cap for `paginationOpts.numItems` (e.g. search dropdowns). */
 	MAX_PAGE_SIZE: 25,
 	/** Default for `DataTable` `optimizationStrategy` (see `DataTableOptimizationStrategy` in data-table `types.ts`). */
-	DEFAULT_OPTIMIZATION_STRATEGY: 'cursor' as const
+	DEFAULT_OPTIMIZATION_STRATEGY: 'cursor' as const,
+	/**
+	 * Most rows an `offset`-strategy query will read to produce an exact `totalCount`.
+	 *
+	 * Offset pagination has to materialize the whole matched set to count and slice it, so its
+	 * cost is O(matching rows). Unbounded, that walks straight into Convex's hard per-query
+	 * limits (16,384 documents / 8 MiB) and the endpoint starts throwing — a feature that
+	 * worked yesterday returns a 500 today, with no degradation in between.
+	 *
+	 * With this cap the query reads at most `OFFSET_SCAN_LIMIT + 1` rows instead. Past the cap
+	 * it stops counting and reports `totalCount: null`, which every consumer already understands
+	 * as "unknown" (it is what cursor mode returns): page numbers disappear, prev/next keeps
+	 * working, nothing throws.
+	 *
+	 * Wire an `aggregate` (see `fetchOptimized/README.md § Aggregate mode`) to remove the bound.
+	 */
+	OFFSET_SCAN_LIMIT: 10_000,
+	/**
+	 * Absolute per-request ceiling on `paginationOpts.numItems`, enforced server-side by
+	 * `resolvePaginationOpts` in every paginated endpoint. Convex endpoints are a public
+	 * API — any caller can hand-craft a request — so without this a single call could demand
+	 * a 50,000-row page and read straight into the platform limits. Per-REQUEST only: every
+	 * row stays reachable across pages; this just guarantees a page is a page.
+	 *
+	 * Distinct from `MAX_PAGE_SIZE` (25), the tighter default cap for search-suggestion
+	 * endpoints: a table may legitimately want up to this many rows per page.
+	 */
+	HARD_MAX_PAGE_SIZE: 100
+} as const;
+
+/** Exact live counters (`defineCounters`) — see `src/convex/counters.ts`. */
+export const AGGREGATE_DATA = {
+	/**
+	 * Rows processed per backfill transaction. Each batch self-schedules the next, so
+	 * backfills work at any table size — this only tunes transaction size, never a ceiling.
+	 */
+	BACKFILL_BATCH: 500
+} as const;
+
+/**
+ * Search endpoints — `createSearchQuery` (Convex).
+ */
+export const SEARCH_DATA = {
+	/** Shorter queries return an empty page before touching the index or the rate limiter. */
+	MIN_QUERY_LENGTH: 2,
+	/** Debounce for the search input before a query is issued, in ms. */
+	INPUT_DEBOUNCE_MS: 300
+} as const;
+
+/** Auth shape knobs shared by the forms and the dual-runtime auth schemas. */
+export const AUTH_DATA = {
+	/** Digits in the emailed OTP. Drives both the input's `maxlength` and the schema regex. */
+	OTP_LENGTH: 8,
+	/** Minimum password length enforced by the auth schemas. */
+	PASSWORD_MIN_LENGTH: 8
+} as const;
+
+/**
+ * Orphan-cleanup cron. The sweep pages one side and checks the counterpart per item with an
+ * indexed point lookup, self-scheduling the next batch until done — works at any table size;
+ * these tune transaction size and safety, never a ceiling.
+ */
+export const STORAGE_CLEANUP_DATA = {
+	/** Rows/objects examined per cleanup transaction; a full batch self-schedules the next. */
+	BATCH: 500,
+	/**
+	 * Never delete an object younger than this. Uploads write the object FIRST and its
+	 * registry row a moment later — without a grace window the sweep could destroy an
+	 * in-flight upload that legitimately has no row yet.
+	 */
+	GRACE_MS: 60 * 60 * 1000 // 1 hour
 } as const;
 
 /**
@@ -20,10 +90,6 @@ export const BATCH_CONFIG = {
 	ORDER_EXPIRE: 200,
 	/** `purgeStaleAuditLogs` — hard cap per run so a post-downtime backlog can't blow the budget. */
 	AUDIT_PURGE: 5_000,
-	/** `cleanupOrphanDataR2` — R2 metadata keys per page, and pages walked per run. Orphans past
-	 *  `PAGE_SIZE * MAX_PAGES` wait for the next sweep. */
-	R2_CLEANUP_PAGE_SIZE: 200,
-	R2_CLEANUP_MAX_PAGES: 25,
 	/** `createDeleteMutation` — default cap on `ids.length` per request. Overridable per call site. */
 	DELETE_MUTATION: 200
 } as const;
@@ -43,7 +109,9 @@ export const UPLOADS_CONFIG = {
 	 * Keys are permanent: renaming a prefix here does NOT move existing objects, so add new
 	 * values rather than editing old ones.
 	 */
-	ALLOWED_KEY_PREFIXES: ['products', 'categories']
+	ALLOWED_KEY_PREFIXES: ['products', 'categories'],
+	/** Target size the client-side image optimizer compresses down to, in MB. */
+	CLIENT_OPTIMIZE_TARGET_MB: 1
 } as const;
 
 const WHATSAPP_NUMBER = '5214499409233';
@@ -71,7 +139,7 @@ export const COMPANY_DATA = {
 	DOMAIN: 'vindima-fullstack.vercel.app',
 	LOGO: '/logo/opt/logo-1536w.webp',
 	DESCRIPTION:
-		'Vinícola orgánica · vinos de autor, charcutería y experiencias para grandes anfitriones.',
+		'Vinícola orgánica - vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
 	ADDRESS: {
@@ -90,21 +158,21 @@ export const COMPANY_DATA = {
 	HOURS: [
 		{
 			DAYS: 'Martes y Miércoles',
-			TIME: '1:00 PM – 9:15 PM',
+			TIME: '1:00 PM -9:15 PM',
 			SCHEMA_DAYS: ['Tuesday', 'Wednesday'],
 			OPENS: '13:00',
 			CLOSES: '21:15'
 		},
 		{
 			DAYS: 'Jueves, Viernes y Sábado',
-			TIME: '1:00 PM – 10:30 PM',
+			TIME: '1:00 PM -10:30 PM',
 			SCHEMA_DAYS: ['Thursday', 'Friday', 'Saturday'],
 			OPENS: '13:00',
 			CLOSES: '22:30'
 		},
 		{
 			DAYS: 'Domingo',
-			TIME: '1:00 PM – 5:00 PM',
+			TIME: '1:00 PM -5:00 PM',
 			SCHEMA_DAYS: ['Sunday'],
 			OPENS: '13:00',
 			CLOSES: '17:00'
@@ -227,7 +295,7 @@ export const SHOP_CONFIG = {
 	 * cards the grid stops reading as "pick one" and starts reading as a list to scroll.
 	 * Extra categories stay fully reachable at their own `/shop/<slug>` pages.
 	 */
-	MAX_ROOT_CATEGORIES: 6,
+	MAX_ROOT_CATEGORIES: 9,
 	/**
 	 * Store-local day boundaries for the admin dashboard (period windows), as a fixed UTC
 	 * offset in minutes. -360 = UTC-6 (Mexico City, no DST since 2022). Analytics rollups
@@ -235,12 +303,6 @@ export const SHOP_CONFIG = {
 	 * ponytail: fixed offset, swap to an IANA-timezone computation if a store with DST needs it.
 	 */
 	DASHBOARD_UTC_OFFSET_MINUTES: -360,
-	/**
-	 * Server-side bound on the products one `/shop/[category]` page returns (all at once,
-	 * no pagination — a storefront category is a scrollable menu, not a directory). Far above
-	 * any realistic catalog; raise it before a category legitimately outgrows it.
-	 */
-	MAX_PRODUCTS_PER_CATEGORY: 200,
 	/** Newest orders shown in compact surfaces (account club-card history strip). Server-side `take`. */
 	MY_ORDERS_PREVIEW_LIMIT: 3
 } as const;

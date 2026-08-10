@@ -6,7 +6,7 @@ import { authComponent, createAuth } from '@/convex/auth/auth';
 import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
 import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
 import { mutationResult } from '@/convex/helpers/mutationResult';
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 /**
  * Envelope for the admin mutations below (the shared `{ success, message, data? }` shape).
@@ -20,7 +20,6 @@ import type { ConvexMutationResult } from '@/convex/types/convexTypes';
  *   `safeMutation` → `handleConvexError`, which toasts and returns `null`.
  *   The dialog sees `null` and bails before the dispatch.
  */
-
 
 /**
  * Set a user's role.

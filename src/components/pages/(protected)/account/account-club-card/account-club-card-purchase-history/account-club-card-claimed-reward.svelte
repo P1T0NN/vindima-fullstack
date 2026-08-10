@@ -70,7 +70,7 @@
 	<p class="text-sm leading-snug text-accent">
 		Artículo gratis reservado:
 		<strong class="font-semibold">{claimName}</strong>
-		<span class="text-muted-foreground"> · Lo agregaremos a tu próximo pedido.</span>
+		<span class="text-muted-foreground">- Lo agregaremos a tu próximo pedido.</span>
 	</p>
 	<ActionButton
 		function={changeChoice}

@@ -37,7 +37,7 @@
 	import { createProductSections } from '@/shared/features/products/forms/createProductForm';
 
 	// UTILS
-	import { zodIssuesForArrayItem } from '@/shared/utils/validationUtils';
+	import { zodIssuesForArrayItem } from '@/features/validations/utils/fieldErrors';
 
 	// TYPES
 	import type { MutationFormExtraFieldsProps } from '@/components/ui/mutation-form/types';
@@ -81,7 +81,11 @@
 	}
 </script>
 
-<SvelteHead title="Nuevo producto" noindex description="Crea un nuevo producto en el catálogo de Vindima." />
+<SvelteHead
+	title="Nuevo producto"
+	noindex
+	description="Crea un nuevo producto en el catálogo de Vindima."
+/>
 
 <section class="{PAGE_CONTAINER} flex flex-col gap-6 py-4 md:py-6">
 	<AddProductHeader />
@@ -108,7 +112,7 @@
 				Lo que vendes: al menos una. La referencia es permanente una vez creada.
 			</CardDescription>
 		</CardHeader>
-		
+
 		<CardContent class="flex flex-col gap-3">
 			{#each variantIndexes as i (i)}
 				<VariantFormCard

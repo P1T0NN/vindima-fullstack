@@ -11,6 +11,9 @@
 	import { appHref } from '@/utils/app-navigation.js';
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 	import { cn } from '@/utils/utils.js';
+
+	// LUCIDE ICONS
+	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 </script>
 
 <Section
@@ -71,9 +74,13 @@
 					Conoce a Alby
 				</h3>
 				<p class="mb-4 max-w-md text-[15px] leading-[1.85] text-foreground/75">
-					Alby fundó Vindima con una convicción: los mejores momentos pasan alrededor de la mesa. Su
-					historia con el vino empezó en casa, sirviendo a los suyos, y creció hasta convertirse en
-					este espacio en Aguascalientes.
+					Alby creó Vindima con una intención muy clara: que más personas pudieran descubrir y disfrutar el vino orgánico de Bodegas de la Parra, hecho en Aguascalientes.
+
+					También quiso crear un espacio para celebrar el placer de reunirse, conversar y compartir.
+
+					En Vindima selecciona vinos, quesos y productos artesanales para encontrar el maridaje que haga especial cada momento: una copa para acompañar una conversación, una tabla para elevar una reunión o algo especial para llevar y compartir.
+
+					Vindima existe para descubrir, maridar y disfrutar más el tiempo que compartimos.
 				</p>
 				<p class="mb-6 max-w-md text-[15px] leading-[1.85] text-foreground/75">
 					Hoy cura cada tabla, elige cada botella y recibe a cada mesa como recibe en su casa.
@@ -82,8 +89,8 @@
 					<p
 						class="max-w-md font-display text-xl leading-snug text-accent italic sm:text-[22px] sm:leading-normal"
 					>
-						«Ser una gran anfitriona es hacer que cada persona se sienta esperada. Vindima existe
-						para compartir eso: el vino, el pan y la buena mesa.»
+						"Ser una gran anfitriona es hacer que cada persona se sienta esperada. Vindima existe
+						para compartir eso: el vino, el pan y la buena mesa."
 					</p>
 				</blockquote>
 			</div>
@@ -110,19 +117,17 @@
 
 		<div class="relative mx-auto max-w-xl text-center">
 			<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Desde 2023</p>
+			
 			<h3
 				class="mb-6 font-display text-3xl leading-tight font-semibold tracking-[0.01em] text-accent-foreground uppercase sm:text-4xl lg:text-[44px]"
 			>
 				La historia de Vindima
 			</h3>
+
 			<p class="mb-4 text-[15px] leading-[1.9] text-accent-surface-muted">
-				Vindima nació en 2023 en el corazón de Aguascalientes con una idea simple: reunir a la gente
-				alrededor de buen vino y comida hecha con las manos. Trabajamos con productores locales,
-				fermentamos nuestro propio pan y curamos charcutería de temporada.
-			</p>
-			<p class="text-[15px] leading-[1.9] text-accent-surface-muted">
-				Cada tabla, cada copa y cada tapa está pensada para grandes anfitriones: para esos momentos
-				en que la mesa se vuelve el mejor lugar de la casa.
+				Vindima nació en 2023 en Aguascalientes para acercar a más personas al vino orgánico mexicano y celebrar el placer de compartir una mesa.
+
+				Vinos, quesos, charcutería, productos artesanales, tablas y tapas, pensados para disfrutar en Vindima o llevar a una reunión. Cada tabla, cada copa y cada tapa está pensada para grandes anfitriones: para esos momentos en que la mesa se vuelve el mejor lugar de la casa.
 			</p>
 		</div>
 	</div>
@@ -146,7 +151,7 @@
 					autor, de producción limitada, que servimos por copa y botella.
 				</p>
 				<Button href={appHref(UNPROTECTED_PAGE_ENDPOINTS.MARIDAJES)} variant="outline" size="lg">
-					Conoce nuestros vinos →
+					Conoce nuestros vinos <ArrowRightIcon class="size-4" strokeWidth={1.75} />
 				</Button>
 			</div>
 
@@ -159,7 +164,7 @@
 				loading="lazy"
 				width="960"
 				height="384"
-				src="/root/opt/espacio-3-960w.webp"
+				src="/root/opt/foto-del-vinedo-960w.webp"
 			/>
 		</div>
 	</div>

@@ -1,7 +1,7 @@
 // LIBRARIES
 import { ConvexError, v } from 'convex/values';
 import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
-import { mutation } from '../_generated/server';
+import { mutation } from '@/convex/functions';
 
 // CONFIG
 import { BATCH_CONFIG } from '@/shared/config.js';
@@ -14,8 +14,9 @@ import { logAudit } from '../tables/auditLog/helpers/logAudit';
 // TYPES
 import type { MutationCtx } from '../_generated/server';
 import type { Doc, TableNames } from '../_generated/dataModel';
-import type { ConvexRateLimitName } from '../rateLimits/registry.js';
-import type { ConvexMutationResult, TranslatableMessage } from '../types/convexTypes.js';
+import type { ConvexRateLimitName } from '@/shared/features/rateLimits/types/rateLimitsTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
+import type { TranslatableMessage } from '@/shared/features/validations/types/validationsTypes';
 import type { AuditAction } from '../tables/auditLog/auditLogConfigs';
 
 // ─── Config types ────────────────────────────────────────────────────────────

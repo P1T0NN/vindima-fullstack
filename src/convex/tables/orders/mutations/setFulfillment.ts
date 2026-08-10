@@ -1,13 +1,10 @@
 // LIBRARIES
 import { ConvexError, v } from 'convex/values';
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
-// HELPERS
-import { orderCountAggregate } from '../helpers/orderCountAggregate';
-
 // TYPES
-import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
+import type { ConvexErrorPayload } from '@/shared/types/types';
 
 /**
  * Internal (admin) — advance post-payment fulfillment (`processing → shipped → delivered`).
@@ -34,9 +31,9 @@ export const setFulfillment = internalMutation({
 				message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' }
 			} satisfies ConvexErrorPayload);
 		}
+		// Work-queue counter follows automatically: `delivered` moves the order open → closed,
+		// other stages keep it open — see `convex/counters.ts`.
 		await ctx.db.patch(order._id, { fulfillment: args.fulfillment });
-		// Work-queue counter: `delivered` moves the order open → closed; other stages keep it open.
-		await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
 
 		// O3/O4 — "en camino" (delivery) or "listo para recoger" (pickup); one template branches
 		// on delivery kind. `EmailSystemDesign.md` §4.2. Only the `shipped` transition emails —

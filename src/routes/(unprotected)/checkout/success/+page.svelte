@@ -342,7 +342,7 @@
 										<SparklesIcon class="size-3 text-chart-2" strokeWidth={2} />
 										<span class="text-gold-ink">Recompensa</span>
 									{:else}
-										{line.qty} × {money(line.unitPriceMinor)}
+										{line.qty} x {money(line.unitPriceMinor)}
 									{/if}
 								</p>
 							</div>
@@ -365,7 +365,7 @@
 					{#if order.amounts.welcomeDiscountMinor > 0}
 						<div class="flex justify-between text-gold-ink">
 							<span>Descuento por primer pedido</span>
-							<span class="tabular-nums">−{money(order.amounts.welcomeDiscountMinor)}</span>
+							<span class="tabular-nums">-{money(order.amounts.welcomeDiscountMinor)}</span>
 						</div>
 					{/if}
 					<div class="flex justify-between text-muted-foreground">

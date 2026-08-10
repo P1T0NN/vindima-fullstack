@@ -23,7 +23,7 @@ import { validateUpsellRule } from '../helpers/validateUpsellRule';
 
 // VALIDATORS
 import { mutationResult } from '@/convex/helpers/mutationResult';
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 export const createUpsellRule = adminMutation('createUpsellRule')({
 	args: zodToConvexFields(createUpsellRuleSchema.shape),
@@ -35,7 +35,8 @@ export const createUpsellRule = adminMutation('createUpsellRule')({
 
 		// Authoritative re-run of the shared schema (shape + item bounds).
 		const parsed = createUpsellRuleSchema.safeParse(args);
-		if (!parsed.success) return { success: false, message: { key: 'UpsellsMessages.INVALID_ITEMS' } };
+		if (!parsed.success)
+			return { success: false, message: { key: 'UpsellsMessages.INVALID_ITEMS' } };
 
 		const validation = await validateUpsellRule(ctx, parsed.data.trigger, parsed.data.itemRefs);
 		if (!validation.ok) return { success: false, message: { key: validation.key } };

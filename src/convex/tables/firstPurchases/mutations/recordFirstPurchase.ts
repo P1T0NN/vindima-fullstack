@@ -1,6 +1,6 @@
 // LIBRARIES
 import { v } from 'convex/values';
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 
 // ANALYTICS
 import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';

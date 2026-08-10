@@ -1,12 +1,12 @@
 // LIBRARIES
 import { ConvexError, v } from 'convex/values';
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 
 // CONFIG
 import { FEATURES } from '@/shared/config.js';
 
 // TYPES
-import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
+import type { ConvexErrorPayload } from '@/shared/types/types';
 import type { Id } from '@/convex/_generated/dataModel';
 
 /**

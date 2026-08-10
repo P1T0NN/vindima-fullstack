@@ -21,7 +21,8 @@
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import CircleAlertIcon from '@lucide/svelte/icons/circle-alert';
 
-	// Rendered inside ConvexDataList's <li> (see /admin/rewards).
+	// Rendered BARE as a direct child of ConvexDataList's container (see /admin/rewards) — this
+	// component owns its own root element, which is what the list's `divide-y` divides.
 	let { item }: { item: RewardItemRow } = $props();
 
 	const convex = useConvexClient();
@@ -30,7 +31,7 @@
 	const displayName = $derived(
 		item.product
 			? item.label
-				? `${item.product.name} · ${item.label}`
+				? `${item.product.name} - ${item.label}`
 				: item.product.name
 			: item.ref
 	);

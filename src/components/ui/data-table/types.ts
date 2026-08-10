@@ -10,17 +10,9 @@ import type { Snippet } from 'svelte';
  */
 export type DataTableOptimizationStrategy = 'cursor' | 'offset';
 
-/**
- * Shape returned by paginated list adapters. `totalCount` is `null` in cursor mode
- * and a finite number in offset mode. `continueCursor` is opaque in cursor mode
- * and the empty string in offset mode.
- */
-export type PaginatedListPayload<T = unknown> = {
-	page: T[];
-	isDone: boolean;
-	continueCursor: string;
-	totalCount: number | null;
-};
+// `PaginatedListPayload` lives in `@/shared/features/pagination/types/paginationTypes` —
+// Convex queries declare it as their return type, and this file imports `Snippet` from
+// `svelte`, so it must not be the home of a type the backend needs. Import it from there.
 
 /** Minimum breakpoint at which the column becomes visible in the table layout. */
 export type ColumnHideBelow = 'sm' | 'md' | 'lg';

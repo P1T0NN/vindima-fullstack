@@ -46,7 +46,7 @@ not an order in any observable sense:
 | Admin order search               | A draft is written **without** `searchText`, so it is not in the `search_text` index at all    |
 | Admin order detail               | `fetchOrderForAdmin` returns `null` for a draft                                                 |
 | Guest tracking by number         | `fetchOrderByNumber` returns `null` for a draft                                                 |
-| Dashboard work queue             | `orderCountAggregate` gives drafts their own `draft` namespace, which nothing reads            |
+| Dashboard work queue             | the `orderCounts` counter gives drafts their own `draft` namespace, which nothing reads            |
 | Analytics / stamps / claims      | All fire in `markOrderPaid`, which a draft only reaches by being paid                          |
 
 **Settlement is unchanged in shape.** `markOrderPaid` now accepts `draft` alongside `pending`

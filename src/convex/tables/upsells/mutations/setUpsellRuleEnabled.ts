@@ -13,7 +13,7 @@ import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
 
 // VALIDATORS
 import { mutationResult } from '@/convex/helpers/mutationResult';
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 export const setUpsellRuleEnabled = adminMutation('setUpsellRuleEnabled')({
 	args: { ruleId: v.id('upsells'), enabled: v.boolean() },

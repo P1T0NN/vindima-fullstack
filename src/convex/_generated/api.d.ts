@@ -10,7 +10,6 @@
 
 import type * as analytics_analytics from "../analytics/analytics.js";
 import type * as analytics_index from "../analytics/index.js";
-import type * as analytics_queries_analyticsQueries from "../analytics/queries/analyticsQueries.js";
 import type * as auth_auth from "../auth/auth.js";
 import type * as auth_authRoutes from "../auth/authRoutes.js";
 import type * as auth_convexCreateAuthRateLimitHook from "../auth/convexCreateAuthRateLimitHook.js";
@@ -20,6 +19,7 @@ import type * as auth_middleware_authMiddleware from "../auth/middleware/authMid
 import type * as auth_queries_authQueries from "../auth/queries/authQueries.js";
 import type * as auth_utils_getEmailFromAuthBody from "../auth/utils/getEmailFromAuthBody.js";
 import type * as convexRateLimiter from "../convexRateLimiter.js";
+import type * as counters from "../counters.js";
 import type * as crons from "../crons.js";
 import type * as emails_helpers_getOrderForEmail from "../emails/helpers/getOrderForEmail.js";
 import type * as emails_helpers_getRewardEmailData from "../emails/helpers/getRewardEmailData.js";
@@ -38,20 +38,20 @@ import type * as emails_templates_orderShippedEmail from "../emails/templates/or
 import type * as emails_templates_orderSummaryTable from "../emails/templates/orderSummaryTable.js";
 import type * as emails_templates_rewardExpiryWarningEmail from "../emails/templates/rewardExpiryWarningEmail.js";
 import type * as emails_templates_rewardUnlockedEmail from "../emails/templates/rewardUnlockedEmail.js";
+import type * as functions from "../functions.js";
 import type * as helpers_convexGetRateLimitedUserId from "../helpers/convexGetRateLimitedUserId.js";
 import type * as helpers_createDeleteMutation from "../helpers/createDeleteMutation.js";
-import type * as helpers_fetchOptimized_createSearchQuery from "../helpers/fetchOptimized/createSearchQuery.js";
-import type * as helpers_fetchOptimized_fetchOptimized from "../helpers/fetchOptimized/fetchOptimized.js";
-import type * as helpers_fetchOptimized_index from "../helpers/fetchOptimized/index.js";
-import type * as helpers_fetchOptimized_kit from "../helpers/fetchOptimized/kit.js";
-import type * as helpers_fetchOptimized_types from "../helpers/fetchOptimized/types.js";
 import type * as helpers_mutationResult from "../helpers/mutationResult.js";
-import type * as helpers_paginationHelpers from "../helpers/paginationHelpers.js";
 import type * as helpers_resolveUploadedImages from "../helpers/resolveUploadedImages.js";
 import type * as http from "../http.js";
+import type * as pagination_fetchOptimized_createSearchQuery from "../pagination/fetchOptimized/createSearchQuery.js";
+import type * as pagination_fetchOptimized_fetchOptimized from "../pagination/fetchOptimized/fetchOptimized.js";
+import type * as pagination_fetchOptimized_index from "../pagination/fetchOptimized/index.js";
+import type * as pagination_fetchOptimized_kit from "../pagination/fetchOptimized/kit.js";
+import type * as pagination_fetchOptimized_types from "../pagination/fetchOptimized/types.js";
+import type * as pagination_paginationHelpers from "../pagination/paginationHelpers.js";
 import type * as rateLimits_convexCreateRateLimit from "../rateLimits/convexCreateRateLimit.js";
 import type * as rateLimits_convexCreateRateLimitInternal from "../rateLimits/convexCreateRateLimitInternal.js";
-import type * as rateLimits_registry from "../rateLimits/registry.js";
 import type * as rateLimits_searchRateLimitMutations from "../rateLimits/searchRateLimitMutations.js";
 import type * as storage_crons_cleanupOrphanDataR2 from "../storage/crons/cleanupOrphanDataR2.js";
 import type * as storage_r2_buildR2PublicObjectUrl from "../storage/r2/buildR2PublicObjectUrl.js";
@@ -99,11 +99,9 @@ import type * as tables_orders_helpers_buildOrderSearchText from "../tables/orde
 import type * as tables_orders_helpers_calculateOrderPrice from "../tables/orders/helpers/calculateOrderPrice.js";
 import type * as tables_orders_helpers_getOrderForPayment from "../tables/orders/helpers/getOrderForPayment.js";
 import type * as tables_orders_helpers_isSameDraftInput from "../tables/orders/helpers/isSameDraftInput.js";
-import type * as tables_orders_helpers_orderCountAggregate from "../tables/orders/helpers/orderCountAggregate.js";
 import type * as tables_orders_helpers_orderDetail from "../tables/orders/helpers/orderDetail.js";
 import type * as tables_orders_helpers_orderUrls from "../tables/orders/helpers/orderUrls.js";
 import type * as tables_orders_http_stripeWebhook from "../tables/orders/http/stripeWebhook.js";
-import type * as tables_orders_mutations_backfillOrderCounts from "../tables/orders/mutations/backfillOrderCounts.js";
 import type * as tables_orders_mutations_cancelMyOrder from "../tables/orders/mutations/cancelMyOrder.js";
 import type * as tables_orders_mutations_markOrderPaid from "../tables/orders/mutations/markOrderPaid.js";
 import type * as tables_orders_mutations_markOrderRefunded from "../tables/orders/mutations/markOrderRefunded.js";
@@ -192,7 +190,6 @@ import type * as tables_upsells_schemas_upsellsSchema from "../tables/upsells/sc
 import type * as tables_upsells_validators_upsellsValidators from "../tables/upsells/validators/upsellsValidators.js";
 import type * as tables_users_userMutations from "../tables/users/userMutations.js";
 import type * as tables_users_userQueries from "../tables/users/userQueries.js";
-import type * as types_convexTypes from "../types/convexTypes.js";
 
 import type {
   ApiFromModules,
@@ -203,7 +200,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   "analytics/analytics": typeof analytics_analytics;
   "analytics/index": typeof analytics_index;
-  "analytics/queries/analyticsQueries": typeof analytics_queries_analyticsQueries;
   "auth/auth": typeof auth_auth;
   "auth/authRoutes": typeof auth_authRoutes;
   "auth/convexCreateAuthRateLimitHook": typeof auth_convexCreateAuthRateLimitHook;
@@ -213,6 +209,7 @@ declare const fullApi: ApiFromModules<{
   "auth/queries/authQueries": typeof auth_queries_authQueries;
   "auth/utils/getEmailFromAuthBody": typeof auth_utils_getEmailFromAuthBody;
   convexRateLimiter: typeof convexRateLimiter;
+  counters: typeof counters;
   crons: typeof crons;
   "emails/helpers/getOrderForEmail": typeof emails_helpers_getOrderForEmail;
   "emails/helpers/getRewardEmailData": typeof emails_helpers_getRewardEmailData;
@@ -231,20 +228,20 @@ declare const fullApi: ApiFromModules<{
   "emails/templates/orderSummaryTable": typeof emails_templates_orderSummaryTable;
   "emails/templates/rewardExpiryWarningEmail": typeof emails_templates_rewardExpiryWarningEmail;
   "emails/templates/rewardUnlockedEmail": typeof emails_templates_rewardUnlockedEmail;
+  functions: typeof functions;
   "helpers/convexGetRateLimitedUserId": typeof helpers_convexGetRateLimitedUserId;
   "helpers/createDeleteMutation": typeof helpers_createDeleteMutation;
-  "helpers/fetchOptimized/createSearchQuery": typeof helpers_fetchOptimized_createSearchQuery;
-  "helpers/fetchOptimized/fetchOptimized": typeof helpers_fetchOptimized_fetchOptimized;
-  "helpers/fetchOptimized/index": typeof helpers_fetchOptimized_index;
-  "helpers/fetchOptimized/kit": typeof helpers_fetchOptimized_kit;
-  "helpers/fetchOptimized/types": typeof helpers_fetchOptimized_types;
   "helpers/mutationResult": typeof helpers_mutationResult;
-  "helpers/paginationHelpers": typeof helpers_paginationHelpers;
   "helpers/resolveUploadedImages": typeof helpers_resolveUploadedImages;
   http: typeof http;
+  "pagination/fetchOptimized/createSearchQuery": typeof pagination_fetchOptimized_createSearchQuery;
+  "pagination/fetchOptimized/fetchOptimized": typeof pagination_fetchOptimized_fetchOptimized;
+  "pagination/fetchOptimized/index": typeof pagination_fetchOptimized_index;
+  "pagination/fetchOptimized/kit": typeof pagination_fetchOptimized_kit;
+  "pagination/fetchOptimized/types": typeof pagination_fetchOptimized_types;
+  "pagination/paginationHelpers": typeof pagination_paginationHelpers;
   "rateLimits/convexCreateRateLimit": typeof rateLimits_convexCreateRateLimit;
   "rateLimits/convexCreateRateLimitInternal": typeof rateLimits_convexCreateRateLimitInternal;
-  "rateLimits/registry": typeof rateLimits_registry;
   "rateLimits/searchRateLimitMutations": typeof rateLimits_searchRateLimitMutations;
   "storage/crons/cleanupOrphanDataR2": typeof storage_crons_cleanupOrphanDataR2;
   "storage/r2/buildR2PublicObjectUrl": typeof storage_r2_buildR2PublicObjectUrl;
@@ -292,11 +289,9 @@ declare const fullApi: ApiFromModules<{
   "tables/orders/helpers/calculateOrderPrice": typeof tables_orders_helpers_calculateOrderPrice;
   "tables/orders/helpers/getOrderForPayment": typeof tables_orders_helpers_getOrderForPayment;
   "tables/orders/helpers/isSameDraftInput": typeof tables_orders_helpers_isSameDraftInput;
-  "tables/orders/helpers/orderCountAggregate": typeof tables_orders_helpers_orderCountAggregate;
   "tables/orders/helpers/orderDetail": typeof tables_orders_helpers_orderDetail;
   "tables/orders/helpers/orderUrls": typeof tables_orders_helpers_orderUrls;
   "tables/orders/http/stripeWebhook": typeof tables_orders_http_stripeWebhook;
-  "tables/orders/mutations/backfillOrderCounts": typeof tables_orders_mutations_backfillOrderCounts;
   "tables/orders/mutations/cancelMyOrder": typeof tables_orders_mutations_cancelMyOrder;
   "tables/orders/mutations/markOrderPaid": typeof tables_orders_mutations_markOrderPaid;
   "tables/orders/mutations/markOrderRefunded": typeof tables_orders_mutations_markOrderRefunded;
@@ -385,7 +380,6 @@ declare const fullApi: ApiFromModules<{
   "tables/upsells/validators/upsellsValidators": typeof tables_upsells_validators_upsellsValidators;
   "tables/users/userMutations": typeof tables_users_userMutations;
   "tables/users/userQueries": typeof tables_users_userQueries;
-  "types/convexTypes": typeof types_convexTypes;
 }>;
 
 /**
@@ -420,4 +414,5 @@ export declare const components: {
   r2: import("@convex-dev/r2/_generated/component.js").ComponentApi<"r2">;
   analytics: import("@piton-/analytics-convex/_generated/component.js").ComponentApi<"analytics">;
   orderCounts: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"orderCounts">;
+  orderBrowse: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"orderBrowse">;
 };

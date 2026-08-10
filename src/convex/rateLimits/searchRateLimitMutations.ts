@@ -1,17 +1,17 @@
-// LIBRARIES
+﻿// LIBRARIES
 import { ConvexError, v } from 'convex/values';
 
 // CONVEX
-import { mutation } from '../_generated/server';
+import { mutation } from '@/convex/functions';
 import { convexRateLimiter } from '../convexRateLimiter';
 import { getAuthUserId } from '../auth/helpers/getAuthUserId';
 
 // CONFIG
-import { convexRateLimitRegistry } from './registry';
+import { convexRateLimitRegistry } from '@/shared/features/rateLimits/data/rateLimitsRegistry';
 
 // TYPES
-import type { ConvexErrorPayload } from '../types/convexTypes';
-import type { ConvexRateLimitName } from './registry';
+import type { ConvexErrorPayload } from '@/shared/types/types';
+import type { ConvexRateLimitName } from '@/shared/features/rateLimits/types/rateLimitsTypes';
 
 const SEARCH_LIMIT_SECRET_ENV = 'SEARCH_INPUT_RATE_LIMIT_SECRET';
 const AUTHENTICATED_KEY_MODES = ['user', 'fallback', 'userAndFallback'] as const;

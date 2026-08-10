@@ -32,7 +32,7 @@
 
 	// UTILS
 	import { cn } from '@/utils/utils.js';
-	import { zodIssuesToFieldErrors } from '@/shared/utils/validationUtils.js';
+	import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
 	import { useProgress } from '@/features/uploadFile/utils/useProgress.svelte';
 	import { Progress } from '@/components/ui/progress/index.js';
 	import { hasUploadFields } from './utils.js';

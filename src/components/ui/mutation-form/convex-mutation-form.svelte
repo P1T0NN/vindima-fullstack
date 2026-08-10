@@ -2,7 +2,7 @@
 	// LIBRARIES
 	import { useConvexClient } from '@mmailaender/convex-svelte';
 	import { toast } from 'svelte-sonner';
-	import type { ZodIssue, ZodType } from 'zod';
+	import type { ZodType } from 'zod';
 
 	// CONFIG
 
@@ -11,7 +11,7 @@
 
 	// UTILS
 	import { safeMutation, uploadFileToR2 } from '@/utils/convexHelpers';
-	import { translateFromBackend } from '@/utils/translateFromBackend';
+	import { translateFromBackend } from '@/features/validations/utils/translateFromBackend';
 	import { processUploadFields } from './utils.js';
 
 	// TYPES

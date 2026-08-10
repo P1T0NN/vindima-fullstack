@@ -92,5 +92,5 @@
 		: 'Esto es permanente y se extiende a sesiones y cuentas. Escribe el correo abajo para confirmar.'}
 	body={role !== 'admin' ? deleteForm : undefined}
 >
-	Eliminar…
+	Eliminar...
 </ActionButton>

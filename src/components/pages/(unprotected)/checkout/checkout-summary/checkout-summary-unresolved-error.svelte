@@ -30,7 +30,7 @@
 		<span class="text-xs text-muted-foreground">
 			{unavailable
 				? 'Ya no está disponible'
-				: `${line.qty} × ${money(product.unitPriceMinor ?? 0)}`}
+				: `${line.qty} x ${money(product.unitPriceMinor ?? 0)}`}
 		</span>
 	</span>
 	{#if !unavailable}

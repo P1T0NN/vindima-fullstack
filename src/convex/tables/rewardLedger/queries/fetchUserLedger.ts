@@ -8,7 +8,7 @@
 import { v } from 'convex/values';
 
 // HELPERS
-import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
+import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
 
 export const fetchUserLedger = fetchOptimized({
 	table: 'rewardLedger',

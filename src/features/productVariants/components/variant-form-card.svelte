@@ -76,10 +76,10 @@
 			{:else}
 				<FieldDescription>
 					{#if refLocked}
-						Bloqueada — este código ya se usa en pedidos y carritos anteriores, así que no puede
+						Bloqueada - este código ya se usa en pedidos y carritos anteriores, así que no puede
 						cambiarse.
 					{:else}
-						Código breve que identifica esta opción — se rellena automáticamente a partir del
+						Código breve que identifica esta opción - se rellena automáticamente a partir del
 						producto y la etiqueta. Los clientes no lo ven y, una vez guardado, no se puede
 						cambiar.
 					{/if}
@@ -114,7 +114,7 @@
 		<FieldLabel for="label-{index}">Etiqueta</FieldLabel>
 		<Input id="label-{index}" bind:value={variant.label} placeholder="Grande" />
 		<FieldDescription>
-			Opcional — nombre de la opción que ven los clientes (Pequeño, Grande, Copa, Botella…).
+			Opcional - nombre de la opción que ven los clientes (Pequeño, Grande, Copa, Botella...).
 			Déjalo vacío si el producto solo se vende en una opción.
 		</FieldDescription>
 	</Field>

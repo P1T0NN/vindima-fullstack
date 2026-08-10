@@ -6,6 +6,6 @@
 	<h1 class="text-2xl font-semibold tracking-tight">Sugerencias</h1>
 	<p class="text-sm text-muted-foreground">
 		Cuando un cliente agrega un producto al carrito, puedes sugerirle otros. Si varias
-		sugerencias aplican, se muestra solo la más específica: producto → categoría → general.
+		sugerencias aplican, se muestra solo la más específica: producto > categoría > general.
 	</p>
 </header>

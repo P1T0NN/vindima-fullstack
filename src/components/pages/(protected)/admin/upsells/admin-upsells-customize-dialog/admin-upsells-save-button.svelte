@@ -65,7 +65,7 @@
 <Button onclick={save} disabled={!canSubmit || saving}>
 	{#if saving}
 		<Spinner class="size-3.5" />
-		Guardando…
+		Guardando...
 	{:else if rule}
 		Guardar cambios
 	{:else}

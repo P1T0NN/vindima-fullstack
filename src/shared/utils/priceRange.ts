@@ -17,10 +17,10 @@ export function priceRange(
 	variants: { priceMinor: number }[],
 	currency: string = CART_CONFIG.CURRENCY
 ): string {
-	if (variants.length === 0) return '—';
+	if (variants.length === 0) return '-';
 	const prices = variants.map((v) => v.priceMinor);
 	const min = Math.min(...prices);
 	const max = Math.max(...prices);
 	const fmt = (n: number) => formatMoneyMinor(n, currency);
-	return min === max ? fmt(min) : `${fmt(min)} – ${fmt(max)}`;
+	return min === max ? fmt(min) : `${fmt(min)} - ${fmt(max)}`;
 }

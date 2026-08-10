@@ -1,6 +1,6 @@
 // LIBRARIES
 import { v } from 'convex/values';
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 
 // CONFIG
 import { FEATURES } from '@/shared/config.js';

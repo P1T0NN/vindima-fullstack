@@ -30,7 +30,7 @@ export function orderPaidEmail(
 	let rewardLine = '';
 	if (reward) {
 		rewardLine = reward.completedCard
-			? p(`Este pedido completó tu tarjeta — tienes un artículo gratis esperándote.`, true)
+			? p(`Este pedido completó tu tarjeta - tienes un artículo gratis esperándote.`, true)
 			: p(`Este pedido suma 1 sello a tu tarjeta (${reward.stamps} de ${reward.perReward}).`, true);
 	}
 
@@ -67,7 +67,7 @@ export function orderPaidEmail(
 		'',
 		reward
 			? reward.completedCard
-				? 'Este pedido completó tu tarjeta — tienes un artículo gratis esperándote.'
+				? 'Este pedido completó tu tarjeta - tienes un artículo gratis esperándote.'
 				: `Este pedido suma 1 sello a tu tarjeta (${reward.stamps} de ${reward.perReward}).`
 			: '',
 		nextLine,

@@ -13,11 +13,6 @@
 	import AdminDashboardTopList from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-top-list.svelte';
 	import AdminDashboardLoading from '@/components/pages/(protected)/admin/dashboard/loading/admin-dashboard-loading.svelte';
 
-	// TEMP — UI preview mock (see admin-dashboard-mock-data.ts). Flip to `false` (or delete the
-	// flag, the import, and the mock file) to go back to the real query.
-	import { createMockDashboard } from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-mock-data';
-	const USE_MOCK = true;
-
 	// TYPES
 	import type { DashboardPeriod } from '@/shared/features/orders/types/ordersTypes';
 
@@ -29,9 +24,7 @@
 	// browser refresh gives fresh data). A new promise per period; `{#await}` below renders
 	// pending/loaded/error and always tracks the latest, so no manual race/loading state.
 	const dashboard = $derived(
-		USE_MOCK
-			? Promise.resolve(createMockDashboard(period))
-			: convex.query(api.tables.orders.queries.fetchDashboard.fetchDashboard, { period })
+		convex.query(api.tables.orders.queries.fetchDashboard.fetchDashboard, { period })
 	);
 
 	// Zone 1 stays LIVE — the page's single subscription (see fetchOrdersCounts).
@@ -54,8 +47,8 @@
 		<AdminDashboardLoading />
 	{:then payload}
 		<!-- Order counts prefer the live subscription, falling back to the one-shot payload
-		     for the very first paint. (Mock mode uses the payload counts directly.) -->
-		{@const ordersCounts = USE_MOCK ? payload.ordersCounts : (ordersCountsQuery.data ?? payload.ordersCounts)}
+		     for the very first paint. -->
+		{@const ordersCounts = ordersCountsQuery.data ?? payload.ordersCounts}
 		<div class="flex flex-col gap-6">
 			<!-- Zone 1 · Order alerts (live) -->
 			<AdminDashboardOrdersAlerts

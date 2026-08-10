@@ -1,5 +1,5 @@
 // UTILS
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 import { AUDIT_RETENTION_DAYS, AUDIT_RETENTION_DEFAULT_DAYS } from '../auditLogConfigs';
 
 // CONFIG

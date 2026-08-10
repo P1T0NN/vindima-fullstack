@@ -102,7 +102,7 @@
 		bind:sortDirection
 		searchable
 		bind:search
-		searchPlaceholder={`Buscar por ${searchField === 'name' ? 'nombre' : 'correo'}…`}
+		searchPlaceholder={`Buscar por ${searchField === 'name' ? 'nombre' : 'correo'}...`}
 		{filters}
 	/>
 </section>

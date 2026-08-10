@@ -28,7 +28,7 @@
 			{order.number}
 		</p>
 		<p class="mt-2 text-xs tracking-wide text-muted-foreground">
-			{formatOrderDate(order._creationTime)} · {itemCount} artículo{itemCount === 1 ? '' : 's'} ·
+			{formatOrderDate(order._creationTime)} - {itemCount} artículo{itemCount === 1 ? '' : 's'} -
 			{deliveryLabel}
 		</p>
 	</div>

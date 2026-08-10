@@ -22,11 +22,11 @@ import { createCategorySchema } from '@/shared/features/productCategories/schema
 
 // VALIDATORS
 import { mutationResult } from '@/convex/helpers/mutationResult';
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 // UTILS
 import { slugify } from '@/shared/utils/slugify';
-import { trimToUndefined } from '@/shared/utils/validationUtils';
+import { trimToUndefined } from '@/shared/utils/stringUtils';
 
 // HELPERS
 import { resolveImageUrl } from '@/convex/storage/r2/resolveImageUrl';

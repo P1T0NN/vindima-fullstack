@@ -3,7 +3,7 @@
 </script>
 
 <div class="flex flex-col gap-3">
-	{#each Array(3) as _, i (i)}
+	{#each { length: 3 } as _, i (i)}
 		<div class="flex flex-col gap-3 rounded-lg border border-border p-4">
 			<div class="h-4 w-2/3 animate-pulse rounded bg-muted"></div>
 			<div class="flex gap-2">

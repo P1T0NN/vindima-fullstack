@@ -18,13 +18,13 @@ export function emailFooter(): string {
             <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:${EMAIL_CONFIG.MUTED_TEXT};">${COMPANY_DATA.DESCRIPTION}</p>
             <p style="margin:0 0 16px;font-size:13px;line-height:1.5;">
               <a href="mailto:${COMPANY_DATA.EMAIL}" style="color:${EMAIL_CONFIG.ACCENT};text-decoration:none;">${COMPANY_DATA.EMAIL}</a>
-              &nbsp;·&nbsp;
+              &nbsp;-&nbsp;
               <a href="${COMPANY_DATA.WHATSAPP_CONTACT_URL}" style="color:${EMAIL_CONFIG.ACCENT};text-decoration:none;">WhatsApp</a>
-              &nbsp;·&nbsp;
+              &nbsp;-&nbsp;
               <span style="color:${EMAIL_CONFIG.MUTED_TEXT};">${COMPANY_DATA.PHONE}</span>
             </p>
             <p style="margin:0;font-size:12px;line-height:1.5;color:${EMAIL_CONFIG.MUTED_TEXT};">
-              © ${year} ${COMPANY_DATA.NAME}. Todos los derechos reservados.<br />
+              &copy; ${year} ${COMPANY_DATA.NAME}. Todos los derechos reservados.<br />
               <a href="https://${COMPANY_DATA.DOMAIN}" style="color:${EMAIL_CONFIG.MUTED_TEXT};text-decoration:underline;">${COMPANY_DATA.DOMAIN}</a>
             </p>
           </td>

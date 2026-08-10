@@ -59,4 +59,4 @@ assert.deepEqual(parseStoredCart(null), []);
 assert.deepEqual(parseStoredCart(JSON.stringify({ lines: 'nope' })), []);
 assert.deepEqual(parseStoredCart(JSON.stringify({ lines: [{ productRef: 'a' }] })), []); // bad shape dropped
 
-console.log('cartUtils self-check passed ✓');
+console.log('cartUtils self-check passed');

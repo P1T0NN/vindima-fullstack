@@ -45,7 +45,7 @@
 		id,
 		disabled = false,
 		required = false,
-		class: className,
+		class: className = 'w-full',
 		ariaLabel,
 		ariaInvalid,
 		ariaDescribedby,
@@ -145,7 +145,6 @@
 		-webkit-appearance: none;
 		display: inline-flex;
 		align-items: center;
-		width: 100%;
 		min-height: 2.25rem;
 		padding: 0.375rem 2rem 0.375rem 0.75rem;
 		font-size: 0.875rem;

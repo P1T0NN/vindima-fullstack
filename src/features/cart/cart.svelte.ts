@@ -131,8 +131,8 @@ class CartState {
 		for (const line of dead) this.remove(line.productRef);
 		toast.info(
 			dead.length === 1
-				? 'Uno de tus productos ya no está disponible — revisa tu carrito.'
-				: 'Algunos de tus productos ya no están disponibles — revisa tu carrito.'
+				? 'Uno de tus productos ya no está disponible - revisa tu carrito.'
+				: 'Algunos de tus productos ya no están disponibles - revisa tu carrito.'
 		);
 	}
 

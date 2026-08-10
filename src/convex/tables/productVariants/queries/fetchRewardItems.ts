@@ -7,7 +7,7 @@
  */
 
 // HELPERS
-import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
+import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
 
 // TYPES
 import type { RewardItemRow } from '@/shared/features/productVariants/types/productVariantsTypes';
@@ -21,6 +21,9 @@ export const fetchRewardItems = fetchOptimized({
 		const products = new Map(
 			await Promise.all(productIds.map(async (id) => [id, await ctx.db.get(id)] as const))
 		);
-		return page.map((variant) => ({ ...variant, product: products.get(variant.productId) ?? null }));
+		return page.map((variant) => ({
+			...variant,
+			product: products.get(variant.productId) ?? null
+		}));
 	}
 });

@@ -53,7 +53,7 @@
 	queryArgs={{ status: statusFilter || undefined, category: categoryFilter || undefined }}
 	controlsPlace="top"
 	searchable
-	searchPlaceholder="Buscar por nombre…"
+	searchPlaceholder="Buscar por nombre..."
 	columns={adminProductsColumns(categoryOptions.nameBySlug)}
 	getRowId={(r) => r._id}
 	customCells={{ name: nameCell, status: statusCell, actions: actionsCell }}

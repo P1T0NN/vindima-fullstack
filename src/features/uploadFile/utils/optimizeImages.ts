@@ -6,6 +6,9 @@
 // LIBRARIES
 import imageCompression from 'browser-image-compression';
 
+// CONFIG
+import { UPLOADS_CONFIG } from '@/shared/config';
+
 // TYPES
 import type { Options as ImageCompressionOptions } from 'browser-image-compression';
 
@@ -18,7 +21,7 @@ import type { Options as ImageCompressionOptions } from 'browser-image-compressi
  * thread — a few hundred ms per image — no CDN, no CSP exception required.
  */
 export const DEFAULT_IMAGE_COMPRESSION_OPTIONS: ImageCompressionOptions = {
-	maxSizeMB: 1,
+	maxSizeMB: UPLOADS_CONFIG.CLIENT_OPTIMIZE_TARGET_MB,
 	maxWidthOrHeight: 1920,
 	fileType: 'image/webp',
 	useWebWorker: false

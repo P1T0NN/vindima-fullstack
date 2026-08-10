@@ -32,6 +32,9 @@
 	// UTILS
 	import { getSearchInputErrorMessage, mapSearchInputResults } from './searchInputUtils.js';
 
+// CONFIG
+import { SEARCH_DATA } from '@/shared/config.js';
+
 	let {
 		ref = $bindable(null),
 		value = $bindable(''),
@@ -39,9 +42,11 @@
 		mapItem,
 		queryArgs,
 		searchArgName = 'search',
-		searchDebounceMs = 300,
+		searchDebounceMs = SEARCH_DATA.INPUT_DEBOUNCE_MS,
 		maxResults = 5,
-		minQueryLength = 1,
+		// Server floor — `createSearchQuery` short-circuits shorter queries, so the client
+		// gate must match it or every 1-char keystroke fires a pointless query.
+		minQueryLength = SEARCH_DATA.MIN_QUERY_LENGTH,
 		includePaginationOpts = true,
 		getErrorMessage = getSearchInputErrorMessage,
 		...restProps

@@ -15,7 +15,7 @@ import { v } from 'convex/values';
 import { CATALOG_CONFIG } from '@/shared/config.js';
 
 // HELPERS
-import { createSearchQuery } from '@/convex/helpers/fetchOptimized';
+import { createSearchQuery } from '@/convex/pagination/fetchOptimized';
 
 export const fetchProductVariantsForSearch = createSearchQuery({
 	table: 'products',

@@ -29,7 +29,7 @@ import { mutationResultWith } from '@/convex/helpers/mutationResult';
 
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
-import type { ConvexErrorPayload, ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexErrorPayload, ConvexMutationResult } from '@/shared/types/types';
 import type { StripeCheckoutDiscount } from '@/shared/features/stripe/types/stripeTypes';
 
 /** Annotated explicitly: this action calls other functions through `internal`, and without a
@@ -43,7 +43,7 @@ function expectedSessionTotal(order: Doc<'orders'>): number {
 }
 
 function amountMismatch(orderId: string, expected: number, actual: number): ConvexError<never> {
-	console.error('[orders] stripe session amount mismatch — refusing to hand out a payment URL', {
+	console.error('[orders] stripe session amount mismatch - refusing to hand out a payment URL', {
 		orderId,
 		expected,
 		actual

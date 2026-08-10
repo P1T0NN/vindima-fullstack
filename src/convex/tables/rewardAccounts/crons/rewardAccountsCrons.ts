@@ -1,5 +1,5 @@
 // LIBRARIES
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG

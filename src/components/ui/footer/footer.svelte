@@ -24,6 +24,9 @@
 		footerMetaLineClass
 	} from './footerTailwindClasses.js';
 
+	// LUCIDE ICONS
+	import CopyrightIcon from '@lucide/svelte/icons/copyright';
+
 	type Props = {
 		class?: string;
 	};
@@ -90,6 +93,6 @@
 			'mt-[34px] border-t border-primary/20 pt-[18px] text-xs leading-normal text-accent-surface-muted/80'
 		)}
 	>
-		{`© ${year} ${COMPANY_DATA.NAME} · Hecho en Aguascalientes`}
+		<CopyrightIcon class="inline size-3 align-[-1px]" /> {`${year} ${COMPANY_DATA.NAME} - Hecho en Aguascalientes`}
 	</div>
 </footer>

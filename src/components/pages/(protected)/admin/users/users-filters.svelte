@@ -34,7 +34,7 @@
 </script>
 
 <NativeSelect
-	class="w-36"
+	class="w-full md:w-36"
 	ariaLabel="Campo de búsqueda"
 	bind:value={() => searchField, (v) => (searchField = (v as 'email' | 'name') || 'email')}
 	options={[
@@ -44,7 +44,7 @@
 />
 
 <NativeSelect
-	class="w-36"
+	class="w-full md:w-36"
 	ariaLabel="Filtrar por rol"
 	bind:value={() => role ?? '', (v) => (role = v === '' ? undefined : (v as 'user' | 'admin'))}
 	options={[
@@ -55,7 +55,7 @@
 />
 
 <NativeSelect
-	class="w-36"
+	class="w-full md:w-36"
 	ariaLabel="Filtrar por estado"
 	bind:value={
 		() => (banned === undefined ? '' : String(banned)),
@@ -69,7 +69,7 @@
 />
 
 <NativeSelect
-	class="w-44"
+	class="w-full md:w-44"
 	ariaLabel="Filtrar por verificación"
 	bind:value={
 		() => (emailVerified === undefined ? '' : String(emailVerified)),

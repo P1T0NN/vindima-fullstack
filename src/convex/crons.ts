@@ -24,7 +24,9 @@ registerRewardAccountsCrons(crons, internal);
 registerRewardLedgerCrons(crons, internal);
 registerOrdersCrons(crons, internal);
 
-// Analytics maintenance (high-volume rollup batching + raw event/rollup retention).
+// Analytics maintenance (high-volume rollup batching, raw event/rollup retention, and
+// shard compaction — which collapses the 8x/32x shard rows on buckets older than ~2 days
+// into one row, so historical reads stop paying the shard multiplier).
 // Handlers are exported from `./analytics/analytics.ts`, so they live under
 // `internal.analytics.analytics.*`.
 analytics.registerCrons(crons, internal.analytics.analytics, {

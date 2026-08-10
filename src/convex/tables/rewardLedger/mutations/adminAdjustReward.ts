@@ -13,10 +13,10 @@ import { adjustRewardSchema } from '@/shared/features/rewardLedger/schemas/rewar
 import { mutationResult } from '@/convex/helpers/mutationResult';
 
 // UTILS
-import { trimToUndefined } from '@/shared/utils/validationUtils';
+import { trimToUndefined } from '@/shared/utils/stringUtils';
 
 // TYPES
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 /**
  * Admin-facing manual reward correction (the lever for edge cases the automatic rules

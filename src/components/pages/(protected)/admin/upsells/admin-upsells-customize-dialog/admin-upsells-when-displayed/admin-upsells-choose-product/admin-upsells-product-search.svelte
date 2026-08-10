@@ -23,7 +23,7 @@
 	query={api.tables.products.queries.fetchProductsForSearch.fetchProductsForSearch}
 	mapItem={(p: Doc<'products'>) => ({ id: p.slug, title: p.name, imageUrl: p.images[0] })}
 	minQueryLength={2}
-	placeholder="Busca el producto…"
+	placeholder="Busca el producto..."
 	class="mt-1 max-w-none"
 	onSelect={(item) => {
 		productSlug = item.id;

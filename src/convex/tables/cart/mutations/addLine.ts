@@ -13,7 +13,7 @@ import { upsertLine } from '@/shared/features/cart/cartUtils';
 import { mutationResult } from '@/convex/helpers/mutationResult';
 
 // TYPES
-import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
+import type { ConvexErrorPayload } from '@/shared/types/types';
 
 /**
  * Public (auth-gated) — add `qty` of a product to the cart. Upserts: existing line

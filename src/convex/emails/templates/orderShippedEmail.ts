@@ -31,7 +31,7 @@ export function orderShippedEmail(order: Doc<'orders'>): EmailContent {
 
 	if (isPickup) {
 		const total = formatMoneyMinor(order.amounts.totalMinor, order.currency);
-		const payReminder = order.status === 'pending' ? p(`Pagas al recoger — ${total}.`) : '';
+		const payReminder = order.status === 'pending' ? p(`Pagas al recoger - ${total}.`) : '';
 
 		const bodyHtml =
 			h1('Tu pedido está listo para recoger') +
@@ -54,7 +54,7 @@ export function orderShippedEmail(order: Doc<'orders'>): EmailContent {
 			orderLinesText(order),
 			'',
 			'Menciona tu número de pedido al llegar.',
-			order.status === 'pending' ? `Pagas al recoger — ${total}.` : ''
+			order.status === 'pending' ? `Pagas al recoger - ${total}.` : ''
 		]
 			.filter(Boolean)
 			.join('\n');

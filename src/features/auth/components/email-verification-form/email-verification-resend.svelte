@@ -8,7 +8,7 @@
 
 	// UTILS
 	import { authClient } from '@/features/auth/lib/auth-client';
-	import { rateLimitMessage } from '@/shared/utils/rateLimitMessages';
+	import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
 
 	// TYPES
 	import type { EmailVerificationResendConfig } from './emailVerificationFormTypes.js';

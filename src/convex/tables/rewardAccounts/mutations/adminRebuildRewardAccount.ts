@@ -10,7 +10,7 @@ import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
 import { mutationResult } from '@/convex/helpers/mutationResult';
 
 // TYPES
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 /**
  * Admin-facing escape hatch — recompute a user's `rewardAccounts` counters by replaying

@@ -36,7 +36,7 @@
 	import { editProductSections } from '@/shared/features/products/forms/editProductForm';
 
 	// UTILS
-	import { zodIssuesForArrayItem } from '@/shared/utils/validationUtils';
+	import { zodIssuesForArrayItem } from '@/features/validations/utils/fieldErrors';
 
 	// TYPES
 	import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
@@ -144,7 +144,7 @@
 				ser únicas.
 			</CardDescription>
 		</CardHeader>
-		
+
 		<CardContent class="flex flex-col gap-3">
 			{#each variantIndexes as i (i)}
 				<VariantFormCard

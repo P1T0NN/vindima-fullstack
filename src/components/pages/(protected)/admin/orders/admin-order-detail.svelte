@@ -51,7 +51,7 @@
 			<div>
 				<h1 class="text-2xl font-semibold tracking-tight">{order.number}</h1>
 				<p class="mt-1 text-sm text-muted-foreground">
-					{formatOrderDate(order._creationTime)} · {itemCount} artículo{itemCount === 1 ? '' : 's'}
+					{formatOrderDate(order._creationTime)} - {itemCount} artículo{itemCount === 1 ? '' : 's'}
 				</p>
 			</div>
 			<span
@@ -94,7 +94,7 @@
 				{#each order.lines as line, i (i)}
 					<li class="flex items-baseline justify-between gap-4 py-2.5 text-sm">
 						<span class="min-w-0">
-							{line.name}{#if line.qty > 1}<span class="text-muted-foreground"> × {line.qty}</span
+							{line.name}{#if line.qty > 1}<span class="text-muted-foreground"> x {line.qty}</span
 								>{/if}
 						</span>
 						<span class={`shrink-0 tabular-nums ${line.isRewardLine ? 'text-gold-ink italic' : ''}`}>
@@ -112,7 +112,7 @@
 				{#if hasWelcome}
 					<div class="flex justify-between text-muted-foreground">
 						<dt>Oferta de bienvenida</dt>
-						<dd class="tabular-nums">−{money(order.amounts.welcomeDiscountMinor)}</dd>
+						<dd class="tabular-nums">-{money(order.amounts.welcomeDiscountMinor)}</dd>
 					</div>
 				{/if}
 				<div class="flex justify-between text-muted-foreground">
@@ -132,7 +132,7 @@
 				<h2 class="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
 					Cliente
 				</h2>
-				<p class="text-sm font-medium">{order.name || '–'}</p>
+				<p class="text-sm font-medium">{order.name || '-'}</p>
 				<a href={`mailto:${order.email}`} class="text-sm text-accent break-all hover:underline">
 					{order.email}
 				</a>

@@ -1,12 +1,9 @@
 // LIBRARIES
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG
 import { BATCH_CONFIG, CHECKOUT_CONFIG, FEATURES } from '@/shared/config.js';
-
-// HELPERS
-import { orderCountAggregate } from '../helpers/orderCountAggregate';
 
 // TYPES
 import type { MutationCtx } from '@/convex/_generated/server';
@@ -48,9 +45,8 @@ export const expirePendingOrders = internalMutation({
 			// A missing paymentMethod is a pre-Stripe row: historical default `cash`.
 			const cutoff = order.paymentMethod === 'online' ? onlineCutoff : cashCutoff;
 			if (order._creationTime >= cutoff) continue; // cash order still inside its longer hold
+			// Work-queue counter follows automatically (pending → closed) — see `convex/counters.ts`.
 			await ctx.db.patch(order._id, { status: 'cancelled' });
-			// Work-queue counter: pending → closed.
-			await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
 			if (order.claimId) {
 				await ctx.runMutation(
 					internal.tables.rewardClaims.mutations.releaseRewardClaim.releaseRewardClaim,
@@ -121,8 +117,7 @@ async function sweepAbandonedDrafts(ctx: MutationCtx, cutoff: number): Promise<n
 			);
 		}
 
-		// Aggregate first — the counter is keyed by the doc, so it must go while the doc exists.
-		await orderCountAggregate.deleteIfExists(ctx, draft);
+		// The trigger removes the row from its bucket in the same transaction.
 		await ctx.db.delete(draft._id);
 
 		// No O6: there is no order to tell the customer about. They were never emailed one.

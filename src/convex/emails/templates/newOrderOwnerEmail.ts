@@ -19,7 +19,7 @@ export function newOrderOwnerEmail(order: Doc<'orders'>): EmailContent {
 	const contact = [order.name, order.phone, order.email]
 		.filter((s): s is string => !!s)
 		.map(esc)
-		.join(' · ');
+		.join(' - ');
 	const fulfillment =
 		order.delivery.kind === 'pickup'
 			? 'Recoger en tienda'
@@ -44,12 +44,12 @@ export function newOrderOwnerEmail(order: Doc<'orders'>): EmailContent {
 		(order.note ? p(`<strong>Nota:</strong> ${esc(order.note)}`, true) : '') +
 		button('Abrir admin', siteUrl('/admin/orders'));
 
-	const html = renderEmail(`${order.name} · ${total}`, bodyHtml);
+	const html = renderEmail(`${order.name} - ${total}`, bodyHtml);
 
 	const text = [
-		`Nuevo pedido ${order.number} — ${total}`,
+		`Nuevo pedido ${order.number} - ${total}`,
 		'',
-		`Cliente: ${[order.name, order.phone, order.email].filter(Boolean).join(' · ')}`,
+		`Cliente: ${[order.name, order.phone, order.email].filter(Boolean).join(' - ')}`,
 		`Entrega: ${fulfillmentText(order)}`,
 		'',
 		orderSummaryText(order),
@@ -60,5 +60,5 @@ export function newOrderOwnerEmail(order: Doc<'orders'>): EmailContent {
 		.filter(Boolean)
 		.join('\n');
 
-	return { subject: `Nuevo pedido ${order.number} — ${total}`, html, text };
+	return { subject: `Nuevo pedido ${order.number} - ${total}`, html, text };
 }

@@ -38,8 +38,8 @@
 		},
 		{
 			slug: 'espacio-3',
-			title: 'La tabla completa',
-			alt: 'Tabla de charcutería con quesos, fruta y dos botellas de la casa.'
+			title: 'Paradoja Malbec',
+			alt: 'Vino Paradoja'
 		},
 		{
 			slug: 'espacio-4',
@@ -63,8 +63,8 @@
 		},
 		{
 			slug: 'espacio-8',
-			title: 'Todo al centro',
-			alt: 'Acercamiento a la tabla: jamón, salami, quesos, fruta fresca y encurtidos.'
+			title: 'Bowls para llevar',
+			alt: 'Bowls para llevar'
 		},
 		{
 			slug: 'espacio-9',
@@ -75,6 +75,11 @@
 			slug: 'espacio-10',
 			title: 'Clericot',
 			alt: 'Postre de frutos rojos y una rebanada de tortilla, servidos al cierre de la noche.'
+		},
+		{
+			slug: 'espacio-11',
+			title: 'Tapas',
+			alt: 'Tapas de queso con aceituna y jamón'
 		}
 	] as const;
 

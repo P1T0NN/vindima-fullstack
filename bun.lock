@@ -4,13 +4,12 @@
     "": {
       "name": "svelte-authentication-template",
       "dependencies": {
-        "@convex-dev/aggregate": "^0.2.2",
         "@convex-dev/better-auth": "^0.12.1",
         "@convex-dev/r2": "^0.10.1",
         "@convex-dev/rate-limiter": "^0.3.2",
         "@mmailaender/convex-better-auth-svelte": "^0.7.3",
         "@mmailaender/convex-svelte": "^0.18.0",
-        "@piton-/analytics-convex": "^1.0.1",
+        "@piton-/analytics-convex": "^2.0.1",
         "better-auth": "1.5.3",
         "botid": "^1.5.11",
         "browser-image-compression": "^2.0.2",
@@ -162,8 +161,6 @@
     "@borewit/text-codec": ["@borewit/text-codec@0.2.2", "", {}, "sha512-DDaRehssg1aNrH4+2hnj1B7vnUGEjU6OIlyRdkMd0aUdIUvKXrJfXsy8LVtXAy7DRvYVluWbMspsRhz2lcW0mQ=="],
 
     "@convex-dev/action-retrier": ["@convex-dev/action-retrier@0.3.0", "", { "peerDependencies": { "convex": "^1.24.8" } }, "sha512-opBNsgOPSuVY3qSARNub98XqPzSpSS7Jga0oGeWFhO+DcWBMt2gD3ssUeEA1Gi7wTNiZBX+T6OBfBnqMfv6Tuw=="],
-
-    "@convex-dev/aggregate": ["@convex-dev/aggregate@0.2.2", "", { "peerDependencies": { "convex": "^1.24.8" } }, "sha512-9sskfPZdiH0mdc33Obcf2+gQSPDpyHqUDkYmXDsUqhqe5lLwGKYbrxw7LgxHmYm9c1YLbaXqxKiM1CgucfKAAw=="],
 
     "@convex-dev/better-auth": ["@convex-dev/better-auth@0.12.1", "", { "dependencies": { "@better-fetch/fetch": "^1.1.18", "common-tags": "^1.8.2", "convex-helpers": "^0.1.95", "jose": "^6.1.0", "remeda": "^2.32.0", "semver": "^7.7.3", "type-fest": "^4.39.1", "zod": "^4.0.0" }, "peerDependencies": { "better-auth": ">=1.6.9 <1.7.0", "convex": "^1.25.0", "react": "^18.3.1 || ^19.0.0" } }, "sha512-fZ1ur7dlgnGy8BfySUZueqo50IrMA6FUjH65foMdQWSi2vsuXQqylVI3PKjH8QGDFFf+2KkF/Gaqpsey7rnolQ=="],
 
@@ -357,7 +354,7 @@
 
     "@oxc-project/types": ["@oxc-project/types@0.139.0", "", {}, "sha512-r9gHphtCs+1M7J0pw6Sn/hh/Wpa/iQrOOkrNAlVLF/gHq+/CJmHIWKKUUhdWjcD6CIa8idarspCsASiXCXvFUw=="],
 
-    "@piton-/analytics-convex": ["@piton-/analytics-convex@1.0.1", "", { "peerDependencies": { "convex": "^1.36.1", "convex-test": "^0.0.49" }, "optionalPeers": ["convex-test"] }, "sha512-9oN6lHOP1sIqvf1pWClMOWeTb207z6iieKE9hbKccHseh8LbpHAk+9EwciGwDXvNrwI9aasNz3Vm/DSd5wKcbw=="],
+    "@piton-/analytics-convex": ["@piton-/analytics-convex@2.0.1", "", { "peerDependencies": { "@convex-dev/aggregate": "^0.2.2", "convex": "^1.36.1", "convex-helpers": ">=0.1.115", "convex-test": "^0.0.49" }, "optionalPeers": ["@convex-dev/aggregate", "convex-helpers", "convex-test"] }, "sha512-l6wv4hqv2sTY3yCfCykFgr9nt6OltLLlIhdcMmYyqvgRm0X8B3eDQH9AxZA/PQlNJhcoiFScGB7fr3h3wzEpXg=="],
 
     "@polka/url": ["@polka/url@1.0.0-next.29", "", {}, "sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww=="],
 

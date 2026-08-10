@@ -19,6 +19,18 @@ export type MyOrdersStatusFilter = (typeof MY_ORDERS_STATUS_FILTERS)[number];
 /** One /my-orders tab — a status slice or the unfiltered list. */
 export type MyOrdersTab = MyOrdersStatusFilter | 'all';
 
+/**
+ * Counter bucket an order occupies — the namespace of the `orderCounts` counter
+ * (`convex/counters.ts`). Every order is in exactly ONE bucket, so bucket transitions
+ * are total and the dashboard's work-queue counts are O(log n) at any volume.
+ *
+ * - `draft`   — unpaid online order; NOT a real order yet, so nothing reads this bucket
+ * - `pending` — awaiting payment confirmation ("pedidos por confirmar")
+ * - `open`    — paid but not yet delivered ("pedidos por entregar")
+ * - `closed`  — delivered / cancelled / refunded
+ */
+export type OrderCountBucket = 'draft' | 'pending' | 'open' | 'closed';
+
 /** `fetchMyOrders` row: the frozen order plus live catalog rows for its lines (images, current names). */
 export type MyOrderRow = Doc<'orders'> & { products: ResolvedCartProduct[] };
 

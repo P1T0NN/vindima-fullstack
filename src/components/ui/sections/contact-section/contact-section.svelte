@@ -45,7 +45,7 @@
 			</h3>
 			<p class="mb-7 max-w-100 text-[13.5px] leading-relaxed text-accent-surface-muted">
 				Mesa para esta noche, tablas para llevar, una recomendación de vino o un evento privado
-				—cumpleaños, catas, cenas de empresa, celebraciones íntimas—. Todo por WhatsApp, y te
+				(cumpleaños, catas, cenas de empresa, celebraciones íntimas). Todo por WhatsApp, y te
 				respondemos en minutos.
 			</p>
 			<Button

@@ -9,7 +9,7 @@ import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';
-import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
+import type { ConvexErrorPayload } from '@/shared/types/types';
 
 /**
  * Stable event-name constants for product code. The library is the analytics
@@ -27,9 +27,15 @@ export const ANALYTICS_EVENT = {
 
 /**
  * Metrics that require the Better Auth `admin` role to read. Everything else
- * only requires a signed-in user. Enforced in the `authorize` callback below
- * because the library runs `authorize` for the `analytics.client.*` wrappers
- * the browser calls. Keep this in sync with the `.adminOnly()` metrics.
+ * only requires a signed-in user. Keep this in sync with the `.adminOnly()`
+ * metrics.
+ *
+ * DORMANT BUT ARMED: the library only runs `authorize` for the
+ * `analytics.client.*` wrappers, and this app re-exports none of them — every
+ * read today goes through `fetchDashboard`, which does its own `requireAdmin`.
+ * This policy is kept deliberately, not by accident: it is what makes
+ * re-exporting a client wrapper safe. Delete it and the first one exported
+ * ships unauthenticated.
  */
 const ADMIN_ONLY_METRICS = new Set<string>([
 	'revenue',
@@ -123,16 +129,19 @@ export const analytics = defineAnalytics(components.analytics, {
 		// Boutique volume; hourly rollups require lowVolume.
 		trafficMode: 'lowVolume',
 		defaultTimezone: 'America/Mexico_City',
-		maxQueryRangeDays: 366,
-		maxRollupRowsPerQuery: 5_000,
 		maxBreakdownItems: 25,
-		rawEventRetentionDays: 90,
-		maxRawEventDeletesPerRun: 5_000
+		rawEventRetentionDays: 90
+		// Read/delete budgets are deliberately left at the 2.0 defaults. The per-query
+		// budget (12,288 rows) is now SHARED across every read in a query — a dashboard
+		// batch, a funnel's grouped reads — so an override below it buys nothing and only
+		// makes `QUERY_TOO_LARGE` fire earlier. `maxQueryRangeDays` is a hard 366 ceiling
+		// that settings can no longer raise, and the delete caps now top out at 4,096.
 	},
 	/**
-	 * Runs only for the `analytics.client.*` wrappers the browser can call.
-	 * Mirrors the previous `requireAnalyticsReadAccess` gate: all reads need a
-	 * signed-in user; admin-only metrics additionally need the `admin` role.
+	 * Runs only for the `analytics.client.*` wrappers the browser can call — see
+	 * the note on ADMIN_ONLY_METRICS above: none are exported today, so this is
+	 * dormant. All reads need a signed-in user; admin-only metrics additionally
+	 * need the `admin` role.
 	 */
 	authorize: async (ctx, operation) => {
 		// At runtime the library passes the real query/mutation ctx; the public
@@ -161,10 +170,12 @@ export const analytics = defineAnalytics(components.analytics, {
 /**
  * Maintenance cron handlers. Registered in `convex/crons.ts` via
  * `analytics.registerCrons(...)`. Exported here so Convex registers them as
- * internal mutations under `internal.analytics.analytics.*`.
+ * internal mutations under `internal.analytics.analytics.*`. All four are
+ * required — `registerCrons` throws if one is missing.
  */
 export const {
 	processPendingHighVolumeAnalyticsEvents,
 	purgeStaleAnalyticsEvents,
-	purgeStaleAnalyticsRollups
+	purgeStaleAnalyticsRollups,
+	compactAnalyticsRollups
 } = analytics.crons;

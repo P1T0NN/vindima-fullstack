@@ -34,7 +34,7 @@
 			description="No pudimos cargar este pedido. Inténtalo de nuevo."
 		/>
 	{:else if orderQuery.isLoading}
-		<p class="py-12 text-center text-sm text-muted-foreground">Cargando pedido…</p>
+		<p class="py-12 text-center text-sm text-muted-foreground">Cargando pedido...</p>
 	{:else if !order}
 		<ErrorComponent
 			variant="alert"

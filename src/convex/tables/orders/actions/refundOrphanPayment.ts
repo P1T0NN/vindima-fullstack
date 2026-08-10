@@ -38,7 +38,7 @@ export const refundOrphanPayment = internalAction({
 			await refundPayment(args.paymentIntentId, `orphan:${args.paymentIntentId}`);
 		} catch (err) {
 			// Let Convex retry the action — the idempotency key keeps that safe.
-			console.error('[orders] orphan refund FAILED — money is still held', {
+			console.error('[orders] orphan refund FAILED - money is still held', {
 				paymentIntentId: args.paymentIntentId,
 				orderId: args.orderId,
 				err

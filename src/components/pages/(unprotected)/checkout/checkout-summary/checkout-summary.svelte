@@ -154,11 +154,11 @@
 	>
 		{#if busy}
 			<Spinner class="size-3.5" />
-			Procesando pedido…
+			Procesando pedido...
 		{:else if loading}
 			{submitVerb}
 		{:else}
-			{submitVerb} · {money(totalMinor)}
+			{submitVerb} {money(totalMinor)}
 		{/if}
 	</Button>
 	<p class="text-center text-xs leading-snug text-muted-foreground">

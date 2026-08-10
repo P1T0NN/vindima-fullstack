@@ -38,8 +38,8 @@ export const handleStripeEvent = internalAction({
 				// OUR misconfiguration, not a bad request: 500 so Stripe keeps retrying while it's
 				// fixed, instead of dropping real payments on the floor.
 				console.error(
-					'[orders] STRIPE_WEBHOOK_SECRET is not set — cannot verify webhooks. Run: ' +
-						'npx convex env set STRIPE_WEBHOOK_SECRET whsec_…'
+					'[orders] STRIPE_WEBHOOK_SECRET is not set - cannot verify webhooks. Run: ' +
+						'npx convex env set STRIPE_WEBHOOK_SECRET whsec_...'
 				);
 				return { status: 500 };
 			}

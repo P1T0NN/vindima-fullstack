@@ -25,7 +25,7 @@ export function orderCancelledEmail(
 	const greeting = hi ? `Hola ${esc(hi)}, ` : 'Hola, ';
 	const total = formatMoneyMinor(order.amounts.totalMinor, order.currency);
 	const claimLine = order.claimId
-		? p('Tu artículo gratis volvió a tu cuenta — úsalo cuando quieras.', true)
+		? p('Tu artículo gratis volvió a tu cuenta - úsalo cuando quieras.', true)
 		: '';
 
 	// The hold window differs by payment method (missing paymentMethod = historical cash).
@@ -68,7 +68,7 @@ export function orderCancelledEmail(
 		orderLinesText(order),
 		`Total no cobrado: ${total}`,
 		'',
-		order.claimId ? 'Tu artículo gratis volvió a tu cuenta — úsalo cuando quieras.' : '',
+		order.claimId ? 'Tu artículo gratis volvió a tu cuenta - úsalo cuando quieras.' : '',
 		nextLine,
 		`Volver a la tienda: ${siteUrl('/shop')}`
 	]

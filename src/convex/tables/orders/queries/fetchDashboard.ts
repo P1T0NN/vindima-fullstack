@@ -7,7 +7,8 @@
  * - Trends/KPIs/breakdowns ← `@piton-/analytics-convex` rollups (`analytics.fetch*` server
  *   helpers — hourly rollups, so windows built from store-local midnights are exact).
  *   Events are tracked at the settle/refund/first-purchase seams; history starts the day
- *   tracking shipped.
+ *   tracking shipped. Five component calls total: one KPI batch per window, one series,
+ *   two breakdowns (different dimensions, so they cannot batch).
  * - Exact operational truth (order work-queue counts) ← live state. Rollups lag and
  *   approximate; a work queue must not.
  */
@@ -96,19 +97,36 @@ export const fetchDashboard = query({
 	}
 });
 
-/** One window's KPIs from the hourly rollups. Revenue is NET (settled minus refunded). */
+/** The four KPI metrics, read as ONE batch per window. */
+const KPI_METRICS = ['revenue', 'orders', 'refunds', 'newCustomers'] as const;
+
+/**
+ * One window's KPIs from the hourly rollups. Revenue is NET (settled minus refunded).
+ *
+ * `fetchDashboardMetrics` reads all four metrics in a single component call, coalescing
+ * their rollup scans and sequencing them against ONE shared read budget — four separate
+ * `fetchSummary` calls each opened their own. Same rows, same numbers, a quarter of the
+ * round trips.
+ *
+ * The window is passed explicitly rather than using the batch's `includeComparison`: that
+ * derives the previous period itself, normalized to UTC day boundaries, which would not
+ * match the store-local midnight windows this dashboard is built on (`localMidnight`
+ * above). Two explicit-range calls keep the periods exactly as they were.
+ */
 async function kpis(ctx: QueryCtx, from: number, to: number): Promise<DashboardKpis> {
-	const [revenue, orders, refunds, newCustomers] = await Promise.all([
-		analytics.fetchSummary(ctx, { metric: 'revenue', from, to }),
-		analytics.fetchSummary(ctx, { metric: 'orders', from, to }),
-		analytics.fetchSummary(ctx, { metric: 'refunds', from, to }),
-		analytics.fetchSummary(ctx, { metric: 'newCustomers', from, to })
-	]);
+	const { metrics } = await analytics.fetchDashboardMetrics(ctx, {
+		metrics: [...KPI_METRICS],
+		from,
+		to
+	});
+	const value = (metric: (typeof KPI_METRICS)[number]) => metrics[metric]?.value ?? 0;
+	const refundsMinor = value('refunds');
+
 	return {
-		revenueMinor: revenue.value - refunds.value,
-		ordersCount: orders.value,
-		refundsMinor: refunds.value,
-		newCustomers: newCustomers.value
+		revenueMinor: value('revenue') - refundsMinor,
+		ordersCount: value('orders'),
+		refundsMinor,
+		newCustomers: value('newCustomers')
 	};
 }
 

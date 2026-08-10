@@ -325,6 +325,169 @@ Mental checklist to run on every page wire-up:
 
 ---
 
+## § LIST & PAGINATION MECHANISMS — WHICH ONE, AND WHAT IT COSTS
+
+> Status: **standing rule** (added 2026-08-03). Third companion section. The realtime rule
+> decides **WHAT**, the data-loading section decides **HOW/WHERE** — this one decides **which
+> list primitive** you reach for once you know you are rendering a collection.
+
+### The one thing that is true of all of them
+
+**Every mechanism filters and paginates on the server.** None of them ships a table to the
+browser and narrows it there. "Component state" below names _where the filter state lives_
+(component state vs the URL) — not where filtering happens. There is no client-side filtering
+of a server-backed collection anywhere in this project, and adding some would be a bug, not a
+shortcut. (The one legitimate client-side narrowing is over an already-loaded bounded set —
+e.g. upsell matching over the resolved cart — which is not a list mechanism.)
+
+So the choice is never "server vs client filtering". It is three independent axes:
+
+| Axis                | Options                                   | Consequence                                                                                                        |
+| ------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **State location**  | URL vs component state                    | Is this view linkable, shareable, crawlable, back-button-correct?                                                  |
+| **Transport**       | one-shot (`client.query`) vs subscription | Does it update live? Does each viewer cost a standing subscription?                                                |
+| **Pagination mode** | `offset` vs `cursor`                      | Page numbers + exact total (O(matching rows) scan, or O(log n) with an aggregate) — or O(page) reads with neither. |
+
+### The mechanisms this project has
+
+| Mechanism              | Component / shape                                       | State     | Transport                                      | Mode                  | Use for                                                                                                                                                                                                                         |
+| ---------------------- | ------------------------------------------------------- | --------- | ---------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **State-driven table** | `ConvexDataTable`                                       | component | subscription **or** one-shot (`realtime` prop) | `cursor` / `offset`   | Admin tables — orders, products, categories, users, upsells                                                                                                                                                                     |
+| **State-driven list**  | `ConvexDataList`                                        | component | same                                           | `cursor` / `offset`   | The same data in a card/row layout instead of a table (e.g. `/my-orders`)                                                                                                                                                       |
+| **Whole-set read**     | a plain non-paginated query, read in a loader or a hook | n/a       | one-shot                                       | none (index-bounded)  | Sets that are small **by design**: category options (`fetchCategoryOptions`), a category's active products (`fetchCategoryPage` — the whole category, never a truncated slice), homepage categories (`SHOP_CONFIG.MAX_ROOT_CATEGORIES`, a deliberate display pick, not a truncation) |
+
+A whole-set read is a real mechanism, not a shortcut — but only when a **server-side** bound
+makes the set provably small. Rendering page 1 of a paginated endpoint and calling it the whole
+set is the bug companion rule 2 forbids.
+
+### Not built here — do not assume these exist
+
+The template this project is bootstrapped from has two more mechanisms. **Neither is ported.**
+
+- **URL-driven table** (`listHref` / `sortHref` / `pageHref`, page number owned by
+  `+page.server.ts`, cursor trail in `?cs=`). `DataTable` here has **no** `pageHref` / `sortHref`
+  props and there is no `listUrlState.ts`. Porting it is the work if a public paginated listing
+  is ever needed.
+- **Infinite scroll** (`ConvexInfiniteList`, `initialData` SSR seeding). Not present at all.
+
+**The consequence, stated plainly:** no paginated view in this app is linkable, bookmarkable, or
+crawlable at a specific page — reload always lands on page 1 with filters cleared. That is
+currently fine because every paginated surface is behind admin auth (addressability buys
+nothing) and every storefront listing is a bounded whole-set read (nothing to paginate). The day
+a public, paginated, SEO-relevant listing appears, this is the gap to close **before** building
+it, not after.
+
+### The decision test
+
+Ask in this order; the first "yes" wins:
+
+1. **"Is the whole set small, and bounded server-side?"** → **whole-set read.** No paginator, no
+   cursor, no page state. Give it a dedicated non-paginated query with an explicit `take` cap.
+2. **"Do rows change under the viewer while they watch?"** (the realtime rule) → keep the
+   default subscription on `ConvexDataTable` / `ConvexDataList`. If no, pass `realtime={false}`
+   — a subscription is a standing cost per viewer.
+3. **"Must this view have an address?"** → **stop.** That mechanism does not exist here (see
+   above). Do not fake it with component state and a `goto`; either build the URL-driven path
+   properly or reconsider whether the collection wants pagination at all.
+
+### Realtime is a prop, not a mechanism
+
+`ConvexDataTable` and `ConvexDataList` both take `realtime`. **In this project it defaults to
+`true`** — a deliberate divergence from the template, which defaults it to `false`.
+
+The reason: every admin table here mutates its own rows from its own screen (bulk delete,
+product status toggles, order fulfillment), and relies on the subscription to reflect that
+write. Flipping the global default off would have silently left stale rows on screen after a
+mutation. The cheap path is fully wired (`src/utils/convexOneShot.svelte.ts` — same
+`{ data, error, isLoading }` surface, re-fetches on args change, no push channel) and is exactly
+one prop away.
+
+**So the standing rule at the top of this document still applies — it is just enforced per call
+site instead of by the default.** Pass `realtime={false}` on any list once you have answered
+_"what changes this data while this exact screen is open, without the user acting?"_ with
+"nothing". Read once at mount; do not toggle it at runtime.
+
+### Hard limits — read before committing to one
+
+These are ceilings, not bugs. Each one will eventually surface.
+
+1. **Plain `offset` mode reads every matching row, up to a cap — wire an aggregate to remove the
+   bound.** The scan form materializes the matched set to compute an exact `totalCount` and
+   slice the page — O(matching rows), capped at `PAGINATION_DATA.OFFSET_SCAN_LIMIT` (10,000).
+   **Past the cap the query stops counting rather than throwing**: it returns `totalCount: null`,
+   page numbers disappear, prev/next keeps working, nothing 500s. Filters count: a well-filtered
+   query over a huge table is fine; the unfiltered "browse everything" page loses its numbers
+   first.
+   _When a surface genuinely needs exact totals + page jumps at unbounded scale:_ use
+   `fetchOptimized`'s **`aggregate` mode** (see `fetchOptimized/README § Aggregate mode` and
+   `src/convex/counters.ts`) — exact `totalCount` and O(log n) jumps to any page, at the cost
+   of one counter per surface kept in sync by the write-path triggers. Check the cheaper rungs
+   first: add a filter, or accept cursor mode.
+   **Status here:** wired and live for `/admin/orders`. Two counters are declared with
+   `defineCounters` (from `@piton-/analytics-convex/counters`): `orderCounts` (`sortKey: null`,
+   pure counters for the dashboard work queue — do not repurpose it, `fetchOrdersCounts`
+   depends on its bucket namespaces) and `orderBrowse` (key `_creationTime`, namespaces
+   `real`/`draft`), whose `.aggregate` backs
+   `fetchOrders`' unfiltered browse: exact totals + clickable page numbers at any order
+   volume. Search and status-filtered requests stay cursor mode — the strategy function on
+   the server and the `optimizationStrategy` derivation in `admin-orders-table.svelte` encode
+   the same predicate and must stay in lockstep. Copy that pair when wiring the next surface.
+2. **Every write to a counted table must go through `@/convex/functions`.** `mutation` /
+   `internalMutation` imported from `_generated/server` bypass the trigger registry in
+   `src/convex/counters.ts`, and one bypassed write silently drifts the counter — a wrong
+   number rendered with full confidence. Queries and actions are unaffected (no `ctx.db` writes)
+   and keep importing from `_generated/server`. The one sanctioned exception is the backfill in
+   `counters.ts` itself, which must not re-enter the trigger it repairs.
+3. **Search can never have page numbers or a total.** Convex search indexes are paginate-only. A
+   searchable listing degrades to prev/next while searching. Platform constraint, not something
+   the factory can hide.
+4. **Cursor history is component state, and it dies on reload.** `ConvexDataTable` keeps its
+   cursor trail in a `$state` array, so "previous" works within a session but a refresh drops
+   the user back to page 1. That is the same gap as "not built here" above — the template solves
+   it by putting the trail in `?cs=`, which this project has not ported.
+5. **Every filter combination needs an index.** Two facets need a composite (`by_role_banned`);
+   three independently-optional facets need more. Indexes cost write throughput. Filtering
+   without an index is deliberately impossible in `fetchOptimized`.
+   **Writing a bespoke filtered/paginated query outside `fetchOptimized`** (a component table,
+   an exotic source)? Copy the reference implementation:
+   `src/convex/auth/component/userQueries.ts` (`listUsersPaginated`) + the recipe in its
+   `schema.ts` — three index-bounded paths (search index with facets as `filterFields` | one
+   `by_<facets…>` index per combination | sort index), with optional-field facets served as a
+   union of their stored representations (`NOT_BANNED_VALUES`). `.filter()` / `.filterWith()`
+   over an unbounded set is the wall this project already hit once — never again. The one
+   sanctioned `filterWith` is `fetchOptimized`'s union dedupe (bounded by duplicates scanned).
+6. **Sorting must be servable by the index the filters chose.** Convex appends `_creationTime`
+   to every index, so flipping its direction always works; sorting by any other column needs an
+   index ordered by it — which usually cannot also bound your facets. `listUsersPaginated`
+   documents the consequence honestly: a name/email sort **falls back to creation time** while a
+   facet is active. Offering an unindexable sort means either a table scan or rows in an order
+   the index never produced.
+7. **Search semantics are token-prefix, not substring.** A search index matches `"tapu"` →
+   `tapuskovic@…`, but not a mid-token fragment like `"puskovic"`. That is the standard
+   typeahead trade for surviving large tables; it is a behaviour change from a `.includes()`
+   scan, and worth saying out loud when a stakeholder asks why a search "stopped working".
+8. **Public list endpoints are effectively unmetered.** Convex queries can only `check` a rate
+   limit (no writes in queries) and anonymous callers have no trustworthy key. A genuinely
+   public paginated list needs to be fronted by a SvelteKit server route that limits by IP.
+
+### What this is ready for
+
+Ready today: admin tables with server-side facets, full-text search and cursor or capped-offset
+pagination; index-bounded filtering on every table including the better-auth `user` table;
+whole-set storefront listings; O(log n) dashboard counters that stay exact at any order volume
+without any call site remembering to maintain them; and exact totals + clickable page jumps at
+unbounded scale on the `/admin/orders` browse (limit 1, wired via the `orderBrowse` counter).
+
+Ready with wiring: the same counter-backed page jumps on any other surface — one component
+instance in `convex.config.ts`, one `counter(...)` entry in `counters.ts` (the trigger comes
+with it), a one-time backfill, and the strategy-function pair from `fetchOrders`.
+
+Not ready without extra work: any linkable / bookmarkable / crawlable paginated view, backward
+navigation surviving a reload (limit 4), sorting by a column no index can order under the active
+filters (limit 6), and public paginated endpoints that need real rate limiting (limit 8).
+
+---
+
 ## § FOR LLMs / AI ASSISTANTS — READ THIS BEFORE WIRING DATA
 
 You are likely biased toward subscribing to everything, because framework examples
@@ -351,9 +514,36 @@ In this codebase — and any project citing this document — that default is **
    per GeneralSystemDesignRule.md; say the word if this needs to be live." Do not silently
    choose the subscription.
 
+7. **Rendering a collection? Also apply § LIST & PAGINATION MECHANISMS.** Pick by the decision
+   test there (bounded set? → whole-set read; changes under the viewer? → keep the
+   subscription, else `realtime={false}`; needs an address? → that mechanism is not built
+   here, say so instead of faking it). Never filter a server-backed collection in the browser.
+   Before choosing `offset` (page numbers + totals), state in a comment either why the matched
+   set stays bounded (the scan form reads every matching row and degrades past the 10k cap) or
+   that the surface has an `aggregate` wired.
+
+8. **NEVER write `.filter()` / `.filterWith()` against an unbounded table** — not in
+   `fetchOptimized` (it won't let you), and not in bespoke queries either. Lists go through
+   `fetchOptimized`; a query that can't (component tables, exotic sources) copies the
+   three-path pattern from `src/convex/auth/component/userQueries.ts` (hard limit 5 above).
+   If you believe a post-index filter is justified, the set it filters must be provably
+   bounded (a page, a per-user collection) and the comment must say what bounds it.
+   The audit is one grep — run it after touching any backend query, and expect exactly one
+   sanctioned hit (`fetchOptimized`'s union dedupe):
+   `grep -rn "filterWith" src/convex --include=*.ts`
+   Any new hit is either the wall coming back or a bounded case missing its justification
+   comment.
+
+9. **Writing a Convex mutation? Import the builder from `@/convex/functions`**, never from
+   `_generated/server`. That is what runs the counter triggers in `src/convex/counters.ts`;
+   a raw builder silently drifts every counter registered for the table it writes (hard limit
+   2 above). Queries and actions keep importing from `_generated/server`.
+
 Checklist to run mentally on every data wire-up:
 `changes-under-viewer? → subscribe (justify in comment) | else → one-shot, minimal shape,
-fetched where used, whole-set endpoint if a select/lookup needs all rows.`
+fetched where used, whole-set endpoint if a select/lookup needs all rows | collection? → §LIST
+mechanism by bounded-set/realtime/address, server-side filtering always | mutation? → builder
+from @/convex/functions.`
 
 ---
 

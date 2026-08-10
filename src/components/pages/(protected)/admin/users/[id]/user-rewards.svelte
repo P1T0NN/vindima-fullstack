@@ -13,6 +13,9 @@
 	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
 
+	// LUCIDE ICONS
+	import ArrowUpDownIcon from '@lucide/svelte/icons/arrow-up-down';
+
 	// UTILS
 	import { safeMutation } from '@/utils/convexHelpers';
 	import { toastResult } from '@/utils/toastResult';
@@ -128,11 +131,11 @@
 					r.rewardsDelta ? `${signed(r.rewardsDelta)} recompensas` : null
 				]
 					.filter(Boolean)
-					.join(', ') || '–',
+					.join(', ') || '-',
 			cellClass: 'tabular-nums',
 			hideBelow: 'md'
 		},
-		{ id: 'status', header: 'Estado', accessor: (r) => r.status ?? '–', hideBelow: 'lg' },
+		{ id: 'status', header: 'Estado', accessor: (r) => r.status ?? '-', hideBelow: 'lg' },
 		{ id: 'note', header: 'Nota', accessor: (r) => r.note ?? '', hideBelow: 'md', wrap: true }
 	];
 </script>
@@ -174,11 +177,11 @@
 		<CardContent class="flex flex-col gap-4">
 			<div class="grid grid-cols-2 gap-3 sm:max-w-md">
 				<div class="flex flex-col gap-1.5">
-					<Label for="stamps-delta">Sellos Δ</Label>
+					<Label for="stamps-delta"><ArrowUpDownIcon class="inline size-3 align-[-1px]" /> Sellos</Label>
 					<Input id="stamps-delta" type="number" step="1" bind:value={stampsDeltaRaw} />
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="rewards-delta">Recompensas Δ</Label>
+					<Label for="rewards-delta"><ArrowUpDownIcon class="inline size-3 align-[-1px]" /> Recompensas</Label>
 					<Input id="rewards-delta" type="number" step="1" bind:value={rewardsDeltaRaw} />
 				</div>
 			</div>

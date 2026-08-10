@@ -5,7 +5,7 @@ import { FEATURES } from '@/shared/config.js';
 import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
 
 // HELPERS
-import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
+import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
 
 /**
  * Public — the signed-in user's own reward history, newest first, paginated. Powers the

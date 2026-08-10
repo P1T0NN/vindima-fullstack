@@ -1,8 +1,8 @@
-// TYPES
-import type { ConvexRateLimitName } from '../rateLimits/registry';
+﻿// TYPES
+import type { ConvexRateLimitName } from '@/shared/features/rateLimits/types/rateLimitsTypes';
 
 /**
- * Better Auth route path → rate-limit bucket(s).
+ * Better Auth route path -> rate-limit bucket(s).
  *
  * Keys are BA endpoint paths (no `/api/auth` prefix). Routes omitted here are
  * intentionally unmetered (`/get-session`, JWKS, etc.).

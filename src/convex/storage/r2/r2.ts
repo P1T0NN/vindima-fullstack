@@ -15,7 +15,7 @@ import { buildR2PublicObjectUrl } from './buildR2PublicObjectUrl.js';
 
 // TYPES
 import type { DataModel } from '../../_generated/dataModel';
-import type { ConvexMutationResult } from '../../types/convexTypes.js';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 /**
  * R2 client bound to the registered component. All server-side R2 work (upload URL minting,

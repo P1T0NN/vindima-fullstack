@@ -49,7 +49,7 @@
 				<span class="flex-1 text-sm text-accent">
 					<strong class="font-semibold tabular-nums">{alert.count}</strong>
 					{alert.label}
-					<span class="text-muted-foreground">· {alert.detail}</span>
+					<span class="text-muted-foreground">- {alert.detail}</span>
 				</span>
 				<ArrowRightIcon
 					class="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"

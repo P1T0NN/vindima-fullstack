@@ -27,14 +27,14 @@ import { createProductSchema } from '@/shared/features/products/schemas/products
 import { mutationResult } from '@/convex/helpers/mutationResult';
 
 // UTILS
-import { trimToUndefined } from '@/shared/utils/validationUtils';
+import { trimToUndefined } from '@/shared/utils/stringUtils';
 
 // HELPERS
 import { resolveImageUrls } from '../helpers/resolveImageUrls';
 import { getProductSlug } from '../helpers/getProductSlug';
 
 // TYPES
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 export const createProduct = adminMutation('createProduct')({
 	args: zodToConvexFields(createProductSchema.shape),

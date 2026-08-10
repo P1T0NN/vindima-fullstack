@@ -59,14 +59,14 @@
 				id="{inputId}-url"
 				type="url"
 				value={urlText}
-				placeholder="/images/tabla.webp o https://…"
+				placeholder="/images/tabla.webp o https://..."
 				disabled={field.disabled}
 				aria-invalid={invalid ? 'true' : undefined}
 				oninput={(e) => setValue(e.currentTarget.value.trim() || null)}
 			/>
 			<p class="mt-1.5 text-xs text-muted-foreground">
 				Una imagen del proyecto (empieza con <code>/</code>) o una dirección completa
-				(<code>https://…</code>). No se sube nada.
+				(<code>https://...</code>). No se sube nada.
 			</p>
 		</TabsContent>
 	</Tabs>

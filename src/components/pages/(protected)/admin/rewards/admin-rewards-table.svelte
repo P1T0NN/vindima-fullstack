@@ -20,7 +20,7 @@
 		getItemKey={(item: RewardItemRow) => item._id}
 		class="gap-0 divide-y divide-border rounded-xl border bg-card px-4"
 	>
-		{#snippet item({ item }: { item: RewardItemRow; index: number })}
+		{#snippet item({ item }: { item: RewardItemRow })}
 			<AdminRewardsItemRow {item} />
 		{/snippet}
 

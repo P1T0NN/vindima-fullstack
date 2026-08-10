@@ -13,7 +13,7 @@ import { query } from '@/convex/_generated/server';
 import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
 
 // HELPERS
-import { orderCountAggregate } from '../helpers/orderCountAggregate';
+import { counters } from '@/convex/counters';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';
@@ -21,17 +21,18 @@ import type { QueryCtx } from '@/convex/_generated/server';
 /**
  * Shared with `fetchDashboard` so the initial paint carries the same counts.
  *
- * O(log n) at ANY order volume: counts come from the `orderCountAggregate`
- * (`@convex-dev/aggregate`), maintained transactionally by every order write site (see
- * `orderCountAggregate.ts` for the contract) and seeded by `backfillOrderCounts`.
- * No table rows are read here — 100k delivered orders cost these counts nothing.
+ * O(log n) at ANY order volume: counts come from the `orderCounts` counter declared in
+ * `convex/counters.ts`, maintained transactionally by its trigger — every write through the
+ * wrapped `mutation`/`internalMutation` keeps it exact, with nothing for a call site to
+ * remember. Seeded by `counters:backfillOrderCounts`. No table rows are read here — 100k
+ * delivered orders cost these counts nothing.
  */
 export async function countOrders(
 	ctx: QueryCtx
 ): Promise<{ pendingCount: number; toFulfillCount: number }> {
 	const [pendingCount, toFulfillCount] = await Promise.all([
-		orderCountAggregate.count(ctx, { namespace: 'pending', bounds: {} }),
-		orderCountAggregate.count(ctx, { namespace: 'open', bounds: {} })
+		counters.orderCounts.count(ctx, 'pending'),
+		counters.orderCounts.count(ctx, 'open')
 	]);
 	return { pendingCount, toFulfillCount };
 }

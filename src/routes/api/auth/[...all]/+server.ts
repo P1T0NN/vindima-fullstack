@@ -2,7 +2,8 @@
 import { PUBLIC_CONVEX_SITE_URL } from '$env/static/public';
 
 // UTILS
-import { CLIENT_IP_HEADER, resolveClientAddress } from '@/shared/utils/clientAddress.js';
+import { CLIENT_IP_HEADER } from '@/shared/utils/clientAddress.js';
+import { resolveClientAddress } from '@/utils/clientAddress.js';
 
 // TYPES
 import type { RequestHandler } from './$types';

@@ -5,17 +5,15 @@
  * `null` for an unknown slug so the route renders a clean 404 instead of throwing.
  *
  * Public (no auth): everything here is storefront data. Products come pre-sorted from the
- * `by_category_status` index (trailing field `sortOrder`), bounded by
- * `SHOP_CONFIG.MAX_PRODUCTS_PER_CATEGORY` — a category page is a scrollable menu, not a
- * paginated directory. `returns` proves server-side that only the safe projections leave.
+ * `by_category_status` index (trailing field `sortOrder`) — a category page is a scrollable
+ * menu that shows the whole category, never a silently truncated slice. The read is
+ * index-bounded to one category's active products, so its size is the catalog's, which the
+ * store controls. `returns` proves server-side that only the safe projections leave.
  */
 
 // LIBRARIES
 import { query } from '@/convex/_generated/server';
 import { v } from 'convex/values';
-
-// CONFIG
-import { SHOP_CONFIG } from '@/shared/config';
 
 // HELPERS
 import { attachVariants } from '@/convex/tables/products/helpers/attachVariants';
@@ -48,14 +46,15 @@ export const fetchCategoryPage = query({
 			.unique();
 		if (!category) return null;
 
-		// Ascending along (category, status, sortOrder) = shop display order.
+		// Ascending along (category, status, sortOrder) = shop display order. Whole category —
+		// a cap here would silently hide products from shoppers, which is worse than the read.
 		const rows = await ctx.db
 			.query('products')
 			.withIndex('by_category_status', (q) =>
 				q.eq('category', category.slug).eq('status', 'active' as const)
 			)
 			.order('asc')
-			.take(SHOP_CONFIG.MAX_PRODUCTS_PER_CATEGORY);
+			.collect();
 
 		const products = (await attachVariants(ctx, rows)).map((product) => ({
 			_id: product._id,

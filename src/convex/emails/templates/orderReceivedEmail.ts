@@ -33,7 +33,7 @@ export function orderReceivedEmail(order: Doc<'orders'>, paymentUrl?: string): E
 	const receiveVerb = order.delivery.kind === 'pickup' ? 'recoger' : 'recibir';
 	// `paymentUrl` only exists for online orders, so the reservation window is the online one.
 	const nextLine = paymentUrl
-		? `Completa tu pago para confirmarlo — tu pedido se reserva por ${CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE} horas.`
+		? `Completa tu pago para confirmarlo - tu pedido se reserva por ${CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE} horas.`
 		: `Pagas al ${receiveVerb} tu pedido. Te avisaremos cuando esté ${order.delivery.kind === 'pickup' ? 'listo' : 'en camino'}.`;
 
 	const cta = paymentUrl ? button('Completar pago', paymentUrl) : '';

@@ -1,23 +1,29 @@
 /**
- * Admin order list — every order, newest first, paginated (cursor mode) for the
- * `/admin/orders` DataTable. Raw `Doc<'orders'>` rows; display mapping (status collapse,
- * money formatting) happens client-side, same as the customer list.
+ * Admin order list — every order, newest first, paginated for the `/admin/orders`
+ * DataTable. Raw `Doc<'orders'>` rows; display mapping (status collapse, money formatting)
+ * happens client-side, same as the customer list.
  *
- * Optional admin controls (one access pattern per request, so they switch by args):
- *  - `search` non-empty → full-text `search_text` index (number / customer), status-filterable.
- *  - else               → a `by_status` union: the one requested status, or all four real ones.
+ * One access pattern per request, switched by args (and the strategy function keeps the
+ * pagination mode in lockstep — the client derives the same predicate):
+ *  - `search` non-empty → full-text `search_text` index (number / customer),
+ *    status-filterable, cursor mode (Convex search indexes are paginate-only).
+ *  - `status` set      → single `by_status` index range, cursor mode.
+ *  - neither           → **aggregate mode** over the `orderBrowse` counter's `real` namespace:
+ *    exact `totalCount` + O(log n) jump to any page number, at any order volume, no scan
+ *    cap. The B-tree is kept in sync by the write-path triggers (`convex/counters.ts`).
  *
- * **Never the default table order.** That would include `draft` rows — unpaid online orders that
- * are not orders yet (`ordersSchema.ts`) — so the unfiltered list enumerates the four real
- * statuses instead. Search mode excludes them for a different reason: a draft is written without
- * a `searchText` blob, so it is not in the `search_text` index at all.
+ * **Never the raw table order.** That would include `draft` rows — unpaid online orders that
+ * are not orders yet (`ordersSchema.ts`) — so the browse reads the `real` namespace only.
+ * Search excludes them for a different reason: a draft is written without a `searchText`
+ * blob, so it is not in the `search_text` index at all.
  */
 
 // LIBRARIES
 import { v } from 'convex/values';
 
 // HELPERS
-import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
+import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
+import { counters } from '@/convex/counters';
 
 /** The statuses an admin can see. `draft` is deliberately not one of them. */
 const REAL_STATUSES = ['pending', 'paid', 'cancelled', 'refunded'] as const;
@@ -31,6 +37,10 @@ export const fetchOrders = fetchOptimized({
 		search: v.optional(v.string()),
 		status: v.optional(orderStatus)
 	},
+	// Browse (no search, no facet) gets page numbers via the aggregate; anything narrower is
+	// cursor. The admin table derives the same predicate from its own state, so caller and
+	// server always agree on which of `page` / `cursor` drives the request.
+	strategy: (args) => (args.search?.trim() || args.status ? 'cursor' : 'offset'),
 	search: (_ctx, args) => {
 		const query = args.search?.trim();
 		if (!query) return null;
@@ -42,8 +52,11 @@ export const fetchOrders = fetchOptimized({
 		};
 	},
 	union: (_ctx, args) => {
-		if (args.search?.trim()) return null; // search mode owns this request
-		const statuses = args.status ? [args.status] : REAL_STATUSES;
-		return { specs: statuses.map((status) => ({ index: 'by_status' as const, eq: { status } })) };
+		if (args.search?.trim() || !args.status) return null; // search / aggregate own those requests
+		return { specs: [{ index: 'by_status' as const, eq: { status: args.status } }] };
+	},
+	aggregate: (_ctx, args) => {
+		if (args.search?.trim() || args.status) return null;
+		return { aggregate: counters.orderBrowse.aggregate, namespace: 'real' };
 	}
 });

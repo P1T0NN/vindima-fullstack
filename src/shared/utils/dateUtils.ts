@@ -14,5 +14,5 @@ export function formatLongDate(iso: string): string {
  */
 export function formatTs(ts: number | string): string {
 	const d = new Date(ts);
-	return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString();
+	return Number.isNaN(d.getTime()) ? '-' : d.toLocaleString();
 }

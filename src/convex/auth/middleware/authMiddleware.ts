@@ -3,15 +3,16 @@ import { ConvexError } from 'convex/values';
 import { customAction, customCtx, customMutation } from 'convex-helpers/server/customFunctions';
 
 // UTILS
-import { action, mutation } from '@/convex/_generated/server';
+import { action } from '@/convex/_generated/server';
+import { mutation } from '@/convex/functions';
 import { authComponent } from '@/convex/auth/auth';
 import { convexGetRateLimitedUserId } from '@/convex/helpers/convexGetRateLimitedUserId';
 import { logAudit } from '@/convex/tables/auditLog/helpers/logAudit';
 
 // TYPES
 import type { ActionCtx, MutationCtx, QueryCtx } from '@/convex/_generated/server';
-import type { ConvexRateLimitName } from '@/convex/rateLimits/registry';
-import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
+import type { ConvexRateLimitName } from '@/shared/features/rateLimits/types/rateLimitsTypes';
+import type { ConvexErrorPayload } from '@/shared/types/types';
 import type { Id } from '@/convex/auth/component/_generated/dataModel';
 import type { AuditAction } from '@/convex/tables/auditLog/auditLogConfigs';
 import type { AuditOptions } from '@/convex/tables/auditLog/helpers/logAudit';

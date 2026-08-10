@@ -38,7 +38,7 @@ function row(
 
 /** Shipping label mirrors checkout: pickup = free counter pickup; delivery = fee or "Gratis". */
 function shippingLabel(order: Doc<'orders'>): string {
-	if (order.delivery.kind === 'pickup') return 'Recoger en tienda — sin costo';
+	if (order.delivery.kind === 'pickup') return 'Recoger en tienda - sin costo';
 	if (order.amounts.shippingMinor === 0) return 'Gratis';
 	return formatMoneyMinor(order.amounts.shippingMinor, order.currency);
 }
@@ -47,7 +47,7 @@ function shippingLabel(order: Doc<'orders'>): string {
 export function orderSummaryRows(order: Doc<'orders'>): string {
 	const lineRows = order.lines
 		.map((l) => {
-			const name = `${esc(l.name)} <span style="color:${EMAIL_CONFIG.MUTED_TEXT};">× ${l.qty}</span>`;
+			const name = `${esc(l.name)} <span style="color:${EMAIL_CONFIG.MUTED_TEXT};">x ${l.qty}</span>`;
 			const value = l.isRewardLine
 				? 'Gratis'
 				: formatMoneyMinor(l.unitPriceMinor * l.qty, order.currency);
@@ -62,7 +62,7 @@ export function orderSummaryRows(order: Doc<'orders'>): string {
 		order.amounts.welcomeDiscountMinor > 0
 			? row(
 					'Oferta de bienvenida',
-					`−${formatMoneyMinor(order.amounts.welcomeDiscountMinor, order.currency)}`,
+					`-${formatMoneyMinor(order.amounts.welcomeDiscountMinor, order.currency)}`,
 					{ muted: true }
 				)
 			: '',
@@ -79,7 +79,7 @@ export function orderSummaryRows(order: Doc<'orders'>): string {
 /** Compact list — item names + qty only, no prices (for shipped/cancelled/expired). */
 export function orderLinesRows(order: Doc<'orders'>): string {
 	return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0">${order.lines
-		.map((l) => row(esc(l.name), `× ${l.qty}`, { muted: true }))
+		.map((l) => row(esc(l.name), `x ${l.qty}`, { muted: true }))
 		.join('')}</table>`;
 }
 
@@ -88,7 +88,7 @@ export function orderSummaryText(order: Doc<'orders'>): string {
 	const lines = order.lines
 		.map(
 			(l) =>
-				`  ${l.name} × ${l.qty} — ${
+				`  ${l.name} x ${l.qty} - ${
 					l.isRewardLine ? 'Gratis' : formatMoneyMinor(l.unitPriceMinor * l.qty, order.currency)
 				}`
 		)
@@ -97,7 +97,7 @@ export function orderSummaryText(order: Doc<'orders'>): string {
 		lines,
 		`  Subtotal: ${formatMoneyMinor(order.amounts.subtotalMinor, order.currency)}`,
 		order.amounts.welcomeDiscountMinor > 0
-			? `  Oferta de bienvenida: −${formatMoneyMinor(order.amounts.welcomeDiscountMinor, order.currency)}`
+			? `  Oferta de bienvenida: -${formatMoneyMinor(order.amounts.welcomeDiscountMinor, order.currency)}`
 			: '',
 		`  Envío: ${shippingLabel(order)}`,
 		`  Total: ${formatMoneyMinor(order.amounts.totalMinor, order.currency)}`
@@ -107,7 +107,7 @@ export function orderSummaryText(order: Doc<'orders'>): string {
 
 /** Plain-text twin of the compact line list. */
 export function orderLinesText(order: Doc<'orders'>): string {
-	return order.lines.map((l) => `  ${l.name} × ${l.qty}`).join('\n');
+	return order.lines.map((l) => `  ${l.name} x ${l.qty}`).join('\n');
 }
 
 /** Delivery/pickup sub-block, HTML. Address as entered for delivery; pickup line otherwise. */

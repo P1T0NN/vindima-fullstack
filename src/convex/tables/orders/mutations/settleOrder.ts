@@ -10,7 +10,7 @@ import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
 import { mutationResult } from '@/convex/helpers/mutationResult';
 
 // TYPES
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 /**
  * Admin-facing "mark paid" — the manual "confirm payment on pickup/delivery" flow. Soft-checks

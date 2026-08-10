@@ -51,7 +51,7 @@
 		(latestOrders ?? []).map((order) => ({
 			id: order._id,
 			date: formatOrderDate(order._creationTime),
-			description: order.lines.map((line) => line.name).join(' · '),
+			description: order.lines.map((line) => line.name).join(' - '),
 			totalMinor: order.amounts.totalMinor,
 			currency: order.currency
 		}))

@@ -5,11 +5,14 @@ import { v } from 'convex/values';
 import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
 
 // HELPERS
-import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
+import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
 import { resolveRefs } from '../../cart/helpers/resolveRefs';
 
 // TYPES
-import { MY_ORDERS_STATUS_FILTERS, type MyOrderRow } from '@/shared/features/orders/types/ordersTypes';
+import {
+	MY_ORDERS_STATUS_FILTERS,
+	type MyOrderRow
+} from '@/shared/features/orders/types/ordersTypes';
 
 /**
  * Public (auth-gated read) — the signed-in customer's orders as `MyOrderRow`s (the frozen

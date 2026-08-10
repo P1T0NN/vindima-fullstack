@@ -3,7 +3,7 @@ import { v, type GenericValidator } from 'convex/values';
 
 /**
  * Validator form of the shared mutation envelope (`ConvexMutationResult` in
- * `@/convex/types/convexTypes`). Every public mutation's `returns:` should be one of these so
+ * `@/shared/types/types`). Every public mutation's `returns:` should be one of these so
  * the client always gets the same `{ success, message, data? }` shape.
  *
  * `message` is a backend `TranslatableMessage` — a stable key (+ optional serialisable params),

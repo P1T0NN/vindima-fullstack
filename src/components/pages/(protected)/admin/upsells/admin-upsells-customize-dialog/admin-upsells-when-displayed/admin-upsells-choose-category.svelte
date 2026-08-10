@@ -15,7 +15,7 @@
 <NativeSelect
 	bind:value
 	options={categoryOptions.options}
-	placeholder="Elige una categoría…"
+	placeholder="Elige una categoría..."
 	ariaLabel="Categoría"
-	class="mt-1"
+	class="mt-1 w-full"
 />

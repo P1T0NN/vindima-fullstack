@@ -7,16 +7,14 @@ import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 // UTILS
 import { appGoto } from '@/utils/app-navigation.js';
 import { authClient } from '@/features/auth/lib/auth-client';
-import {
-	passwordResetRequestFormSchema,
-	passwordResetVerifyFormSchema
-} from './password-reset-form-schema.js';
-import { zodIssuesToFieldErrors } from '@/shared/utils/validationUtils.js';
-import { rateLimitMessage } from '@/shared/utils/rateLimitMessages';
+import { passwordResetRequestSchema } from '@/shared/features/auth/schemas/passwordResetRequestSchema.js';
+import { passwordResetVerifySchema } from '@/shared/features/auth/schemas/passwordResetVerifySchema.js';
+import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
+import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
 
 // TYPES
 import type { PasswordResetFormStep, PasswordResetField } from './passwordResetFormTypes.js';
-import type { FieldErrors } from '@/shared/types/types';
+import type { FieldErrors } from '@/shared/features/validations/types/validationsTypes';
 
 // Wait for aria-invalid to hit the DOM, then move focus to the first bad field.
 async function focusFirstInvalid() {
@@ -40,7 +38,7 @@ export function createPasswordResetForm() {
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
 
-		const p = passwordResetRequestFormSchema.safeParse({
+		const p = passwordResetRequestSchema.safeParse({
 			email: String(formData.get('email') ?? ''),
 			flow: String(formData.get('flow') ?? '')
 		});
@@ -77,26 +75,17 @@ export function createPasswordResetForm() {
 
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
-		const submittedNewPassword = String(formData.get('newPassword') ?? '');
 
-		const p = passwordResetVerifyFormSchema.safeParse({
+		const p = passwordResetVerifySchema.safeParse({
 			code: String(formData.get('code') ?? '').trim(),
-			newPassword: submittedNewPassword,
+			newPassword: String(formData.get('newPassword') ?? ''),
+			confirmPassword,
 			email: step.email,
 			flow: String(formData.get('flow') ?? '')
 		});
 
 		if (!p.success) {
 			fieldErrors = zodIssuesToFieldErrors<PasswordResetField>(p.error.issues);
-			errorMessage = null;
-			await focusFirstInvalid();
-			return;
-		}
-
-		if (submittedNewPassword !== confirmPassword) {
-			fieldErrors = {
-				confirmPassword: 'Las contraseñas deben coincidir.'
-			};
 			errorMessage = null;
 			await focusFirstInvalid();
 			return;

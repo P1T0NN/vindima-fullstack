@@ -40,7 +40,7 @@ const CONTACT_FIELDS: MutationFormFieldDef[] = [
 		type: 'tel',
 		autocomplete: 'tel',
 		placeholder: '449 000 0000',
-		description: 'Opcional — Usaremos este número para contactarte sobre tu pedido'
+		description: 'Opcional - Usaremos este número para contactarte sobre tu pedido'
 	}
 ];
 
@@ -58,7 +58,7 @@ const ADDRESS_FIELDS: MutationFormFieldDef[] = [
 		label: 'Departamento, interior, etc.',
 		kind: 'input',
 		autocomplete: 'address-line2',
-		placeholder: 'Departamento, interior, piso…',
+		placeholder: 'Departamento, interior, piso...',
 		description: 'Opcional.'
 	},
 	{

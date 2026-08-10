@@ -85,7 +85,7 @@
 		selectValueOnSelect={false}
 		keepOpenOnSelect
 		{pendingId}
-		placeholder="Busca un producto para añadir…"
+		placeholder="Busca un producto para añadir..."
 		aria-label="Buscar un producto para añadir a las recompensas"
 		aria-describedby={hintId}
 		emptyTitle="Sin resultados"

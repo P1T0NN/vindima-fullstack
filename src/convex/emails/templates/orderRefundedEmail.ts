@@ -19,7 +19,7 @@ export function orderRefundedEmail(order: Doc<'orders'>): EmailContent {
 
 	const nextLine =
 		order.paymentMethod === 'online'
-			? 'Verás el reembolso en tu método de pago en 5–10 días hábiles.'
+			? 'Verás el reembolso en tu método de pago en 5-10 días hábiles.'
 			: 'Te contactaremos para coordinar la devolución.';
 
 	const bodyHtml =

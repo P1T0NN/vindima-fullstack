@@ -3,8 +3,8 @@ import { APIError } from 'better-auth/api';
 import type { GenericCtx } from '@convex-dev/better-auth';
 import { internal } from '../_generated/api';
 import type { DataModel } from '../_generated/dataModel';
-import type { TranslatableMessage } from '../types/convexTypes';
-import type { ConvexRateLimitName } from './registry';
+import { rateLimitDescriptor } from '@/shared/features/validations/utils/translatableMessage';
+import type { ConvexRateLimitName } from '@/shared/features/rateLimits/types/rateLimitsTypes';
 
 type ConvexRateLimitRunnerCtx = GenericCtx<DataModel> & {
 	runMutation: (
@@ -12,27 +12,6 @@ type ConvexRateLimitRunnerCtx = GenericCtx<DataModel> & {
 		args: { name: string; key: string }
 	) => Promise<unknown>;
 };
-
-/** JSON `{ key, params }` for BA `APIError.message` — keep in sync with `rateLimitMessage` on the client. */
-function convexRateLimitWireMessage(retryAfterMs: number | undefined): string {
-	let message: TranslatableMessage;
-
-	if (typeof retryAfterMs !== 'number' || retryAfterMs <= 0) {
-		message = { key: 'GenericMessages.TOO_MANY_REQUESTS' };
-	} else if (retryAfterMs < 60_000) {
-		message = {
-			key: 'GenericMessages.TOO_MANY_REQUESTS_SECONDS',
-			params: { seconds: Math.ceil(retryAfterMs / 1000) }
-		};
-	} else {
-		message = {
-			key: 'GenericMessages.TOO_MANY_REQUESTS_MINUTES',
-			params: { minutes: Math.ceil(retryAfterMs / 60_000) }
-		};
-	}
-
-	return JSON.stringify(message);
-}
 
 /**
  * Charge a named bucket and map `@convex-dev/rate-limiter` failures to a BA `429`.
@@ -49,7 +28,7 @@ export async function convexCreateRateLimit(
 ): Promise<void> {
 	if (!('runMutation' in ctx)) {
 		throw new Error(
-			'[convexCreateRateLimit] Context lacks runMutation — auth rate limits require a mutation-capable Convex ctx.'
+			'[convexCreateRateLimit] Context lacks runMutation - auth rate limits require a mutation-capable Convex ctx.'
 		);
 	}
 
@@ -63,8 +42,10 @@ export async function convexCreateRateLimit(
 			const retryAfterMs = error.data.retryAfter;
 			const ms = typeof retryAfterMs === 'number' && retryAfterMs > 0 ? retryAfterMs : undefined;
 
+			// JSON `{ key, params }` for BA's string-only `APIError.message`; the client's
+			// `rateLimitMessage` parses it back and renders it in the user's locale.
 			throw new APIError('TOO_MANY_REQUESTS', {
-				message: convexRateLimitWireMessage(ms)
+				message: JSON.stringify(rateLimitDescriptor(ms))
 			});
 		}
 		throw error;

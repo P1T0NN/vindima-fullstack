@@ -21,8 +21,11 @@
 
 	import { createPasswordResetForm } from './password-reset-form-model.svelte.js';
 
-	/** Matches `convexGenerateVerificationToken` and `passwordResetVerifyFormSchema`. */
-	const OTP_MAX_LENGTH = 8;
+	// CONFIG
+	import { AUTH_DATA } from '@/shared/config';
+
+	/** Matches the OTP the auth emails send and `passwordResetVerifySchema`. */
+	const OTP_MAX_LENGTH = AUTH_DATA.OTP_LENGTH;
 
 	const id = $props.id();
 

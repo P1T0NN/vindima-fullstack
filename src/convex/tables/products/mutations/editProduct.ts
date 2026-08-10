@@ -36,14 +36,14 @@ import { editProductSchema } from '@/shared/features/products/schemas/editProduc
 import { mutationResult } from '@/convex/helpers/mutationResult';
 
 // UTILS
-import { trimToUndefined } from '@/shared/utils/validationUtils';
+import { trimToUndefined } from '@/shared/utils/stringUtils';
 
 // HELPERS
 import { resolveImageUrls } from '../helpers/resolveImageUrls';
 
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
-import type { ConvexMutationResult } from '@/convex/types/convexTypes';
+import type { ConvexMutationResult } from '@/shared/types/types';
 
 export const editProduct = adminMutation('editProduct')({
 	args: {
@@ -195,7 +195,10 @@ export const editProduct = adminMutation('editProduct')({
 		let variantSortOrder = 0;
 		for (const variant of args.variants) {
 			// Removal wins over edit; tombstoned rows skip silently (§8 A5, validated above).
-			if (variant.variantId && (removedSet.has(variant.variantId) || skipVariantIds.has(variant.variantId)))
+			if (
+				variant.variantId &&
+				(removedSet.has(variant.variantId) || skipVariantIds.has(variant.variantId))
+			)
 				continue;
 			const label = trimToUndefined(variant.label);
 			const sortOrder = variantSortOrder++;

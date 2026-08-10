@@ -27,7 +27,7 @@ function siteOrigin(): string {
 	const raw = process.env.PUBLIC_SITE_URL;
 	if (!raw) {
 		throw new Error(
-			'PUBLIC_SITE_URL is not set on this Convex deployment — online payments need it to build ' +
+			'PUBLIC_SITE_URL is not set on this Convex deployment - online payments need it to build ' +
 				'return URLs. Run: npx convex env set PUBLIC_SITE_URL <your site origin>'
 		);
 	}

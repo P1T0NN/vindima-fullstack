@@ -136,7 +136,7 @@
 						</span>
 
 						<div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-							<span>IP: {session.ipAddress || '–'}</span>
+							<span>IP: {session.ipAddress || '-'}</span>
 							<span>Creado: {formatTs(session.createdAt)}</span>
 							<span>Expira: {formatTs(session.expiresAt)}</span>
 						</div>

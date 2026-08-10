@@ -45,7 +45,7 @@ export const refundStripePayment = internalAction({
 		try {
 			await refundPayment(order.paymentRef, `refund:${order._id}`);
 		} catch (err) {
-			console.error('[orders] stripe refund failed — order stays paid, retry from admin', {
+			console.error('[orders] stripe refund failed - order stays paid, retry from admin', {
 				orderId: order._id,
 				paymentRef: order.paymentRef,
 				err

@@ -4,6 +4,9 @@ import { SvelteSet } from 'svelte/reactivity';
 // TYPES
 import type { UploadFileEntry, UploadFileRow } from '../types/uploadFileTypes';
 
+// UTILS
+import { uploadImageKey } from './uploadImageUtils';
+
 export type UseFileUploadMode = 'single' | 'multiple';
 
 export type UseFileUploadArgs = {
@@ -21,7 +24,7 @@ export type UseFileUploadArgs = {
  * Re-exported so sub-components can reference the same key logic.
  */
 export function fileKey(f: UploadFileEntry): string {
-	return typeof f === 'string' ? f : `${f.name}-${f.size}-${f.lastModified}`;
+	return uploadImageKey(f);
 }
 
 /**

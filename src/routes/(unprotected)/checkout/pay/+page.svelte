@@ -18,7 +18,7 @@
 
 	// UTILS
 	import { safeAction } from '@/utils/convexHelpers';
-	import { translateFromBackend } from '@/utils/translateFromBackend';
+	import { translateFromBackend } from '@/features/validations/utils/translateFromBackend';
 
 	// LUCIDE ICONS
 	import LockIcon from '@lucide/svelte/icons/lock';
@@ -138,7 +138,7 @@
 				<span class="pay-sliver absolute inset-y-0 left-0 w-1/3 bg-primary"></span>
 			</div>
 
-			<p class="text-sm text-muted-foreground">Te llevamos al pago seguro…</p>
+			<p class="text-sm text-muted-foreground">Te llevamos al pago seguro...</p>
 
 			<p
 				class="mt-2 inline-flex items-center gap-1.5 text-[0.7rem] font-medium tracking-[0.13em] text-muted-foreground/70 uppercase"

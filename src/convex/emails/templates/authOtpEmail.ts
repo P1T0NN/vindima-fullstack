@@ -55,7 +55,7 @@ export function authOtpEmail(otp: string, type: OtpEmailType): EmailContent {
 		h1(copy.h1) +
 		p(context) +
 		codeBlock +
-		p('¿No fuiste tú? Ignora este correo — nadie puede entrar sin el código.', true);
+		p('¿No fuiste tú? Ignora este correo - nadie puede entrar sin el código.', true);
 
 	const html = renderEmail(context, bodyHtml);
 	const text = [

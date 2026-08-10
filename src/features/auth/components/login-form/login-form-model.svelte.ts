@@ -7,13 +7,13 @@ import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 // UTILS
 import { appGoto } from '@/utils/app-navigation.js';
 import { authClient } from '@/features/auth/lib/auth-client';
-import { loginFormSchema } from './login-form-schema.js';
-import { zodIssuesToFieldErrors } from '@/shared/utils/validationUtils.js';
-import { rateLimitMessage } from '@/shared/utils/rateLimitMessages';
+import { loginSchema } from '@/shared/features/auth/schemas/loginSchema.js';
+import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
+import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
 
 // TYPES
 import type { LoginFormStep, LoginField } from './loginFormTypes.js';
-import type { FieldErrors } from '@/shared/types/types';
+import type { FieldErrors } from '@/shared/features/validations/types/validationsTypes';
 
 export type LoginFormCopy = {
 	signInFailed: () => string;
@@ -34,7 +34,7 @@ export function createLoginForm(copy: LoginFormCopy) {
 		const form = event.currentTarget as HTMLFormElement;
 		const formData = new FormData(form);
 
-		const p = loginFormSchema.safeParse({
+		const p = loginSchema.safeParse({
 			email: String(formData.get('email') ?? ''),
 			password: String(formData.get('password') ?? ''),
 			flow: String(formData.get('flow') ?? '')

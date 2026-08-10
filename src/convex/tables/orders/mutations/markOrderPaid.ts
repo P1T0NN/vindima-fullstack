@@ -1,19 +1,18 @@
 // LIBRARIES
 import { ConvexError, v } from 'convex/values';
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
 // ANALYTICS
 import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';
 
 // HELPERS
-import { orderCountAggregate } from '../helpers/orderCountAggregate';
 import { buildOrderSearchText } from '../helpers/buildOrderSearchText';
 
 // TYPES
 import type { MutationCtx } from '@/convex/_generated/server';
 import type { Doc } from '@/convex/_generated/dataModel';
-import type { ConvexErrorPayload } from '@/convex/types/convexTypes';
+import type { ConvexErrorPayload } from '@/shared/types/types';
 
 /**
  * Internal — THE settlement seam (see `CheckoutPageSystemDesign.md` §6.2 + §7). The ONLY
@@ -66,8 +65,6 @@ export const markOrderPaid = internalMutation({
 						})
 					})
 		});
-		// Work-queue counter: pending → open (paid, not yet delivered).
-		await orderCountAggregate.replaceOrInsert(ctx, order, (await ctx.db.get(order._id))!);
 
 		// Analytics — order.settled + one order.line_sold per non-reward line (feeds the
 		// admin dashboard). unique keys make webhook replays a no-op; the catch keeps a

@@ -8,7 +8,7 @@
  */
 
 // HELPERS
-import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
+import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
 
 export const fetchAllCategories = fetchOptimized({
 	table: 'productCategories',

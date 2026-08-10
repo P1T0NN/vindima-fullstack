@@ -10,7 +10,7 @@
 
 /** `Paradoja Blanc` + `Botella` → `Paradoja Blanc · Botella`; no label → just the name. */
 export function formatVariantName(productName: string, variantLabel?: string | null): string {
-	return variantLabel ? `${productName} · ${variantLabel}` : productName;
+	return variantLabel ? `${productName} - ${variantLabel}` : productName;
 }
 
 /** 'boards-1-M' → 'Boards 1 M'. Readable fallback for a ref whose product no longer exists. */

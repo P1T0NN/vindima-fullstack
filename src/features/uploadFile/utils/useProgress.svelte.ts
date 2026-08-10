@@ -43,7 +43,7 @@ export function useProgress(options?: UseProgressOptions) {
 
 	function beforeUploadFile(fileNum: number, totalFiles: number) {
 		percent = Math.round(uploadSlicePercent(fileNum - 1, totalFiles));
-		label = `Subiendo archivo ${fileNum} de ${totalFiles}…`;
+		label = `Subiendo archivo ${fileNum} de ${totalFiles}...`;
 	}
 
 	function afterUploadFile(fileNum: number, totalFiles: number) {

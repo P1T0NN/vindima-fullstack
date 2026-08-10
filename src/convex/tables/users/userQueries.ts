@@ -6,10 +6,10 @@ import { authComponent } from '@/convex/auth/auth';
 
 // UTILS
 import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
-import { paginatedQueryArgs, resolvePaginationOpts } from '@/convex/helpers/paginationHelpers';
+import { paginatedQueryArgs, resolvePaginationOpts } from '@/convex/pagination/paginationHelpers';
 
 // TYPES
-import type { PaginatedListPayload } from '@/components/ui/data-table/types';
+import type { PaginatedListPayload } from '@/shared/features/pagination/types/paginationTypes';
 import type { Doc } from '@/convex/auth/component/_generated/dataModel';
 
 /**

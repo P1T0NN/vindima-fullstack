@@ -15,7 +15,7 @@
 import { v } from 'convex/values';
 
 // HELPERS
-import { fetchOptimized } from '@/convex/helpers/fetchOptimized';
+import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
 import { attachVariants } from '../helpers/attachVariants';
 
 const productStatus = v.union(v.literal('draft'), v.literal('active'), v.literal('archived'));

@@ -1,5 +1,5 @@
 // LIBRARIES
-import { internalMutation } from '@/convex/_generated/server';
+import { internalMutation } from '@/convex/functions';
 
 // CONFIG
 import { BATCH_CONFIG, FEATURES } from '@/shared/config.js';

@@ -58,7 +58,7 @@
 			<Input
 				id="ban-reason"
 				bind:value={reason}
-				placeholder="Violación de los términos…"
+				placeholder="Violación de los términos..."
 				disabled={isPending}
 			/>
 		</Field>

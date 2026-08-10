@@ -58,7 +58,7 @@
 	minQueryLength={2}
 	selectValueOnSelect={false}
 	{disabled}
-	placeholder="Buscar productos…"
+	placeholder="Buscar productos..."
 	class="max-w-none"
 	onSelect={(item) => {
 		onAdd(item.id, item.title);

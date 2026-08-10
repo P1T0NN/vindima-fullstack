@@ -54,13 +54,12 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
-		"@convex-dev/aggregate": "^0.2.2",
 		"@convex-dev/better-auth": "^0.12.1",
 		"@convex-dev/r2": "^0.10.1",
 		"@convex-dev/rate-limiter": "^0.3.2",
 		"@mmailaender/convex-better-auth-svelte": "^0.7.3",
 		"@mmailaender/convex-svelte": "^0.18.0",
-		"@piton-/analytics-convex": "^1.0.1",
+		"@piton-/analytics-convex": "^2.0.1",
 		"better-auth": "1.5.3",
 		"botid": "^1.5.11",
 		"browser-image-compression": "^2.0.2",

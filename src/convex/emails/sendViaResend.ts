@@ -27,7 +27,7 @@ export async function sendViaResend(
 	idempotencyKey?: string
 ): Promise<void> {
 	if (!FEATURES.EMAILS) {
-		console.log('[emails] skipped — FEATURES.EMAILS is off', { to, subject: content.subject });
+		console.log('[emails] skipped - FEATURES.EMAILS is off', { to, subject: content.subject });
 		return;
 	}
 
@@ -47,6 +47,6 @@ export async function sendViaResend(
 	);
 
 	if (error) {
-		throw new Error(`Resend send failed: ${error.name} — ${error.message}`);
+		throw new Error(`Resend send failed: ${error.name} - ${error.message}`);
 	}
 }

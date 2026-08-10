@@ -42,7 +42,7 @@ export function editProductSections(
 					label: 'Descripción',
 					kind: 'textarea',
 					rows: 2,
-					placeholder: 'Texto breve que aparece en la ficha del producto…'
+					placeholder: 'Texto breve que aparece en la ficha del producto...'
 				},
 				{
 					id: 'category',
