@@ -111,25 +111,7 @@
 			<CategoryProductGrid products={page.products} category={category.slug} />
 
 			<!-- Category-specific extras (promotions / CTA), inline per slug. -->
-			{#if slug === 'vinos-de-autor'}
-				<p class="mt-10 mb-3.5 text-xs font-medium tracking-widest text-gold-ink uppercase">
-					Promociones
-				</p>
-				<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-					{#each [{ discount: '-10%', text: 'En la compra de 3 o más botellas' }, { discount: '-12%', text: 'En la caja de 12 botellas' }, { discount: '-10%', text: 'Botella + tabla, hogaza o cualquier alimento' }] as promo (promo.text)}
-						<div class="flex items-center gap-3.5 rounded-lg border border-primary/40 px-5 py-4.5">
-							<span class="shrink-0 font-display text-3xl leading-none font-semibold text-gold-ink">
-								{promo.discount}
-							</span>
-							<span class="text-[12.5px] leading-snug text-muted-foreground">{promo.text}</span>
-						</div>
-					{/each}
-				</div>
-				{@render ctaPanel(
-					'¿Quieres una cata privada o botellas para tu evento?',
-					'Ordenar por WhatsApp'
-				)}
-			{:else if slug === 'bowls'}
+			{#if slug === 'bowls'}
 				{@render ctaPanel('Arma tu bowl para llevar.', 'Pedir por WhatsApp')}
 			{:else if slug === 'hogazas'}
 				{@render ctaPanel(

@@ -56,8 +56,7 @@
 				</h1>
 
 				<p class="mt-6.5 mb-9 max-w-105 text-[15px] leading-[1.8] text-muted-foreground">
-					Una bodega orgánica en Aguascalientes. Tablas de temporada, tapas y vino seleccionado para
-					reunir a los tuyos alrededor de la mesa.
+					Un Wine Bar en Aguascalientes. Tablas de temporada, tapas y vino orgánico seleccionado para reunir a los tuyos alrededor de la mesa.
 				</p>
 
 				<div class="flex flex-wrap gap-3.5">
