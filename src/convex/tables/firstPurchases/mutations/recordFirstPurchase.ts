@@ -44,13 +44,13 @@ export const recordFirstPurchase = internalMutation({
 			discountMinorUnits: args.discountMinorUnits
 		});
 
-		// Analytics — the dashboard's "new customers" KPI (first PAID order, not signup).
-		// Only on the insert path, so replays never double-count; never blocks the money path.
+		// Analytics — first PAID order (not signup). Only on the insert path, so replays never
+		// double-count; never blocks the money path.
 		try {
 			await analytics.track(ctx, ANALYTICS_EVENT.CUSTOMER_FIRST_PURCHASE, {
-				actorId: args.userId,
-				properties: { discountMinor: args.discountMinorUnits },
-				unique: { key: `first-purchase:${args.userId}` }
+				subjectRef: args.userId,
+				props: { discountMinor: args.discountMinorUnits },
+				dedupeKey: `first-purchase:${args.userId}`
 			});
 		} catch (err) {
 			console.warn('[firstPurchases] analytics track failed; recording anyway', { err });

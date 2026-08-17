@@ -412,7 +412,7 @@ export declare const components: {
   rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
   betterAuth: import("../auth/component/_generated/component.js").ComponentApi<"betterAuth">;
   r2: import("@convex-dev/r2/_generated/component.js").ComponentApi<"r2">;
-  analytics: import("@piton-/analytics-convex/_generated/component.js").ComponentApi<"analytics">;
+  analytics: import("@vllnt/convex-analytics/_generated/component.js").ComponentApi<"analytics">;
   orderCounts: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"orderCounts">;
   orderBrowse: import("@convex-dev/aggregate/_generated/component.js").ComponentApi<"orderBrowse">;
 };

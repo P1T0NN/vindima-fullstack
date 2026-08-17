@@ -4,12 +4,11 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"analytics:configure": "bunx convex run analytics/index:writeConfiguration",
-		"predev": "bun run analytics:configure || exit 0",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
+		"postinstall": "bun scripts/fix-convex-analytics.mjs",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
@@ -54,12 +53,13 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@convex-dev/aggregate": "^0.2.2",
 		"@convex-dev/better-auth": "^0.12.1",
 		"@convex-dev/r2": "^0.10.1",
 		"@convex-dev/rate-limiter": "^0.3.2",
 		"@mmailaender/convex-better-auth-svelte": "^0.7.3",
 		"@mmailaender/convex-svelte": "^0.18.0",
-		"@piton-/analytics-convex": "^2.0.1",
+		"@vllnt/convex-analytics": "^0.1.0-canary.55667b0",
 		"better-auth": "1.5.3",
 		"botid": "^1.5.11",
 		"browser-image-compression": "^2.0.2",

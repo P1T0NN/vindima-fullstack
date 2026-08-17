@@ -24,7 +24,7 @@ const schema = defineSchema({
 	// The table itself is always declared so flipping the flag needs no migration.
 	auditLogs: auditLogTable,
 
-	// In-app analytics (events + rollups) live inside the `@piton-/analytics-convex`
+	// In-app analytics (events + rollups) live inside the `@vllnt/convex-analytics`
 	// component now — it owns its own tables. See `./analytics/analytics.ts`.
 
 	// Punch-card rewards — toggle population via FEATURES.REWARDS in shared/config.ts.

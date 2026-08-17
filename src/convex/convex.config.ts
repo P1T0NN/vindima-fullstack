@@ -2,7 +2,7 @@
 import { defineApp } from 'convex/server';
 import rateLimiter from '@convex-dev/rate-limiter/convex.config.js';
 import r2 from '@convex-dev/r2/convex.config.js';
-import analytics from '@piton-/analytics-convex/convex.config.js';
+import analytics from '@vllnt/convex-analytics/convex.config';
 import aggregate from '@convex-dev/aggregate/convex.config.js';
 import betterAuth from './auth/component/convex.config';
 

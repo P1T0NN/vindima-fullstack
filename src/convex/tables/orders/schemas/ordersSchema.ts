@@ -82,6 +82,13 @@ export const ordersTable = defineTable({
 	 *  for the 'manual' provider. A historical fact, never re-read as a live reference. */
 	paymentRef: v.optional(v.string()),
 
+	/** Epoch-ms the order was settled (`markOrderPaid`) — the single money-path timestamp the
+	 *  dashboard sums over. Set on the `pending|draft → paid` transition; refunded orders keep
+	 *  it. Optional so pre-existing rows validate; history starts when this field shipped. */
+	settledAt: v.optional(v.number()),
+	/** Epoch-ms the order was refunded (`markOrderRefunded`). Set on `paid → refunded`. */
+	refundedAt: v.optional(v.number()),
+
 	/** Stripe Checkout Session currently attached to this order (`StripeSystemDesign.md` §6).
 	 *  Cleared — and the session expired — whenever the draft changes or is cancelled; the
 	 *  webhook only settles a payment whose session matches this value (§8.2). Retained on
@@ -107,5 +114,8 @@ export const ordersTable = defineTable({
 	// Guest order lookup: the shopper types the number printed on their receipt. Exact-match
 	// only — the email must still match too, so this index is a finder, not an authenticator.
 	.index('by_number', ['number'])
+	// Dashboard money windows: settled/refunded orders by their lifecycle timestamps.
+	.index('by_settledAt', ['settledAt'])
+	.index('by_refundedAt', ['refundedAt'])
 	// Admin order search: match number/customer, still filterable by status.
 	.searchIndex('search_text', { searchField: 'searchText', filterFields: ['status'] });

@@ -3,22 +3,17 @@
  * everything `/admin/dashboard` renders for a period. Fetched ONE-SHOT from the page (see
  * GeneralSystemDesignRule.md); only `fetchOrdersCounts` (separate file) is subscribed.
  *
- * Two-source rule in action:
- * - Trends/KPIs/breakdowns ← `@piton-/analytics-convex` rollups (`analytics.fetch*` server
- *   helpers — hourly rollups, so windows built from store-local midnights are exact).
- *   Events are tracked at the settle/refund/first-purchase seams; history starts the day
- *   tracking shipped. Five component calls total: one KPI batch per window, one series,
- *   two breakdowns (different dimensions, so they cannot batch).
- * - Exact operational truth (order work-queue counts) ← live state. Rollups lag and
- *   approximate; a work queue must not.
+ * Single-source rule: EVERY number below is computed from the orders / firstPurchases /
+ * productCategories tables — exact, and windowed on store-local midnights via the
+ * `settledAt` / `refundedAt` timestamps set at the settle/refund seams. `@vllnt/convex-analytics`
+ * still ingests the money-path events (`analytics.track` at those seams) but the dashboard
+ * reads none of its count rollups — those are reserved for future funnel/retention reads.
+ * History starts the day `settledAt`/`refundedAt` shipped (as before: the day tracking shipped).
  */
 
 // LIBRARIES
 import { v } from 'convex/values';
 import { query } from '@/convex/_generated/server';
-
-// ANALYTICS
-import { analytics } from '@/convex/analytics';
 
 // AUTH
 import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
@@ -31,6 +26,7 @@ import { CART_CONFIG, SHOP_CONFIG } from '@/shared/config';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';
+import type { Doc } from '@/convex/_generated/dataModel';
 import type {
 	DashboardKpis,
 	DashboardPayload,
@@ -38,6 +34,7 @@ import type {
 } from '@/shared/features/orders/types/ordersTypes';
 
 const DAY_MS = 86_400_000;
+const HOUR_MS = 3_600_000;
 const OFFSET_MS = SHOP_CONFIG.DASHBOARD_UTC_OFFSET_MINUTES * 60_000;
 
 /** Days per period preset ('today' = 1: window starts at local midnight). */
@@ -45,6 +42,7 @@ const PERIOD_DAYS: Record<DashboardPeriod, number> = { today: 1, '7d': 7, '30d':
 
 /** Most recent store-local midnight at-or-before `t`, as a UTC ms epoch. */
 const localMidnight = (t: number) => Math.floor((t + OFFSET_MS) / DAY_MS) * DAY_MS - OFFSET_MS;
+const localHour = (t: number) => Math.floor((t + OFFSET_MS) / HOUR_MS) * HOUR_MS - OFFSET_MS;
 
 const kpisValidator = v.object({
 	revenueMinor: v.number(),
@@ -76,112 +74,130 @@ export const fetchDashboard = query({
 		const currentStart = localMidnight(now) - (days - 1) * DAY_MS;
 		const previousStart = currentStart - days * DAY_MS;
 
-		const kpiFetch = (from: number, to: number): Promise<DashboardKpis> => kpis(ctx, from, to);
-
-		const [current, previous, revenueSeries, topProducts, categoryRevenue] = await Promise.all([
-			kpiFetch(currentStart, now),
-			kpiFetch(previousStart, currentStart),
-			series(ctx, args.period, currentStart, now),
-			products(ctx, currentStart, now),
-			categories(ctx, currentStart, now)
+		const [current, previous] = await Promise.all([
+			windowData(ctx, currentStart, now),
+			windowData(ctx, previousStart, currentStart)
 		]);
 
 		return {
 			ordersCounts: await countOrders(ctx),
-			kpis: { current, previous },
-			revenueSeries,
-			topProducts,
-			categoryRevenue,
+			kpis: { current: kpisFrom(current), previous: kpisFrom(previous) },
+			revenueSeries: seriesFrom(current.settled, args.period, currentStart, now),
+			topProducts: productsFrom(current.settled),
+			categoryRevenue: await categoriesFrom(ctx, current.settled),
 			currency: CART_CONFIG.CURRENCY
 		};
 	}
 });
 
-/** The four KPI metrics, read as ONE batch per window. */
-const KPI_METRICS = ['revenue', 'orders', 'refunds', 'newCustomers'] as const;
+/** Settled + refunded + first-purchase rows for one `[from, to)` window. */
+type WindowData = {
+	settled: Doc<'orders'>[];
+	refunded: Doc<'orders'>[];
+	firstPurchases: Doc<'firstPurchases'>[];
+};
 
-/**
- * One window's KPIs from the hourly rollups. Revenue is NET (settled minus refunded).
- *
- * `fetchDashboardMetrics` reads all four metrics in a single component call, coalescing
- * their rollup scans and sequencing them against ONE shared read budget — four separate
- * `fetchSummary` calls each opened their own. Same rows, same numbers, a quarter of the
- * round trips.
- *
- * The window is passed explicitly rather than using the batch's `includeComparison`: that
- * derives the previous period itself, normalized to UTC day boundaries, which would not
- * match the store-local midnight windows this dashboard is built on (`localMidnight`
- * above). Two explicit-range calls keep the periods exactly as they were.
- */
-async function kpis(ctx: QueryCtx, from: number, to: number): Promise<DashboardKpis> {
-	const { metrics } = await analytics.fetchDashboardMetrics(ctx, {
-		metrics: [...KPI_METRICS],
-		from,
-		to
-	});
-	const value = (metric: (typeof KPI_METRICS)[number]) => metrics[metric]?.value ?? 0;
-	const refundsMinor = value('refunds');
+async function windowData(ctx: QueryCtx, from: number, to: number): Promise<WindowData> {
+	const [settled, refunded, firstPurchases] = await Promise.all([
+		ctx.db
+			.query('orders')
+			.withIndex('by_settledAt', (q) => q.gte('settledAt', from).lt('settledAt', to))
+			.collect(),
+		ctx.db
+			.query('orders')
+			.withIndex('by_refundedAt', (q) => q.gte('refundedAt', from).lt('refundedAt', to))
+			.collect(),
+		ctx.db
+			.query('firstPurchases')
+			.withIndex('by_creation_time', (q) =>
+				q.gte('_creationTime', from).lt('_creationTime', to)
+			)
+			.collect()
+	]);
+	return { settled, refunded, firstPurchases };
+}
 
+/** One window's KPIs. Revenue is NET (settled minus refunded). */
+function kpisFrom({ settled, refunded, firstPurchases }: WindowData): DashboardKpis {
+	const gross = settled.reduce((sum, o) => sum + o.amounts.totalMinor, 0);
+	const refundsMinor = refunded.reduce((sum, o) => sum + o.amounts.totalMinor, 0);
 	return {
-		revenueMinor: value('revenue') - refundsMinor,
-		ordersCount: value('orders'),
+		revenueMinor: gross - refundsMinor,
+		ordersCount: settled.length,
 		refundsMinor,
-		newCustomers: value('newCustomers')
+		newCustomers: firstPurchases.length
 	};
 }
 
-/** Gross revenue buckets — hourly for "today", local days otherwise (defaultTimezone). */
-async function series(
-	ctx: QueryCtx,
+/** Gross settled revenue per bucket — hourly for "today", local days otherwise. Every bucket in
+ *  the period is emitted (zero-padded), so the x-axis always spans the full range: with a single
+ *  sale-day an unpadded series collapses to one dot and no line. */
+function seriesFrom(
+	settled: Doc<'orders'>[],
 	period: DashboardPeriod,
-	from: number,
-	to: number
-): Promise<DashboardPayload['revenueSeries']> {
-	const result = await analytics.fetchTimeSeries(ctx, {
-		metric: 'revenue',
-		from,
-		to,
-		...(period === 'today' ? {} : { bucketUnit: 'day' as const })
-	});
-	const key = result.meta.seriesKeys[0];
-	return result.data.map((row) => ({
-		t: row.date,
-		valueMinor: (key !== undefined ? row[key] : 0) ?? 0
-	}));
+	currentStart: number,
+	now: number
+): DashboardPayload['revenueSeries'] {
+	const hourly = period === 'today';
+	const bucket = hourly ? localHour : localMidnight;
+	const step = hourly ? HOUR_MS : DAY_MS;
+
+	const byBucket = new Map<number, number>();
+	for (const order of settled) {
+		const t = bucket(order.settledAt!);
+		byBucket.set(t, (byBucket.get(t) ?? 0) + order.amounts.totalMinor);
+	}
+
+	const out: DashboardPayload['revenueSeries'] = [];
+	for (let t = bucket(currentStart); t <= bucket(now); t += step) {
+		out.push({ t, valueMinor: byBucket.get(t) ?? 0 });
+	}
+	return out;
 }
 
-/** Top 5 products by revenue (line snapshots carried the display name at track time). */
-async function products(
-	ctx: QueryCtx,
-	from: number,
-	to: number
-): Promise<DashboardPayload['topProducts']> {
-	const result = await analytics.fetchBreakdown(ctx, {
-		metric: 'productRevenue',
-		from,
-		to,
-		groupBy: 'product'
-	});
-	return result.data.slice(0, 5).map((d) => ({ name: d.key, revenueMinor: d.value }));
+/** Top 5 products by revenue, from the settled lines' price snapshots. */
+function productsFrom(settled: Doc<'orders'>[]): DashboardPayload['topProducts'] {
+	const byProduct = new Map<string, number>();
+	for (const order of settled) {
+		for (const line of order.lines) {
+			if (line.isRewardLine) continue;
+			byProduct.set(line.name, (byProduct.get(line.name) ?? 0) + line.unitPriceMinor * line.qty);
+		}
+	}
+	return [...byProduct.entries()]
+		.sort((a, b) => b[1] - a[1])
+		.slice(0, 5)
+		.map(([name, revenueMinor]) => ({ name, revenueMinor }));
 }
 
-/** Revenue per category — events store the slug; display names resolve here. */
-async function categories(
+/** Revenue per category (slug → name), resolved line-by-line at read time. */
+async function categoriesFrom(
 	ctx: QueryCtx,
-	from: number,
-	to: number
+	settled: Doc<'orders'>[]
 ): Promise<DashboardPayload['categoryRevenue']> {
-	const result = await analytics.fetchBreakdown(ctx, {
-		metric: 'productRevenue',
-		from,
-		to,
-		groupBy: 'category'
-	});
-	// Category display names (slug → name). Single-digit rows; collect is fine.
+	const byCategory = new Map<string, number>();
+	// ponytail: one point-read per non-reward line. Boutique volume is fine; if a
+	// high-SKU catalog ever makes this slow, denormalize the category slug onto the
+	// order line at placement (the same snapshot the name already is).
+	for (const order of settled) {
+		for (const line of order.lines) {
+			if (line.isRewardLine) continue;
+			const variant = await ctx.db
+				.query('productVariants')
+				.withIndex('by_ref', (q) => q.eq('ref', line.productRef))
+				.unique();
+			const product = variant ? await ctx.db.get(variant.productId) : null;
+			const slug = product?.category ?? 'otros';
+			byCategory.set(slug, (byCategory.get(slug) ?? 0) + line.unitPriceMinor * line.qty);
+		}
+	}
+
 	const allCategories = await ctx.db.query('productCategories').collect();
 	const nameBySlug = new Map(allCategories.map((c) => [c.slug, c.name]));
-	return result.data.map((d) => ({
-		name: d.key === 'otros' ? 'Otros' : (nameBySlug.get(d.key) ?? d.key),
-		revenueMinor: d.value
-	}));
+	return [...byCategory.entries()]
+		.sort((a, b) => b[1] - a[1])
+		.map(([slug, revenueMinor]) => ({
+			name: slug === 'otros' ? 'Otros' : (nameBySlug.get(slug) ?? slug),
+			revenueMinor
+		}));
 }

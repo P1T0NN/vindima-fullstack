@@ -33,7 +33,7 @@ export const PAGINATION_DATA = {
 	HARD_MAX_PAGE_SIZE: 100
 } as const;
 
-/** Exact live counters (`defineCounters`) — see `src/convex/counters.ts`. */
+/** Exact live counters (`TableAggregate` + triggers) — see `src/convex/counters.ts`. */
 export const AGGREGATE_DATA = {
 	/**
 	 * Rows processed per backfill transaction. Each batch self-schedules the next, so

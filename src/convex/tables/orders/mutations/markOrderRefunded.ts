@@ -35,14 +35,15 @@ export const markOrderRefunded = internalMutation({
 		}
 
 		// Work-queue counter follows automatically (open → closed) — see `convex/counters.ts`.
-		await ctx.db.patch(order._id, { status: 'refunded' });
+		await ctx.db.patch(order._id, { status: 'refunded', refundedAt: Date.now() });
 
-		// Analytics — feeds the dashboard's refunds KPI. Never blocks the refund.
+		// Analytics — the money-path event; `dedupeKey` makes replays a no-op. Never blocks
+		// the refund.
 		try {
 			await analytics.track(ctx, ANALYTICS_EVENT.ORDER_REFUNDED, {
-				actorId: order.userId ?? undefined,
-				properties: { amountMinor: order.amounts.totalMinor, currency: order.currency },
-				unique: { key: `order-refunded:${order._id}` }
+				subjectRef: order.userId ?? undefined,
+				props: { amountMinor: order.amounts.totalMinor, currency: order.currency },
+				dedupeKey: `order-refunded:${order._id}`
 			});
 		} catch (err) {
 			console.warn('[orders] analytics track failed on refund; refunding anyway', {
