@@ -135,11 +135,10 @@ const ADDRESS = {
 export const COMPANY_DATA = {
 	NAME: 'Vindima',
 	EMAIL: 'info@kurosava.com',
-	RESEND_EMAIL: 'info@kurosava.com',
-	DOMAIN: 'vindima-fullstack.vercel.app',
+	RESEND_EMAIL: 'info@vindimawinebar.com',
+	DOMAIN: 'vindimawinebar.com',
 	LOGO: '/logo/opt/logo-1536w.webp',
-	DESCRIPTION:
-		'Vinícola orgánica - vinos de autor, charcutería y experiencias para grandes anfitriones.',
+	DESCRIPTION: 'Vinícola orgánica - vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
 	ADDRESS: {
