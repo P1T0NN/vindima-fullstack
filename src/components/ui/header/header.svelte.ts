@@ -137,6 +137,14 @@ export function startScrollSpy(headerOffset = 72): () => void {
 	// Detection band = from just below the header down to ~30% of the viewport. The
 	// topmost section currently touching that band (DOM order) is the active one, so
 	// a section stays active until it scrolls up out of the band.
+	//
+	// The band's top MUST equal the page's `scroll-padding-top` — that is where hash
+	// navigation actually lands a section. A header-height guess here drifts from the
+	// CSS (header ≈62px vs `scroll-padding-top: 5rem`), leaving the previous section's
+	// bottom inside the band and highlighting the link one above the one clicked.
+	const scrollPadding =
+		parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || headerOffset;
+
 	const visible = new Map<string, boolean>();
 	const observer = new IntersectionObserver(
 		(entries) => {
@@ -144,7 +152,7 @@ export function startScrollSpy(headerOffset = 72): () => void {
 			const top = sections.find((s) => visible.get(s.id));
 			scrollSpy.active = top ? `#${top.id}` : '';
 		},
-		{ rootMargin: `-${headerOffset}px 0px -70% 0px`, threshold: 0 }
+		{ rootMargin: `-${scrollPadding}px 0px -70% 0px`, threshold: 0 }
 	);
 	sections.forEach((s) => observer.observe(s));
 	return () => observer.disconnect();

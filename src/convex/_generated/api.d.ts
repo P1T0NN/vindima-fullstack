@@ -53,6 +53,7 @@ import type * as pagination_paginationHelpers from "../pagination/paginationHelp
 import type * as rateLimits_convexCreateRateLimit from "../rateLimits/convexCreateRateLimit.js";
 import type * as rateLimits_convexCreateRateLimitInternal from "../rateLimits/convexCreateRateLimitInternal.js";
 import type * as rateLimits_searchRateLimitMutations from "../rateLimits/searchRateLimitMutations.js";
+import type * as rewriteImageBaseUrl from "../rewriteImageBaseUrl.js";
 import type * as storage_crons_cleanupOrphanDataR2 from "../storage/crons/cleanupOrphanDataR2.js";
 import type * as storage_r2_buildR2PublicObjectUrl from "../storage/r2/buildR2PublicObjectUrl.js";
 import type * as storage_r2_r2 from "../storage/r2/r2.js";
@@ -243,6 +244,7 @@ declare const fullApi: ApiFromModules<{
   "rateLimits/convexCreateRateLimit": typeof rateLimits_convexCreateRateLimit;
   "rateLimits/convexCreateRateLimitInternal": typeof rateLimits_convexCreateRateLimitInternal;
   "rateLimits/searchRateLimitMutations": typeof rateLimits_searchRateLimitMutations;
+  rewriteImageBaseUrl: typeof rewriteImageBaseUrl;
   "storage/crons/cleanupOrphanDataR2": typeof storage_crons_cleanupOrphanDataR2;
   "storage/r2/buildR2PublicObjectUrl": typeof storage_r2_buildR2PublicObjectUrl;
   "storage/r2/r2": typeof storage_r2_r2;
