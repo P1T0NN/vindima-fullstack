@@ -89,6 +89,7 @@
 		href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Jost:wght@400;500;600&display=swap"
 		rel="stylesheet"
 	/>
+	<!-- Umami analytics disabled for now.
 	{#if !dev}
 		<script
 			defer
@@ -96,6 +97,7 @@
 			data-website-id="b8f657d5-dddc-4c34-bdda-2da1cf55e58f"
 		></script>
 	{/if}
+	-->
 </svelte:head>
 
 <!-- NuqsAdapter: app-wide `useQueryState` URL-synced state (admin filters, order tabs). -->
