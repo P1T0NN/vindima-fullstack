@@ -1,75 +1,117 @@
 // LIBRARIES
+import type { Bounds } from '@convex-dev/aggregate';
+import { mergedStream, stream } from 'convex-helpers/server/stream';
 import { v } from 'convex/values';
 
+// CONVEX
+import schema from '@/convex/schema.js';
+
+// AGGREGATES
+import { userOrderFilterAggregate } from '../aggregates/userOrderFilterAggregate.js';
+import { userOrderTotalCounter } from '../counters/userOrderTotalCounter.js';
+
 // AUTH
-import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
+import { getAuthUserId } from '@/convex/betterAuth/helpers/getAuthUserId';
 
 // HELPERS
-import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
-import { resolveRefs } from '../../cart/helpers/resolveRefs';
+import { getPagination, paginatedPageValidator } from '@/convex/helpers/getPagination.js';
+import { fetchOptimizedQuery } from '@/convex/wrappers/fetchOptimizedQuery.js';
+import { resolveRefs } from '../../cart/helpers/resolveRefs.js';
+
+// VALIDATORS
+import { myOrderRowValidator } from '../validators/ordersValidators.js';
 
 // TYPES
+import type { Id } from '@/convex/_generated/dataModel.js';
+import type { QueryCtx } from '@/convex/_generated/server.js';
+import type { PaginationOptions } from 'convex/server';
+import type { ConvexPaginatedPage } from '@/shared/features/pagination/types/paginationTypesConvex.js';
+import type { OrderFilterAggregateKey } from '../aggregates/orderFilterAggregate.js';
 import {
 	MY_ORDERS_STATUS_FILTERS,
-	type MyOrderRow
+	type MyOrderRow,
+	type MyOrdersStatusFilter
 } from '@/shared/features/orders/types/ordersTypes';
 
-/**
- * Public (auth-gated read) — the signed-in customer's orders as `MyOrderRow`s (the frozen
- * order + live catalog rows for its lines), newest first, paginated (cursor mode). Display
- * mapping (status collapse, formatting) happens client-side. Feeds `ConvexDataList` on the
- * orders page.
- *
- * `union` instead of `where`: `specs: []` is the factory's "empty page" escape, so
- * signed-out callers get a valid empty page (the orders page renders its empty state)
- * instead of an auth throw or a full-table walk.
- *
- * `status` narrows to one order-page tab. `'closed'` collapses the two terminal states
- * (cancelled + refunded) into one customer-facing "Cancelados" list via a two-spec union.
- */
-export const fetchMyOrders = fetchOptimized({
-	table: 'orders',
+const REAL_STATUSES = ['pending', 'paid', 'cancelled', 'refunded'] as const;
+
+function orderStatusBounds(
+	status: (typeof REAL_STATUSES)[number]
+): Bounds<OrderFilterAggregateKey, Id<'orders'>> {
+	return { prefix: [true, status] };
+}
+
+function emptyPage<T>(paginationOpts: PaginationOptions): ConvexPaginatedPage<T> {
+	return {
+		items: [],
+		nextCursor: null,
+		hasNextPage: false,
+		pageSize: paginationOpts.numItems
+	};
+}
+
+function statusSource(
+	ctx: QueryCtx,
+	userId: string,
+	statuses: readonly (typeof REAL_STATUSES)[number][]
+) {
+	const streams = statuses.map((status) =>
+		stream(ctx.db, schema)
+			.query('orders')
+			.withIndex('by_user_and_status', (q) => q.eq('userId', userId).eq('status', status))
+			.order('desc')
+	);
+
+	return streams.length === 1 ? streams[0] : mergedStream(streams, ['_creationTime']);
+}
+
+function statusesForFilter(status: MyOrdersStatusFilter | undefined) {
+	if (!status) return REAL_STATUSES;
+	return status === 'closed' ? (['cancelled', 'refunded'] as const) : ([status] as const);
+}
+
+/** Public auth-gated customer order history, enriched only after its bounded page is read. */
+export const fetchMyOrders = fetchOptimizedQuery({
 	args: {
-		status: v.optional(v.union(...MY_ORDERS_STATUS_FILTERS.map((s) => v.literal(s))))
+		status: v.optional(v.union(...MY_ORDERS_STATUS_FILTERS.map((status) => v.literal(status))))
 	},
-	union: async (ctx, args) => {
+	returns: paginatedPageValidator(myOrderRowValidator),
+	count: userOrderFilterAggregate,
+	countTotal: async ({ ctx, args }) => {
 		const userId = await getAuthUserId(ctx);
-		if (!userId) return { specs: [] };
+		if (!userId) return 0;
+		if (!args.status) return userOrderTotalCounter.count(ctx, userId);
 
-		// "Todos" enumerates the four real statuses rather than walking `by_user`, because
-		// `by_user` would also return `draft` rows — unpaid online orders that do not exist yet
-		// as far as the customer is concerned (`ordersSchema.ts`). Same index cost, one spec each.
-		if (!args.status) {
-			return {
-				specs: (['pending', 'paid', 'cancelled', 'refunded'] as const).map((status) => ({
-					index: 'by_user_and_status' as const,
-					eq: { userId, status }
-				}))
-			};
-		}
-
-		const statuses =
-			args.status === 'closed' ? (['cancelled', 'refunded'] as const) : ([args.status] as const);
-		return {
-			specs: statuses.map((status) => ({
-				index: 'by_user_and_status' as const,
-				eq: { userId, status }
+		const counts = await userOrderFilterAggregate.countBatch(
+			ctx,
+			statusesForFilter(args.status).map((status) => ({
+				namespace: userId,
+				bounds: orderStatusBounds(status)
 			}))
-		};
+		);
+		return counts.reduce((total, count) => total + count, 0);
 	},
-	// Ship each order with its lines' live catalog rows so the card never fetches per-row.
-	// Page-bounded: ≤ numItems orders, ONE shared resolve for the whole page. Lines keep
-	// their snapshot name as the fallback, so a delisted product still renders correctly.
-	enrich: async (ctx, page): Promise<MyOrderRow[]> => {
-		const refs = [...new Set(page.flatMap((order) => order.lines.map((line) => line.productRef)))];
+	fetchPage: async ({ ctx, paginationOpts, args }): Promise<ConvexPaginatedPage<MyOrderRow>> => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) return emptyPage<MyOrderRow>(paginationOpts);
+
+		const page = await getPagination(statusSource(ctx, userId, statusesForFilter(args.status)), {
+			paginationOpts
+		});
+		const refs = [
+			...new Set(page.items.flatMap((order) => order.lines.map((line) => line.productRef)))
+		];
 		const rows = refs.length > 0 ? await resolveRefs(ctx, refs) : [];
 		const byRef = new Map(rows.map((row) => [row.productRef, row]));
 
-		return page.map((order) => ({
-			...order,
-			products: [...new Set(order.lines.map((line) => line.productRef))].flatMap(
-				(ref) => byRef.get(ref) ?? []
-			)
-		}));
+		return {
+			...page,
+			items: page.items.map((order) => ({
+				...order,
+				products: [...new Set(order.lines.map((line) => line.productRef))].map(
+					(ref) => byRef.get(ref)!
+				)
+			}))
+		};
 	}
 });

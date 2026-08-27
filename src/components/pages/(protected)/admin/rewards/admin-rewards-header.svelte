@@ -1,6 +1,6 @@
 <script lang="ts">
 	// CONFIG
-	import { REWARDS_CONFIG } from '@/shared/config';
+	import { REWARDS_CONFIG } from '@/shared/features/rewards/config';
 </script>
 
 <header class="flex flex-col gap-1">

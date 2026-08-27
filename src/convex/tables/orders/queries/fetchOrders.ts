@@ -1,62 +1,83 @@
-/**
- * Admin order list — every order, newest first, paginated for the `/admin/orders`
- * DataTable. Raw `Doc<'orders'>` rows; display mapping (status collapse, money formatting)
- * happens client-side, same as the customer list.
- *
- * One access pattern per request, switched by args (and the strategy function keeps the
- * pagination mode in lockstep — the client derives the same predicate):
- *  - `search` non-empty → full-text `search_text` index (number / customer),
- *    status-filterable, cursor mode (Convex search indexes are paginate-only).
- *  - `status` set      → single `by_status` index range, cursor mode.
- *  - neither           → **aggregate mode** over the `orderBrowse` counter's `real` namespace:
- *    exact `totalCount` + O(log n) jump to any page number, at any order volume, no scan
- *    cap. The B-tree is kept in sync by the write-path triggers (`convex/counters.ts`).
- *
- * **Never the raw table order.** That would include `draft` rows — unpaid online orders that
- * are not orders yet (`ordersSchema.ts`) — so the browse reads the `real` namespace only.
- * Search excludes them for a different reason: a draft is written without a `searchText`
- * blob, so it is not in the `search_text` index at all.
- */
+/** Admin order list — every non-draft order, newest first. */
 
 // LIBRARIES
+import { mergedStream, stream } from 'convex-helpers/server/stream';
 import { v } from 'convex/values';
 
+// CONVEX
+import schema from '@/convex/schema.js';
+
+// AGGREGATES
+import type { Bounds } from '@convex-dev/aggregate';
+import { orderFilterAggregate } from '../aggregates/orderFilterAggregate.js';
+import { orderTotalCounter, ORDER_TOTAL_COUNTER_KEY } from '../counters/orderTotalCounter.js';
+
 // HELPERS
-import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
-import { counters } from '@/convex/counters';
+import { getPagination, paginatedPageValidator } from '@/convex/helpers/getPagination.js';
+import { fetchOptimizedQuery } from '@/convex/wrappers/fetchOptimizedQuery.js';
+
+// VALIDATORS
+import { orderRowValidator } from '../validators/ordersValidators.js';
+
+// TYPES
+import type { Id } from '@/convex/_generated/dataModel.js';
+import type { QueryCtx } from '@/convex/_generated/server.js';
+import type { OrderFilterAggregateKey } from '../aggregates/orderFilterAggregate.js';
 
 /** The statuses an admin can see. `draft` is deliberately not one of them. */
 const REAL_STATUSES = ['pending', 'paid', 'cancelled', 'refunded'] as const;
+const orderStatus = v.union(...REAL_STATUSES.map((status) => v.literal(status)));
 
-const orderStatus = v.union(...REAL_STATUSES.map((s) => v.literal(s)));
+function orderStatusBounds(
+	status: (typeof REAL_STATUSES)[number]
+): Bounds<OrderFilterAggregateKey, Id<'orders'>> {
+	return { prefix: [true, status] };
+}
 
-export const fetchOrders = fetchOptimized({
-	table: 'orders',
+function statusSource(ctx: QueryCtx, statuses: readonly (typeof REAL_STATUSES)[number][]) {
+	const streams = statuses.map((status) =>
+		stream(ctx.db, schema)
+			.query('orders')
+			.withIndex('by_status', (q) => q.eq('status', status))
+			.order('desc')
+	);
+
+	return streams.length === 1 ? streams[0] : mergedStream(streams, ['_creationTime']);
+}
+
+export const fetchOrders = fetchOptimizedQuery({
 	auth: 'admin',
-	args: {
-		search: v.optional(v.string()),
-		status: v.optional(orderStatus)
-	},
-	// Browse (no search, no facet) gets page numbers via the aggregate; anything narrower is
-	// cursor. The admin table derives the same predicate from its own state, so caller and
-	// server always agree on which of `page` / `cursor` drives the request.
-	strategy: (args) => (args.search?.trim() || args.status ? 'cursor' : 'offset'),
-	search: (_ctx, args) => {
-		const query = args.search?.trim();
-		if (!query) return null;
-		return {
-			index: 'search_text',
-			searchField: 'searchText',
-			query,
-			eq: args.status ? { status: args.status } : {}
-		};
-	},
-	union: (_ctx, args) => {
-		if (args.search?.trim() || !args.status) return null; // search / aggregate own those requests
-		return { specs: [{ index: 'by_status' as const, eq: { status: args.status } }] };
-	},
-	aggregate: (_ctx, args) => {
-		if (args.search?.trim() || args.status) return null;
-		return { aggregate: counters.orderBrowse.aggregate, namespace: 'real' };
+	args: { status: v.optional(orderStatus) },
+	returns: paginatedPageValidator(orderRowValidator),
+	count: orderFilterAggregate,
+	countTotal: ({ ctx, args }) =>
+		args.status
+			? orderFilterAggregate.count(ctx, { bounds: orderStatusBounds(args.status) })
+			: orderTotalCounter.count(ctx, ORDER_TOTAL_COUNTER_KEY),
+	fetchPage: ({ ctx, paginationOpts, search, args }) => {
+		if (search) {
+			if (args.status) {
+				return getPagination(
+					ctx.db
+						.query('orders')
+						.withSearchIndex('search_text', (q) =>
+							q
+								.search('searchText', search)
+								.eq('status', args.status as (typeof REAL_STATUSES)[number])
+						),
+					{ paginationOpts }
+				);
+			}
+
+			return getPagination(
+				ctx.db
+					.query('orders')
+					.withSearchIndex('search_text', (q) => q.search('searchText', search)),
+				{ paginationOpts }
+			);
+		}
+
+		const statuses = args.status ? [args.status] : REAL_STATUSES;
+		return getPagination(statusSource(ctx, statuses), { paginationOpts });
 	}
 });

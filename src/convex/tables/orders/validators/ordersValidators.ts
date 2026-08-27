@@ -1,6 +1,9 @@
 // LIBRARIES
 import { v } from 'convex/values';
 
+// VALIDATORS
+import { resolvedCartProductRow } from '@/convex/tables/cart/validators/cartValidators';
+
 /** A snapshotted order line — name + unit price frozen at placement. */
 export const orderLineValidator = v.object({
 	/** Opaque product reference, resolved by the app layer (same discipline as the cart). */
@@ -43,3 +46,46 @@ export const orderDeliveryValidator = v.union(
 		})
 	})
 );
+
+/** Complete order document returned by admin and customer order listings. */
+export const orderRowValidator = v.object({
+	_id: v.id('orders'),
+	_creationTime: v.number(),
+	userId: v.union(v.string(), v.null()),
+	email: v.string(),
+	name: v.string(),
+	phone: v.optional(v.string()),
+	number: v.string(),
+	attemptId: v.string(),
+	status: v.union(
+		v.literal('draft'),
+		v.literal('pending'),
+		v.literal('paid'),
+		v.literal('cancelled'),
+		v.literal('refunded')
+	),
+	fulfillment: v.union(
+		v.null(),
+		v.literal('processing'),
+		v.literal('shipped'),
+		v.literal('delivered')
+	),
+	lines: v.array(orderLineValidator),
+	amounts: orderAmountsValidator,
+	currency: v.string(),
+	delivery: orderDeliveryValidator,
+	paymentMethod: v.optional(orderPaymentMethodValidator),
+	note: v.optional(v.string()),
+	claimId: v.optional(v.id('rewardClaims')),
+	paymentRef: v.optional(v.string()),
+	settledAt: v.optional(v.number()),
+	refundedAt: v.optional(v.number()),
+	paymentSessionRef: v.optional(v.string()),
+	paymentSessionAttempt: v.optional(v.number()),
+	searchText: v.optional(v.string())
+});
+
+/** Customer order row with bounded live catalog projections for its lines. */
+export const myOrderRowValidator = orderRowValidator.extend({
+	products: v.array(resolvedCartProductRow)
+});

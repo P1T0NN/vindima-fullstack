@@ -1,31 +1,31 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 
 	// CONFIG
-	import { CART_CONFIG } from '@/shared/config';
+	import { CART_CONFIG } from '@/shared/features/cart/config';
 
 	// COMPONENTS
 	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 
 	// UTILS
-	import { safeMutation } from '@/utils/convexHelpers';
-	import { toastResult } from '@/utils/toastResult';
+	import { toastMessage } from '@/utils/toastMessage';
+import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 
 	// TYPES
 	import type { RewardItemRow } from '@/shared/features/productVariants/types/productVariantsTypes';
 
-	// LUCIDE ICONS
-	import Trash2Icon from '@lucide/svelte/icons/trash-2';
-	import CircleAlertIcon from '@lucide/svelte/icons/circle-alert';
-
-	// Rendered BARE as a direct child of ConvexDataList's container (see /admin/rewards) — this
+	// Rendered as the content of a DataList item (see /admin/rewards) — this
 	// component owns its own root element, which is what the list's `divide-y` divides.
 	let { item }: { item: RewardItemRow } = $props();
 
-	const convex = useConvexClient();
+	const setVariantRewardEligible = useMutation(
+		api.tables.productVariants.mutations.setVariantRewardEligible.setVariantRewardEligible
+	);
 	let busy = $state(false);
 
 	const displayName = $derived(
@@ -42,12 +42,29 @@
 		if (busy) return;
 		busy = true;
 		try {
-			const res = await safeMutation(
-				convex,
-				api.tables.productVariants.mutations.setVariantRewardEligible.setVariantRewardEligible,
-				{ variantId: item._id, eligible: false }
-			);
-			toastResult(res);
+			let result;
+			try {
+				result = await setVariantRewardEligible({ variantId: item._id, eligible: false });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
+			}
+			const message = result.message;
+			if (!result.success) {
+				toastMessage({ type: 'error', error: null, message });
+				return;
+			}
+			toastMessage({ type: 'success', message });
 		} finally {
 			busy = false;
 		}
@@ -66,7 +83,7 @@
 
 		{#if notPurchasable}
 			<p class="mt-0.5 flex items-center gap-1 text-xs text-destructive">
-				<CircleAlertIcon class="size-3.5 shrink-0" aria-hidden="true" />
+				<span class="icon-[lucide--circle-alert] size-3.5 shrink-0" aria-hidden="true"></span>
 				<span class="truncate">No disponible para compra, oculto para los clientes</span>
 			</p>
 		{/if}
@@ -86,7 +103,7 @@
 		title={`¿Quitar ${displayName} de las recompensas?`}
 		description={`Los clientes ya no pueden elegir ${displayName} como artículo gratis. Si alguien ya lo tiene reservado, la reserva sigue siendo válida: quitarlo solo impide nuevos canjes.`}
 	>
-		<Trash2Icon class="size-4" />
+		<span class="icon-[lucide--trash-2] size-4"></span>
 		<span class="hidden sm:inline">Eliminar</span>
 	</ActionButton>
 </div>

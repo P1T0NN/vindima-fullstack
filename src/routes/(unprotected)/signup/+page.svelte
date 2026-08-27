@@ -9,12 +9,12 @@
 	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import { Card } from '@/components/ui/card/index.js';
 	import { Input } from '@/components/ui/input/index.js';
-	import { BirthdayInput } from '@/components/ui/birthday-input/index.js';
+	import { BirthdayInput } from '@/components/ui/custom-components/birthday-input/index.js';
 	import { Label } from '@/components/ui/label/index.js';
-	import Link from '@/components/ui/link/link.svelte';
-	import Logo from '@/components/ui/logo/logo.svelte';
-	import Section from '@/components/ui/section/section.svelte';
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import Link from '@/components/ui/custom-components/link/link.svelte';
+	import Logo from '@/components/ui/custom-components/logo/logo.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import GoogleLoginButton from '@/features/auth/components/google-login-button/google-login-button.svelte';
 	import PasswordInput from '@/features/auth/components/password-input/password-input.svelte';
 	import EmailVerificationForm from '@/features/auth/components/email-verification-form/email-verification-form.svelte';
@@ -172,8 +172,7 @@
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.password}
-								<FieldError id="signup-password-{id}-error">{form.fieldErrors.password}</FieldError
-								>
+								<FieldError id="signup-password-{id}-error">{form.fieldErrors.password}</FieldError>
 							{/if}
 						</div>
 
@@ -241,8 +240,7 @@
 								class="h-auto rounded-sm px-3 py-3"
 							/>
 							{#if form.fieldErrors.birthday}
-								<FieldError id="signup-birthday-{id}-error">{form.fieldErrors.birthday}</FieldError
-								>
+								<FieldError id="signup-birthday-{id}-error">{form.fieldErrors.birthday}</FieldError>
 							{/if}
 						</div>
 					</div>

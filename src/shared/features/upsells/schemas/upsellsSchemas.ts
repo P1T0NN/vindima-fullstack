@@ -8,7 +8,7 @@
 import { z } from 'zod';
 
 // CONFIG
-import { UPSELLS_CONFIG } from '@/shared/config';
+import { UPSELLS_CONFIG } from '@/shared/features/upsells/config';
 
 /** What fires a rule. Mirrors `upsellTriggerValidator` (Convex) and `UpsellTrigger` (type). */
 export const upsellTriggerSchema = z.discriminatedUnion('kind', [

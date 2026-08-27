@@ -7,9 +7,6 @@
 	import { AlertDialog } from '@/components/ui/alert-dialog/index.js';
 	import { Button } from '@/components/ui/button/index.js';
 
-	// LUCIDE ICONS
-	import ShieldAlertIcon from '@lucide/svelte/icons/shield-alert';
-
 	/**
 	 * Surfaces auth-related redirect errors that BA appends as query params
 	 * (e.g. `?error=banned&error_description=…` after a banned user is bounced
@@ -53,7 +50,7 @@
 				<div
 					class="flex size-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive"
 				>
-					<ShieldAlertIcon class="size-5" />
+					<span class="icon-[lucide--shield-alert] size-5" ></span>
 				</div>
 				<h2>{title}</h2>
 			</div>

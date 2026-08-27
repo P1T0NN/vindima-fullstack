@@ -2,11 +2,8 @@
 	// COMPONENTS
 	import CreateUpsellButton from '../create-upsell-button.svelte';
 
-	// LUCIDE ICONS
-	import SparklesIcon from '@lucide/svelte/icons/sparkles';
-
 	// The builder dialog's id — the create button opens it natively (zero JS).
-	let { dialogId }: { dialogId: string } = $props();
+	let { onOpen }: { onOpen: () => void } = $props();
 </script>
 
 <div
@@ -15,7 +12,7 @@
 	<span
 		class="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground"
 	>
-		<SparklesIcon class="size-6" strokeWidth={1.5} />
+		<span class="icon-[lucide--sparkles] size-6"></span>
 	</span>
 
 	<div class="flex flex-col gap-1">
@@ -26,5 +23,5 @@
 		</p>
 	</div>
 
-	<CreateUpsellButton {dialogId} label="Crear sugerencia" />
+	<CreateUpsellButton {onOpen} label="Crear sugerencia" />
 </div>

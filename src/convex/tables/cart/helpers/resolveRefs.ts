@@ -16,7 +16,7 @@
  */
 
 // CONFIG
-import { CART_CONFIG } from '@/shared/config';
+import { CART_CONFIG } from '@/shared/features/cart/config';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';

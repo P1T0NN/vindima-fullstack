@@ -2,16 +2,14 @@
 	import './layout.css';
 
 	// SVELTEKIT IMPORTS
-	import { dev } from '$app/environment';
 	import { page } from '$app/state';
 
 	// LIBRARIES
 	import { NuqsAdapter } from 'nuqs-svelte/adapters/svelte-kit';
 	import { createSvelteAuthClient } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { authClient } from '@/features/auth/lib/auth-client';
-	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
+	import { useAuth, useQuery } from 'convex-svelte';
 	import { api } from '@/convex/_generated/api';
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// CLASSES
 	import { authClass, type CurrentUser } from '@/features/auth/classes/authClass.svelte';
@@ -19,9 +17,10 @@
 
 	// COMPONENTS
 	import { Toaster } from '@/components/ui/sonner';
-	import Header from '@/components/ui/header/header.svelte';
-	import Footer from '@/components/ui/footer/footer.svelte';
-	import CartSidebar from '@/components/ui/cart/cart-sidebar.svelte';
+	import * as Tooltip from '@/components/ui/tooltip/index.js';
+	import Header from '@/components/ui/custom-components/header/header.svelte';
+	import Footer from '@/components/ui/custom-components/footer/footer.svelte';
+	import CartSidebar from '@/components/ui/custom-components/cart/cart-sidebar.svelte';
 	import AuthErrorBanner from '@/features/auth/components/auth-error-banner/auth-error-banner.svelte';
 
 	// TYPES
@@ -41,7 +40,7 @@
 	const auth = useAuth();
 
 	const currentUserResponse = useQuery(
-		api.auth.queries.authQueries.getCurrentUser,
+		api.auth.getCurrentUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
 		() => ({
 			initialData: data.currentUser ?? undefined,
@@ -63,14 +62,13 @@
 	});
 
 	// CART — one subscription drives the authenticated cart; guests use localStorage.
-	const convex = useConvexClient();
 	const cartResponse = useQuery(api.tables.cart.queries.getMyCart.getMyCart, () =>
 		auth.isAuthenticated ? {} : 'skip'
 	);
 
-	// Tell the cart the current auth state + client (handles guest→server merge on login).
+	// Tell the cart the current auth state (handles guest→server merge on login).
 	$effect(() => {
-		cart.setAuth(!!auth.isAuthenticated, convex);
+		cart.setAuth(!!auth.isAuthenticated);
 	});
 	// Mirror the live server cart into `CartState` (reconciles optimistic writes).
 	$effect(() => {
@@ -102,26 +100,28 @@
 
 <!-- NuqsAdapter: app-wide `useQueryState` URL-synced state (admin filters, order tabs). -->
 <NuqsAdapter>
-	<div class="flex min-h-dvh flex-col">
-		<a
-			href="#contenido"
-			class="sr-only rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus-visible:not-sr-only focus-visible:absolute focus-visible:top-2 focus-visible:left-2 focus-visible:z-100"
-		>
-			Saltar al contenido
-		</a>
-		{#if !isAdminRoute}
-			<Header />
-		{/if}
-		<!-- Admin renders its own <main> inside the sidebar inset — nesting two mains is invalid,
+	<Tooltip.Provider>
+		<div class="flex min-h-dvh flex-col">
+			<a
+				href="#contenido"
+				class="sr-only rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus-visible:not-sr-only focus-visible:absolute focus-visible:top-2 focus-visible:left-2 focus-visible:z-100"
+			>
+				Saltar al contenido
+			</a>
+			{#if !isAdminRoute}
+				<Header />
+			{/if}
+			<!-- Admin renders its own <main> inside the sidebar inset — nesting two mains is invalid,
 		     so the storefront landmark steps down to a div there. -->
-		<svelte:element this={isAdminRoute ? 'div' : 'main'} id="contenido" class="min-h-0 flex-1">
-			{@render children()}
-		</svelte:element>
-		{#if !isAdminRoute}
-			<Footer />
-		{/if}
-	</div>
-	<CartSidebar />
-	<Toaster richColors />
-	<AuthErrorBanner />
+			<svelte:element this={isAdminRoute ? 'div' : 'main'} id="contenido" class="min-h-0 flex-1">
+				{@render children()}
+			</svelte:element>
+			{#if !isAdminRoute}
+				<Footer />
+			{/if}
+		</div>
+		<CartSidebar />
+		<Toaster richColors />
+		<AuthErrorBanner />
+	</Tooltip.Provider>
 </NuqsAdapter>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import AdminRewardsHeader from '@/components/pages/(protected)/admin/rewards/admin-rewards-header.svelte';
 	import AdminRewardsAddForm from '@/components/pages/(protected)/admin/rewards/admin-rewards-add-form.svelte';
 	import AdminRewardsTable from '@/components/pages/(protected)/admin/rewards/admin-rewards-table.svelte';

@@ -11,6 +11,7 @@ import type { Doc } from '@/convex/_generated/dataModel';
  */
 export const getOrderForEmail = internalQuery({
 	args: { orderId: v.id('orders') },
+	returns: v.any(),
 	handler: async (ctx, args): Promise<Doc<'orders'> | null> => {
 		return await ctx.db.get(args.orderId);
 	}

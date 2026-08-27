@@ -1,26 +1,22 @@
 <script lang="ts">
-	// The one "create an upsell" button — opens the builder dialog natively (zero JS).
-	// Used by the page header and the empty state so both stay identical.
-
 	// COMPONENTS
-	import { NativeDialogTrigger } from '@/components/ui/native-dialog/index.js';
+	import { Button } from '@/components/ui/button/index.js';
 
-	// LUCIDE ICONS
-	import PlusIcon from '@lucide/svelte/icons/plus';
+	// UTILS
+	import { cn } from '@/utils/utils.js';
 
 	let {
-		dialogId,
+		onOpen,
 		label = 'Nueva sugerencia',
 		class: className
 	}: {
-		/** Id of the builder `<NativeDialog>` this button opens. */
-		dialogId: string;
+		onOpen: () => void;
 		label?: string;
 		class?: string;
 	} = $props();
 </script>
 
-<NativeDialogTrigger {dialogId} class="shrink-0 gap-2 {className ?? ''}">
-	<PlusIcon class="size-4" />
+<Button onclick={onOpen} class={cn('shrink-0 gap-2', className)}>
+	<span class="icon-[lucide--plus] size-4" aria-hidden="true"></span>
 	{label}
-</NativeDialogTrigger>
+</Button>

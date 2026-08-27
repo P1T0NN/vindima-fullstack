@@ -2,7 +2,7 @@
 import { renderEmail, h1, p, panel, button, siteUrl, firstName, esc } from './emailLayout';
 
 // CONFIG
-import { EMAIL_CONFIG } from '@/shared/config.js';
+import { EMAIL_CONFIG } from '@/shared/features/emails/config.js';
 
 // TYPES
 import type { EmailContent } from '@/shared/features/emails/types/emailsTypes';

@@ -1,19 +1,23 @@
 <script lang="ts">
-	// CONFIG
-	import { ASSETS_DATA } from '@/shared/config.js';
+	// ASSETS
+	import aboutImage from '../../../../../../static/root/about-image.png?enhanced';
+	import bottle from '../../../../../../static/assets/bottle.png?enhanced';
+	import fotoDelVinedo from '../../../../../../static/root/foto-del-vinedo.jpg?enhanced';
+	import glass from '../../../../../../static/assets/glass.png?enhanced';
+	import olive from '../../../../../../static/assets/olive.png?enhanced';
+	import olives from '../../../../../../static/assets/olives.png?enhanced';
+
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
-	import Section from '@/components/ui/section/section.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
+	import StaticImage from '@/components/ui/custom-components/static-image/static-image.svelte';
 
 	// UTILS
 	import { appHref } from '@/utils/app-navigation.js';
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 	import { cn } from '@/utils/utils.js';
-
-	// LUCIDE ICONS
-	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
 </script>
 
 <Section
@@ -25,16 +29,16 @@
 	class="relative overflow-hidden"
 >
 	<div class="relative px-6 py-16 text-center sm:px-10 sm:py-16">
-		<img
-			src={ASSETS_DATA.OLIVE}
+		<StaticImage
+			src={olive}
 			alt=""
 			aria-hidden="true"
 			class="pointer-events-none absolute top-9 right-12 hidden w-27.5 rotate-14 opacity-15 sm:block"
 			loading="lazy"
 			decoding="async"
 		/>
-		<img
-			src={ASSETS_DATA.OLIVES}
+		<StaticImage
+			src={olives}
 			alt=""
 			aria-hidden="true"
 			class="pointer-events-none absolute top-15 -left-10 hidden w-45 opacity-15 sm:block"
@@ -56,31 +60,33 @@
 
 	<div class={cn(PAGE_CONTAINER, 'pb-20 sm:pb-24')}>
 		<div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
-			<img
+			<StaticImage
+				src={aboutImage}
 				alt="Retrato de Alby"
 				class="rounded-lg object-contain"
 				decoding="async"
 				loading="lazy"
 				width="640"
 				height="690"
-				src="/root/opt/about-image-640w.webp"
 			/>
 
 			<div>
-				<p class="mb-4 text-xs font-medium tracking-widest text-gold-ink uppercase">La anfitriona</p>
+				<p class="mb-4 text-xs font-medium tracking-widest text-gold-ink uppercase">
+					La anfitriona
+				</p>
 				<h3
 					class="mb-5 font-display text-3xl leading-none font-semibold tracking-[0.01em] text-accent uppercase sm:text-4xl lg:text-[44px]"
 				>
 					Conoce a Alby
 				</h3>
 				<p class="mb-4 max-w-md text-[15px] leading-[1.85] text-foreground/75">
-					Alby creó Vindima con una intención muy clara: que más personas pudieran descubrir y disfrutar el vino orgánico de Bodegas de la Parra, hecho en Aguascalientes.
-
-					También quiso crear un espacio para celebrar el placer de reunirse, conversar y compartir.
-
-					En Vindima selecciona vinos, quesos y productos artesanales para encontrar el maridaje que haga especial cada momento: una copa para acompañar una conversación, una tabla para elevar una reunión o algo especial para llevar y compartir.
-
-					Vindima existe para descubrir, maridar y disfrutar más el tiempo que compartimos.
+					Alby creó Vindima con una intención muy clara: que más personas pudieran descubrir y
+					disfrutar el vino orgánico de Bodegas de la Parra, hecho en Aguascalientes. También quiso
+					crear un espacio para celebrar el placer de reunirse, conversar y compartir. En Vindima
+					selecciona vinos, quesos y productos artesanales para encontrar el maridaje que haga
+					especial cada momento: una copa para acompañar una conversación, una tabla para elevar una
+					reunión o algo especial para llevar y compartir. Vindima existe para descubrir, maridar y
+					disfrutar más el tiempo que compartimos.
 				</p>
 				<p class="mb-6 max-w-md text-[15px] leading-[1.85] text-foreground/75">
 					Hoy cura cada tabla, elige cada botella y recibe a cada mesa como recibe en su casa.
@@ -98,16 +104,16 @@
 	</div>
 
 	<div class="relative overflow-hidden bg-accent px-6 py-20 sm:px-10 sm:py-21">
-		<img
-			src={ASSETS_DATA.GLASS}
+		<StaticImage
+			src={glass}
 			alt=""
 			aria-hidden="true"
 			class="pointer-events-none absolute -bottom-5 -left-8 w-45 opacity-15"
 			loading="lazy"
 			decoding="async"
 		/>
-		<img
-			src={ASSETS_DATA.BOTTLE}
+		<StaticImage
+			src={bottle}
 			alt=""
 			aria-hidden="true"
 			class="pointer-events-none absolute top-8 -right-5 w-42.5 opacity-15"
@@ -117,7 +123,7 @@
 
 		<div class="relative mx-auto max-w-xl text-center">
 			<p class="mb-4 text-xs font-medium tracking-widest text-primary uppercase">Desde 2023</p>
-			
+
 			<h3
 				class="mb-6 font-display text-3xl leading-tight font-semibold tracking-[0.01em] text-accent-foreground uppercase sm:text-4xl lg:text-[44px]"
 			>
@@ -125,9 +131,11 @@
 			</h3>
 
 			<p class="mb-4 text-[15px] leading-[1.9] text-accent-surface-muted">
-				Vindima nació en 2023 en Aguascalientes para acercar a más personas al vino orgánico mexicano y celebrar el placer de compartir una mesa.
-
-				Vinos, quesos, charcutería, productos artesanales, tablas y tapas, pensados para disfrutar en Vindima o llevar a una reunión. Cada tabla, cada copa y cada tapa está pensada para grandes anfitriones: para esos momentos en que la mesa se vuelve el mejor lugar de la casa.
+				Vindima nació en 2023 en Aguascalientes para acercar a más personas al vino orgánico
+				mexicano y celebrar el placer de compartir una mesa. Vinos, quesos, charcutería, productos
+				artesanales, tablas y tapas, pensados para disfrutar en Vindima o llevar a una reunión. Cada
+				tabla, cada copa y cada tapa está pensada para grandes anfitriones: para esos momentos en
+				que la mesa se vuelve el mejor lugar de la casa.
 			</p>
 		</div>
 	</div>
@@ -151,20 +159,20 @@
 					autor, de producción limitada, que servimos por copa y botella.
 				</p>
 				<Button href={appHref(UNPROTECTED_PAGE_ENDPOINTS.MARIDAJES)} variant="outline" size="lg">
-					Conoce nuestros vinos <ArrowRightIcon class="size-4" strokeWidth={1.75} />
+					Conoce nuestros vinos <span class="icon-[lucide--arrow-right] size-4"></span>
 				</Button>
 			</div>
 
 			<!-- ponytail: stand-in — no dedicated vineyard photo exists yet (the design mockup
 			     shipped an empty image-slot here); swap src when the client provides one. -->
-			<img
+			<StaticImage
+				src={fotoDelVinedo}
 				alt="Foto del viñedo"
 				class="h-110 w-full rounded-lg object-cover"
 				decoding="async"
 				loading="lazy"
 				width="960"
 				height="384"
-				src="/root/opt/foto-del-vinedo-960w.webp"
 			/>
 		</div>
 	</div>

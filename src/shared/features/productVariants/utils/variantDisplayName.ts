@@ -2,7 +2,7 @@
  * Variant display-name composition — FRONTEND-ONLY (GeneralSystemDesignRule.md § backend
  * returns data, frontend renders display). Convex returns raw fields (`productName`,
  * `variantLabel`, refs); every screen composes what it shows through these helpers, so
- * display formatting — and future i18n — lives in exactly one client-side place.
+ * display formatting lives in exactly one client-side place.
  *
  * Convex must NEVER import this file. The one server-side composition that remains is the
  * order-line snapshot written at purchase time (a stored fact, like an invoice).

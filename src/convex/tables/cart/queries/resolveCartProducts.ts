@@ -15,7 +15,7 @@ import { ConvexError, v } from 'convex/values';
 import { query } from '@/convex/_generated/server';
 
 // CONFIG
-import { CART_CONFIG } from '@/shared/config';
+import { CART_CONFIG } from '@/shared/features/cart/config';
 
 // HELPERS
 import { resolveRefs } from '../helpers/resolveRefs';
@@ -30,7 +30,7 @@ export const resolveCartProducts = query({
 		if (args.refs.length > CART_CONFIG.MAX_RESOLVE_REFS) {
 			throw new ConvexError({
 				code: 'TOO_MANY_REFS',
-				message: { key: 'ProductMessages.TOO_MANY_REFS' }
+				message: 'Se solicitaron demasiados elementos.'
 			});
 		}
 		return await resolveRefs(ctx, args.refs);

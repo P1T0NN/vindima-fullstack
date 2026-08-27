@@ -17,17 +17,17 @@
 import { zodToConvexFields } from 'convex-helpers/server/zod4';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminUploadMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // SCHEMAS
 import { createProductSchema } from '@/shared/features/products/schemas/productsSchemas';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 
 // UTILS
 import { trimToUndefined } from '@/shared/utils/stringUtils';
+import { resolveStoredFileUrls } from '@/convex/storage/r2';
 
 // HELPERS
 import { resolveImageUrls } from '../helpers/resolveImageUrls';
@@ -36,15 +36,15 @@ import { getProductSlug } from '../helpers/getProductSlug';
 // TYPES
 import type { ConvexMutationResult } from '@/shared/types/types';
 
-export const createProduct = adminMutation('createProduct')({
+export const createProduct = adminUploadMutation({
 	args: zodToConvexFields(createProductSchema.shape),
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		// Authoritative run of the shared schema (the form's pre-submit check is advisory).
-		// No per-issue messages for now — a schema failure returns a generic envelope key.
+		// No per-issue messages for now — a schema failure returns a generic display-ready message.
 		const parsed = createProductSchema.safeParse(args);
 		if (!parsed.success) {
-			return { success: false, message: { key: 'GenericMessages.UNEXPECTED_ERROR' } };
+			return { success: false, message: 'Ocurrió un error inesperado. Inténtalo de nuevo.' };
 		}
 
 		// Post-parse cleanup: `name` is already trimmed by the schema; '' → absent for the rest.
@@ -52,7 +52,13 @@ export const createProduct = adminMutation('createProduct')({
 		// Absent = draft: a scripted caller that omits it can never publish by accident.
 		const status = parsed.data.status ?? 'draft';
 		const description = trimToUndefined(parsed.data.description);
-		const images = await resolveImageUrls(ctx, parsed.data.images);
+		const uploadedKeys = args.uploadedFiles ?? [];
+		const uploadedUrls = await resolveStoredFileUrls(uploadedKeys);
+		const uploadedUrlByKey = new Map(uploadedKeys.map((key, index) => [key, uploadedUrls[index]]));
+		const images = resolveImageUrls(
+			parsed.data.images.map((image) => uploadedUrlByKey.get(image) ?? image)
+		);
+		if (images.length === 0) return fail('No se pudo guardar la imagen del producto. Vuelve a subirla.');
 		const cleanedVariants = parsed.data.variants.map((variant) => ({
 			...variant,
 			label: trimToUndefined(variant.label)
@@ -64,7 +70,7 @@ export const createProduct = adminMutation('createProduct')({
 			.query('productCategories')
 			.withIndex('by_slug', (q) => q.eq('slug', category))
 			.unique();
-		if (!categoryRow) return fail('CATEGORY_INVALID');
+		if (!categoryRow) return fail('Esa categoría no existe. Elige una de la lista.');
 
 		// Derived, never typed — the admin only ever names the product.
 		const slug = await getProductSlug(ctx, name);
@@ -75,7 +81,7 @@ export const createProduct = adminMutation('createProduct')({
 				.query('productVariants')
 				.withIndex('by_ref', (q) => q.eq('ref', variant.ref))
 				.unique();
-			if (refTaken) return fail('REF_TAKEN');
+			if (refTaken) return fail('Esa referencia de variante ya está en uso.');
 		}
 
 		// Ordering is auto-assigned, never typed by the admin: a new product is appended to the end
@@ -114,15 +120,10 @@ export const createProduct = adminMutation('createProduct')({
 			});
 		}
 
-		ctx.audit(AUDIT_ACTIONS.PRODUCT_CREATE, {
-			resource: { table: 'products', id: productId },
-			after: { slug, category, status, variantCount: cleanedVariants.length }
-		});
-
-		return { success: true, message: { key: 'ProductMessages.PRODUCT_CREATED' } };
+		return { success: true, message: 'Producto creado.' };
 	}
 });
 
-function fail(key: string): ConvexMutationResult {
-	return { success: false, message: { key: `ProductMessages.${key}` } };
+function fail(message: string): ConvexMutationResult {
+	return { success: false, message };
 }

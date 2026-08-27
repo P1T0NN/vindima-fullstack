@@ -22,17 +22,15 @@ export const setFulfillment = internalMutation({
 		if (!order) {
 			throw new ConvexError({
 				code: 'ORDER_NOT_FOUND',
-				message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' }
+				message: 'No encontramos ese pedido.'
 			} satisfies ConvexErrorPayload);
 		}
 		if (order.status !== 'paid') {
 			throw new ConvexError({
 				code: 'ORDER_NOT_PAID',
-				message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' }
+				message: 'Este pedido ya no se puede modificar.'
 			} satisfies ConvexErrorPayload);
 		}
-		// Work-queue counter follows automatically: `delivered` moves the order open → closed,
-		// other stages keep it open — see `convex/counters.ts`.
 		await ctx.db.patch(order._id, { fulfillment: args.fulfillment });
 
 		// O3/O4 — "en camino" (delivery) or "listo para recoger" (pickup); one template branches

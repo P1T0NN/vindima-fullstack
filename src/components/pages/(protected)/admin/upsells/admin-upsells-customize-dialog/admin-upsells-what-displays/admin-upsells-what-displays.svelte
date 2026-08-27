@@ -4,7 +4,7 @@
 	// to the dialog (save + validation read it).
 
 	// CONFIG
-	import { UPSELLS_CONFIG } from '@/shared/config.js';
+	import { UPSELLS_CONFIG } from '@/shared/features/upsells/config.js';
 
 	// COMPONENTS
 	import AdminUpsellsSelectedItem from './admin-upsells-selected-item.svelte';

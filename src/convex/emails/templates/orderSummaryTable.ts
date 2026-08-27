@@ -1,5 +1,5 @@
 // CONFIG
-import { EMAIL_CONFIG } from '@/shared/config.js';
+import { EMAIL_CONFIG } from '@/shared/features/emails/config.js';
 
 // UTILS
 import { formatMoneyMinor } from '@/utils/formatters';

@@ -3,52 +3,88 @@
  * archived included), variants attached, for the `/admin/products` DataTable. Cursor mode,
  * newest first.
  *
- * Optional admin controls (one access pattern per request, so they switch by args):
+ * Optional admin controls arrive as normalized wrapper inputs:
  *  - `search` non-empty     → full-text `search_name` index, category/status-filterable.
- *  - else category+status   → `by_category_status`.
- *  - else category only     → `by_category_status` (category prefix).
- *  - else status only       → `by_status`.
- *  - else                   → default newest-first table order.
+ *  - category + status      → `by_category_status`.
+ *  - category only          → `by_category_status` (category prefix).
+ *  - status only            → `by_status`.
+ *  - no controls            → default newest-first table order.
  */
 
-// LIBRARIES
-import { v } from 'convex/values';
+// WRAPPER
+import { fetchOptimizedQuery } from '@/convex/wrappers/fetchOptimizedQuery.js';
+
+// AGGREGATES
+import type { Bounds } from '@convex-dev/aggregate';
+import { getFilteredTotalAggregate } from '@/convex/aggregates/helpers/getFilteredTotalAggregate.js';
+import { productFilterAggregate } from '../aggregates/productFilterAggregate.js';
+import { productTotalCounter, PRODUCT_TOTAL_COUNTER_KEY } from '../counters/productTotalCounter.js';
 
 // HELPERS
-import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
-import { attachVariants } from '../helpers/attachVariants';
+import { getProductsPage } from '../helpers/getProductsPage.js';
 
-const productStatus = v.union(v.literal('draft'), v.literal('active'), v.literal('archived'));
+// VALIDATORS
+import { adminProductsPage } from '../validators/productsValidators.js';
 
-export const fetchAllProducts = fetchOptimized({
-	table: 'products',
+// TYPES
+import type { Id } from '@/convex/_generated/dataModel.js';
+import type { ConvexFilter } from '@/shared/features/filters/types/filterTypesConvex.js';
+import type {
+	ProductFilterAggregateKey,
+	ProductStatus
+} from '../aggregates/productFilterAggregate.js';
+
+const PRODUCT_STATUSES = [
+	'draft',
+	'active',
+	'archived'
+] as const satisfies readonly ProductStatus[];
+
+function filterValue(filters: ConvexFilter[], field: string): string | undefined {
+	const value = filters.find((filter) => filter.field === field)?.eq;
+	return typeof value === 'string' ? value : undefined;
+}
+
+function statusValue(filters: ConvexFilter[]): ProductStatus | undefined {
+	const value = filterValue(filters, 'status');
+	return PRODUCT_STATUSES.includes(value as ProductStatus) ? (value as ProductStatus) : undefined;
+}
+
+function productPrefixBounds(
+	prefix: [ProductStatus] | [ProductStatus, string]
+): Bounds<ProductFilterAggregateKey, Id<'products'>> {
+	return { prefix };
+}
+
+export const fetchAllProducts = fetchOptimizedQuery({
 	auth: 'admin',
-	args: {
-		search: v.optional(v.string()),
-		status: v.optional(productStatus),
-		category: v.optional(v.string())
-	},
-	search: (_ctx, args) => {
-		const query = args.search?.trim();
-		if (!query) return null;
-		return {
-			index: 'search_name',
-			searchField: 'name',
-			query,
-			eq: {
-				...(args.category ? { category: args.category } : {}),
-				...(args.status ? { status: args.status } : {})
-			}
-		};
-	},
-	where: (_ctx, args) => {
-		if (args.search?.trim()) return null; // search mode owns this request
-		if (args.category && args.status) {
-			return { index: 'by_category_status', eq: { category: args.category, status: args.status } };
+	returns: adminProductsPage,
+	count: productFilterAggregate,
+	countTotal: ({ ctx }) => productTotalCounter.count(ctx, PRODUCT_TOTAL_COUNTER_KEY),
+	predicateFor: (key, value) => {
+		if (key === 'category' && value) return { field: 'category', eq: value };
+		if (key === 'status' && ['draft', 'active', 'archived'].includes(value)) {
+			return { field: 'status', eq: value };
 		}
-		if (args.category) return { index: 'by_category_status', eq: { category: args.category } };
-		if (args.status) return { index: 'by_status', eq: { status: args.status } };
-		return null; // no filter → default table order
+		return undefined;
 	},
-	enrich: (ctx, page) => attachVariants(ctx, page)
+	filteredTotal: 'exact',
+	countFiltered: async ({ ctx, search, filters }) => {
+		if (search) return undefined;
+
+		const category = filterValue(filters, 'category');
+		const status = statusValue(filters);
+		const statuses = status ? [status] : PRODUCT_STATUSES;
+		const queries = category
+			? statuses.map((statusValue) => ({
+					bounds: productPrefixBounds([statusValue, category])
+				}))
+			: status
+				? [{ bounds: productPrefixBounds([status]) }]
+				: [];
+
+		return getFilteredTotalAggregate(ctx, productFilterAggregate, queries);
+	},
+	fetchPage: ({ ctx, paginationOpts, search, filters }) =>
+		getProductsPage(ctx, paginationOpts, search, filters)
 });

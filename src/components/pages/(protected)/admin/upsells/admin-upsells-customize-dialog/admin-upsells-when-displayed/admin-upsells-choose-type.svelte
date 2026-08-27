@@ -2,22 +2,17 @@
 	// The three trigger-type cards: product · category · global.
 
 	// COMPONENTS
-	import { CardSelect } from '@/components/ui/card-select/index.js';
+	import { CardSelect } from '@/components/ui/custom-components/card-select/index.js';
 
 	// TYPES
 	import type { UpsellTrigger } from '@/shared/features/upsells/types/upsellsTypes';
 
-	// LUCIDE ICONS
-	import PackageIcon from '@lucide/svelte/icons/package';
-	import TagIcon from '@lucide/svelte/icons/tag';
-	import StoreIcon from '@lucide/svelte/icons/store';
-
 	let { kind = $bindable('product') }: { kind?: UpsellTrigger['kind'] } = $props();
 
 	const KIND_META = {
-		product: { icon: PackageIcon, description: 'Al agregar un producto específico.' },
-		category: { icon: TagIcon, description: 'Al agregar cualquier producto de una categoría.' },
-		global: { icon: StoreIcon, description: 'Al agregar cualquier producto.' }
+		product: { icon: 'icon-[lucide--package]', description: 'Al agregar un producto específico.' },
+		category: { icon: 'icon-[lucide--tag]', description: 'Al agregar cualquier producto de una categoría.' },
+		global: { icon: 'icon-[lucide--store]', description: 'Al agregar cualquier producto.' }
 	};
 
 	const kindOptions = [

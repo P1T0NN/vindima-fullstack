@@ -1,6 +1,6 @@
 /**
  * Declared sections for the admin "create product" form — each renders as a titled Card in
- * `ConvexMutationForm`.
+ * `Form`.
  *
  * A builder function (not a const) because the category select's options come from the
  * `fetchAllCategories` query at runtime (ProductCategorySystemDesign.md §6.1) — the owner
@@ -16,63 +16,59 @@
 
 // TYPES
 import type {
-	MutationFormSection,
-	MutationFormSelectOption
-} from '@/components/ui/mutation-form/types';
+	FormSection,
+	FormSelectOption
+} from '@/components/ui/custom-components/form/formTypes';
 
-export function createProductSections(
-	categoryOptions: MutationFormSelectOption[]
-): MutationFormSection[] {
+export function createProductSections(categoryOptions: FormSelectOption[]): FormSection[] {
 	return [
 		{
-			id: 'details',
+			kind: 'section',
 			title: 'Detalles del producto',
 			description: 'Lo que ven los clientes en la ficha y en el carrito.',
 			fields: [
 				{
-					id: 'name',
+					name: 'name',
 					label: 'Nombre',
 					kind: 'input',
 					required: true,
 					placeholder: 'p. ej. Tabla de quesos'
 				},
 				{
-					id: 'description',
+					name: 'description',
 					label: 'Descripción',
 					kind: 'textarea',
-					rows: 2,
 					placeholder: 'Texto breve que aparece en la ficha del producto...'
 				},
 				{
-					id: 'category',
+					name: 'category',
 					label: 'Categoría',
 					kind: 'select',
 					required: true,
 					options: categoryOptions,
-					selectPlaceholder: 'Elige una categoría',
 					description: 'La tienda agrupa y filtra por esta categoría.'
 				}
 			]
 		},
 		{
-			id: 'merchandising',
+			kind: 'section',
 			title: 'Merchandising',
 			description: 'Imagen, orden y destacado en los listados.',
 			fields: [
 				{
-					id: 'images',
+					name: 'images',
 					label: 'Imagen',
-					kind: 'upload-single',
+					kind: 'upload',
+					required: true,
+					mode: 'single',
 					accept: 'image/*',
-					uploadPrefix: 'products',
-					allowUrl: true,
 					description: 'La imagen que los clientes ven en la tienda. Obligatoria.'
 				},
 				// Toggles get their own full-width row — never inline with inputs.
 				{
-					id: 'featured',
+					name: 'featured',
 					label: 'Destacado',
-					kind: 'switch',
+					kind: 'checkbox',
 					description: 'Muestra la insignia de destacado.'
 				}
 			]

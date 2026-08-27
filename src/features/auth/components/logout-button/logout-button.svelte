@@ -13,9 +13,6 @@
 	// UTILS
 	import { appGoto } from '@/utils/app-navigation.js';
 
-	// LUCIDE ICONS
-	import LogOutIcon from '@lucide/svelte/icons/log-out';
-
 	// TYPES
 	import type { ButtonVariant } from '@/components/ui/button/button.svelte';
 
@@ -53,7 +50,7 @@
 	{#if isLoggingOut}
 		<Spinner />
 	{:else}
-		<LogOutIcon class="h-5 w-5" />
+		<span class="icon-[lucide--log-out] h-5 w-5" ></span>
 	{/if}
 
 	<span>Cerrar sesión</span>

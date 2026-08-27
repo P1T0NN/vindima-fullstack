@@ -8,8 +8,8 @@ import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 import { appGoto } from '@/utils/app-navigation.js';
 import { authClient } from '@/features/auth/lib/auth-client';
 import { signUpPageSchema, signUpSchema } from '@/shared/features/auth/schemas/signUpSchema.js';
-import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
-import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
+import { zodIssuesToFieldErrors } from '@/shared/features/validations/utils/zodFieldErrors';
+import { formatRateLimitMessage } from '@/utils/toastMessage';
 
 // TYPES
 import type { SignUpFormStep, SignUpField, SignUpPageField } from './signUpFormTypes.js';
@@ -72,7 +72,7 @@ export function createSignUpForm(copy: SignUpFormCopy) {
 				if (/password/i.test(error.message ?? '')) {
 					fieldErrors = { password: error.message ?? copy.signUpFailed() };
 				} else {
-					errorMessage = rateLimitMessage(error.message, copy.signUpFailed());
+					errorMessage = formatRateLimitMessage(error.message, copy.signUpFailed());
 				}
 				return;
 			}
@@ -191,7 +191,7 @@ export function createSignUpPageForm(copy: SignUpFormCopy) {
 				if (/password/i.test(error.message ?? '')) {
 					fieldErrors = { password: error.message ?? copy.signUpFailed() };
 				} else {
-					errorMessage = rateLimitMessage(error.message, copy.signUpFailed());
+					errorMessage = formatRateLimitMessage(error.message, copy.signUpFailed());
 				}
 				return;
 			}

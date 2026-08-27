@@ -9,7 +9,7 @@ import { v } from 'convex/values';
 import { query } from '@/convex/_generated/server';
 
 // MIDDLEWARE
-import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
+import { requireAdminIdentity } from '@/convex/betterAuth/helpers/requireIdentity';
 
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
@@ -17,7 +17,7 @@ import type { Doc } from '@/convex/_generated/dataModel';
 export const fetchOrderForAdmin = query({
 	args: { orderId: v.string() },
 	handler: async (ctx, args): Promise<Doc<'orders'> | null> => {
-		await requireAdmin(ctx);
+		await requireAdminIdentity(ctx);
 
 		const id = ctx.db.normalizeId('orders', args.orderId);
 		if (!id) return null;

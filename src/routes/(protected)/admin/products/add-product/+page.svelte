@@ -1,6 +1,5 @@
 <script lang="ts">
 	// SVELTEKIT
-	import { goto } from '$app/navigation';
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
@@ -13,12 +12,13 @@
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import AddProductHeader from '@/components/pages/(protected)/admin/add-product/add-product-header.svelte';
 	import VariantFormCard from '@/features/productVariants/components/variant-form-card.svelte';
 	import ProductStatusCard from '@/features/products/components/product-status-card.svelte';
-	import ConvexMutationForm from '@/components/ui/mutation-form/convex-mutation-form.svelte';
+	import Form from '@/components/ui/custom-components/form/form.svelte';
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import {
 		Card,
 		CardHeader,
@@ -30,32 +30,45 @@
 	// SCHEMAS
 	import {
 		createProductFormSchema,
-		type CreateProductInput
+		createProductSchema,
+		type CreateProductInput,
+		type CreateProductWireInput
 	} from '@/shared/features/products/schemas/productsSchemas';
 
 	// FORMS
 	import { createProductSections } from '@/shared/features/products/forms/createProductForm';
 
 	// UTILS
-	import { zodIssuesForArrayItem } from '@/features/validations/utils/fieldErrors';
+	import { appGoto } from '@/utils/app-navigation.js';
+	import {
+		zodIssuesForArrayItemErrors,
+		zodIssuesToFieldErrors
+	} from '@/shared/features/validations/utils/zodFieldErrors';
 
 	// TYPES
-	import type { MutationFormExtraFieldsProps } from '@/components/ui/mutation-form/types';
+	import type { PreviewFile } from '@/features/uploadFile/types/uploadFileTypes.js';
+
+	type ProductFormValues = Omit<CreateProductInput, 'images'> & {
+		images: CreateProductWireInput['images'];
+	};
 
 	// Category options come from the DB — the owner picks, never types (typo-proof).
 	const categoryOptions = useCategoryOptions();
 	const sections = $derived(createProductSections(categoryOptions.options));
 
-	let values = $state<CreateProductInput>({
+	let values = $state<ProductFormValues>({
 		name: '',
 		description: '',
-		images: null,
+		images: [],
 		category: '',
 		// Publish by default — the common case is adding a product that goes live.
 		status: 'active',
 		featured: false,
 		variants: [{ ref: '', label: '', priceMinor: 0, available: true, sortOrder: 0 }]
 	});
+	let uploadFiles = $state<PreviewFile[]>([]);
+	let validationSubmitted = $state(false);
+	let submitting = $state(false);
 
 	const variantIndexes = $derived([...values.variants.keys()]);
 
@@ -73,12 +86,16 @@
 		values.variants.splice(index, 1);
 	}
 
-	// The form collects one image; the product stores a list (`images[0]` is what the
-	// storefront shows). By here the upload step has already turned the `File` into a ref.
-	function transformArgs(args: Record<string, unknown>) {
-		const image = args.images;
-		return { ...args, images: typeof image === 'string' && image ? [image] : [] };
-	}
+	const validationIssues = $derived.by(() => {
+		if (!validationSubmitted) return [];
+		const validation = createProductFormSchema.safeParse({
+			...values,
+			images: uploadFiles[0]?.file ?? null
+		});
+		return validation.success ? [] : validation.error.issues;
+	});
+
+	const validationErrors = $derived(zodIssuesToFieldErrors(validationIssues));
 </script>
 
 <SvelteHead
@@ -90,20 +107,42 @@
 <section class="{PAGE_CONTAINER} flex flex-col gap-6 py-4 md:py-6">
 	<AddProductHeader />
 
-	<ConvexMutationForm
+	<Form
 		bind:values
-		schema={createProductFormSchema}
-		{sections}
-		runFunction={api.tables.products.mutations.createProduct.createProduct}
-		{transformArgs}
-		submitLabel="Crear producto"
+		fields={sections}
+		function={api.tables.products.mutations.createProduct.createProduct}
+		uploadNamespace="products"
+		bind:uploadFiles
+		bind:submitting
+		prepareArgs={({ values: formValues, uploadedFiles }) => {
+			validationSubmitted = true;
+			const preparedValues = {
+				...formValues,
+				name: formValues.name!,
+				category: formValues.category!,
+				variants: formValues.variants!,
+				images: uploadedFiles
+			};
+			const validation = createProductSchema.safeParse(preparedValues);
+			if (!validation.success) throw new Error('Corrige los errores del formulario.');
+			return validation.data;
+		}}
 		resetOnSuccess={false}
-		onSuccess={() => goto(ADMIN_PAGE_ENDPOINTS.PRODUCTS)}
+		successMessage="Producto creado."
+		errorMessage="No se pudo crear el producto."
+		onSuccess={(result) => {
+			if (result.success) return appGoto(ADMIN_PAGE_ENDPOINTS.PRODUCTS);
+		}}
 		{extraFields}
-	/>
+	>
+		<Button type="submit" disabled={submitting}>
+			{#if submitting}<Spinner class="size-3.5" />{/if}
+			Crear producto
+		</Button>
+	</Form>
 </section>
 
-{#snippet extraFields({ errors, issues }: MutationFormExtraFieldsProps<CreateProductInput>)}
+{#snippet extraFields({ disabled }: { disabled: boolean })}
 	<!-- Variants — an array editor, so it can't be a declared section; styled as one. -->
 	<Card>
 		<CardHeader>
@@ -118,19 +157,28 @@
 				<VariantFormCard
 					index={i}
 					bind:variant={values.variants[i]}
-					canRemove={values.variants.length > 1}
-					onRemove={() => removeVariant(i)}
-					errors={zodIssuesForArrayItem(issues, 'variants', i)}
+					canRemove={values.variants.length > 1 && !disabled}
+					onRemove={() => {
+						if (!disabled) removeVariant(i);
+					}}
+					errors={zodIssuesForArrayItemErrors(validationIssues, 'variants', i)}
 					refBase={values.name}
 				/>
 			{/each}
 
-			<!-- Array-level rule (needs ≥ 1 variant, refs must be unique) — no single row owns it. -->
-			{#if errors.variants}
-				<p class="text-sm text-destructive">{errors.variants}</p>
+			{#if validationErrors.variants}
+				<p class="text-sm text-destructive">{validationErrors.variants}</p>
 			{/if}
 
-			<Button type="button" variant="outline" size="sm" onclick={addVariant} class="self-start">
+			<!-- Array-level rule (needs ≥ 1 variant, refs must be unique) — no single row owns it. -->
+			<Button
+				type="button"
+				variant="outline"
+				size="sm"
+				onclick={addVariant}
+				{disabled}
+				class="self-start"
+			>
 				Agregar variante
 			</Button>
 		</CardContent>

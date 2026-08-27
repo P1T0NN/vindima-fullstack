@@ -4,7 +4,7 @@
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useConvexClient } from 'convex-svelte';
 
 	// STATE
 	import { authClass } from '@/features/auth/classes/authClass.svelte';
@@ -14,7 +14,7 @@
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
-	import DataList from '@/components/ui/data-list/data-list.svelte';
+	import DataList from '@/components/ui/custom-components/data-list/data-list.svelte';
 	import AccountClubCardOrderItem from './account-club-card-order-item.svelte';
 	import AccountClubCardClaimedReward from './account-club-card-claimed-reward.svelte';
 	import AccountClubCardChooseReward from './account-club-card-choose-reward.svelte';
@@ -29,9 +29,7 @@
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';
 	import type { PurchaseHistoryRow } from '../accountClubCardTypes';
-
-	// LUCIDE ICONS
-	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
+	import type { PaginationState } from '@/shared/features/pagination/types/paginationTypes.js';
 
 	const convex = useConvexClient();
 
@@ -56,6 +54,16 @@
 			currency: order.currency
 		}))
 	);
+	const historyPagination = $derived<PaginationState<PurchaseHistoryRow>>({
+		page: 1,
+		data: history,
+		loading: historyLoading,
+		nextCursor: null,
+		pageSize: history.length,
+		total: history.length,
+		onPrev: () => {},
+		onNext: () => {}
+	});
 
 	const rewards = $derived(authClass.currentUser?.rewards ?? null);
 	const featureOn = $derived(!!rewards);
@@ -102,20 +110,18 @@
 			class="inline-flex min-h-11 items-center gap-1.5 text-xs font-medium tracking-wide uppercase"
 		>
 			Mis pedidos
-			<ArrowRightIcon class="size-3.5" />
+			<span class="icon-[lucide--arrow-right] size-3.5"></span>
 		</Button>
 	</div>
 
 	<DataList
-		items={history}
-		isLoading={historyLoading}
-		role="table"
-		ariaLabelledby="purchase-history-label"
+		pagination={historyPagination}
+		showPagination={false}
 		class="text-sm"
-		getItemKey={(order) => order.id}
-		{item}
+		key={(order) => order.id}
+		{children}
 		{empty}
-		{loading}
+		loadingSnippet={loading}
 		{header}
 	/>
 
@@ -144,21 +150,18 @@
 </div>
 
 {#snippet header()}
-	<div role="row" class="grid grid-cols-3">
+	<div class="grid grid-cols-3">
 		<span
-			role="columnheader"
 			class="pb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase max-sm:sr-only"
 		>
 			Fecha
 		</span>
 		<span
-			role="columnheader"
 			class="pb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase max-sm:sr-only"
 		>
 			Pedido
 		</span>
 		<span
-			role="columnheader"
 			class="pb-3 text-right text-xs font-semibold tracking-wide text-muted-foreground uppercase max-sm:sr-only"
 		>
 			Total
@@ -166,7 +169,7 @@
 	</div>
 {/snippet}
 
-{#snippet item({ item: order }: { item: PurchaseHistoryRow })}
+{#snippet children(order: PurchaseHistoryRow)}
 	<AccountClubCardOrderItem {order} />
 {/snippet}
 

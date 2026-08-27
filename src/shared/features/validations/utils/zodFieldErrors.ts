@@ -1,7 +1,5 @@
-// Dual-runtime zod → field-error mapping. Messages here are still CODES (or bespoke
-// per-schema strings) — nothing in this file translates. The Svelte half
-// (`@/features/validations/utils/fieldErrors.ts`) localizes on the way out and owns the
-// UI-side helpers (clearing errors on input, etc.).
+// Dual-runtime zod → field-error mapping. Messages are display-ready strings from zod or
+// the shared default error map.
 
 // TYPES
 import type { FieldErrors, ZodIssueLike } from '../types/validationsTypes.js';
@@ -9,10 +7,10 @@ import type { FieldErrors, ZodIssueLike } from '../types/validationsTypes.js';
 /**
  * Maps zod `issues` to `{ field: message }` — top path segment, first issue per field
  * wins (so an empty field reads "required", not the later `min(8)` on the same value).
- * Messages pass through UNtranslated. `includeOnlyKeys` drops unrelated fields when a
+ * Messages pass through unchanged. `includeOnlyKeys` drops unrelated fields when a
  * merged schema validates more than one form section.
  */
-export function zodIssuesToFieldErrorCodes<T extends string>(
+export function zodIssuesToFieldErrors<T extends string>(
 	issues: readonly ZodIssueLike[],
 	includeOnlyKeys?: readonly T[]
 ): FieldErrors<T> {
@@ -27,12 +25,12 @@ export function zodIssuesToFieldErrorCodes<T extends string>(
 }
 
 /**
- * Per-row codes for one item of an array field, keyed by the item's own property name
+ * Per-row errors for one item of an array field, keyed by the item's own property name
  * (`issues` with path `[arrayKey, index, prop]`). For array editors rendered outside the
- * declared fields — `zodIssuesToFieldErrorCodes` collapses those to the array key alone,
+ * declared fields — `zodIssuesToFieldErrors` collapses those to the array key alone,
  * which can't say WHICH row failed.
  */
-export function zodIssuesForArrayItemCodes(
+export function zodIssuesForArrayItemErrors(
 	issues: readonly ZodIssueLike[],
 	arrayKey: string,
 	index: number

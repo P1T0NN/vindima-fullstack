@@ -3,9 +3,6 @@ import { ConvexError, v } from 'convex/values';
 import { internalMutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
-// ANALYTICS
-import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';
-
 // TYPES
 import type { ConvexErrorPayload } from '@/shared/types/types';
 
@@ -24,33 +21,17 @@ export const markOrderRefunded = internalMutation({
 		if (!order) {
 			throw new ConvexError({
 				code: 'ORDER_NOT_FOUND',
-				message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' }
+				message: 'No encontramos ese pedido.'
 			} satisfies ConvexErrorPayload);
 		}
 		if (order.status !== 'paid') {
 			throw new ConvexError({
 				code: 'ORDER_NOT_PAID',
-				message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' }
+				message: 'Este pedido ya no se puede modificar.'
 			} satisfies ConvexErrorPayload);
 		}
 
-		// Work-queue counter follows automatically (open → closed) — see `convex/counters.ts`.
 		await ctx.db.patch(order._id, { status: 'refunded', refundedAt: Date.now() });
-
-		// Analytics — the money-path event; `dedupeKey` makes replays a no-op. Never blocks
-		// the refund.
-		try {
-			await analytics.track(ctx, ANALYTICS_EVENT.ORDER_REFUNDED, {
-				subjectRef: order.userId ?? undefined,
-				props: { amountMinor: order.amounts.totalMinor, currency: order.currency },
-				dedupeKey: `order-refunded:${order._id}`
-			});
-		} catch (err) {
-			console.warn('[orders] analytics track failed on refund; refunding anyway', {
-				orderId: order._id,
-				err
-			});
-		}
 
 		if (order.userId) {
 			await ctx.runMutation(

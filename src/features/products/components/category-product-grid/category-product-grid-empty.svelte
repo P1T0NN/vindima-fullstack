@@ -8,9 +8,6 @@
 	// UTILS
 	import { cn } from '@/utils/utils.js';
 
-	// LUCIDE ICONS
-	import PackageOpenIcon from '@lucide/svelte/icons/package-open';
-
 	let {
 		class: className,
 		title = 'No hay productos disponibles por ahora',
@@ -31,7 +28,7 @@
 	)}
 >
 	<div class="flex size-12 items-center justify-center rounded-full bg-muted">
-		<PackageOpenIcon class="size-6 text-muted-foreground" aria-hidden="true" />
+		<span class="icon-[lucide--package-open] size-6 text-muted-foreground" aria-hidden="true" ></span>
 	</div>
 
 	<div class="flex max-w-sm flex-col gap-1.5">

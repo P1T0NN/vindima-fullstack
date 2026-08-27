@@ -6,8 +6,8 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
-	import Section from '@/components/ui/section/section.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 
 	const notFound = $derived(page.status === 404);

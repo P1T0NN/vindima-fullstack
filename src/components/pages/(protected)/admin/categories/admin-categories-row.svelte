@@ -1,7 +1,9 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
@@ -14,22 +16,17 @@
 	import { appHref } from '@/utils/app-navigation.js';
 
 	// UTILS
-	import { safeMutation } from '@/utils/convexHelpers';
-	import { toastResult } from '@/utils/toastResult';
+	import { toastMessage } from '@/utils/toastMessage';
+import { hasErrorMessage } from '@/shared/utils/errorMessage';
 
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';
 
-	// LUCIDE ICONS
-	import PencilIcon from '@lucide/svelte/icons/pencil';
-	import Trash2Icon from '@lucide/svelte/icons/trash-2';
-	import PackageIcon from '@lucide/svelte/icons/package';
-	import TagIcon from '@lucide/svelte/icons/tag';
-	import ImageIcon from '@lucide/svelte/icons/image';
-
 	let { category }: { category: Doc<'productCategories'> } = $props();
 
-	const convex = useConvexClient();
+	const deleteCategory = useMutation(
+		api.tables.productCategories.mutations.deleteCategory.deleteCategory
+	);
 
 	let busy = $state(false);
 
@@ -38,19 +35,36 @@
 		busy = true;
 		try {
 			// Server refuses with CATEGORY_IN_USE while products still reference the slug.
-			const res = await safeMutation(
-				convex,
-				api.tables.productCategories.mutations.deleteCategory.deleteCategory,
-				{ categoryId: category._id }
-			);
-			toastResult(res);
+			let result;
+			try {
+				result = await deleteCategory({ categoryId: category._id });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
+			}
+			const message = result.message;
+			if (!result.success) {
+				toastMessage({ type: 'error', error: null, message });
+				return;
+			}
+			toastMessage({ type: 'success', message });
 		} finally {
 			busy = false;
 		}
 	}
 </script>
 
-<!-- Rendered inside a ConvexDataTable cell (see /admin/categories nameCell snippet). -->
+<!-- Rendered inside the DataTable row cell on /admin/categories. -->
 <div class="flex w-full items-start gap-3">
 	<!-- Fixed-size thumb: rows stay aligned whether or not a category has an image, and the
 	     placeholder doubles as the "this one has no image yet" signal for older categories. -->
@@ -65,7 +79,7 @@
 			/>
 		{:else}
 			<div class="flex size-full items-center justify-center text-muted-foreground">
-				<ImageIcon class="size-4" aria-hidden="true" />
+				<span class="icon-[lucide--image] size-4" aria-hidden="true"></span>
 			</div>
 		{/if}
 	</div>
@@ -86,7 +100,7 @@
 				href={appHref(ADMIN_PAGE_ENDPOINTS.EDIT_CATEGORY.replace(':id', category._id))}
 				aria-label={`Editar ${category.name}`}
 			>
-				<PencilIcon class="size-4" />
+				<span class="icon-[lucide--pencil] size-4"></span>
 				Editar
 			</Button>
 
@@ -99,26 +113,27 @@
 				title={`¿Eliminar ${category.name}?`}
 				description="Esto no se puede deshacer."
 			>
-				<Trash2Icon class="size-4" />
+				<span class="icon-[lucide--trash-2] size-4"></span>
 				Eliminar
 
 				{#snippet body()}
 					<ul class="flex flex-col gap-2.5 text-sm">
 						<li class="flex items-start gap-2.5 text-foreground">
-							<PackageIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+							<span class="mt-0.5 icon-[lucide--package] size-4 shrink-0 text-muted-foreground"
+							></span>
 							<span>
 								Solo se pueden eliminar categorías vacías: si algún producto aún usa esta, la
 								eliminación se rechaza y no cambia nada.
 							</span>
 						</li>
 						<li class="flex items-start gap-2.5 text-foreground">
-							<TagIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+							<span class="mt-0.5 icon-[lucide--tag] size-4 shrink-0 text-muted-foreground"></span>
 							<span>Desaparece del formulario de producto y de la agrupación en la tienda.</span>
 						</li>
 					</ul>
 					<p class="mt-3 text-xs text-muted-foreground">
-						No se eliminan productos. Para retirar una categoría en uso, mueve antes sus productos
-						a otra categoría.
+						No se eliminan productos. Para retirar una categoría en uso, mueve antes sus productos a
+						otra categoría.
 					</p>
 				{/snippet}
 			</ActionButton>

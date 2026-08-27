@@ -10,10 +10,7 @@ import { v } from 'convex/values';
 import { query } from '@/convex/_generated/server';
 
 // AUTH
-import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
-
-// HELPERS
-import { counters } from '@/convex/counters';
+import { requireAdminIdentity } from '@/convex/betterAuth/helpers/requireIdentity';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';
@@ -21,27 +18,29 @@ import type { QueryCtx } from '@/convex/_generated/server';
 /**
  * Shared with `fetchDashboard` so the initial paint carries the same counts.
  *
- * O(log n) at ANY order volume: counts come from the `orderCounts` counter declared in
- * `convex/counters.ts`, maintained transactionally by its trigger — every write through the
- * wrapped `mutation`/`internalMutation` keeps it exact, with nothing for a call site to
- * remember. Seeded by `counters:backfillOrderCounts`. No table rows are read here — 100k
- * delivered orders cost these counts nothing.
+ * `pendingCount` = orders awaiting payment confirmation; `toFulfillCount` = paid orders
+ * not yet delivered. Scans the `by_status` index — a temporary fallback until an
+ * aggregate-backed count is re-introduced.
  */
 export async function countOrders(
 	ctx: QueryCtx
 ): Promise<{ pendingCount: number; toFulfillCount: number }> {
-	const [pendingCount, toFulfillCount] = await Promise.all([
-		counters.orderCounts.count(ctx, 'pending'),
-		counters.orderCounts.count(ctx, 'open')
+	const [pending, paid] = await Promise.all([
+		ctx.db.query('orders').withIndex('by_status', (q) => q.eq('status', 'pending')).collect(),
+		ctx.db.query('orders').withIndex('by_status', (q) => q.eq('status', 'paid')).collect()
 	]);
-	return { pendingCount, toFulfillCount };
+
+	return {
+		pendingCount: pending.length,
+		toFulfillCount: paid.filter((order) => order.fulfillment !== 'delivered').length
+	};
 }
 
 export const fetchOrdersCounts = query({
 	args: {},
 	returns: v.object({ pendingCount: v.number(), toFulfillCount: v.number() }),
 	handler: async (ctx) => {
-		await requireAdmin(ctx);
+		await requireAdminIdentity(ctx);
 		return await countOrders(ctx);
 	}
 });

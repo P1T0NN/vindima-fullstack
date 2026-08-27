@@ -3,7 +3,7 @@ import { sequence } from '@sveltejs/kit/hooks';
 
 // LIBRARIES
 import { getToken } from '@mmailaender/convex-better-auth-svelte/sveltekit';
-import { withServerConvexToken } from '@mmailaender/convex-svelte/sveltekit/server';
+import { withServerConvexToken } from 'convex-svelte/sveltekit/server';
 
 // UTILS
 import { getSecurityHeaders, getHstsHeader } from '@/utils/securityHeaders.js';

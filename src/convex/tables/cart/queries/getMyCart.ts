@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { query } from '@/convex/_generated/server';
 
 // AUTH
-import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
+import { getAuthUserId } from '@/convex/betterAuth/helpers/getAuthUserId';
 
 // SCHEMA
 import { cartLineValidator } from '@/convex/tables/cart/schemas/cartSchema';

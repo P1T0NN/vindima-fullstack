@@ -15,14 +15,14 @@
 		FieldDescription,
 		FieldError
 	} from '@/components/ui/field/index.js';
-	import { FormField } from '@/components/ui/form-field/index.js';
-	import Logo from '@/components/ui/logo/logo.svelte';
+	import { FormField } from '@/components/ui/custom-components/form-field/index.js';
+	import Logo from '@/components/ui/custom-components/logo/logo.svelte';
 	import EmailVerificationResend from '@/features/auth/components/email-verification-form/email-verification-resend.svelte';
 
 	import { createPasswordResetForm } from './password-reset-form-model.svelte.js';
 
 	// CONFIG
-	import { AUTH_DATA } from '@/shared/config';
+	import { AUTH_DATA } from '@/shared/features/auth/config';
 
 	/** Matches the OTP the auth emails send and `passwordResetVerifySchema`. */
 	const OTP_MAX_LENGTH = AUTH_DATA.OTP_LENGTH;

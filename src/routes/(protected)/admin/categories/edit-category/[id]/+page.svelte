@@ -4,18 +4,18 @@
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 
 	// CONFIG
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import EditCategoryHeader from '@/components/pages/(protected)/admin/edit-category/edit-category-header.svelte';
 	import EditCategoryForm from '@/components/pages/(protected)/admin/edit-category/edit-category-form.svelte';
 	import EditCategoryLoading from '@/components/pages/(protected)/admin/edit-category/loading/edit-category-loading.svelte';
 	import EditCategoryEmpty from '@/components/pages/(protected)/admin/edit-category/empty/edit-category-empty.svelte';
-	import { ErrorComponent } from '@/components/ui/error-component/index.js';
+	import { ErrorComponent } from '@/components/ui/custom-components/error-component/index.js';
 
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';

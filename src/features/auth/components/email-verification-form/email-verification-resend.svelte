@@ -5,10 +5,11 @@
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
 	import { FieldDescription } from '@/components/ui/field/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 
 	// UTILS
 	import { authClient } from '@/features/auth/lib/auth-client';
-	import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
+	import { formatRateLimitMessage } from '@/utils/toastMessage';
 
 	// TYPES
 	import type { EmailVerificationResendConfig } from './emailVerificationFormTypes.js';
@@ -66,9 +67,8 @@
 			});
 			if (error) {
 				console.error('Email verification: resend failed:', error);
-				// Backend errors travel as wire-JSON message keys — rendered to Spanish here.
 				toast.error(
-					rateLimitMessage(error.message, 'No se pudo reenviar el código. Inténtalo de nuevo.')
+					formatRateLimitMessage(error.message, 'No se pudo reenviar el código. Inténtalo de nuevo.')
 				);
 			}
 		} catch (error) {
@@ -93,6 +93,7 @@
 			disabled={blocked}
 			onclick={handleResend}
 		>
+			{#if resending}<Spinner class="size-3.5" />{/if}
 			{cooldownRemaining > 0 ? `Reenviar en ${cooldownRemaining}s` : 'Reenviar'}
 		</Button>
 	</span>

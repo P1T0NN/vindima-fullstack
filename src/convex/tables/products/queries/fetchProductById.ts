@@ -9,10 +9,10 @@ import { query } from '@/convex/_generated/server';
 import { v } from 'convex/values';
 
 // CONFIG
-import { CATALOG_CONFIG } from '@/shared/config.js';
+import { CATALOG_CONFIG } from '@/shared/features/products/config.js';
 
 // MIDDLEWARE
-import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
+import { requireAdminIdentity } from '@/convex/betterAuth/helpers/requireIdentity';
 
 // TYPES
 import type { AdminProductRow } from '@/shared/features/products/types/productsTypes';
@@ -20,7 +20,7 @@ import type { AdminProductRow } from '@/shared/features/products/types/productsT
 export const fetchProductById = query({
 	args: { productId: v.string() },
 	handler: async (ctx, args): Promise<AdminProductRow | null> => {
-		await requireAdmin(ctx);
+		await requireAdminIdentity(ctx);
 
 		const id = ctx.db.normalizeId('products', args.productId);
 		if (!id) return null;

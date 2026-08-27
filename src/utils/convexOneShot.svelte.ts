@@ -8,7 +8,7 @@
 // written. Args changes still refetch; what you give up is the push channel.
 
 // LIBRARIES
-import { useConvexClient } from '@mmailaender/convex-svelte';
+import { useConvexClient } from 'convex-svelte';
 
 // TYPES
 import type { FunctionReference } from 'convex/server';

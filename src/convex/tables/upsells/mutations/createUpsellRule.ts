@@ -9,8 +9,7 @@
 import { zodToConvexFields } from 'convex-helpers/server/zod4';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // CONFIG
 import { FEATURES } from '@/shared/config';
@@ -22,33 +21,38 @@ import { createUpsellRuleSchema } from '@/shared/features/upsells/schemas/upsell
 import { validateUpsellRule } from '../helpers/validateUpsellRule';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 import type { ConvexMutationResult } from '@/shared/types/types';
 
-export const createUpsellRule = adminMutation('createUpsellRule')({
+export const createUpsellRule = adminMutation({
 	args: zodToConvexFields(createUpsellRuleSchema.shape),
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		if (!FEATURES.UPSELLS) {
-			return { success: false, message: { key: 'UpsellsMessages.UPSELLS_DISABLED' } };
+			return { success: false, message: 'Las sugerencias no están disponibles por el momento.' };
 		}
 
 		// Authoritative re-run of the shared schema (shape + item bounds).
 		const parsed = createUpsellRuleSchema.safeParse(args);
 		if (!parsed.success)
-			return { success: false, message: { key: 'UpsellsMessages.INVALID_ITEMS' } };
+			return {
+				success: false,
+				message: 'Revisa los artículos sugeridos: algunos ya no están disponibles.'
+			};
 
 		const validation = await validateUpsellRule(ctx, parsed.data.trigger, parsed.data.itemRefs);
-		if (!validation.ok) return { success: false, message: { key: validation.key } };
+		if (!validation.ok) return { success: false, message: validation.message };
 
 		// Uniqueness: at most one rule per exact trigger.
 		const existing = await ctx.db
 			.query('upsells')
 			.withIndex('by_trigger_key', (q) => q.eq('triggerKey', validation.triggerKey))
 			.unique();
-		if (existing) return { success: false, message: { key: 'UpsellsMessages.RULE_EXISTS' } };
+		if (existing) {
+			return { success: false, message: 'Ya existe una sugerencia para este disparador.' };
+		}
 
-		const ruleId = await ctx.db.insert('upsells', {
+		await ctx.db.insert('upsells', {
 			trigger: parsed.data.trigger,
 			triggerKey: validation.triggerKey,
 			itemRefs: parsed.data.itemRefs,
@@ -56,11 +60,6 @@ export const createUpsellRule = adminMutation('createUpsellRule')({
 			updatedAt: Date.now()
 		});
 
-		ctx.audit(AUDIT_ACTIONS.UPSELL_CREATE, {
-			resource: { table: 'upsells', id: ruleId },
-			after: { triggerKey: validation.triggerKey, items: parsed.data.itemRefs.length }
-		});
-
-		return { success: true, message: { key: 'UpsellsMessages.RULE_CREATED' } };
+		return { success: true, message: 'Sugerencia creada.' };
 	}
 });

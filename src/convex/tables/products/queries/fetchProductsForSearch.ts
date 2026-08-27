@@ -1,28 +1,27 @@
-/**
- * Product name search for admin pickers (upsell trigger, etc.) — dropdown/autocomplete
- * suggestions, active products only. The slim `createSearchQuery` sibling of
- * `fetchAllProducts`: search index only, cursor only, server-capped page, no variants.
- * Callers read it one-shot per keystroke (no subscription). Guide:
- * `pagination/fetchOptimized/README.md § createSearchQuery`.
- */
+/** Admin product-name search for dropdown suggestions. */
 
 // LIBRARIES
 import { v } from 'convex/values';
 
 // HELPERS
-import { createSearchQuery } from '@/convex/pagination/fetchOptimized';
+import { fetchOptimizedSearchQuery } from '@/convex/wrappers/fetchOptimizedSearchQuery.js';
 
-// No advisory rate-limit name: this is an `auth: 'admin'` endpoint (trusted, signed-in
-// callers only), so it matches the old paginated picker's un-throttled behavior. Add a
-// registered name to `convexRateLimitRegistry` and pass it here if throttling is ever wanted.
-export const fetchProductsForSearch = createSearchQuery({
-	table: 'products',
+const productSearchRow = v.object({
+	_id: v.id('products'),
+	slug: v.string(),
+	name: v.string(),
+	images: v.array(v.string())
+});
+
+export const fetchProductsForSearch = fetchOptimizedSearchQuery({
 	auth: 'admin',
-	args: { search: v.string() },
-	search: (_ctx, args) => ({
-		index: 'search_name',
-		searchField: 'name',
-		query: args.search,
-		eq: { status: 'active' as const }
-	})
+	returns: v.array(productSearchRow),
+	fetchResults: async ({ ctx, search, limit }) => {
+		const products = await ctx.db
+			.query('products')
+			.withSearchIndex('search_name', (q) => q.search('name', search).eq('status', 'active'))
+			.take(limit);
+
+		return products.map(({ _id, slug, name, images }) => ({ _id, slug, name, images }));
+	}
 });

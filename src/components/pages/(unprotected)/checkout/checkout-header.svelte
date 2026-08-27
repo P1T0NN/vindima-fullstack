@@ -1,19 +1,16 @@
 <script lang="ts">
-	// CONFIG
-	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
+	// CONSTANTS
+	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints';
 
 	// UTILS
-	import { appHref } from '@/utils/app-navigation.js';
-
-	// LUCIDE ICONS
-	import { ArrowLeft } from '@lucide/svelte';
+	import { appHref } from '@/utils/app-navigation';
 </script>
 
 <a
 	href={appHref(UNPROTECTED_PAGE_ENDPOINTS.SHOP)}
 	class="mb-6 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-gold-ink uppercase no-underline transition-colors hover:text-accent"
 >
-	<ArrowLeft class="size-4" /> Volver a la tienda
+	<span class="icon-[lucide--arrow-left] size-4" aria-hidden="true"></span> Volver a la tienda
 </a>
 
 <h1

@@ -1,13 +1,13 @@
 <script lang="ts">
 	// Create/edit an upsell rule (§8.2) — one form for both. Two questions: WHEN it shows
 	// (trigger) and WHAT it suggests (items). The form never mentions refs/slugs/keys — the
-	// pickers (search-driven, one-shot) translate names to identifiers.
+	// pickers (search-driven, one-shot) convert names to identifiers.
 
 	// CONFIG
-	import { UPSELLS_CONFIG } from '@/shared/config.js';
+	import { UPSELLS_CONFIG } from '@/shared/features/upsells/config.js';
 
 	// COMPONENTS
-	import { NativeDialog } from '@/components/ui/native-dialog/index.js';
+	import NativeDialog from '@/components/ui/native-components/native-dialog/native-dialog.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 	import AdminUpsellsWhenDisplayed from './admin-upsells-when-displayed/admin-upsells-when-displayed.svelte';
 	import AdminUpsellsWhatDisplays from './admin-upsells-what-displays/admin-upsells-what-displays.svelte';
@@ -22,23 +22,37 @@
 		UpsellTrigger
 	} from '@/shared/features/upsells/types/upsellsTypes';
 
-	// LUCIDE ICONS
-	import XIcon from '@lucide/svelte/icons/x';
-
 	let {
 		open = $bindable(),
-		dialogId,
 		rule,
 		existingKeys
 	}: {
 		open: boolean;
-		/** Page-known dialog id so `<NativeDialogTrigger>`s elsewhere can open this natively. */
-		dialogId?: string;
 		/** The rule being edited, or `null` to create a new one. */
 		rule: UpsellAdminRule | null;
 		/** triggerKeys of every existing rule — for the inline "ya existe" check. */
 		existingKeys: string[];
 	} = $props();
+
+	let triggerButton = $state<HTMLButtonElement>();
+	let closeButton = $state<HTMLButtonElement>();
+	let nativeOpen = $state(false);
+
+	$effect(() => {
+		if (open && triggerButton && !nativeOpen) {
+			nativeOpen = true;
+			triggerButton.click();
+		} else if (!open && nativeOpen && closeButton) {
+			nativeOpen = false;
+			closeButton.click();
+		}
+	});
+
+	function dismiss(close: () => void) {
+		nativeOpen = false;
+		close();
+		open = false;
+	}
 
 	const MAX = UPSELLS_CONFIG.MAX_ITEMS_PER_RULE;
 
@@ -69,14 +83,14 @@
 	});
 
 	// ─── Trigger + validation ───
-	const trigger = $derived<UpsellTrigger>(
+	const ruleTrigger = $derived<UpsellTrigger>(
 		kind === 'product'
 			? { kind: 'product', slug: productSlug }
 			: kind === 'category'
 				? { kind: 'category', category: categorySlug }
 				: { kind: 'global' }
 	);
-	const triggerKey = $derived(buildTriggerKey(trigger));
+	const triggerKey = $derived(buildTriggerKey(ruleTrigger));
 	const ownKey = $derived(rule ? buildTriggerKey(rule.trigger) : null);
 	const duplicate = $derived(existingKeys.includes(triggerKey) && triggerKey !== ownKey);
 
@@ -91,12 +105,17 @@
 </script>
 
 <NativeDialog
-	bind:open
-	id={dialogId}
-	title={rule ? 'Editar sugerencia' : 'Nueva sugerencia'}
 	class="flex max-w-lg flex-col gap-5 rounded-xl bg-popover p-5 text-popover-foreground ring-1 ring-foreground/10"
 >
+	{#snippet trigger({ open: openDialog })}
+		<button bind:this={triggerButton} hidden type="button" onclick={openDialog}>
+			Abrir editor de sugerencias
+		</button>
+	{/snippet}
+
 	{#snippet children({ close })}
+		<button bind:this={closeButton} hidden type="button" onclick={close}>Cerrar editor</button>
+
 		<div class="flex items-start justify-between gap-3">
 			<h2 class="text-lg font-semibold">
 				{#if rule}
@@ -109,11 +128,11 @@
 			<Button
 				variant="ghost"
 				size="icon-sm"
-				onclick={close}
+				onclick={() => dismiss(close)}
 				aria-label="Cerrar"
 				class="-mt-0.5 -mr-1 text-muted-foreground"
 			>
-				<XIcon class="size-5" />
+				<span class="icon-[lucide--x] size-5"></span>
 			</Button>
 		</div>
 
@@ -138,13 +157,13 @@
 		{/key}
 
 		<div class="flex justify-end gap-2">
-			<Button variant="outline" onclick={close}>Cancelar</Button>
+			<Button variant="outline" onclick={() => dismiss(close)}>Cancelar</Button>
 			<AdminUpsellsSaveButton
 				{rule}
-				{trigger}
+				trigger={ruleTrigger}
 				itemRefs={selectedRefs}
 				{canSubmit}
-				onSaved={() => (open = false)}
+				onSaved={() => dismiss(close)}
 			/>
 		</div>
 	{/snippet}

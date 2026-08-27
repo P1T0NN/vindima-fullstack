@@ -11,22 +11,24 @@
 import { v } from 'convex/values';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 import type { ConvexMutationResult } from '@/shared/types/types';
+
+// STORAGE
+import { deleteStoredFiles } from '@/convex/storage/r2';
 
 // The `deleteCategorySchema` wire shape is just this one id — the `v.id` validator IS the
 // stronger check, so deriving it from zod would only weaken it.
-export const deleteCategory = adminMutation('deleteCategory')({
+export const deleteCategory = adminMutation({
 	args: { categoryId: v.id('productCategories') },
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		const category = await ctx.db.get(args.categoryId);
 		if (!category) {
-			return { success: false, message: { key: 'ProductMessages.CATEGORY_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos esa categoría.' };
 		}
 
 		// In-use guard — one indexed row is enough to refuse.
@@ -35,16 +37,15 @@ export const deleteCategory = adminMutation('deleteCategory')({
 			.withIndex('by_category_status', (q) => q.eq('category', category.slug))
 			.first();
 		if (inUse) {
-			return { success: false, message: { key: 'ProductMessages.CATEGORY_IN_USE' } };
+			return {
+				success: false,
+				message: 'Esta categoría todavía tiene productos. Muévelos o elimínalos primero.'
+			};
 		}
 
+		if (category.image) await deleteStoredFiles(ctx, [category.image]);
 		await ctx.db.delete(args.categoryId);
 
-		ctx.audit(AUDIT_ACTIONS.CATEGORY_DELETE, {
-			resource: { table: 'productCategories', id: args.categoryId },
-			before: { slug: category.slug, name: category.name }
-		});
-
-		return { success: true, message: { key: 'ProductMessages.CATEGORY_DELETED' } };
+		return { success: true, message: 'Categoría eliminada.' };
 	}
 });

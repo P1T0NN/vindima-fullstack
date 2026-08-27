@@ -9,8 +9,8 @@ import { appGoto } from '@/utils/app-navigation.js';
 import { authClient } from '@/features/auth/lib/auth-client';
 import { passwordResetRequestSchema } from '@/shared/features/auth/schemas/passwordResetRequestSchema.js';
 import { passwordResetVerifySchema } from '@/shared/features/auth/schemas/passwordResetVerifySchema.js';
-import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
-import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
+import { zodIssuesToFieldErrors } from '@/shared/features/validations/utils/zodFieldErrors';
+import { formatRateLimitMessage } from '@/utils/toastMessage';
 
 // TYPES
 import type { PasswordResetFormStep, PasswordResetField } from './passwordResetFormTypes.js';
@@ -108,7 +108,7 @@ export function createPasswordResetForm() {
 						newPassword: error.message ?? 'Código inválido o expirado. Inténtalo de nuevo.'
 					};
 				} else {
-					errorMessage = rateLimitMessage(
+					errorMessage = formatRateLimitMessage(
 						error.message,
 						'Código inválido o expirado. Inténtalo de nuevo.'
 					);

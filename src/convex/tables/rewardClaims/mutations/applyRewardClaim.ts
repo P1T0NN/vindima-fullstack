@@ -27,13 +27,13 @@ export const applyRewardClaim = internalMutation({
 		if (!claim) {
 			throw new ConvexError({
 				code: 'REWARD_CLAIM_NOT_FOUND',
-				message: { key: 'RewardMessages.CLAIM_NOT_FOUND' }
+				message: 'No encontramos esa reclamación de recompensa.'
 			} satisfies ConvexErrorPayload);
 		}
 		if (claim.status !== 'active') {
 			throw new ConvexError({
 				code: 'REWARD_CLAIM_NOT_ACTIVE',
-				message: { key: 'RewardMessages.CLAIM_NOT_ACTIVE' }
+				message: 'Esa reclamación de recompensa ya no está activa.'
 			} satisfies ConvexErrorPayload);
 		}
 

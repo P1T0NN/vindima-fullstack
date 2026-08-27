@@ -1,4 +1,4 @@
-/** Locale-aware long date, e.g. "18 June 2026". */
+/** Long date, e.g. "18 June 2026". */
 export function formatLongDate(iso: string): string {
 	return new Date(iso).toLocaleDateString(undefined, {
 		day: 'numeric',
@@ -8,7 +8,7 @@ export function formatLongDate(iso: string): string {
 }
 
 /**
- * Format a timestamp (epoch number or ISO string) as a locale-formatted
+ * Format a timestamp (epoch number or ISO string) as a formatted
  * date/time. Returns an em-dash for unparseable input so callers can render
  * the result directly without re-checking validity.
  */

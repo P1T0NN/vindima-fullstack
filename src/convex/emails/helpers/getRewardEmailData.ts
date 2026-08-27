@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { internalQuery } from '@/convex/_generated/server';
 
 // AUTH (user email lookup)
-import { authComponent } from '@/convex/auth/auth';
+import { authComponent } from '@/convex/betterAuth/config';
 
 // TYPES
 import type { RewardEmailData } from '@/shared/features/emails/types/emailsTypes';
@@ -14,6 +14,15 @@ import type { RewardEmailData } from '@/shared/features/emails/types/emailsTypes
  */
 export const getRewardEmailData = internalQuery({
 	args: { userId: v.string() },
+	returns: v.union(
+		v.null(),
+		v.object({
+			email: v.string(),
+			name: v.string(),
+			stamps: v.number(),
+			availableRewards: v.number()
+		})
+	),
 	handler: async (ctx, args): Promise<RewardEmailData | null> => {
 		const user = (await authComponent.getAnyUserById(ctx, args.userId)) as {
 			email?: string;

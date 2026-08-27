@@ -1,6 +1,6 @@
 <script lang="ts">
 	// LIBRARIES
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { api } from '@/convex/_generated/api';
 
 	// STATE
@@ -8,7 +8,7 @@
 	import { authClass } from '@/features/auth/classes/authClass.svelte';
 
 	// CONFIG
-	import { CART_CONFIG } from '@/shared/config.js';
+	import { CART_CONFIG } from '@/shared/features/cart/config.js';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';

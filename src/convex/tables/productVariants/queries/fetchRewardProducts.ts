@@ -1,34 +1,40 @@
-/**
- * Reward-item search for the /admin/rewards add-picker — the reward-side sibling of
- * `fetchProductsForSearch`, but flattened to variants via `createSearchQuery`'s `map` hook.
- *
- * Searches PRODUCTS (`search_name`, active) and flattens each match's ADDABLE variants —
- * available, live, and not already a reward — into one row per variant `_id` (exactly what
- * `setVariantRewardEligible` takes). `SearchInputConvex` reads the slim `{ page, … }` payload
- * one-shot per term. Admin-only.
- */
+/** Admin search for active, available variants that are not reward items yet. */
 
 // LIBRARIES
 import { v } from 'convex/values';
 
 // CONFIG
-import { CATALOG_CONFIG } from '@/shared/config.js';
+import { CATALOG_CONFIG } from '@/shared/features/products/config.js';
 
 // HELPERS
-import { createSearchQuery } from '@/convex/pagination/fetchOptimized';
+import { fetchOptimizedSearchQuery } from '@/convex/wrappers/fetchOptimizedSearchQuery.js';
 
-export const fetchRewardProducts = createSearchQuery({
-	table: 'products',
+const rewardProductSearchRow = v.object({
+	variantId: v.id('productVariants'),
+	productName: v.string(),
+	variantLabel: v.union(v.string(), v.null()),
+	priceMinor: v.number(),
+	imageUrl: v.union(v.string(), v.null())
+});
+
+type RewardProductSearchRow = {
+	variantId: string;
+	productName: string;
+	variantLabel: string | null;
+	priceMinor: number;
+	imageUrl: string | null;
+};
+
+export const fetchRewardProducts = fetchOptimizedSearchQuery({
 	auth: 'admin',
-	args: { search: v.string() },
-	search: (_ctx, args) => ({
-		index: 'search_name',
-		searchField: 'name',
-		query: args.search,
-		eq: { status: 'active' as const }
-	}),
-	map: async (ctx, products) => {
-		const rows = [];
+	returns: v.array(rewardProductSearchRow),
+	fetchResults: async ({ ctx, search, limit }) => {
+		const products = await ctx.db
+			.query('products')
+			.withSearchIndex('search_name', (q) => q.search('name', search).eq('status', 'active'))
+			.take(limit);
+		const rows: RewardProductSearchRow[] = [];
+
 		for (const product of products) {
 			const variants = (
 				await ctx.db
@@ -45,15 +51,14 @@ export const fetchRewardProducts = createSearchQuery({
 			for (const variant of variants) {
 				rows.push({
 					variantId: variant._id,
-					// Raw fields — the picker composes the display name (`variantDisplayName.ts`).
 					productName: product.name,
 					variantLabel: variant.label ?? null,
 					priceMinor: variant.priceMinor,
-					// Cover image (`images[0]`), so the picker shows the product instead of an initial.
 					imageUrl: product.images[0] ?? null
 				});
 			}
 		}
+
 		return rows;
 	}
 });

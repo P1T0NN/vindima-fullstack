@@ -8,9 +8,6 @@
 	// TYPES
 	import type { Snippet } from 'svelte';
 
-	// LUCIDE ICONS
-	import ShoppingBagIcon from '@lucide/svelte/icons/shopping-bag';
-
 	type Props = {
 		/** Product name (also drives the monogram fallback). */
 		title: string;
@@ -133,7 +130,7 @@
 					disabled={addDisabled}
 					onclick={onadd}
 				>
-					<ShoppingBagIcon class="size-4" />
+					<span class="icon-[lucide--shopping-bag] size-4" ></span>
 					Agregar al carrito
 				</Button>
 			{/if}

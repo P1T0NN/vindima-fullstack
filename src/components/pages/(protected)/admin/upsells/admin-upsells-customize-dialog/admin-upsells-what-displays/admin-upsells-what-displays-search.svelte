@@ -1,19 +1,28 @@
 <script lang="ts">
-	// Variant autocomplete for the item picker: type → pick → the parent adds a chip. One-shot
-	// search via SearchInputConvex over `fetchProductVariantsForSearch`. Disabled at the cap.
-
 	// LIBRARIES
+	import { useQuery } from 'convex-svelte';
 	import { api } from '@/convex/_generated/api';
 
 	// CONFIG
-	import { CART_CONFIG } from '@/shared/config.js';
+	import { CART_CONFIG } from '@/shared/features/cart/config.js';
 
 	// COMPONENTS
-	import { SearchInputConvex } from '@/components/ui/search-input/index.js';
+	import SearchInput from '@/features/search/components/search-input.svelte';
+
+	// HOOKS
+	import { useSearch } from '@/features/search/hooks/useSearch.svelte';
 
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { formatVariantName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
+
+	type VariantSearchRow = {
+		ref: string;
+		productName: string;
+		variantLabel: string | null;
+		priceMinor: number;
+		imageUrl: string | null;
+	};
 
 	let {
 		excludeSlug = '',
@@ -27,41 +36,62 @@
 		onAdd: (ref: string, label: string) => void;
 	} = $props();
 
-	/** Cleared on every pick: the chip below is the record of the choice, so the field starts
-	 *  fresh for the next one instead of holding a term whose result is already taken. */
-	let search = $state('');
+	const search = useSearch();
+	const variantsQuery = useQuery(
+		api.tables.productVariants.queries.fetchProductVariantsForSearch.fetchProductVariantsForSearch,
+		() =>
+			search.isActive ? { search: search.term, excludeSlug: excludeSlug || undefined } : 'skip'
+	);
 
 	const money = (minor: number) => formatMoneyMinor(minor, CART_CONFIG.CURRENCY);
 
-	// One row per sellable variant: its `ref` is the id upsell rules store; price rides the
-	// description line, and the product's cover fills the dropdown's leading square.
-	const toItem = (row: {
-		ref: string;
-		productName: string;
-		variantLabel: string | null;
-		priceMinor: number;
-		imageUrl: string | null;
-	}) => ({
-		id: row.ref,
-		title: formatVariantName(row.productName, row.variantLabel),
-		description: money(row.priceMinor),
-		imageUrl: row.imageUrl ?? undefined
-	});
+	function selectVariant(row: VariantSearchRow) {
+		const label = formatVariantName(row.productName, row.variantLabel);
+		onAdd(row.ref, label);
+		search.clear();
+	}
 </script>
 
-<SearchInputConvex
-	bind:value={search}
-	query={api.tables.productVariants.queries.fetchProductVariantsForSearch
-		.fetchProductVariantsForSearch}
-	queryArgs={{ excludeSlug }}
-	mapItem={toItem}
-	minQueryLength={2}
-	selectValueOnSelect={false}
-	{disabled}
+<SearchInput
+	bind:value={search.value}
+	label="Buscar productos"
 	placeholder="Buscar productos..."
+	dropdownOpen={!disabled && search.isActive}
+	{disabled}
 	class="max-w-none"
-	onSelect={(item) => {
-		onAdd(item.id, item.title);
-		search = '';
-	}}
-/>
+>
+	{#snippet dropdown()}
+		{#if variantsQuery.isLoading}
+			<p class="px-3 py-2 text-sm text-muted-foreground" role="status">Buscando...</p>
+		{:else if variantsQuery.error}
+			<p class="px-3 py-2 text-sm text-destructive" role="status">
+				No se pudieron cargar los productos.
+			</p>
+		{:else if variantsQuery.data?.length}
+			{#each variantsQuery.data as row (row.ref)}
+				<button
+					type="button"
+					role="option"
+					aria-selected="false"
+					class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+					onclick={() => selectVariant(row)}
+				>
+					<span class="grid size-8 shrink-0 place-items-center overflow-hidden rounded-md bg-muted">
+						{#if row.imageUrl}
+							<img src={row.imageUrl} alt="" class="size-full object-cover" />
+						{:else}
+							<span class="icon-[lucide--wine] size-4 text-muted-foreground" aria-hidden="true"
+							></span>
+						{/if}
+					</span>
+					<span class="min-w-0 flex-1 truncate font-medium">
+						{formatVariantName(row.productName, row.variantLabel)}
+					</span>
+					<span class="shrink-0 text-muted-foreground tabular-nums">{money(row.priceMinor)}</span>
+				</button>
+			{/each}
+		{:else}
+			<p class="px-3 py-2 text-sm text-muted-foreground" role="status">Sin resultados</p>
+		{/if}
+	{/snippet}
+</SearchInput>

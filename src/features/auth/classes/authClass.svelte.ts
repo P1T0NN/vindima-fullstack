@@ -1,5 +1,5 @@
 // Centralized store for the currently-authenticated user (sourced from
-// `api.auth.queries.authQueries.getCurrentUser` via the root layout's `useQuery`).
+// `api.auth.getCurrentUser` via the root layout's `useQuery`).
 // Components should read from `authClass.currentUser` instead of subscribing to
 // the query themselves.
 
@@ -15,7 +15,7 @@ import type { FunctionReturnType } from 'convex/server';
  * automatically — no risk of the local type drifting out of sync.
  */
 export type CurrentUser = NonNullable<
-	FunctionReturnType<typeof api.auth.queries.authQueries.getCurrentUser>
+	FunctionReturnType<typeof api.auth.getCurrentUser>
 >;
 
 class AuthClass {

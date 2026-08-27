@@ -1,7 +1,9 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 
 	// STATE
 	import { authClass } from '@/features/auth/classes/authClass.svelte';
@@ -10,8 +12,8 @@
 	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 
 	// UTILS
-	import { safeMutation } from '@/utils/convexHelpers';
-	import { toastResult } from '@/utils/toastResult';
+	import { toastMessage } from '@/utils/toastMessage';
+import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
 
 	// TYPES
@@ -27,7 +29,9 @@
 		onCancelled: (message: string) => void;
 	} = $props();
 
-	const convex = useConvexClient();
+	const cancelRewardClaim = useMutation(
+		api.tables.rewardClaims.mutations.cancelRewardClaim.cancelRewardClaim
+	);
 
 	const rewards = $derived(authClass.currentUser?.rewards ?? null);
 	const activeClaim = $derived(rewards?.activeClaim ?? null);
@@ -48,14 +52,31 @@
 		isBusy = true;
 		try {
 			// Cancel returns the reward to the balance; the query then re-renders the picker.
-			const result = await safeMutation(
-				convex,
-				api.tables.rewardClaims.mutations.cancelRewardClaim.cancelRewardClaim,
-				{ claimId: activeClaim.claimId }
-			);
-			if (toastResult(result)) {
-				onCancelled('La recompensa volvió a tu saldo. Puedes elegir otra.');
+			let result;
+			try {
+				result = await cancelRewardClaim({ claimId: activeClaim.claimId });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
 			}
+			const message = result.message;
+			if (!result.success) {
+				toastMessage({ type: 'error', error: null, message });
+				return;
+			}
+			toastMessage({ type: 'success', message });
+
+			onCancelled('La recompensa volvió a tu saldo. Puedes elegir otra.');
 		} finally {
 			isBusy = false;
 		}

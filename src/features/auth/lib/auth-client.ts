@@ -7,16 +7,16 @@ import { emailOTPClient, inferAdditionalFields } from 'better-auth/client/plugin
 import { toast } from 'svelte-sonner';
 
 // UTILS
-import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
+import { formatRateLimitMessage } from '@/utils/toastMessage';
 
-// All admin actions (delete/ban/unban/role-change/session-revoke) go through
-// Convex mutations in `src/convex/tables/users/userMutations.ts`, so the BA
-// `adminClient()` plugin isn't installed here. Re-add it only if you need
-// to call `authClient.admin.*` directly (e.g. a UI that can't take a Convex
-// round-trip for the admin step) and pair it with `recordAdminAction` for
-// the audit trail.
+// The Better Auth `adminClient()` plugin isn't installed — there is no admin
+// user-management surface here. Re-add it only if you need `authClient.admin.*`
+// directly.
 
 export const authClient = createAuthClient({
+	sessionOptions: {
+		refetchOnWindowFocus: false
+	},
 	plugins: [
 		inferAdditionalFields({
 			user: {
@@ -36,7 +36,7 @@ export const authClient = createAuthClient({
 			const retryAfterMs =
 				Number.isFinite(retryAfterSec) && retryAfterSec > 0 ? retryAfterSec * 1000 : undefined;
 
-			toast.error(rateLimitMessage(retryAfterMs));
+			toast.error(formatRateLimitMessage(retryAfterMs));
 		}
 	}
 });

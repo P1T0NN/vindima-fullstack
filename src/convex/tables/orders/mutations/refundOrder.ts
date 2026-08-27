@@ -3,11 +3,10 @@ import { v } from 'convex/values';
 import { internal } from '@/convex/_generated/api';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 
 // TYPES
 import type { ConvexMutationResult } from '@/shared/types/types';
@@ -26,26 +25,19 @@ import type { ConvexMutationResult } from '@/shared/types/types';
  *   confirms. If Stripe fails, the order stays `paid` — the truth — and the admin retries.
  *   Flipping first would put a lie in the books.
  */
-export const refundOrder = adminMutation('refundOrder')({
+export const refundOrder = adminMutation({
 	args: { orderId: v.id('orders') },
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		const order = await ctx.db.get(args.orderId);
 		if (!order) {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos ese pedido.' };
 		}
 		if (order.status !== 'paid') {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_PAID' } };
+			return { success: false, message: 'Esta acción solo aplica a pedidos pagados.' };
 		}
 
 		const refundsOnline = order.paymentMethod === 'online' && !!order.paymentRef;
-
-		// Audit the admin's decision either way — the request is the auditable act; the outcome
-		// lands in the order's own status.
-		ctx.audit(AUDIT_ACTIONS.ORDER_REFUND, {
-			resource: { table: 'orders', id: order._id },
-			after: { number: order.number, totalMinor: order.amounts.totalMinor }
-		});
 
 		if (refundsOnline) {
 			await ctx.scheduler.runAfter(
@@ -53,13 +45,16 @@ export const refundOrder = adminMutation('refundOrder')({
 				internal.tables.orders.actions.refundStripePayment.refundStripePayment,
 				{ orderId: order._id }
 			);
-			return { success: true, message: { key: 'CheckoutMessages.ORDER_REFUND_STARTED' } };
+			return {
+				success: true,
+				message: 'Reembolso enviado a Stripe. El pedido se marcará como reembolsado al confirmarse.'
+			};
 		}
 
 		await ctx.runMutation(internal.tables.orders.mutations.markOrderRefunded.markOrderRefunded, {
 			orderId: order._id
 		});
 
-		return { success: true, message: { key: 'CheckoutMessages.ORDER_REFUNDED' } };
+		return { success: true, message: 'Pedido reembolsado.' };
 	}
 });

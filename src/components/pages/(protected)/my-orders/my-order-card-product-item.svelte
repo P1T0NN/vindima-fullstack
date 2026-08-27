@@ -3,10 +3,6 @@
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
 
-	// LUCIDE ICONS
-	import PackageIcon from '@lucide/svelte/icons/package';
-	import SparklesIcon from '@lucide/svelte/icons/sparkles';
-
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
@@ -45,7 +41,7 @@
 				class="size-full object-cover"
 			/>
 		{:else}
-			<PackageIcon class="size-5 text-muted-foreground/40" strokeWidth={1.5} />
+			<span class="icon-[lucide--package] size-5 text-muted-foreground/40" ></span>
 		{/if}
 	</div>
 
@@ -53,7 +49,7 @@
 		<p class="truncate text-sm text-foreground">{name}</p>
 		<p class="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
 			{#if line.isRewardLine}
-				<SparklesIcon class="size-3 text-gold-ink" strokeWidth={2} />
+				<span class="icon-[lucide--sparkles] size-3 text-gold-ink" ></span>
 				<span class="text-gold-ink">Recompensa</span>
 			{:else}
 				{line.qty} x {money(line.unitPriceMinor)}

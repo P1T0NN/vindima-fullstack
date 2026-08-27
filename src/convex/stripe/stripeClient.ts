@@ -4,7 +4,7 @@
 import Stripe from 'stripe';
 
 // CONFIG
-import { STRIPE_CONFIG } from '@/shared/config.js';
+import { STRIPE_CONFIG } from '@/shared/features/stripe/config.js';
 
 /**
  * The ONE place a Stripe client is constructed (`StripeSystemDesign.md` §11).
@@ -27,7 +27,7 @@ import { STRIPE_CONFIG } from '@/shared/config.js';
  * Convex function type allowed there. The webhook HTTP action stays in the default runtime and
  * delegates to `handleStripeEvent` for exactly this reason.
  *
- * Every value setting comes from `STRIPE_CONFIG` in `src/shared/config.ts` — including the
+ * Every value setting comes from `STRIPE_CONFIG` in `src/shared/features/stripe/config.ts` — including the
  * pinned `API_VERSION`, so a Stripe API release can never change behaviour under an
  * already-deployed store. Only the two secrets live outside config, in Convex env.
  */

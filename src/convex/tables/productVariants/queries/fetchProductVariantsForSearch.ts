@@ -1,38 +1,44 @@
-/**
- * Variant search for the upsell item picker — the variant-level sibling of
- * `products/queries/fetchProductsForSearch`, flattened via `createSearchQuery`'s `map` hook.
- *
- * Variants have no name index, so we search PRODUCTS (`search_name`, active) and flatten each
- * match's live, sellable variants into one row per `ref` — the string upsell rules store. A
- * product can't upsell itself, so `excludeSlug` (the trigger product) is dropped. Admin-only;
- * `SearchInputConvex` reads it one-shot per term.
- */
+/** Admin variant search for the upsell item picker. */
 
 // LIBRARIES
 import { v } from 'convex/values';
 
 // CONFIG
-import { CATALOG_CONFIG } from '@/shared/config.js';
+import { CATALOG_CONFIG } from '@/shared/features/products/config.js';
 
 // HELPERS
-import { createSearchQuery } from '@/convex/pagination/fetchOptimized';
+import { fetchOptimizedSearchQuery } from '@/convex/wrappers/fetchOptimizedSearchQuery.js';
 
-export const fetchProductVariantsForSearch = createSearchQuery({
-	table: 'products',
+const variantSearchRow = v.object({
+	ref: v.string(),
+	productName: v.string(),
+	variantLabel: v.union(v.string(), v.null()),
+	priceMinor: v.number(),
+	imageUrl: v.union(v.string(), v.null())
+});
+
+type VariantSearchRow = {
+	ref: string;
+	productName: string;
+	variantLabel: string | null;
+	priceMinor: number;
+	imageUrl: string | null;
+};
+
+export const fetchProductVariantsForSearch = fetchOptimizedSearchQuery({
 	auth: 'admin',
 	args: {
-		search: v.string(),
 		/** Trigger product slug to drop — a product can't upsell itself. */
 		excludeSlug: v.optional(v.string())
 	},
-	search: (_ctx, args) => ({
-		index: 'search_name',
-		searchField: 'name',
-		query: args.search,
-		eq: { status: 'active' as const }
-	}),
-	map: async (ctx, products, args) => {
-		const rows = [];
+	returns: v.array(variantSearchRow),
+	fetchResults: async ({ ctx, search, limit, args }) => {
+		const products = await ctx.db
+			.query('products')
+			.withSearchIndex('search_name', (q) => q.search('name', search).eq('status', 'active'))
+			.take(limit);
+		const rows: VariantSearchRow[] = [];
+
 		for (const product of products) {
 			if (args.excludeSlug && product.slug === args.excludeSlug) continue;
 
@@ -48,15 +54,14 @@ export const fetchProductVariantsForSearch = createSearchQuery({
 			for (const variant of variants) {
 				rows.push({
 					ref: variant.ref,
-					// Raw fields — the picker composes the display name (`variantDisplayName.ts`).
 					productName: product.name,
 					variantLabel: variant.label ?? null,
 					priceMinor: variant.priceMinor,
-					// Cover image (`images[0]`), so the picker shows the product instead of an initial.
 					imageUrl: product.images[0] ?? null
 				});
 			}
 		}
+
 		return rows;
 	}
 });

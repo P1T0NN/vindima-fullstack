@@ -2,10 +2,10 @@
 import { query } from '@/convex/_generated/server';
 
 // CONFIG
-import { SHOP_CONFIG } from '@/shared/config.js';
+import { SHOP_CONFIG } from '@/shared/features/shop/config.js';
 
 // AUTH
-import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
+import { getAuthUserId } from '@/convex/betterAuth/helpers/getAuthUserId';
 
 /**
  * Public (auth-gated read) — just the few newest orders as raw `Doc<'orders'>` rows, for compact

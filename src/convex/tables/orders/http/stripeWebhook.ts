@@ -12,7 +12,7 @@ import { FEATURES } from '@/shared/config.js';
  * Deliberately thin, and in the DEFAULT runtime (HTTP routes must be): it reads the raw body
  * **before any parsing** — the signature covers the exact bytes — and hands it to
  * `handleStripeEvent`, which runs in the Node runtime where the Stripe SDK lives. All
- * verification and the settlement decision tree happen there; this file only translates the
+ * verification and the settlement decision tree happen there; this file only converts the
  * result into a status code.
  */
 export const stripeWebhook = httpAction(async (ctx, request) => {

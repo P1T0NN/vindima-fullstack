@@ -2,15 +2,15 @@
 import { v } from 'convex/values';
 
 // MIDDLEWARE
-import { authMutation } from '@/convex/auth/middleware/authMiddleware';
+import { authenticatedMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // CONFIG
-import { CART_CONFIG } from '@/shared/config';
+import { CART_CONFIG } from '@/shared/features/cart/config';
 
 // HELPERS
 import { loadCart } from '@/convex/tables/cart/helpers/loadCart';
 import { mergeLines } from '@/shared/features/cart/cartUtils';
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 
 // SCHEMA
 import { cartLineValidator } from '@/convex/tables/cart/schemas/cartSchema';
@@ -21,16 +21,15 @@ import { cartLineValidator } from '@/convex/tables/cart/schemas/cartSchema';
  * and truncated to config limits (see `mergeLines`). Idempotent — a double-fire from
  * a repeated auth event is a no-op. One atomic transaction.
  */
-export const mergeGuestCart = authMutation('mergeGuestCart')({
+export const mergeGuestCart = authenticatedMutation({
 	args: { lines: v.array(cartLineValidator) },
-	// Returns the shared envelope (truthy) so the client can tell success from a
-	// handled error (safeMutation returns null on caught/toasted errors).
+	// Returns the shared envelope (truthy) so the client can tell success from failure.
 	returns: mutationResult,
 	handler: async (ctx, args) => {
-		const ok = { success: true, message: { key: 'GenericMessages.OK' } } as const;
+		const ok = { success: true, message: 'Listo.' } as const;
 		if (args.lines.length === 0) return ok;
 
-		const cart = await loadCart(ctx, ctx.userId);
+		const cart = await loadCart(ctx, ctx.identity.subject);
 		const now = Date.now();
 		const merged = mergeLines(
 			cart?.lines ?? [],
@@ -42,7 +41,7 @@ export const mergeGuestCart = authMutation('mergeGuestCart')({
 		if (cart) {
 			await ctx.db.patch(cart._id, { lines: merged, updatedAt: now });
 		} else {
-			await ctx.db.insert('carts', { userId: ctx.userId, lines: merged, updatedAt: now });
+			await ctx.db.insert('carts', { userId: ctx.identity.subject, lines: merged, updatedAt: now });
 		}
 		return ok;
 	}

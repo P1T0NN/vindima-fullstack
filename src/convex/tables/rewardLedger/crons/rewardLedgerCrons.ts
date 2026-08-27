@@ -2,7 +2,8 @@
 import { internalMutation } from '@/convex/functions';
 
 // CONFIG
-import { BATCH_CONFIG, FEATURES } from '@/shared/config.js';
+import { BATCH_CONFIG } from '@/shared/features/batch/config.js';
+import { FEATURES } from '@/shared/config.js';
 
 // HELPERS
 import { applyConfirmedStamp } from '@/convex/tables/rewardAccounts/helpers/applyConfirmedStamp';

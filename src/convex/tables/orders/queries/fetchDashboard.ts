@@ -16,13 +16,14 @@ import { v } from 'convex/values';
 import { query } from '@/convex/_generated/server';
 
 // AUTH
-import { requireAdmin } from '@/convex/auth/middleware/authMiddleware';
+import { requireAdminIdentity } from '@/convex/betterAuth/helpers/requireIdentity';
 
 // HELPERS
 import { countOrders } from './fetchOrdersCounts';
 
 // CONFIG
-import { CART_CONFIG, SHOP_CONFIG } from '@/shared/config';
+import { CART_CONFIG } from '@/shared/features/cart/config';
+import { SHOP_CONFIG } from '@/shared/features/shop/config';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';
@@ -64,7 +65,7 @@ export const fetchDashboard = query({
 		currency: v.string()
 	}),
 	handler: async (ctx, args): Promise<DashboardPayload> => {
-		await requireAdmin(ctx);
+		await requireAdminIdentity(ctx);
 
 		const now = Date.now();
 		const days = PERIOD_DAYS[args.period];

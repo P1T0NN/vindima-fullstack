@@ -5,10 +5,7 @@
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
 
-	// LUCIDE ICONS
-	import PackageIcon from '@lucide/svelte/icons/package';
-	import ArrowRightIcon from '@lucide/svelte/icons/arrow-right';
-</script>
+		</script>
 
 <div class="flex flex-col items-center px-4 py-16 text-center sm:py-24">
 	<!-- Icon medallion — concentric brand rings, same pattern as the empty cart. -->
@@ -18,7 +15,7 @@
 		<span
 			class="relative flex size-20 items-center justify-center rounded-full border border-primary/30 bg-card shadow-brand-panel"
 		>
-			<PackageIcon class="size-8 text-accent" strokeWidth={1.4} />
+			<span class="icon-[lucide--package] size-8 text-accent" ></span>
 		</span>
 	</div>
 
@@ -36,6 +33,6 @@
 		class="group h-12 gap-2 px-8 text-sm tracking-wider uppercase"
 	>
 		Explora la tienda
-		<ArrowRightIcon class="size-4 transition-transform group-hover:translate-x-0.5" />
+		<span class="icon-[lucide--arrow-right] size-4 transition-transform group-hover:translate-x-0.5" ></span>
 	</Button>
 </div>

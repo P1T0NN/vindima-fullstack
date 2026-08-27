@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 
 	// LIBRARIES
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { useAuth } from 'convex-svelte';
 
 	// STATE
 	import { cart } from '@/features/cart/cart.svelte';
@@ -13,10 +13,10 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
-	import Section from '@/components/ui/section/section.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
 	import { Button } from '@/components/ui/button/index.js';
-	import { ErrorComponent } from '@/components/ui/error-component/index.js';
+	import { ErrorComponent } from '@/components/ui/custom-components/error-component/index.js';
 	import CheckoutHeader from '@/components/pages/(unprotected)/checkout/checkout-header.svelte';
 	import CheckoutForm from '@/components/pages/(unprotected)/checkout/checkout-form.svelte';
 	import CheckoutPageLoading from '@/components/pages/(unprotected)/checkout/loading/checkout-page-loading.svelte';

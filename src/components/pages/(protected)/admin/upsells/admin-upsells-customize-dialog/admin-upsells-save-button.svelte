@@ -4,15 +4,17 @@
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
 	import Spinner from '@/components/ui/spinner/spinner.svelte';
 
 	// UTILS
-	import { safeMutation } from '@/utils/convexHelpers';
-	import { toastResult } from '@/utils/toastResult';
+	import { toastMessage } from '@/utils/toastMessage';
+import { hasErrorMessage } from '@/shared/utils/errorMessage';
 
 	// TYPES
 	import type {
@@ -37,25 +39,43 @@
 		onSaved: () => void;
 	} = $props();
 
-	const convex = useConvexClient();
+	const editUpsellRule = useMutation(api.tables.upsells.mutations.editUpsellRule.editUpsellRule);
+	const createUpsellRule = useMutation(
+		api.tables.upsells.mutations.createUpsellRule.createUpsellRule
+	);
 	let saving = $state(false);
 
 	async function save() {
 		if (!canSubmit || saving) return;
 		saving = true;
 		try {
-			const res = rule
-				? await safeMutation(convex, api.tables.upsells.mutations.editUpsellRule.editUpsellRule, {
-						ruleId: rule.id as never,
-						trigger,
-						itemRefs
-					})
-				: await safeMutation(
-						convex,
-						api.tables.upsells.mutations.createUpsellRule.createUpsellRule,
-						{ trigger, itemRefs }
-					);
-			if (toastResult(res)) onSaved();
+			let result;
+			try {
+				result = rule
+					? await editUpsellRule({ ruleId: rule.id as never, trigger, itemRefs })
+					: await createUpsellRule({ trigger, itemRefs });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
+			}
+			const message = result.message;
+			if (!result.success) {
+				toastMessage({ type: 'error', error: null, message });
+				return;
+			}
+			toastMessage({ type: 'success', message });
+
+			onSaved();
 		} finally {
 			saving = false;
 		}

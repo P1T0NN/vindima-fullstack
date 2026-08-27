@@ -2,9 +2,6 @@
 import { v } from 'convex/values';
 import { internalMutation } from '@/convex/functions';
 
-// ANALYTICS
-import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';
-
 // TYPES
 import type { Id } from '@/convex/_generated/dataModel';
 
@@ -43,18 +40,6 @@ export const recordFirstPurchase = internalMutation({
 			orderId: args.orderId,
 			discountMinorUnits: args.discountMinorUnits
 		});
-
-		// Analytics — first PAID order (not signup). Only on the insert path, so replays never
-		// double-count; never blocks the money path.
-		try {
-			await analytics.track(ctx, ANALYTICS_EVENT.CUSTOMER_FIRST_PURCHASE, {
-				subjectRef: args.userId,
-				props: { discountMinor: args.discountMinorUnits },
-				dedupeKey: `first-purchase:${args.userId}`
-			});
-		} catch (err) {
-			console.warn('[firstPurchases] analytics track failed; recording anyway', { err });
-		}
 
 		return rowId;
 	}

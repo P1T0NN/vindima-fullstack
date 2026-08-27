@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { query } from '@/convex/_generated/server';
 
 // HELPERS
-import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
+import { getAuthUserId } from '@/convex/betterAuth/helpers/getAuthUserId';
 import { orderDetail, guestEmailMatches } from '../helpers/orderDetail';
 import { normalizeOrderNumber } from '@/shared/features/orders/utils/orderNumber';
 

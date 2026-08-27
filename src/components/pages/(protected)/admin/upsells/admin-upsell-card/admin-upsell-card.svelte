@@ -4,26 +4,24 @@
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 
 	// COMPONENTS
 	import { Switch } from '@/components/ui/switch/index.js';
 	import { Button } from '@/components/ui/button/index.js';
 	import ActionButton from '@/components/ui/action-button/action-button.svelte';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 
 	// UTILS
-	import { safeMutation } from '@/utils/convexHelpers';
+	import { toastMessage } from '@/utils/toastMessage';
 	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
-	import { toastResult } from '@/utils/toastResult';
+import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	import { cn } from '@/utils/utils.js';
 
 	// TYPES
 	import type { UpsellAdminRule } from '@/shared/features/upsells/types/upsellsTypes';
-
-	// LUCIDE ICONS
-	import Trash2Icon from '@lucide/svelte/icons/trash-2';
-	import PencilIcon from '@lucide/svelte/icons/pencil';
-	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 
 	let {
 		rule,
@@ -36,7 +34,12 @@
 		builderOpen?: boolean;
 	} = $props();
 
-	const convex = useConvexClient();
+	const setUpsellRuleEnabled = useMutation(
+		api.tables.upsells.mutations.setUpsellRuleEnabled.setUpsellRuleEnabled
+	);
+	const deleteUpsellRule = useMutation(
+		api.tables.upsells.mutations.deleteUpsellRule.deleteUpsellRule
+	);
 
 	let togglePending = $state(false);
 	let deletePending = $state(false);
@@ -54,12 +57,29 @@
 		if (togglePending) return;
 		togglePending = true;
 		try {
-			const res = await safeMutation(
-				convex,
-				api.tables.upsells.mutations.setUpsellRuleEnabled.setUpsellRuleEnabled,
-				{ ruleId: rule.id as never, enabled: next }
-			);
-			toastResult(res);
+			let result;
+			try {
+				result = await setUpsellRuleEnabled({ ruleId: rule.id as never, enabled: next });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
+			}
+			const message = result.message;
+			if (!result.success) {
+				toastMessage({ type: 'error', error: null, message });
+				return;
+			}
+			toastMessage({ type: 'success', message });
 		} finally {
 			togglePending = false;
 		}
@@ -69,12 +89,29 @@
 		if (deletePending) return;
 		deletePending = true;
 		try {
-			const res = await safeMutation(
-				convex,
-				api.tables.upsells.mutations.deleteUpsellRule.deleteUpsellRule,
-				{ ruleId: rule.id as never }
-			);
-			toastResult(res);
+			let result;
+			try {
+				result = await deleteUpsellRule({ ruleId: rule.id as never });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
+			}
+			const message = result.message;
+			if (!result.success) {
+				toastMessage({ type: 'error', error: null, message });
+				return;
+			}
+			toastMessage({ type: 'success', message });
 		} finally {
 			deletePending = false;
 		}
@@ -102,17 +139,20 @@
 			{/if}
 			{#if triggerBroken}
 				<span class="ml-1 inline-flex items-center gap-1 text-xs text-destructive">
-					<TriangleAlertIcon class="size-3.5" /> ya no existe
+					<span class="icon-[lucide--triangle-alert] size-3.5"></span> ya no existe
 				</span>
 			{/if}
 		</p>
 
-		<Switch
-			checked={rule.enabled}
-			disabled={togglePending}
-			onCheckedChange={toggle}
-			aria-label={rule.enabled ? 'Desactivar sugerencia' : 'Activar sugerencia'}
-		/>
+		<div class="flex items-center gap-2" aria-busy={togglePending}>
+			{#if togglePending}<Spinner class="size-3.5" />{/if}
+			<Switch
+				checked={rule.enabled}
+				disabled={togglePending}
+				onCheckedChange={toggle}
+				aria-label={rule.enabled ? 'Desactivar sugerencia' : 'Activar sugerencia'}
+			/>
+		</div>
 	</div>
 
 	<!-- Offered items, in fire order. -->
@@ -144,17 +184,16 @@
 
 	{#if brokenItems > 0}
 		<p class="inline-flex items-center gap-1 text-xs text-destructive">
-			<TriangleAlertIcon class="size-3.5" />
+			<span class="icon-[lucide--triangle-alert] size-3.5"></span>
 			{brokenItems === 1
 				? '1 artículo ya no está disponible'
-				: `${brokenItems} artículos ya no están disponibles`}. Edita la sugerencia para
-			corregirlo.
+				: `${brokenItems} artículos ya no están disponibles`}. Edita la sugerencia para corregirlo.
 		</p>
 	{/if}
 
 	<div class="flex items-center justify-end gap-2">
 		<Button variant="outline" size="sm" onclick={edit}>
-			<PencilIcon class="size-3.5" />
+			<span class="icon-[lucide--pencil] size-3.5"></span>
 			Editar
 		</Button>
 
@@ -169,7 +208,7 @@
 				: `¿Eliminar la sugerencia de "${rule.triggerLabel}"?`}
 			description="Dejará de mostrarse a los clientes. Esta acción no se puede deshacer."
 		>
-			<Trash2Icon class="size-4" />
+			<span class="icon-[lucide--trash-2] size-4"></span>
 			Eliminar
 		</ActionButton>
 	</div>

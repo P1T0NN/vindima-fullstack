@@ -3,12 +3,20 @@
 	import { api } from '@/convex/_generated/api';
 	import { useQueryState, parseAsStringLiteral } from 'nuqs-svelte';
 
+	// HOOKS
+	import { useConvexPagination } from '@/features/pagination/hooks/useConvexPagination.svelte.js';
+	import { useSearch } from '@/features/search/hooks/useSearch.svelte';
+
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
+	import { PAGINATION_DATA } from '@/shared/features/pagination/config.js';
+	import { SEARCH_DATA } from '@/shared/features/search/config.js';
 
 	// COMPONENTS
-	import ConvexDataTable from '@/components/ui/data-table/convex-data-table.svelte';
-	import { NativeSelect } from '@/components/ui/select/index.js';
+	import { Button } from '@/components/ui/button/index.js';
+	import DataTable from '@/components/ui/custom-components/data-table/data-table.svelte';
+	import SearchInput from '@/features/search/components/search-input.svelte';
+	import { TableCell, TableHead } from '@/components/ui/table';
 
 	// DATA
 	import { ORDER_STATUSES, ORDER_STATUS_LABELS } from '@/shared/features/orders/data/ordersData.js';
@@ -19,34 +27,9 @@
 	import { orderStatusLabel, orderStatusBadgeClass } from '@/features/orders/utils/orderStatus.js';
 
 	// TYPES
-	import type { ColumnDef, DataTableCellSnippetProps } from '@/components/ui/data-table/types.js';
 	import type { Doc } from '@/convex/_generated/dataModel';
 
 	type OrderRow = Doc<'orders'>;
-
-	const columns: ColumnDef<OrderRow>[] = [
-		{ id: 'number', header: 'Pedido', accessor: (r) => r.number },
-		{
-			id: 'date',
-			header: 'Fecha',
-			accessor: (r) => new Date(r._creationTime).toLocaleDateString(),
-			hideBelow: 'md'
-		},
-		{ id: 'customer', header: 'Cliente', accessor: (r) => r.name || r.email, hideBelow: 'md' },
-		{
-			id: 'items',
-			header: 'Artículos',
-			accessor: (r) => r.lines.reduce((n, line) => n + line.qty, 0),
-			hideBelow: 'lg'
-		},
-		{
-			id: 'total',
-			header: 'Total',
-			accessor: (r) => formatMoneyMinor(r.amounts.totalMinor, r.currency),
-			cellClass: 'tabular-nums'
-		},
-		{ id: 'status', header: 'Estado', accessor: (r) => orderStatusLabel(r.status) }
-	];
 
 	// Status filter is URL-synced (`?status=`): null = all. Bookmarkable/shareable filtered
 	// views and back-button support come for free, and the dashboard's order alert cards
@@ -57,59 +40,93 @@
 		...ORDER_STATUSES.map((value) => ({ value, label: ORDER_STATUS_LABELS[value] }))
 	];
 
-	let search = $state('');
-
-	// MUST mirror `fetchOrders`' strategy function: the unfiltered browse is offset-paginated
-	// against the `orderBrowse` aggregate (exact totals + page jumps at any volume); search and
-	// status filters are cursor mode (search indexes are paginate-only, filtered sets have no
-	// counter). Caller and server derive the same predicate, so they always agree on which of
-	// `page` / `cursor` drives the request.
-	const optimizationStrategy = $derived(search.trim() || status.current ? 'cursor' : 'offset');
+	const search = useSearch({
+		minChars: SEARCH_DATA.MIN_QUERY_LENGTH,
+		debounceMs: SEARCH_DATA.INPUT_DEBOUNCE_MS
+	});
+	const orders = useConvexPagination(
+		api.tables.orders.queries.fetchOrders.fetchOrders,
+		() => ({
+			search: search.term || undefined,
+			status: status.current ?? undefined
+		}),
+		{ pageSize: PAGINATION_DATA.DEFAULT_PAGE_SIZE }
+	);
 </script>
 
-<ConvexDataTable
-	caption="Pedidos"
-	query={api.tables.orders.queries.fetchOrders.fetchOrders}
-	queryArgs={{ status: status.current ?? undefined }}
-	{optimizationStrategy}
-	numbered
-	controlsPlace="top"
-	searchable
-	bind:search
-	searchPlaceholder="Buscar por número o cliente..."
-	{columns}
-	getRowId={(r) => r._id}
-	customCells={{ number: numberCell, status: statusCell }}
-	{filters}
-/>
+<DataTable pagination={orders} placement="above" class="text-sm" key={(order) => order._id}>
+	{#snippet header()}
+		<div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+			<SearchInput
+				class="md:max-w-sm"
+				placeholder="Buscar por número o cliente..."
+				label="Buscar pedidos"
+				bind:value={search.value}
+			/>
+			<select
+				class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm md:w-48"
+				aria-label="Filtrar por estado"
+				bind:value={
+					() => status.current ?? '',
+					(value) => (status.current = value ? (value as (typeof ORDER_STATUSES)[number]) : null)
+				}
+			>
+				{#each statusOptions as option (option.value)}
+					<option value={option.value}>{option.label}</option>
+				{/each}
+			</select>
+		</div>
+	{/snippet}
 
-{#snippet filters()}
-	<!-- Setter casts to `ORDER_STATUSES`, not `OrderRow['status']` — the latter also carries
-	     `draft`, which is not a filterable state (an unpaid online order is not an order yet). -->
-	<NativeSelect
-		class="w-full md:w-48"
-		ariaLabel="Filtrar por estado"
-		bind:value={
-			() => status.current ?? '',
-			(v) => (status.current = v ? (v as (typeof ORDER_STATUSES)[number]) : null)
-		}
-		options={statusOptions}
-	/>
-{/snippet}
+	{#snippet head()}
+		<TableHead>Pedido</TableHead>
+		<TableHead class="hidden md:table-cell">Fecha</TableHead>
+		<TableHead class="hidden md:table-cell">Cliente</TableHead>
+		<TableHead class="hidden lg:table-cell">Artículos</TableHead>
+		<TableHead>Total</TableHead>
+		<TableHead>Estado</TableHead>
+	{/snippet}
 
-{#snippet numberCell({ row }: DataTableCellSnippetProps<OrderRow>)}
-	<a
-		href={appHref(ADMIN_PAGE_ENDPOINTS.ORDER.replace(':id', row._id))}
-		class="font-medium text-accent hover:underline"
-	>
-		{row.number}
-	</a>
-{/snippet}
+	{#snippet row(order: OrderRow)}
+		<TableCell>
+			<Button
+				variant="link"
+				href={appHref(ADMIN_PAGE_ENDPOINTS.ORDER.replace(':id', order._id))}
+				class="h-auto justify-start p-0 text-left font-medium text-accent"
+			>
+				{order.number}
+			</Button>
+		</TableCell>
+		<TableCell class="hidden md:table-cell">
+			{new Date(order._creationTime).toLocaleDateString()}
+		</TableCell>
+		<TableCell class="hidden md:table-cell">{order.name || order.email}</TableCell>
+		<TableCell class="hidden lg:table-cell">
+			{order.lines.reduce((n, line) => n + line.qty, 0)}
+		</TableCell>
+		<TableCell class="tabular-nums">
+			{formatMoneyMinor(order.amounts.totalMinor, order.currency)}
+		</TableCell>
+		<TableCell>
+			<span
+				class={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${orderStatusBadgeClass(order.status)}`}
+			>
+				{orderStatusLabel(order.status)}
+			</span>
+		</TableCell>
+	{/snippet}
 
-{#snippet statusCell({ row }: DataTableCellSnippetProps<OrderRow>)}
-	<span
-		class={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${orderStatusBadgeClass(row.status)}`}
-	>
-		{orderStatusLabel(row.status)}
-	</span>
-{/snippet}
+	{#snippet errorSnippet()}
+		<p
+			class="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
+		>
+			No se pudieron cargar los pedidos.
+		</p>
+	{/snippet}
+
+	{#snippet empty()}
+		<p class="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+			No hay pedidos que coincidan con los filtros.
+		</p>
+	{/snippet}
+</DataTable>

@@ -317,7 +317,8 @@ src/shared/features/rewards/utils/
                                        Runtime-agnostic (no Convex ctx), so it imports cleanly
                                        into both Convex functions and SvelteKit UI.
 
-src/shared/config.ts                ← FEATURES.REWARDS + REWARDS_CONFIG (the per-project knob).
+src/shared/config.ts                ← FEATURES.REWARDS.
+src/shared/features/rewards/config.ts ← REWARDS_CONFIG (the per-project knob).
 ```
 
 Convex function references follow file-based routing, e.g.
@@ -374,7 +375,7 @@ maps them to visible text). Keys emitted:
 
 When cloning this template for a new store:
 
-1. Edit `REWARDS_CONFIG` in `src/shared/config.ts` — stamps per reward, qualifying-order
+1. Edit `REWARDS_CONFIG` in `src/shared/features/rewards/config.ts` — stamps per reward, qualifying-order
    rule, eligible free items, expiry.
 2. Add the `RewardMessages.*` keys (§13) + UI copy in `rewardsCopy.ts` — wording/translations.
 3. Done. (Or set `FEATURES.REWARDS = false` if the project has no loyalty program.)
@@ -529,7 +530,7 @@ src/convex/tables/rewards/
 └── queries/fetchMyRewards.ts       ← extended payload (welcomeOffer field)
 
 src/shared/features/rewards/utils/rewardsUtils.ts  ← + welcomeDiscountMinor()
-src/shared/config.ts                ← + FIRST_PURCHASE block in REWARDS_CONFIG
+src/shared/features/rewards/config.ts ← + FIRST_PURCHASE block in REWARDS_CONFIG
 ```
 
 ### 15.10 Verification checklist additions

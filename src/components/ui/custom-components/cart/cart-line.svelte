@@ -1,0 +1,112 @@
+<script lang="ts">
+	// LIBRARIES
+	import { toast } from 'svelte-sonner';
+
+	// STATE
+	import { cart } from '@/features/cart/cart.svelte';
+
+	// UTILS
+	import { formatMoneyMinor } from '@/utils/formatters.js';
+	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
+	import { CART_CONFIG } from '@/shared/features/cart/config';
+
+	// ICONS
+
+	// TYPES
+	import type { CartLine } from '@/shared/features/cart/cartUtils';
+	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
+
+	// Product resolution is owned by the parent surface's single subscription (§5) and passed in.
+	let { line, product }: { line: CartLine; product: ResolvedCartProduct } = $props();
+
+	const available = $derived(product.unitPriceMinor !== null);
+	// Display composition is the frontend's job — the backend returns raw fields.
+	const name = $derived(resolvedDisplayName({ ...product, ref: product.productRef }));
+	const money = (minor: number) => formatMoneyMinor(minor, product.currency);
+
+	function removeWithUndo() {
+		const { productRef, qty } = line;
+		cart.remove(productRef);
+		toast('Eliminado del carrito', {
+			action: { label: 'Deshacer', onClick: () => cart.add(productRef, qty) }
+		});
+	}
+</script>
+
+<div class="flex gap-3 py-4" class:opacity-50={!available}>
+	<!-- Image / placeholder -->
+	<div class="size-16 shrink-0 overflow-hidden rounded-md bg-muted">
+		{#if product.imageUrl}
+			<img
+				src={product.imageUrl}
+				alt=""
+				width="64"
+				height="64"
+				loading="lazy"
+				decoding="async"
+				class="size-full object-cover"
+			/>
+		{/if}
+	</div>
+
+	<div class="flex min-w-0 flex-1 flex-col gap-1.5">
+		<div class="flex items-start justify-between gap-3">
+			<div class="min-w-0">
+				<p class="truncate text-sm font-medium text-foreground">{name}</p>
+				{#if available && line.qty > 1}
+					<p class="mt-0.5 text-xs text-muted-foreground">
+						{`${money(product.unitPriceMinor!)} c/u`}
+					</p>
+				{/if}
+			</div>
+			{#if available}
+				<p class="shrink-0 font-display text-sm font-semibold text-foreground tabular-nums">
+					{money(product.unitPriceMinor! * line.qty)}
+				</p>
+			{/if}
+		</div>
+
+		<div class="mt-1 flex items-center justify-between gap-3">
+			{#if available}
+				<!-- Quantity stepper -->
+				<div class="inline-flex items-center rounded-md border border-border">
+					<button
+						type="button"
+						class="inline-flex size-11 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
+						onclick={() => cart.setQty(line.productRef, line.qty - 1)}
+						disabled={line.qty <= 1}
+						aria-label={`Disminuir cantidad de ${name}`}
+					>
+						<span class="icon-[lucide--minus] size-4" ></span>
+					</button>
+					<output
+						class="min-w-8 px-1 text-center text-sm font-medium tabular-nums"
+						aria-live="polite"
+						aria-label={`Cantidad de ${name}`}
+					>
+						{line.qty}
+					</output>
+					<button
+						type="button"
+						class="inline-flex size-11 items-center justify-center text-foreground transition-opacity hover:opacity-70 disabled:opacity-30"
+						onclick={() => cart.setQty(line.productRef, line.qty + 1)}
+						disabled={line.qty >= CART_CONFIG.MAX_QTY_PER_LINE}
+						aria-label={`Aumentar cantidad de ${name}`}
+					>
+						<span class="icon-[lucide--plus] size-4" ></span>
+					</button>
+				</div>
+			{:else}
+				<span class="text-xs font-medium text-muted-foreground">Ya no está disponible</span>
+			{/if}
+
+			<button
+				type="button"
+				class="inline-flex min-h-11 items-center px-2 text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+				onclick={removeWithUndo}
+			>
+				Eliminar
+			</button>
+		</div>
+	</div>
+</div>

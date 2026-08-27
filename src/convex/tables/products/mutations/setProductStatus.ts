@@ -9,20 +9,19 @@
 import { v } from 'convex/values';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 import type { ConvexMutationResult } from '@/shared/types/types';
 
 const STATUS_MESSAGE: Record<'draft' | 'active' | 'archived', string> = {
-	draft: 'ProductMessages.PRODUCT_UPDATED',
-	active: 'ProductMessages.PRODUCT_RESTORED',
-	archived: 'ProductMessages.PRODUCT_ARCHIVED'
+	draft: 'Producto actualizado.',
+	active: 'Producto publicado.',
+	archived: 'Producto archivado.'
 };
 
-export const setProductStatus = adminMutation('setProductStatus')({
+export const setProductStatus = adminMutation({
 	args: {
 		productId: v.id('products'),
 		status: v.union(v.literal('draft'), v.literal('active'), v.literal('archived'))
@@ -31,7 +30,7 @@ export const setProductStatus = adminMutation('setProductStatus')({
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		const product = await ctx.db.get(args.productId);
 		if (!product) {
-			return { success: false, message: { key: 'ProductMessages.PRODUCT_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos ese producto.' };
 		}
 
 		await ctx.db.patch(args.productId, {
@@ -40,12 +39,6 @@ export const setProductStatus = adminMutation('setProductStatus')({
 			...(args.status === 'active' && !product.wasActive ? { wasActive: true } : {})
 		});
 
-		ctx.audit(AUDIT_ACTIONS.PRODUCT_STATUS, {
-			resource: { table: 'products', id: args.productId },
-			before: { status: product.status },
-			after: { status: args.status }
-		});
-
-		return { success: true, message: { key: STATUS_MESSAGE[args.status] } };
+		return { success: true, message: STATUS_MESSAGE[args.status] };
 	}
 });

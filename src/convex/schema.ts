@@ -1,9 +1,9 @@
 // LIBRARIES
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { literals } from 'convex-helpers/validators';
 
 // TABLES
-import { auditLogTable } from './tables/auditLog/schemas/auditLogSchema';
 import { rewardAccountsTable } from './tables/rewardAccounts/schemas/rewardAccountsSchema';
 import { rewardClaimsTable } from './tables/rewardClaims/schemas/rewardClaimsSchema';
 import { rewardLedgerTable } from './tables/rewardLedger/schemas/rewardLedgerSchema';
@@ -19,10 +19,6 @@ const schema = defineSchema({
 	// Users (with `role` and other custom fields) live in the better-auth component;
 	// access via `authComponent.getAuthUser(ctx)`. Foreign-key columns below store the
 	// better-auth user id as a plain string.
-
-	// Audit logs — toggle population via FEATURES.AUDIT_LOGS in shared/config.ts.
-	// The table itself is always declared so flipping the flag needs no migration.
-	auditLogs: auditLogTable,
 
 	// In-app analytics (events + rollups) live inside the `@vllnt/convex-analytics`
 	// component now — it owns its own tables. See `./analytics/analytics.ts`.
@@ -63,14 +59,14 @@ const schema = defineSchema({
 	// so flipping needs no migration).
 	upsells: upsellsTable,
 
-	/** Cloudflare R2 file reference + cached download URL. Owner-stamped at upload. */
-	uploadedFilesR2: defineTable({
+	storageUploads: defineTable({
 		ownerId: v.string(),
 		key: v.string(),
-		url: v.string()
+		status: literals('pending', 'uploaded'),
+		createdAt: v.number()
 	})
 		.index('by_key', ['key'])
-		.index('by_owner', ['ownerId'])
+		.index('by_created_at', ['createdAt'])
 });
 
 export default schema;

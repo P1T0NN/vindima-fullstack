@@ -20,7 +20,8 @@ import { query } from '@/convex/_generated/server';
 import { v } from 'convex/values';
 
 // CONFIG
-import { PAGINATION_DATA, SHOP_CONFIG } from '@/shared/config';
+import { PAGINATION_DATA } from '@/shared/features/pagination/config';
+import { SHOP_CONFIG } from '@/shared/features/shop/config';
 
 // VALIDATORS
 import { shopCategoryRow } from '../validators/productCategoriesValidators';

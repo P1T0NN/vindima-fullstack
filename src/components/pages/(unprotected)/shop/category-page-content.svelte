@@ -7,9 +7,9 @@
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import { Button } from '@/components/ui/button/index.js';
-	import Section from '@/components/ui/section/section.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
 	import CategoryProductGrid from '@/features/products/components/category-product-grid/category-product-grid.svelte';
 	import CategoryPageEmpty from './empty/category-page-empty.svelte';
 	import UpsellDialog from '@/features/upsells/components/upsell-dialog/upsell-dialog.svelte';
@@ -20,9 +20,6 @@
 	// TYPES
 	import type { ShopCategoryPage } from '@/shared/features/productCategories/types/productCategoriesTypes';
 	import type { UpsellCatalog } from '@/shared/features/upsells/types/upsellsTypes';
-
-	// LUCIDE ICONS
-	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 
 	let {
 		pageData,
@@ -83,7 +80,7 @@
 
 		<div class="relative {PAGE_CONTAINER}">
 			<Button href="{resolve('/')}#shop" class="mb-8">
-				<ArrowLeftIcon class="size-4" strokeWidth={1.75} />
+				<span class="icon-[lucide--arrow-left] size-4"></span>
 				Volver a la tienda
 			</Button>
 

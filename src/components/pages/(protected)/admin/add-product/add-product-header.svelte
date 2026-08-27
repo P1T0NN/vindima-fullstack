@@ -2,16 +2,14 @@
 	// CONFIG
 	import { ADMIN_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
-	// LUCIDE ICONS
-	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
-</script>
+	</script>
 
 <header class="flex flex-col gap-1">
 	<a
 		href={ADMIN_PAGE_ENDPOINTS.PRODUCTS}
 		class="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
 	>
-		<ArrowLeftIcon class="size-4" aria-hidden="true" />
+		<span class="icon-[lucide--arrow-left] size-4" aria-hidden="true" ></span>
 		Productos
 	</a>
 

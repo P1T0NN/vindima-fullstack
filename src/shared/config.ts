@@ -1,119 +1,3 @@
-export const PAGINATION_DATA = {
-	DEFAULT_PAGE_SIZE: 10,
-	/** Server-side cap for `paginationOpts.numItems` (e.g. search dropdowns). */
-	MAX_PAGE_SIZE: 25,
-	/** Default for `DataTable` `optimizationStrategy` (see `DataTableOptimizationStrategy` in data-table `types.ts`). */
-	DEFAULT_OPTIMIZATION_STRATEGY: 'cursor' as const,
-	/**
-	 * Most rows an `offset`-strategy query will read to produce an exact `totalCount`.
-	 *
-	 * Offset pagination has to materialize the whole matched set to count and slice it, so its
-	 * cost is O(matching rows). Unbounded, that walks straight into Convex's hard per-query
-	 * limits (16,384 documents / 8 MiB) and the endpoint starts throwing — a feature that
-	 * worked yesterday returns a 500 today, with no degradation in between.
-	 *
-	 * With this cap the query reads at most `OFFSET_SCAN_LIMIT + 1` rows instead. Past the cap
-	 * it stops counting and reports `totalCount: null`, which every consumer already understands
-	 * as "unknown" (it is what cursor mode returns): page numbers disappear, prev/next keeps
-	 * working, nothing throws.
-	 *
-	 * Wire an `aggregate` (see `fetchOptimized/README.md § Aggregate mode`) to remove the bound.
-	 */
-	OFFSET_SCAN_LIMIT: 10_000,
-	/**
-	 * Absolute per-request ceiling on `paginationOpts.numItems`, enforced server-side by
-	 * `resolvePaginationOpts` in every paginated endpoint. Convex endpoints are a public
-	 * API — any caller can hand-craft a request — so without this a single call could demand
-	 * a 50,000-row page and read straight into the platform limits. Per-REQUEST only: every
-	 * row stays reachable across pages; this just guarantees a page is a page.
-	 *
-	 * Distinct from `MAX_PAGE_SIZE` (25), the tighter default cap for search-suggestion
-	 * endpoints: a table may legitimately want up to this many rows per page.
-	 */
-	HARD_MAX_PAGE_SIZE: 100
-} as const;
-
-/** Exact live counters (`TableAggregate` + triggers) — see `src/convex/counters.ts`. */
-export const AGGREGATE_DATA = {
-	/**
-	 * Rows processed per backfill transaction. Each batch self-schedules the next, so
-	 * backfills work at any table size — this only tunes transaction size, never a ceiling.
-	 */
-	BACKFILL_BATCH: 500
-} as const;
-
-/**
- * Search endpoints — `createSearchQuery` (Convex).
- */
-export const SEARCH_DATA = {
-	/** Shorter queries return an empty page before touching the index or the rate limiter. */
-	MIN_QUERY_LENGTH: 2,
-	/** Debounce for the search input before a query is issued, in ms. */
-	INPUT_DEBOUNCE_MS: 300
-} as const;
-
-/** Auth shape knobs shared by the forms and the dual-runtime auth schemas. */
-export const AUTH_DATA = {
-	/** Digits in the emailed OTP. Drives both the input's `maxlength` and the schema regex. */
-	OTP_LENGTH: 8,
-	/** Minimum password length enforced by the auth schemas. */
-	PASSWORD_MIN_LENGTH: 8
-} as const;
-
-/**
- * Orphan-cleanup cron. The sweep pages one side and checks the counterpart per item with an
- * indexed point lookup, self-scheduling the next batch until done — works at any table size;
- * these tune transaction size and safety, never a ceiling.
- */
-export const STORAGE_CLEANUP_DATA = {
-	/** Rows/objects examined per cleanup transaction; a full batch self-schedules the next. */
-	BATCH: 500,
-	/**
-	 * Never delete an object younger than this. Uploads write the object FIRST and its
-	 * registry row a moment later — without a grace window the sweep could destroy an
-	 * in-flight upload that legitimately has no row yet.
-	 */
-	GRACE_MS: 60 * 60 * 1000 // 1 hour
-} as const;
-
-/**
- * Server-side batch sizes for bulk work — one bounded batch per cron tick / request, never
- * a self-rescheduling loop. A full batch is the signal to raise the cron frequency or the
- * number here (the crons log a warning when they saturate).
- */
-export const BATCH_CONFIG = {
-	/** `confirmPendingStamps` — pending stamps promoted per hourly run (~4.8k/day headroom). */
-	REWARD_STAMP_CONFIRM: 200,
-	/** `expireInactiveCards` — inactive reward accounts wiped per daily run. */
-	REWARD_CARD_EXPIRE: 500,
-	/** `expirePendingOrders` — abandoned `pending` orders cancelled per run. */
-	ORDER_EXPIRE: 200,
-	/** `purgeStaleAuditLogs` — hard cap per run so a post-downtime backlog can't blow the budget. */
-	AUDIT_PURGE: 5_000,
-	/** `createDeleteMutation` — default cap on `ids.length` per request. Overridable per call site. */
-	DELETE_MUTATION: 200
-} as const;
-
-/**
- * Direct-to-R2 upload limits, enforced server-side before a signed URL is minted.
- * Mirrors historical Convex-storage limits — keep caps aligned so UX stays predictable.
- */
-export const UPLOADS_CONFIG = {
-	MAX_UPLOAD_BYTES: 10 * 1024 * 1024, // 10 MB
-	ALLOWED_CONTENT_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'],
-	/**
-	 * Object-key prefixes clients may request, so bucket contents stay browsable by entity type
-	 * (`products/<uuid>`) instead of a flat pile of UUIDs. Strict allowlist — a free-form prefix
-	 * from the client would let a caller write anywhere in the bucket namespace.
-	 *
-	 * Keys are permanent: renaming a prefix here does NOT move existing objects, so add new
-	 * values rather than editing old ones.
-	 */
-	ALLOWED_KEY_PREFIXES: ['products', 'categories'],
-	/** Target size the client-side image optimizer compresses down to, in MB. */
-	CLIENT_OPTIMIZE_TARGET_MB: 1
-} as const;
-
 const WHATSAPP_NUMBER = '5214499409233';
 
 /** Address parts, kept separate because schema.org `PostalAddress` needs them individually. */
@@ -136,9 +20,14 @@ export const COMPANY_DATA = {
 	NAME: 'Vindima',
 	EMAIL: 'info@kurosava.com',
 	RESEND_EMAIL: 'info@vindimawinebar.com',
+	EMAIL_COPY: {
+		FOOTER_NOTICE: 'You are receiving this email because of activity on your account.',
+		IGNORE_NOTICE: 'If you did not request this email, you can safely ignore it.'
+	},
 	DOMAIN: 'vindimawinebar.com',
-	LOGO: '/logo/opt/logo-1536w.webp',
-	DESCRIPTION: 'Vinícola orgánica - vinos de autor, charcutería y experiencias para grandes anfitriones.',
+	LOGO: '/logo/logo.png',
+	DESCRIPTION:
+		'Vinícola orgánica - vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
 	WHATSAPP_CONTACT_URL: `https://wa.me/${WHATSAPP_NUMBER}`,
 	ADDRESS: {
@@ -151,7 +40,7 @@ export const COMPANY_DATA = {
 	 * Opening hours, one entry per day group. `DAYS`/`TIME` are display copy; `SCHEMA_DAYS`
 	 * (English day names) and 24h `OPENS`/`CLOSES` feed the `openingHoursSpecification` in the
 	 * home page's JSON-LD. Edit both halves of an entry together — nothing derives one from
-	 * the other, since parsing localised "1:00 PM" copy back into a machine time is more code
+	 * the other, since parsing display-formatted "1:00 PM" copy back into a machine time is more code
 	 * than restating four characters.
 	 */
 	HOURS: [
@@ -185,58 +74,24 @@ export const COMPANY_DATA = {
 } as const;
 
 /**
- * Email palette — inline hex only, since email clients don't support CSS variables
- * (so these can't reference `layout.css` vars and are duplicated here on purpose).
- * Used by the transactional email header/footer templates.
- */
-export const EMAIL_CONFIG = {
-	/** Deep burgundy — header bar background, links. Mirrors `--accent`. */
-	ACCENT: '#510128',
-	/** Gold — wordmark. Mirrors `--primary`. */
-	GOLD: '#d9af50',
-	/** Page background around the 600px email. Mirrors `--background`. */
-	BACKGROUND: '#f2f1ed',
-	/** Footer panel background. Mirrors `--secondary`/`--muted`. */
-	SURFACE: '#edebe3',
-	/** Body card background (the middle of the sandwich). Mirrors `--card`. */
-	CARD: '#fbfaf7',
-	/** Primary body text + headings. Mirrors `--foreground`. */
-	TEXT: '#1c1418',
-	/** Muted text — taglines, legal line, secondary copy. Mirrors `--muted-foreground`. */
-	MUTED_TEXT: 'rgba(28,20,24,0.6)',
-	/** Text on the accent CTA button. Mirrors `--accent-foreground`. */
-	ON_ACCENT: '#f2f1ed',
-	/** Serif stack — matches the header wordmark. Email-safe families only. */
-	FONT_SERIF: "Georgia,'Times New Roman',serif",
-	/** Sans stack — the body default. */
-	FONT_SANS: 'Arial,Helvetica,sans-serif',
-	/**
-	 * Minutes an OTP stays valid, as printed in the auth emails. This is COPY, not enforcement:
-	 * the real window is better-auth's `emailOTP.expiresIn` (left at its 5-minute default).
-	 * Bump both together.
-	 */
-	OTP_EXPIRY_MINUTES: 5
-} as const;
-
-/**
  * Decorative art renders at ≤220px wide, so the 640w WebP variants are already
  * oversized for every call site — the raw PNGs (up to 917 KB each) stay in
- * `static/assets/` only as source material for regenerating `opt/`.
+ * `static/assets/` as the source material for enhanced image components.
  */
 export const ASSETS_DATA = {
-	BOARD: '/assets/opt/board-640w.webp',
-	BOTTLE_OUTLINE: '/assets/opt/bottle-outline-640w.webp',
-	BOTTLE: '/assets/opt/bottle-640w.webp',
-	BOWL_PLATTER: '/assets/opt/bowl-platter-640w.webp',
-	CHEESE: '/assets/opt/cheese-640w.webp',
-	DESSERT: '/assets/opt/dessert-640w.webp',
-	GLASS_SOFT: '/assets/opt/glass-soft-640w.webp',
-	GLASS: '/assets/opt/glass-640w.webp',
-	HOGAZA: '/assets/opt/hogaza-640w.webp',
-	OLIVE: '/assets/opt/olive-640w.webp',
-	OLIVES: '/assets/opt/olives-640w.webp',
-	TAPA: '/assets/opt/tapa-640w.webp',
-	WINE_BOTTLE: '/assets/opt/wine-bottle-640w.webp'
+	BOARD: '/assets/board.png',
+	BOTTLE_OUTLINE: '/assets/bottle-outline.png',
+	BOTTLE: '/assets/bottle.png',
+	BOWL_PLATTER: '/assets/bowl-platter.png',
+	CHEESE: '/assets/cheese.png',
+	DESSERT: '/assets/dessert.png',
+	GLASS_SOFT: '/assets/glass-soft.png',
+	GLASS: '/assets/glass.png',
+	HOGAZA: '/assets/hogaza.png',
+	OLIVE: '/assets/olive.png',
+	OLIVES: '/assets/olives.png',
+	TAPA: '/assets/tapa.png',
+	WINE_BOTTLE: '/assets/win-bottle.png'
 } as const;
 
 /**
@@ -245,16 +100,9 @@ export const ASSETS_DATA = {
  */
 export const FEATURES = {
 	/**
-	 * Enable audit logging. When `false`, `ctx.audit()` / `logAudit()` are no-ops
-	 * and nothing is written to the `auditLogs` table. The table itself is always
-	 * declared in the schema so toggling this flag needs no migration.
-	 */
-	AUDIT_LOGS: true,
-
-	/**
 	 * Enable the punch-card rewards system. Tables stay declared; flipping needs no
 	 * migration. When `false`: stamp/claim functions no-op, queries return null, crons
-	 * exit, UI renders nothing. See `RewardSystem.md` and `REWARDS_CONFIG` below.
+	 * exit, UI renders nothing. See `RewardSystem.md` and the rewards feature config.
 	 */
 	REWARDS: true,
 
@@ -279,126 +127,9 @@ export const FEATURES = {
 	 * Enable add-to-cart upsell suggestions. Table stays declared; flipping needs no
 	 * migration. When `false`: the `/admin/upsells` nav entry hides, `fetchUpsellCatalog`
 	 * returns empty, no dialog ever mounts, and the add-to-cart flow behaves exactly as
-	 * before the feature existed. See `UpsellsSystemDesign.md` and `UPSELLS_CONFIG` below.
+	 * before the feature existed. See `UpsellsSystemDesign.md` and the upsells feature config.
 	 */
 	UPSELLS: true
-} as const;
-
-/**
- * Storefront config — per-project knobs for what the public pages show.
- */
-export const SHOP_CONFIG = {
-	/**
-	 * Hard cap on the categories the homepage shop section fetches, enforced server-side in
-	 * `fetchCategoriesSafe`. The section is a menu overview, not a directory: past this many
-	 * cards the grid stops reading as "pick one" and starts reading as a list to scroll.
-	 * Extra categories stay fully reachable at their own `/shop/<slug>` pages.
-	 */
-	MAX_ROOT_CATEGORIES: 9,
-	/**
-	 * Store-local day boundaries for the admin dashboard (period windows), as a fixed UTC
-	 * offset in minutes. -360 = UTC-6 (Mexico City, no DST since 2022). Analytics rollups
-	 * are hourly, so windows built from these midnights are exact.
-	 * ponytail: fixed offset, swap to an IANA-timezone computation if a store with DST needs it.
-	 */
-	DASHBOARD_UTC_OFFSET_MINUTES: -360,
-	/** Newest orders shown in compact surfaces (account club-card history strip). Server-side `take`. */
-	MY_ORDERS_PREVIEW_LIMIT: 3
-} as const;
-
-/**
- * Catalog shape knobs — products, variants, generated slugs. Server-side bounds, not UI.
- */
-export const CATALOG_CONFIG = {
-	/**
-	 * Server-side `take` bound when joining a product's variants. One variant axis per product
-	 * (`ProductsTableSystemDesign.md` §2), so a handful of rows at most — this is a safety cap,
-	 * not a page size.
-	 */
-	MAX_VARIANTS_PER_PRODUCT: 64,
-	/** Base for a generated product slug when the name has no slug-able characters at all. */
-	SLUG_FALLBACK_BASE: 'producto',
-	/** Numeric slug suffixes tried before falling back to a timestamp. */
-	SLUG_SUFFIX_LIMIT: 50
-} as const;
-
-/**
- * Punch-card rewards config — THE per-project knob (see `RewardSystem.md`).
- * Every value is an integer, string, or null (null = feature off). To retarget
- * this template for a new store, edit only this block (+ copy strings in the UI layer).
- *
- * Model: every qualifying paid order earns 1 stamp; `STAMPS_PER_REWARD` stamps
- * = 1 free item the customer picks from the admin-managed reward items (/admin/rewards).
- */
-export const REWARDS_CONFIG = {
-	/** Stamps needed to earn one free item. */
-	STAMPS_PER_REWARD: 5,
-
-	EARN: {
-		/** Min order subtotal (minor units, after discounts, before shipping/tax) to earn a stamp. 0 = every order. */
-		MIN_ORDER_MINOR_UNITS: 0,
-		/** Days a stamp stays pending (return window). 0 = confirmed instantly. */
-		PENDING_DAYS: 0,
-		/** Orders containing a claimed free item still earn a stamp? Default true (generous, costs nothing). */
-		STAMP_ON_REWARD_ORDERS: true
-	},
-
-	// Reward items (the free-item pool) are admin-managed in the DB — the `rewardEligible`
-	// flag on variants, set from /admin/rewards. See RewardItemsSystemDesign.md.
-
-	EXPIRY: {
-		/** Card progress AND banked rewards reset after this many months of no activity. null = never. */
-		INACTIVITY_MONTHS: 12 as number | null,
-		/** Warn the user this many days before expiry (drives UI banner + optional email hook). */
-		WARN_DAYS_BEFORE: 30
-	},
-
-	/**
-	 * First-purchase discount ("welcome offer") — see RewardSystem.md §15. An add-on to the
-	 * rewards module, gated independently of `FEATURES.REWARDS`: it's ON iff `DISCOUNT_PERCENT`
-	 * is non-null. Auto-applied server-side to a user's first-ever paid order; one per account,
-	 * forever (enforced by the immutable `firstPurchases` table, not by mutable eligibility).
-	 */
-	FIRST_PURCHASE: {
-		/** Percent off the first-ever paid order. Integer 1–100. null = feature off. */
-		DISCOUNT_PERCENT: 10 as number | null,
-		/** Cap on the discount amount (minor units). null = uncapped. Protects against 10% of a huge order. */
-		MAX_DISCOUNT_MINOR_UNITS: null as number | null,
-		/** Require a verified email before the discount applies. Primary multi-account friction. */
-		REQUIRE_VERIFIED_EMAIL: false
-	}
-} as const;
-
-/**
- * Cart config — one of the ONLY TWO files a new project edits to adapt the cart:
- *   1. this block (currency + limits)
- *   2. the product map in `src/shared/features/cart/cartItems.ts` (refs → name/price/image)
- * Everything else (state, sidebar UI, Convex module) is universal and untouched.
- *
- * Guest carts live in `localStorage`; authenticated carts live in one Convex `carts`
- * doc per user. Prices are resolved app-side, so this module never assumes a catalog.
- * See `CartSystem.md`.
- */
-export const CART_CONFIG = {
-	/**
-	 * Default ISO 4217 currency for prices (used when a product doesn't override it).
-	 * Neutral template default — set this to the store's currency per project.
-	 */
-	CURRENCY: 'MXN',
-	/** Max quantity per line. Stepper clamps to this; mutations enforce it server-side. */
-	MAX_QTY_PER_LINE: 20,
-	/** Max distinct lines per cart. Adds beyond this are rejected. */
-	MAX_LINES: 50,
-	/**
-	 * Server cap for one `resolveCartProducts` request: `MAX_LINES` + the reward-claim ref,
-	 * rounded up for headroom. A bigger batch can't come from a real cart, so the public
-	 * resolver rejects it (`TOO_MANY_REFS`) before doing any DB reads. Keep > `MAX_LINES` + 1.
-	 */
-	MAX_RESOLVE_REFS: 64,
-	/** Versioned localStorage key. Bump the suffix to invalidate old guest carts. */
-	STORAGE_KEY: 'cart.v1',
-	/** Debounce (ms) for coalescing quantity-stepper writes to the server. */
-	STEPPER_DEBOUNCE_MS: 400
 } as const;
 
 /**
@@ -471,105 +202,11 @@ export const CHECKOUT_CONFIG = {
 } as const;
 
 /**
- * Stripe Checkout config — every Stripe value setting in one place (see
- * `StripeSystemDesign.md`). Reached only when a shopper picks `CHECKOUT_CONFIG.PAYMENT_METHODS
- * .ONLINE`; a cash-only store ignores this block entirely.
- *
- * Secrets are NOT here and never can be: `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` live in
- * Convex env (`npx convex env set …`, §17). This file is bundled to the browser.
- *
- * Nothing here is account-scoped either — no `price_…`/`coupon_…`/`acct_…` ids — which is what
- * makes swapping Stripe accounts a two-env-var change (§2, the Portability Contract).
- */
-export const STRIPE_CONFIG = {
-	/**
-	 * Stripe API version, pinned so a Stripe release can never change behaviour under an
-	 * already-deployed store. Must match what the installed `stripe` package ships (its types
-	 * only describe that one version) — bump this together with the package, never alone.
-	 */
-	API_VERSION: '2026-06-24.dahlia',
-
-	/**
-	 * Checkout Session lifetime (§7.3.4). The rule the session builder applies:
-	 * `expires_at = min(now + MAX_HOURS, order expiry − ORDER_EXPIRY_MARGIN_HOURS)`.
-	 */
-	SESSION: {
-		/** Stripe PLATFORM limit — the longest a session may live. Not a preference; raising it
-		 *  makes Stripe reject the call. */
-		MAX_HOURS: 24,
-		/** Stripe PLATFORM limit — the shortest a session may live. Below this we refuse to create
-		 *  one and tell the shopper to place a fresh order. */
-		MIN_MINUTES: 30,
-		/** Our safety margin against the ceiling, so second-rounding can't land 1s past Stripe's
-		 *  24h limit. */
-		CEILING_MARGIN_MINUTES: 1,
-		/**
-		 * Our safety margin against the ORDER's own expiry: a payment session always dies this
-		 * long before `expirePendingOrders` may cancel its order. Load-bearing — it is why the
-		 * cron needs zero Stripe awareness and can never cancel an order mid-payment. Only
-		 * shorten it if the cron interval shortens too.
-		 */
-		ORDER_EXPIRY_MARGIN_HOURS: 1
-	},
-
-	/**
-	 * Per-account Stripe behaviours we pin, so identical code charges an identical number on ANY
-	 * Stripe account instead of inheriting each dashboard's settings (§2).
-	 *
-	 * ⚠ Both are coupled to the §7.4 amount assertion: the session's `amount_total` must equal
-	 * the order's `totalMinor`, or no payment URL is handed out. Enabling either makes Stripe add
-	 * to or re-present that total, so flipping one here REQUIRES revisiting that assertion (and,
-	 * for tax, `CHECKOUT_CONFIG.TAX_MODE` + how catalog prices are entered).
-	 */
-	ACCOUNT_BEHAVIOR: {
-		/** Re-present the total in the shopper's local currency. Off: this template is
-		 *  deliberately single-currency (`CART_CONFIG.CURRENCY`). */
-		ADAPTIVE_PRICING: false,
-		/** Let Stripe Tax ADD tax on top. Off: prices here are tax-inclusive, so the order total
-		 *  is already final. */
-		AUTOMATIC_TAX: false
-	},
-
-	/**
-	 * Copy rendered on Stripe's hosted page — the one surface whose text we send to a third party
-	 * instead of rendering ourselves (same category as email templates, which are the documented
-	 * exception in `GeneralSystemDesignRule.md` § backend returns data). Line-item names are NOT
-	 * here: those are the order's frozen snapshot names.
-	 */
-	LABELS: {
-		/** Shipping row for a pickup order (always 0 — shown so the total itemises honestly). */
-		PICKUP: 'Recoger en tienda',
-		/** Shipping row for a delivery order. */
-		SHIPPING: 'Envío',
-		/** Name of the ad-hoc first-purchase coupon (§7.2). */
-		WELCOME_DISCOUNT: 'Descuento primer pedido'
-	}
-} as const;
-
-/**
- * Add-to-cart upsell suggestions — per-project knobs. See `UpsellsSystemDesign.md` §4.2.
- * Gated by `FEATURES.UPSELLS`.
- */
-export const UPSELLS_CONFIG = {
-	/** Max items one rule may offer (and the dialog may show). 3–4 reads as a suggestion; more
-	 *  reads as a second catalog. Enforced in the zod schema AND the mutations. */
-	MAX_ITEMS_PER_RULE: 4,
-	/** Show a given rule's dialog at most once per browser session (sessionStorage). `false` =
-	 *  every matching add fires it — the current choice: the popup appears on every add of a
-	 *  product that has upsells. */
-	SHOW_ONCE_PER_SESSION: false,
-	/** Versioned sessionStorage key holding the ids of rules already shown (§5.4). Bump to reset. */
-	SHOWN_STORAGE_KEY: 'upsells.shown.v1'
-} as const;
-
-/**
  * Routes instrumented by `initBotId` on the client and verified by
  * `checkBotId` on the server via `safeCommand`.
  *
- * SvelteKit remote functions POST to `/_app/remote/<hash>/call`. With locale
- * prefixes (Paraglide), the path becomes `/<locale>/_app/remote/<hash>/call`.
+ * SvelteKit remote functions POST to `/_app/remote/<hash>/call`.
  */
 export const BOTID_PROTECTED_ROUTES = [
-	{ path: '/_app/remote/*', method: 'POST' as const },
-	{ path: '/*/_app/remote/*', method: 'POST' as const }
+	{ path: '/_app/remote/*', method: 'POST' as const }
 ];

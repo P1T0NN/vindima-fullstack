@@ -4,7 +4,7 @@
 	// are bad; ticket promedio is neutral (derived, no goal direction).
 
 	// COMPONENTS
-	import { StatTile } from '@/components/ui/stat-tile/index.js';
+	import { StatTile } from '@/components/ui/custom-components/stat-tile/index.js';
 
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';

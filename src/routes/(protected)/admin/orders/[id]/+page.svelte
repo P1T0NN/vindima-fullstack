@@ -4,12 +4,12 @@
 
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import AdminOrderDetail from '@/components/pages/(protected)/admin/orders/admin-order-detail.svelte';
-	import { ErrorComponent } from '@/components/ui/error-component/index.js';
+	import { ErrorComponent } from '@/components/ui/custom-components/error-component/index.js';
 
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';

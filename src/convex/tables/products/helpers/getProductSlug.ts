@@ -10,7 +10,7 @@
  */
 
 // CONFIG
-import { CATALOG_CONFIG } from '@/shared/config.js';
+import { CATALOG_CONFIG } from '@/shared/features/products/config.js';
 
 // UTILS
 import { slugify } from '@/shared/utils/slugify';

@@ -7,9 +7,6 @@
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
 
-	// LUCIDE ICONS
-	import PlusIcon from '@lucide/svelte/icons/plus';
-
 	let { ref, name }: { ref: string; name: string } = $props();
 </script>
 
@@ -19,6 +16,6 @@
 	class="shrink-0 self-center"
 	aria-label={`Agregar ${name}`}
 >
-	<PlusIcon strokeWidth={2} />
+	<span class="icon-[lucide--plus]" ></span>
 	Agregar
 </Button>

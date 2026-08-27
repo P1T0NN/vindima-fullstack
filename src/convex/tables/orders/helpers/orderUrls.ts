@@ -16,7 +16,7 @@ const PAY_PATH = '/checkout/pay';
 const SUCCESS_PATH = '/checkout/success';
 
 /**
- * The deployment's public origin. Same env var the auth module reads (`PUBLIC_SITE_URL`), so
+ * The deployment's public origin. Same env var the auth module reads (`PUBLIC_ORIGIN`), so
  * one value drives auth callbacks and payment redirects — and a local dev deployment redirects
  * to localhost rather than production.
  *
@@ -24,11 +24,11 @@ const SUCCESS_PATH = '/checkout/success';
  * Only the `online` path reaches this, so cash-only stores never see it (§11).
  */
 function siteOrigin(): string {
-	const raw = process.env.PUBLIC_SITE_URL;
+	const raw = process.env.PUBLIC_ORIGIN;
 	if (!raw) {
 		throw new Error(
-			'PUBLIC_SITE_URL is not set on this Convex deployment - online payments need it to build ' +
-				'return URLs. Run: npx convex env set PUBLIC_SITE_URL <your site origin>'
+			'PUBLIC_ORIGIN is not set on this Convex deployment - online payments need it to build ' +
+				'return URLs. Run: npx convex env set PUBLIC_ORIGIN <your site origin>'
 		);
 	}
 	return raw.replace(/\/+$/, '');

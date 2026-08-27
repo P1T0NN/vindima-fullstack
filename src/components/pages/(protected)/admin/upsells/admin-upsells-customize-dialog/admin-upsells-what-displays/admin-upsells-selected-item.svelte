@@ -4,9 +4,6 @@
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
 
-	// LUCIDE ICONS
-	import XIcon from '@lucide/svelte/icons/x';
-
 	let { label, onRemove }: { label: string; onRemove: () => void } = $props();
 </script>
 
@@ -21,6 +18,6 @@
 		onclick={onRemove}
 		class="size-4 text-primary hover:bg-primary/20"
 	>
-		<XIcon class="size-3" />
+		<span class="icon-[lucide--x] size-3" ></span>
 	</Button>
 </span>

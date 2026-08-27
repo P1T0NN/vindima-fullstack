@@ -14,9 +14,6 @@
 	import { formatOrderDate } from '@/features/orders/utils/ordersUtils.js';
 	import { orderStatusLabel, orderStatusBadgeClass } from '@/features/orders/utils/orderStatus.js';
 
-	// LUCIDE ICONS
-	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
-
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';
 
@@ -43,7 +40,7 @@
 	<!-- Header: back + number + status. -->
 	<div class="flex flex-col gap-4">
 		<Button href={resolve('/admin/orders')} variant="outline" size="sm" class="w-fit">
-			<ArrowLeftIcon class="size-4" strokeWidth={1.75} />
+			<span class="icon-[lucide--arrow-left] size-4" ></span>
 			Pedidos
 		</Button>
 

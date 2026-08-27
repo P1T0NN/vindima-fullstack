@@ -1,18 +1,29 @@
 /**
- * All product categories, sorted by `sortOrder` (ProductCategorySystemDesign.md §5).
- *
- * Public (no auth): category names are public data — the shop renders them. Feeds the
- * /admin/categories ConvexDataTable. (Admin form selects use the non-paginated
- * `fetchCategoryOptions` instead.) Offset strategy: the table is single-digit rows,
- * and offset gives the table exact totals + page jumps.
+ * All product categories, sorted by `sortOrder` for the admin categories table.
+ * Public category data; totals stay intentionally omitted until an aggregate is needed.
  */
 
 // HELPERS
-import { fetchOptimized } from '@/convex/pagination/fetchOptimized';
+import { getPagination, paginatedPageValidator } from '@/convex/helpers/getPagination.js';
+import { fetchOptimizedQuery } from '@/convex/wrappers/fetchOptimizedQuery.js';
 
-export const fetchAllCategories = fetchOptimized({
-	table: 'productCategories',
-	strategy: 'offset',
-	order: 'asc',
-	where: () => ({ index: 'by_sort_order' })
+// AGGREGATES
+import { productCategoryFilterAggregate } from '../aggregates/productCategoryFilterAggregate.js';
+import {
+	PRODUCT_CATEGORY_TOTAL_COUNTER_KEY,
+	productCategoryTotalCounter
+} from '../counters/productCategoryTotalCounter.js';
+
+// VALIDATORS
+import { categoryRowValidator } from '../validators/productCategoriesValidators.js';
+
+export const fetchAllCategories = fetchOptimizedQuery({
+	returns: paginatedPageValidator(categoryRowValidator),
+	count: productCategoryFilterAggregate,
+	countTotal: ({ ctx }) =>
+		productCategoryTotalCounter.count(ctx, PRODUCT_CATEGORY_TOTAL_COUNTER_KEY),
+	fetchPage: ({ ctx, paginationOpts }) =>
+		getPagination(ctx.db.query('productCategories').withIndex('by_sort_order').order('asc'), {
+			paginationOpts
+		})
 });

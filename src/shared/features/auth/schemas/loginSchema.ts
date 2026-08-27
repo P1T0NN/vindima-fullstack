@@ -1,16 +1,13 @@
 // Dual-runtime auth schema — `safeParse` it from Svelte forms AND Convex functions alike.
 //
-// MESSAGE CONVENTION (all schemas in this folder): no rendered text, ever. The default
-// zod error map (`@/shared/features/validations`) already turns required/email/min/max
-// into human message CODES; a bespoke message is just a bare catalog key string (or
-// `JSON.stringify({ key, params })` when it needs params) — the frontend translates at
-// render via `zodIssuesToFieldErrors`.
+// MESSAGE CONVENTION (all schemas in this folder): validation messages are display-ready
+// strings, whether they come from the shared zod error map or a schema-specific rule.
 
 // LIBRARIES
 import { z } from 'zod';
 
 // CONFIG
-import { AUTH_DATA } from '@/shared/config';
+import { AUTH_DATA } from '@/shared/features/auth/config';
 
 export const loginSchema = z.object({
 	// `.pipe(z.email())` (v4's non-deprecated form) runs AFTER trim + min(1), so an empty

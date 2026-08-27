@@ -7,9 +7,6 @@
 	import { Button } from '@/components/ui/button/index.js';
 	import MyOrderCardCancelButton from './my-order-card-cancel-button.svelte';
 
-	// LUCIDE ICONS
-	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
-
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';
 
@@ -26,10 +23,9 @@
 	class="mx-5 mb-5 rounded-xl border border-amber-300/60 bg-amber-50/70 p-4 sm:mx-6 dark:border-amber-900/50 dark:bg-amber-950/30"
 >
 	<div class="flex gap-2.5">
-		<TriangleAlertIcon
-			class="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400"
-			strokeWidth={1.8}
-		/>
+		<span
+			class="icon-[lucide--triangle-alert] mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400"
+		></span>
 		<p class="text-sm leading-relaxed text-amber-900 dark:text-amber-200">
 			Tu pago no se completó. Guardamos este pedido por {CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE}&nbsp;horas.
 			Puedes terminarlo cuando quieras.

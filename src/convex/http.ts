@@ -1,5 +1,5 @@
 import { httpRouter } from 'convex/server';
-import { authComponent, createAuth } from './auth/auth';
+import { authComponent, createAuth } from './betterAuth/config.js';
 import { stripeWebhook } from './tables/orders/http/stripeWebhook';
 
 const http = httpRouter();

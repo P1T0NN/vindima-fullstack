@@ -1,5 +1,5 @@
 // CONFIG
-import { REWARDS_CONFIG } from '@/shared/config.js';
+import { REWARDS_CONFIG } from '@/shared/features/rewards/config.js';
 
 /**
  * Pure punch-card math. No Convex ctx, no I/O — every function is a total function
@@ -84,7 +84,7 @@ export function revokeConfirmedStamp(c: RewardCounters): RewardCounters {
 	};
 }
 
-/** Stable reasons a reward claim can be blocked. The frontend maps each to copy. */
+/** Stable domain reasons a reward claim can be blocked. */
 export type ClaimBlockedReason =
 	| 'ITEM_NOT_ELIGIBLE'
 	| 'NO_REWARDS_AVAILABLE'
@@ -92,8 +92,7 @@ export type ClaimBlockedReason =
 
 /**
  * Guard for `claimReward`. Returns a stable reason code, or `null` if the claim is
- * allowed. Pure and code-based (not a sentence) so the wording lives on the frontend in
- * `rewardsCopy.ts` and the check stays unit-testable. Eligibility is an INPUT — the
+ * allowed. Pure and code-based so the check stays unit-testable. Eligibility is an INPUT — the
  * server computes it from the DB (`rewardEligible` flag, RewardItemsSystemDesign.md §4.3),
  * keeping this function free of I/O and config.
  */

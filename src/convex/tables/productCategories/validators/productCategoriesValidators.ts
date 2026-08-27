@@ -1,10 +1,22 @@
 /**
  * Shared Convex validators for product-category queries.
- * Category content is single-language plain text — no localized records.
+ * Category content is single-language plain text — no per-language records.
  */
 
 // LIBRARIES
 import { v } from 'convex/values';
+
+/** Complete category document returned by the admin listing. */
+export const categoryRowValidator = v.object({
+	_id: v.id('productCategories'),
+	_creationTime: v.number(),
+	slug: v.string(),
+	name: v.string(),
+	subtitle: v.optional(v.string()),
+	image: v.optional(v.string()),
+	description: v.optional(v.string()),
+	sortOrder: v.number()
+});
 
 /**
  * Public storefront row — what an unauthenticated visitor may see about a category.

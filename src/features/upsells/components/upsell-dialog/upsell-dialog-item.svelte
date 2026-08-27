@@ -2,7 +2,7 @@
 	// One pairing suggestion row: image (or fallback icon), name/description/price, add button.
 
 	// CONFIG
-	import { CART_CONFIG } from '@/shared/config.js';
+	import { CART_CONFIG } from '@/shared/features/cart/config.js';
 
 	// COMPONENTS
 	import UpsellDialogItemAddButton from './upsell-dialog-item-add-button.svelte';
@@ -13,9 +13,6 @@
 
 	// TYPES
 	import type { UpsellCatalogItem } from '@/shared/features/upsells/types/upsellsTypes';
-
-	// LUCIDE ICONS
-	import UtensilsCrossedIcon from '@lucide/svelte/icons/utensils-crossed';
 
 	let { item }: { item: UpsellCatalogItem } = $props();
 
@@ -36,11 +33,10 @@
 				decoding="async"
 			/>
 		{:else}
-			<UtensilsCrossedIcon
-				class="size-6 text-muted-foreground/60"
-				strokeWidth={1.4}
+			<span
+				class="icon-[lucide--utensils-crossed] size-6 text-muted-foreground/60"
 				aria-hidden="true"
-			/>
+			></span>
 		{/if}
 	</div>
 

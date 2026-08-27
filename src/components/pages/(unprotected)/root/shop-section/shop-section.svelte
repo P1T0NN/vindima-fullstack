@@ -1,14 +1,14 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 
 	// CONFIG
-	import { CART_CONFIG } from '@/shared/config.js';
+	import { CART_CONFIG } from '@/shared/features/cart/config.js';
 
 	// COMPONENTS
 	import { Card, CardDescription, CardTitle } from '@/components/ui/card/index.js';
-	import Section from '@/components/ui/section/section.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
 	import ShopSectionLoading from './shop-section-loading.svelte';
 	import ShopSectionEmpty from './shop-section-empty.svelte';
 

@@ -3,9 +3,6 @@ import { ConvexError, v } from 'convex/values';
 import { internalMutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
-// ANALYTICS
-import { analytics, ANALYTICS_EVENT } from '@/convex/analytics';
-
 // HELPERS
 import { buildOrderSearchText } from '../helpers/buildOrderSearchText';
 
@@ -32,7 +29,7 @@ export const markOrderPaid = internalMutation({
 		if (!order) {
 			throw new ConvexError({
 				code: 'ORDER_NOT_FOUND',
-				message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' }
+				message: 'No encontramos ese pedido.'
 			} satisfies ConvexErrorPayload);
 		}
 
@@ -43,7 +40,7 @@ export const markOrderPaid = internalMutation({
 		if (order.status !== 'pending' && order.status !== 'draft') {
 			throw new ConvexError({
 				code: 'ORDER_NOT_PENDING',
-				message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' }
+				message: 'Este pedido ya no se puede modificar.'
 			} satisfies ConvexErrorPayload);
 		}
 
@@ -64,22 +61,6 @@ export const markOrderPaid = internalMutation({
 						})
 					})
 		});
-
-		// Analytics — order.settled (the money-path event; `dedupeKey` makes webhook replays
-		// a no-op). The catch keeps a misconfigured analytics component from ever rolling
-		// back a settlement.
-		try {
-			await analytics.track(ctx, ANALYTICS_EVENT.ORDER_SETTLED, {
-				subjectRef: order.userId ?? undefined,
-				props: { amountMinor: order.amounts.totalMinor, currency: order.currency },
-				dedupeKey: `order-settled:${order._id}`
-			});
-		} catch (err) {
-			console.warn('[orders] analytics track failed on settle; settling anyway', {
-				orderId: order._id,
-				err
-			});
-		}
 
 		// Reward-line inputs for the receipt email (O2), captured across the stamp grant.
 		let rewardStamps: number | undefined;

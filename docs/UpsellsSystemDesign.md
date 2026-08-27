@@ -154,7 +154,7 @@ the shop catalog read use `by_trigger_key` / full collect.
 
 ### 4.2 The single knob: `UPSELLS_CONFIG` (+ `FEATURES.UPSELLS`)
 
-In `src/shared/config.ts`, next to the other feature configs (same one-file rule):
+In `src/shared/features/upsells/config.ts`:
 
 ```ts
 export const UPSELLS_CONFIG = {
@@ -377,7 +377,7 @@ Same envelope convention, namespace `UpsellsMessages.*` (register in
 
 Each step shippable and testable before the next:
 
-1. **Config**: `UPSELLS_CONFIG` + `FEATURES.UPSELLS` in `src/shared/config.ts`.
+1. **Config**: `UPSELLS_CONFIG` in `src/shared/features/upsells/config.ts` + `FEATURES.UPSELLS` in `src/shared/config.ts`.
 2. **Schema**: `upsellsSchema.ts` + registration. Deploy — empty table.
 3. **Shared layer**: zod schemas (`upsellsSchemas.ts`), types (`upsellsTypes.ts`), pure
    utils (`upsellsUtils.ts` + `.check.ts`: `buildTriggerKey`, `matchUpsellRule`,

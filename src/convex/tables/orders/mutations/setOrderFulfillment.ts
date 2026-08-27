@@ -3,11 +3,10 @@ import { v } from 'convex/values';
 import { internal } from '@/convex/_generated/api';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 
 // TYPES
 import type { ConvexMutationResult } from '@/shared/types/types';
@@ -19,7 +18,7 @@ import type { ConvexMutationResult } from '@/shared/types/types';
  * the "on its way" / "ready for pickup" email (`EmailSystemDesign.md` §4.2). Display only — no
  * money logic.
  */
-export const setOrderFulfillment = adminMutation('setOrderFulfillment')({
+export const setOrderFulfillment = adminMutation({
 	args: {
 		orderId: v.id('orders'),
 		fulfillment: v.union(v.literal('processing'), v.literal('shipped'), v.literal('delivered'))
@@ -28,10 +27,10 @@ export const setOrderFulfillment = adminMutation('setOrderFulfillment')({
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		const order = await ctx.db.get(args.orderId);
 		if (!order) {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos ese pedido.' };
 		}
 		if (order.status !== 'paid') {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_PAID' } };
+			return { success: false, message: 'Esta acción solo aplica a pedidos pagados.' };
 		}
 
 		await ctx.runMutation(internal.tables.orders.mutations.setFulfillment.setFulfillment, {
@@ -39,12 +38,6 @@ export const setOrderFulfillment = adminMutation('setOrderFulfillment')({
 			fulfillment: args.fulfillment
 		});
 
-		ctx.audit(AUDIT_ACTIONS.ORDER_FULFILLMENT, {
-			resource: { table: 'orders', id: order._id },
-			before: { fulfillment: order.fulfillment },
-			after: { fulfillment: args.fulfillment }
-		});
-
-		return { success: true, message: { key: 'CheckoutMessages.ORDER_FULFILLMENT_UPDATED' } };
+		return { success: true, message: 'Estado de entrega actualizado.' };
 	}
 });

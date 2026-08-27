@@ -1,11 +1,15 @@
 <script lang="ts">
 	// CONFIG
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
-	import { ASSETS_DATA } from '@/shared/config.js';
+
+	// ASSETS
+	import glass from '../../../../../static/assets/glass.png?enhanced';
+	import heroSectionWineBottle from '../../../../../static/root/hero-section-wine-bottle.png?enhanced';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
-	import Section from '@/components/ui/section/section.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
+	import StaticImage from '@/components/ui/custom-components/static-image/static-image.svelte';
 
 	// UTILS
 	import { appHref } from '@/utils/app-navigation.js';
@@ -56,7 +60,8 @@
 				</h1>
 
 				<p class="mt-6.5 mb-9 max-w-105 text-[15px] leading-[1.8] text-muted-foreground">
-					Un Wine Bar en Aguascalientes. Tablas de temporada, tapas y vino orgánico seleccionado para reunir a los tuyos alrededor de la mesa.
+					Un Wine Bar en Aguascalientes. Tablas de temporada, tapas y vino orgánico seleccionado
+					para reunir a los tuyos alrededor de la mesa.
 				</p>
 
 				<div class="flex flex-wrap gap-3.5">
@@ -68,8 +73,8 @@
 				</div>
 			</div>
 
-			<img
-				src="/root/opt/hero-section-wine-bottle-433w.webp"
+			<StaticImage
+				src={heroSectionWineBottle}
 				alt="Botella de vino Vindima"
 				class="pointer-events-none absolute right-8.5 -bottom-11 z-10 hidden h-141.5 drop-shadow-brand-lg lg:block"
 				width="433"
@@ -77,8 +82,8 @@
 				loading="eager"
 				decoding="async"
 			/>
-			<img
-				src={ASSETS_DATA.GLASS}
+			<StaticImage
+				src={glass}
 				alt="Copa de vino"
 				class="pointer-events-none absolute right-75 -bottom-7.5 z-1 hidden h-75 -rotate-3 drop-shadow-brand-md lg:block"
 				width="150"

@@ -12,14 +12,13 @@
 import { v } from 'convex/values';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 import type { ConvexMutationResult } from '@/shared/types/types';
 
-export const setVariantRewardEligible = adminMutation('setVariantRewardEligible')({
+export const setVariantRewardEligible = adminMutation({
 	args: {
 		variantId: v.id('productVariants'),
 		eligible: v.boolean()
@@ -28,31 +27,26 @@ export const setVariantRewardEligible = adminMutation('setVariantRewardEligible'
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		const variant = await ctx.db.get(args.variantId);
 		if (!variant || variant.deletedAt !== undefined) {
-			return { success: false, message: { key: 'ProductMessages.VARIANT_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos esa variante.' };
 		}
 
 		if (args.eligible) {
 			const product = await ctx.db.get(variant.productId);
 			if (!variant.available || product?.status !== 'active') {
-				return { success: false, message: { key: 'RewardMessages.REWARD_ITEM_NOT_AVAILABLE' } };
+				return {
+					success: false,
+					message: 'Este artículo no está a la venta por ahora; primero hazlo disponible.'
+				};
 			}
 		}
 
 		await ctx.db.patch(args.variantId, { rewardEligible: args.eligible ? true : undefined });
 
-		ctx.audit(AUDIT_ACTIONS.REWARD_ITEM_SET, {
-			resource: { table: 'productVariants', id: args.variantId },
-			before: { ref: variant.ref, rewardEligible: variant.rewardEligible ?? false },
-			after: { rewardEligible: args.eligible }
-		});
-
 		return {
 			success: true,
-			message: {
-				key: args.eligible
-					? 'RewardMessages.REWARD_ITEM_ADDED'
-					: 'RewardMessages.REWARD_ITEM_REMOVED'
-			}
+			message: args.eligible
+				? 'Agregado a los artículos de recompensa.'
+				: 'Eliminado de los artículos de recompensa.'
 		};
 	}
 });

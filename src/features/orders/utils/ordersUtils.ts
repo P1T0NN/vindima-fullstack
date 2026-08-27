@@ -19,7 +19,7 @@ export function orderFilterLabel(filter: OrderFilter): string {
 	return filter === 'all' ? 'Todos' : orderStatusLabel(filter);
 }
 
-/** `placedAt` (ms) → "12 Jul 2026" in the page's locale. */
+/** `placedAt` (ms) → a Spanish short date such as "12 jul 2026". */
 export function formatOrderDate(ms: number): string {
 	return new Intl.DateTimeFormat(INTL_LOCALE, {
 		day: 'numeric',

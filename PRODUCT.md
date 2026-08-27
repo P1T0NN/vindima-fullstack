@@ -47,7 +47,6 @@ What this site must never resemble:
    Decoration steps back to burgundy ink on warm paper.
 3. **Money is sacred text.** Integer minor units in code; display serif + tabular-nums
    in totals; the total band is the visual full stop of every order surface.
-4. **Spanish is the source language.** UI copy is written in es-MX and translated
-   outward (wuchale). No em dashes in copy.
+4. **Spanish is the source language.** UI copy is written in es-MX. No em dashes in copy.
 5. **Calm data.** One-shot fetches by default; realtime only where data changes under
    the viewer without them acting (see docs/GeneralSystemDesignRule.md).

@@ -1,0 +1,21 @@
+<script lang="ts">
+	import { Pagination as PaginationPrimitive } from 'bits-ui';
+	import { buttonVariants } from '@/components/ui/button/index.js';
+	import { cn } from '@/utils/utils.js';
+
+	let {
+		ref = $bindable(null),
+		class: className,
+		...restProps
+	}: PaginationPrimitive.NextButtonProps = $props();
+</script>
+
+<PaginationPrimitive.NextButton
+	bind:ref
+	aria-label="Go to next page"
+	class={cn(buttonVariants({ variant: 'ghost', size: 'default' }), 'pr-1.5!', className)}
+	{...restProps}
+>
+	<span class="cn-pagination-next-text hidden sm:block">Next</span>
+	<span class="icon-[lucide--chevron-right]" data-icon="inline-end" aria-hidden="true"></span>
+</PaginationPrimitive.NextButton>

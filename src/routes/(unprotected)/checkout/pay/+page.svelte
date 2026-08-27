@@ -4,25 +4,26 @@
 	import { onMount } from 'svelte';
 
 	// LIBRARIES
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useAction } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 	import { api } from '@/convex/_generated/api';
 
 	// CONFIG
+	import logoImage from '../../../../../static/logo/logo.png?enhanced';
+
 	import { COMPANY_DATA } from '@/shared/config.js';
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
-	import Section from '@/components/ui/section/section.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
+	import StaticImage from '@/components/ui/custom-components/static-image/static-image.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 
 	// UTILS
-	import { safeAction } from '@/utils/convexHelpers';
-	import { translateFromBackend } from '@/features/validations/utils/translateFromBackend';
-
-	// LUCIDE ICONS
-	import LockIcon from '@lucide/svelte/icons/lock';
-	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
+	import { toastMessage } from '@/utils/toastMessage';
+	import { hasErrorMessage } from '@/shared/utils/errorMessage';
 
 	// TYPES
 	import type { Id } from '@/convex/_generated/dataModel';
@@ -37,7 +38,9 @@
 	const orderId = $derived(page.url.searchParams.get('order') ?? '');
 	const email = $derived(page.url.searchParams.get('email') ?? undefined);
 
-	const convex = useConvexClient();
+	const createSession = useAction(
+		api.tables.orders.actions.createCheckoutSession.createCheckoutSession
+	);
 
 	let failed = $state(false);
 	let errorText = $state('');
@@ -52,21 +55,29 @@
 		}
 
 		try {
-			const res = await safeAction(
-				convex,
-				api.tables.orders.actions.createCheckoutSession.createCheckoutSession,
-				{ orderId: orderId as Id<'orders'>, email }
-			);
-
-			// `null` = the error was already toasted (rate limit / typed backend error).
-			if (!res) {
+			let res;
+			try {
+				res = await createSession({ orderId: orderId as Id<'orders'>, email });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
 				failed = true;
 				errorText = 'No pudimos abrir la página de pago. Inténtalo de nuevo.';
 				return;
 			}
-			if (!res.success || !res.data?.url) {
+
+			if (!res || !res.success || !res.data?.url) {
 				failed = true;
-				errorText = translateFromBackend(res.message);
+				errorText = res.message;
 				return;
 			}
 
@@ -98,7 +109,7 @@
 			<span
 				class="flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive"
 			>
-				<TriangleAlertIcon class="size-5" strokeWidth={1.8} />
+				<span class="icon-[lucide--triangle-alert] size-5"></span>
 			</span>
 			<div class="flex flex-col gap-2">
 				<h1 class="font-display text-2xl font-semibold tracking-wide text-accent uppercase">
@@ -117,8 +128,8 @@
 		<div class="flex w-full max-w-sm flex-col items-center gap-7 text-center">
 			<!-- The logo holds the moment: the shopper is between our page and Stripe's, and
 			     seeing who they're paying is the reassurance that matters here. -->
-			<img
-				src={COMPANY_DATA.LOGO}
+			<StaticImage
+				src={logoImage}
 				alt={COMPANY_DATA.NAME}
 				class="h-20 w-auto max-w-[min(14rem,60vw)] object-contain"
 				width="160"
@@ -143,7 +154,7 @@
 			<p
 				class="mt-2 inline-flex items-center gap-1.5 text-[0.7rem] font-medium tracking-[0.13em] text-muted-foreground/70 uppercase"
 			>
-				<LockIcon class="size-3" strokeWidth={2} />
+				<span class="icon-[lucide--lock] size-3"></span>
 				Pago procesado por Stripe
 			</p>
 		</div>

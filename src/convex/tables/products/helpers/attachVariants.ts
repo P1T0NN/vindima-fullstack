@@ -7,7 +7,7 @@
  */
 
 // CONFIG
-import { CATALOG_CONFIG } from '@/shared/config.js';
+import { CATALOG_CONFIG } from '@/shared/features/products/config.js';
 
 // TYPES
 import type { QueryCtx } from '@/convex/_generated/server';

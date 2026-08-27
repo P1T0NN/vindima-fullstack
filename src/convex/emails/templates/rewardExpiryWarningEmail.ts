@@ -1,5 +1,5 @@
 // CONFIG
-import { REWARDS_CONFIG } from '@/shared/config.js';
+import { REWARDS_CONFIG } from '@/shared/features/rewards/config.js';
 
 // UTILS
 import { formatDateLong } from '@/utils/formatters';

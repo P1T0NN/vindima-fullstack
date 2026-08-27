@@ -1,6 +1,6 @@
 <script lang="ts">
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import AdminOrdersTable from '@/components/pages/(protected)/admin/orders/admin-orders-table.svelte';
 	import AdminOrdersHeader from '@/components/pages/(protected)/admin/orders/admin-orders-header.svelte';
 </script>

@@ -1,5 +1,6 @@
 // CONFIG
-import { COMPANY_DATA, EMAIL_CONFIG } from '@/shared/config.js';
+import { COMPANY_DATA } from '@/shared/config.js';
+import { EMAIL_CONFIG } from '@/shared/features/emails/config.js';
 
 /**
  * Standalone HTML footer block for transactional emails. A centered 600px wide

@@ -1,5 +1,7 @@
 // CONFIG
-import { CART_CONFIG, FEATURES, REWARDS_CONFIG } from '@/shared/config.js';
+import { CART_CONFIG } from '@/shared/features/cart/config.js';
+import { FEATURES } from '@/shared/config.js';
+import { REWARDS_CONFIG } from '@/shared/features/rewards/config.js';
 
 // RESOLVER (the products table is the single price/name authority — one indexed point-read per
 // ref, deduped per product. See ProductsTableSystemDesign.md §5.1.)

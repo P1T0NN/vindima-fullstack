@@ -2,14 +2,14 @@
 import { v } from 'convex/values';
 
 // MIDDLEWARE
-import { authMutation } from '@/convex/auth/middleware/authMiddleware';
+import { authenticatedMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // CONFIG
 import { FEATURES } from '@/shared/config.js';
 
 // HELPERS
 import { claimBlockedReason } from '@/shared/features/rewards/utils/rewardsUtils';
-import { mutationResultWith } from '@/convex/helpers/mutationResult';
+import { mutationResultWith } from '@/convex/validators/mutationResult';
 
 /**
  * Public (auth-gated) — the customer spends one banked reward on a chosen free item.
@@ -22,24 +22,24 @@ import { mutationResultWith } from '@/convex/helpers/mutationResult';
  * `active` claim, records a `claim` ledger entry, and decrements `availableRewards`, all
  * in one transaction. Two concurrent claims can't both win — Convex OCC serializes them.
  *
- * Returns the `{ success, message, data? }` envelope; the frontend toasts `message.key`
- * (resolved from `rewardsCopy.ts`). Rate-limited per user.
+ * Returns the `{ success, message, data? }` envelope with display-ready text. Rate-limited
+ * per user.
  */
-export const claimReward = authMutation('claimReward')({
+export const claimReward = authenticatedMutation({
 	args: { itemRef: v.string() },
 	returns: mutationResultWith(v.object({ claimId: v.id('rewardClaims'), itemRef: v.string() })),
 	handler: async (ctx, args) => {
 		if (!FEATURES.REWARDS) {
-			return { success: false, message: { key: 'RewardMessages.REWARDS_DISABLED' } };
+			return { success: false, message: 'Las recompensas no están disponibles por ahora.' };
 		}
 
 		const account = await ctx.db
 			.query('rewardAccounts')
-			.withIndex('by_user', (q) => q.eq('userId', ctx.userId))
+			.withIndex('by_user', (q) => q.eq('userId', ctx.identity.subject))
 			.unique();
 		const activeClaim = await ctx.db
 			.query('rewardClaims')
-			.withIndex('by_user_status', (q) => q.eq('userId', ctx.userId).eq('status', 'active'))
+			.withIndex('by_user_status', (q) => q.eq('userId', ctx.identity.subject).eq('status', 'active'))
 			.first();
 
 		// Eligibility from the DB: flagged as a reward item AND actually redeemable right now.
@@ -59,17 +59,25 @@ export const claimReward = authMutation('claimReward')({
 			availableRewards: account?.availableRewards ?? 0,
 			hasActiveClaim: activeClaim !== null
 		});
-		if (reason) return { success: false, message: { key: `RewardMessages.${reason}` } };
+		if (reason) {
+			const message =
+				reason === 'ITEM_NOT_ELIGIBLE'
+					? 'Ese artículo no está disponible como recompensa.'
+					: reason === 'NO_REWARDS_AVAILABLE'
+						? 'Aún no tienes un artículo gratis para reclamar.'
+						: 'Ya tienes un artículo gratis reservado.';
+			return { success: false, message };
+		}
 
 		// `reason === null` implies availableRewards >= 1, so the account exists.
 		const now = Date.now();
 		const claimId = await ctx.db.insert('rewardClaims', {
-			userId: ctx.userId,
+			userId: ctx.identity.subject,
 			itemRef: args.itemRef,
 			status: 'active'
 		});
 		await ctx.db.insert('rewardLedger', {
-			userId: ctx.userId,
+			userId: ctx.identity.subject,
 			kind: 'claim',
 			source: 'claim',
 			sourceKey: `claim:${claimId}`,
@@ -82,7 +90,7 @@ export const claimReward = authMutation('claimReward')({
 
 		return {
 			success: true,
-			message: { key: 'RewardMessages.REWARD_CLAIMED' },
+			message: 'Artículo gratis reservado: ¡va en tu próximo pedido!',
 			data: { claimId, itemRef: args.itemRef }
 		};
 	}

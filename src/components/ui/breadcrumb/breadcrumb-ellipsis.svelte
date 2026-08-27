@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { cn, type WithElementRef, type WithoutChildren } from '@/utils/utils.js';
-	import MoreHorizontalIcon from '@lucide/svelte/icons/more-horizontal';
 
 	let {
 		ref = $bindable(null),
@@ -18,6 +17,6 @@
 	class={cn('flex size-5 items-center justify-center [&>svg]:size-4', className)}
 	{...restProps}
 >
-	<MoreHorizontalIcon />
+	<span class="icon-[lucide--more-horizontal]" ></span>
 	<span class="sr-only">More</span>
 </span>

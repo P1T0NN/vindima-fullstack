@@ -4,7 +4,7 @@
 	// curve, animated draw-in, crosshair tooltip). Money on the only axis; never a 2nd series.
 
 	// COMPONENTS
-	import AreaChart from '@/components/ui/custom-charts/charts-only/area-chart.svelte';
+	import AreaChart from '@/components/ui/custom-components/custom-charts/charts-only/area-chart.svelte';
 	import * as Chart from '@/components/ui/chart/index.js';
 	import AdminDashboardRevenueChartEmpty from './empty/admin-dashboard-revenue-chart-empty.svelte';
 

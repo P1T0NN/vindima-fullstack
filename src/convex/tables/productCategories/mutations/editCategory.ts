@@ -13,25 +13,23 @@ import { v } from 'convex/values';
 import { zodToConvexFields } from 'convex-helpers/server/zod4';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminUploadMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // SCHEMAS
 import { editCategorySchema } from '@/shared/features/productCategories/schemas/productCategoriesSchemas';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 
 // UTILS
 import { trimToUndefined } from '@/shared/utils/stringUtils';
-
-// HELPERS
-import { resolveImageUrl } from '@/convex/storage/r2/resolveImageUrl';
+import { isUsableImageUrl } from '@/shared/utils/imageValue';
+import { deleteStoredFiles, resolveStoredFileUrls } from '@/convex/storage/r2';
 
 // TYPES
 import type { ConvexMutationResult } from '@/shared/types/types';
 
-export const editCategory = adminMutation('editCategory')({
+export const editCategory = adminUploadMutation({
 	args: {
 		...zodToConvexFields(editCategorySchema.shape),
 		categoryId: v.id('productCategories')
@@ -41,12 +39,12 @@ export const editCategory = adminMutation('editCategory')({
 		// Authoritative run of the shared schema (the form's pre-submit check is advisory).
 		const parsed = editCategorySchema.safeParse(args);
 		if (!parsed.success) {
-			return { success: false, message: { key: 'ProductMessages.CATEGORY_NAME_REQUIRED' } };
+			return { success: false, message: 'Se requiere un nombre de categoría.' };
 		}
 
 		const category = await ctx.db.get(args.categoryId);
 		if (!category) {
-			return { success: false, message: { key: 'ProductMessages.CATEGORY_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos esa categoría.' };
 		}
 
 		const name = parsed.data.name; // already trimmed by the schema
@@ -61,22 +59,24 @@ export const editCategory = adminMutation('editCategory')({
 			patch.subtitle = trimToUndefined(parsed.data.subtitle);
 		}
 
+		let nextImage: string | undefined;
 		if (parsed.data.image !== undefined) {
-			const image = await resolveImageUrl(ctx, parsed.data.image);
-			// Refuse rather than blanking the card image on a bad ref.
-			if (!image)
-				return { success: false, message: { key: 'ProductMessages.CATEGORY_IMAGE_INVALID' } };
+			const [uploadedImage] = await resolveStoredFileUrls(args.uploadedFiles ?? []);
+			const image = uploadedImage ?? parsed.data.image;
+			if (!isUsableImageUrl(image))
+				return {
+					success: false,
+					message: 'No se pudo guardar la imagen de la categoría. Vuelve a subirla.'
+				};
 			patch.image = image;
+			nextImage = image;
 		}
 
 		await ctx.db.patch(args.categoryId, patch);
+		if (nextImage !== undefined && category.image !== undefined) {
+			await deleteStoredFiles(ctx, [category.image], [nextImage]);
+		}
 
-		ctx.audit(AUDIT_ACTIONS.CATEGORY_UPDATE, {
-			resource: { table: 'productCategories', id: args.categoryId },
-			before: { name: category.name, hasImage: category.image !== undefined },
-			after: { name, hasImage: (patch.image ?? category.image) !== undefined }
-		});
-
-		return { success: true, message: { key: 'ProductMessages.CATEGORY_UPDATED' } };
+		return { success: true, message: 'Categoría actualizada.' };
 	}
 });

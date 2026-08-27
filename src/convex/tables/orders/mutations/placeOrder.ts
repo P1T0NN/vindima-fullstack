@@ -5,11 +5,11 @@ import { mutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG
-import { CART_CONFIG, CHECKOUT_CONFIG, FEATURES } from '@/shared/config.js';
+import { CART_CONFIG } from '@/shared/features/cart/config.js';
+import { CHECKOUT_CONFIG, FEATURES } from '@/shared/config.js';
 
 // AUTH / RATE LIMIT
-import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
-import { convexRateLimiter } from '@/convex/convexRateLimiter';
+import { getAuthUserId } from '@/convex/betterAuth/helpers/getAuthUserId';
 
 // HELPERS / PROVIDERS
 import { calculateOrderPrice } from '../helpers/calculateOrderPrice';
@@ -23,7 +23,7 @@ import { placeOrderSchema } from '@/shared/features/orders/schemas/ordersSchemas
 // SCHEMA VALIDATORS
 import { orderAmountsValidator } from '../validators/ordersValidators';
 import { paymentInstructionValidator } from '../providers/types';
-import { mutationResultWith } from '@/convex/helpers/mutationResult';
+import { mutationResultWith } from '@/convex/validators/mutationResult';
 
 // TYPES
 import type { MutationCtx } from '@/convex/_generated/server';
@@ -112,30 +112,26 @@ export const placeOrder = mutation({
 	),
 	handler: async (ctx, args) => {
 		if (!FEATURES.CHECKOUT) {
-			return { success: false, message: { key: 'CheckoutMessages.CHECKOUT_DISABLED' } };
+			return { success: false, message: 'El proceso de compra no está disponible por el momento.' };
 		}
 
 		// Authoritative run of the shared schema (contact/email/address shape). Semantic
 		// checks (guest policy, empty order, delivery-mode enabled) follow with their own keys.
 		const parsedInput = placeOrderSchema.safeParse(args);
 		if (!parsedInput.success) {
-			return { success: false, message: { key: 'GenericMessages.UNEXPECTED_ERROR' } };
+			return { success: false, message: 'Ocurrió un error inesperado. Inténtalo de nuevo.' };
 		}
 
 		const userId = await getAuthUserId(ctx);
 		if (!userId && !CHECKOUT_CONFIG.ALLOW_GUEST_CHECKOUT) {
-			return { success: false, message: { key: 'CheckoutMessages.AUTH_REQUIRED' } };
+			return { success: false, message: 'Inicia sesión para realizar tu pedido.' };
 		}
 		if (args.lines.length === 0) {
-			return { success: false, message: { key: 'CheckoutMessages.EMPTY_ORDER' } };
+			return { success: false, message: 'Tu carrito está vacío.' };
 		}
 
-		// Rate-limit authed placement per user. Guests have no per-user key; their placement is
-		// bounded by attemptId idempotency below + the pending-expiry cron (spec §6.1).
-		if (userId) {
-			await convexRateLimiter.limit(ctx, 'placeOrder', { key: userId, throws: true });
-		}
-
+		// Global rate limit — authed placement is bounded per user; guests have no per-user key
+		// and are bounded by attemptId idempotency below + the pending-expiry cron (spec §6.1).
 		// The draft this attempt resolves to, if any (one indexed point read).
 		const existing = await ctx.db
 			.query('orders')
@@ -158,7 +154,7 @@ export const placeOrder = mutation({
 		// owned by someone else: forget the id, mint a new one, resubmit once.
 		if (existing && !isLiveDraft(existing.status)) {
 			if (existing.status !== 'paid') {
-				return { success: false, message: { key: 'CheckoutMessages.ATTEMPT_CONFLICT' } };
+				return { success: false, message: 'Iniciamos un pedido nuevo. Inténtalo de nuevo.' };
 			}
 
 			const payment = await getPaymentProvider(existing.paymentMethod ?? 'cash').createPayment(
@@ -166,7 +162,7 @@ export const placeOrder = mutation({
 			);
 			return {
 				success: true,
-				message: { key: 'CheckoutMessages.ORDER_PLACED' },
+				message: 'Pedido realizado.',
 				data: {
 					orderId: existing._id,
 					number: existing.number,
@@ -180,15 +176,15 @@ export const placeOrder = mutation({
 		// signed-out draft being reused. Never read or mutate it; the client silently regenerates
 		// its id and resubmits once (§5.3.4).
 		if (existing && existing.userId !== null && existing.userId !== userId) {
-			return { success: false, message: { key: 'CheckoutMessages.ATTEMPT_CONFLICT' } };
+			return { success: false, message: 'Iniciamos un pedido nuevo. Inténtalo de nuevo.' };
 		}
 
 		// Delivery kind must be enabled in config (a client can't order a disabled mode).
 		if (args.delivery.kind === 'pickup' && !CHECKOUT_CONFIG.FULFILLMENT.PICKUP) {
-			return { success: false, message: { key: 'CheckoutMessages.INVALID_DELIVERY' } };
+			return { success: false, message: 'Esa opción de entrega no está disponible.' };
 		}
 		if (args.delivery.kind === 'delivery' && !CHECKOUT_CONFIG.FULFILLMENT.DELIVERY) {
-			return { success: false, message: { key: 'CheckoutMessages.INVALID_DELIVERY' } };
+			return { success: false, message: 'Esa opción de entrega no está disponible.' };
 		}
 
 		// Chosen payment method must be enabled in config (a client can't pick a disabled card).
@@ -196,7 +192,7 @@ export const placeOrder = mutation({
 			(args.paymentMethod === 'cash' && CHECKOUT_CONFIG.PAYMENT_METHODS.CASH) ||
 			(args.paymentMethod === 'online' && CHECKOUT_CONFIG.PAYMENT_METHODS.ONLINE);
 		if (!methodEnabled) {
-			return { success: false, message: { key: 'CheckoutMessages.INVALID_PAYMENT_METHOD' } };
+			return { success: false, message: 'Ese método de pago no está disponible.' };
 		}
 
 		// Clamp to the same limits the cart enforces, then let the server price it.
@@ -223,7 +219,7 @@ export const placeOrder = mutation({
 				);
 				return {
 					success: true,
-					message: { key: 'CheckoutMessages.ORDER_PLACED' },
+					message: 'Pedido realizado.',
 					data: {
 						orderId: existing._id,
 						number: existing.number,
@@ -242,7 +238,7 @@ export const placeOrder = mutation({
 			if (!priced.ok) {
 				return {
 					success: false,
-					message: { key: 'CheckoutMessages.UNAVAILABLE_LINES' },
+					message: 'Algunos artículos ya no están disponibles. Revisa tu pedido.',
 					data: { unavailableRefs: priced.unavailableRefs }
 				};
 			}
@@ -322,7 +318,7 @@ export const placeOrder = mutation({
 
 			return {
 				success: true,
-				message: { key: 'CheckoutMessages.ORDER_PLACED' },
+				message: 'Pedido realizado.',
 				data: {
 					orderId: existing._id,
 					number: existing.number,
@@ -341,7 +337,7 @@ export const placeOrder = mutation({
 		if (!priced.ok) {
 			return {
 				success: false,
-				message: { key: 'CheckoutMessages.UNAVAILABLE_LINES' },
+				message: 'Algunos artículos ya no están disponibles. Revisa tu pedido.',
 				data: { unavailableRefs: priced.unavailableRefs }
 			};
 		}
@@ -418,7 +414,7 @@ export const placeOrder = mutation({
 
 		return {
 			success: true,
-			message: { key: 'CheckoutMessages.ORDER_PLACED' },
+			message: 'Pedido realizado.',
 			data: { orderId, number, amounts: priced.amounts, payment }
 		};
 	}

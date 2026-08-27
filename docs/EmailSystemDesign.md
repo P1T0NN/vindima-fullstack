@@ -11,7 +11,8 @@
 > `CheckoutPageSystemDesign.md` §3 + §7 (placement/settlement seams), `RewardSystem.md` §6 + §7
 > (stamps, claims, expiry cron). The chrome already exists:
 > `src/convex/emails/templates/emailHeader.ts` and `emailFooter.ts` (table-based, inline-styled,
-> brand values from `COMPANY_DATA` + `EMAIL_CONFIG` in `src/shared/config.ts`).
+> brand values from `COMPANY_DATA` in `src/shared/config.ts` and `EMAIL_CONFIG` in
+> `src/shared/features/emails/config.ts`).
 
 ---
 

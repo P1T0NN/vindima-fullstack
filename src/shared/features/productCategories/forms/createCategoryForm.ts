@@ -1,24 +1,23 @@
 /**
- * Declared section for the admin "new category" form — renders as one titled Card in
- * `ConvexMutationForm`.
+ * Declared section for the admin "new category" form — renders as one titled Card in `Form`.
  *
  * A plain const (not a builder like the product forms): nothing here depends on runtime
- * data. Three fields only — everything else about a category is derived, never typed:
+ * data. Three text fields plus one image — everything else about a category is derived, never typed:
  * the `slug` comes from the name server-side, and the storefront's price range is computed
  * from the category's products, so it can never go stale in the owner's copy.
  */
 
 // TYPES
-import type { MutationFormSection } from '@/components/ui/mutation-form/types';
+import type { FormSection } from '@/components/ui/custom-components/form/formTypes';
 
-export const createCategorySections: MutationFormSection[] = [
+export const createCategorySections: FormSection[] = [
 	{
-		id: 'category',
+		kind: 'section',
 		title: 'Categoría',
 		description: 'Así se ve en la portada de la tienda.',
 		fields: [
 			{
-				id: 'name',
+				name: 'name',
 				label: 'Nombre',
 				kind: 'input',
 				required: true,
@@ -27,27 +26,25 @@ export const createCategorySections: MutationFormSection[] = [
 					'El título de la tarjeta, y como aparece al elegir la categoría de un producto.'
 			},
 			{
-				id: 'subtitle',
+				name: 'subtitle',
 				label: 'Subtítulo',
 				kind: 'input',
 				placeholder: 'p. ej. Para picar',
 				description: 'Etiqueta corta en mayúsculas sobre el título de la página. Opcional.'
 			},
 			{
-				id: 'description',
+				name: 'description',
 				label: 'Descripción',
 				kind: 'textarea',
-				rows: 2,
 				placeholder: 'p. ej. Charcutería y queso para compartir',
 				description: 'Una línea corta bajo el título. Máximo 120 caracteres.'
 			},
 			{
-				id: 'image',
+				name: 'image',
 				label: 'Imagen',
-				kind: 'upload-single',
+				kind: 'upload',
+				required: true,
 				accept: 'image/*',
-				uploadPrefix: 'categories',
-				allowUrl: true,
 				description: 'La imagen de la tarjeta. Obligatoria.'
 			}
 		]

@@ -11,10 +11,6 @@
 	// TYPES
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
-	// LUCIDE ICONS
-	import EyeIcon from '@lucide/svelte/icons/eye';
-	import EyeOffIcon from '@lucide/svelte/icons/eye-off';
-
 	type Props = WithElementRef<Omit<HTMLInputAttributes, 'type' | 'files'>>;
 
 	let {
@@ -49,9 +45,9 @@
 		{disabled}
 	>
 		{#if visible}
-			<EyeOffIcon />
+			<span class="icon-[lucide--eye-off]" ></span>
 		{:else}
-			<EyeIcon />
+			<span class="icon-[lucide--eye]" ></span>
 		{/if}
 	</Button>
 </div>

@@ -10,7 +10,8 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		alias: {
-			'@/*': './src/*'
+			'@/*': './src/*',
+			'@convex/*': './src/convex/*'
 		},
 		// SvelteKit's CSRF origin check is on by default. Add extra allowed
 		// origins here only if needed (e.g. multi-domain setups). An empty list

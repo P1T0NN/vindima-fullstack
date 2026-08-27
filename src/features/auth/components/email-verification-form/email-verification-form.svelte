@@ -13,13 +13,13 @@
 	import EmailVerificationResend from './email-verification-resend.svelte';
 
 	// CONFIG
-	import { AUTH_DATA } from '@/shared/config';
+	import { AUTH_DATA } from '@/shared/features/auth/config';
 
 	// UTILS
 	import { emailVerificationSchema } from '@/shared/features/auth/schemas/emailVerificationSchema.js';
 	import { cn, type WithElementRef } from '@/utils/utils.js';
-	import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
-	import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
+	import { zodIssuesToFieldErrors } from '@/shared/features/validations/utils/zodFieldErrors';
+	import { formatRateLimitMessage } from '@/utils/toastMessage';
 
 	// TYPES
 	import type { HTMLFormAttributes } from 'svelte/elements';
@@ -90,7 +90,7 @@
 			});
 			if (error) {
 				console.error('Email verification: verifyEmail failed:', error);
-				errorMessage = rateLimitMessage(
+				errorMessage = formatRateLimitMessage(
 					error.message,
 					'Código inválido o expirado. Inténtalo de nuevo.'
 				);
@@ -237,6 +237,7 @@
 
 			<Field>
 				<Button type="submit" class={fullWidthButtons ? 'w-full' : ''} disabled={busy}>
+					{#if busy}<Spinner class="size-3.5" />{/if}
 					Continuar
 				</Button>
 				<Button

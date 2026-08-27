@@ -2,7 +2,7 @@
 	// COMPONENTS
 	import CategoryPageContent from '@/components/pages/(unprotected)/shop/category-page-content.svelte';
 	import CategoryPageLoading from '@/components/pages/(unprotected)/shop/loading/category-page-loading.svelte';
-	import { ErrorComponent } from '@/components/ui/error-component/index.js';
+	import { ErrorComponent } from '@/components/ui/custom-components/error-component/index.js';
 
 	// TYPES
 	import type { PageData } from './$types';

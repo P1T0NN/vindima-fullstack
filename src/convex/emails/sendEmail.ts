@@ -1,61 +1,53 @@
 // LIBRARIES
 import { v } from 'convex/values';
-import { internalAction } from '@/convex/_generated/server';
+
+// CONVEX
 import { internal } from '@/convex/_generated/api';
+import { internalAction } from '@/convex/_generated/server';
 
 // CONFIG
-import { COMPANY_DATA, REWARDS_CONFIG } from '@/shared/config.js';
+import { COMPANY_DATA } from '@/shared/config.js';
+import { REWARDS_CONFIG } from '@/shared/features/rewards/config.js';
 
-// MUTATIONS
-import { sendViaResend } from './sendViaResend';
+// EMAIL
+import { sendViaResend } from './sendViaResend.js';
 
 // TEMPLATES
-import { orderReceivedEmail } from './templates/orderReceivedEmail';
-import { orderPaidEmail } from './templates/orderPaidEmail';
-import { orderShippedEmail } from './templates/orderShippedEmail';
-import { orderCancelledEmail } from './templates/orderCancelledEmail';
-import { orderRefundedEmail } from './templates/orderRefundedEmail';
 import { newOrderOwnerEmail } from './templates/newOrderOwnerEmail';
-import { rewardUnlockedEmail } from './templates/rewardUnlockedEmail';
+import { orderCancelledEmail } from './templates/orderCancelledEmail';
+import { orderPaidEmail } from './templates/orderPaidEmail';
+import { orderReceivedEmail } from './templates/orderReceivedEmail';
+import { orderRefundedEmail } from './templates/orderRefundedEmail';
+import { orderShippedEmail } from './templates/orderShippedEmail';
 import { rewardExpiryWarningEmail } from './templates/rewardExpiryWarningEmail';
+import { rewardUnlockedEmail } from './templates/rewardUnlockedEmail';
 
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
 import type { EmailContent, RewardEmailData } from '@/shared/features/emails/types/emailsTypes';
 
-/**
- * THE transactional-email seam (see `EmailSystemDesign.md` §3 + §7.2). One internal action,
- * scheduled fire-and-forget from every mutation/cron event via `ctx.scheduler.runAfter(0, …)`.
- * It hydrates whatever the chosen template needs (order or reward data), builds the branded
- * sandwich, and hands off to `sendViaResend`. A failure here is logged and left for Convex's
- * action retry — it never propagates back into the money path that scheduled it.
- *
- * The auth OTP emails do NOT go through here — the user is actively waiting, so that hook
- * calls `sendViaResend` synchronously (see `auth/emails/sendVerificationOTP.ts`).
- */
+/** Scheduled transactional-email seam used by order and rewards mutations. */
 export const sendEmail = internalAction({
 	args: {
 		kind: v.union(
-			v.literal('orderReceived'), // O1
-			v.literal('orderPaid'), // O2
-			v.literal('orderShipped'), // O3 / O4
-			v.literal('orderCancelled'), // O5 / O6
-			v.literal('orderRefunded'), // O7
-			v.literal('newOrderOwner'), // S1
-			v.literal('rewardUnlocked'), // R1
-			v.literal('rewardExpiryWarning') // R2
+			v.literal('orderReceived'),
+			v.literal('orderPaid'),
+			v.literal('orderShipped'),
+			v.literal('orderCancelled'),
+			v.literal('orderRefunded'),
+			v.literal('newOrderOwner'),
+			v.literal('rewardUnlocked'),
+			v.literal('rewardExpiryWarning')
 		),
-		// Order kinds + owner.
 		orderId: v.optional(v.id('orders')),
 		cancelReason: v.optional(v.union(v.literal('user'), v.literal('expired'))),
 		paymentUrl: v.optional(v.string()),
-		// O2 reward line (computed at the settlement seam; omitted = no line).
 		rewardStamps: v.optional(v.number()),
 		rewardCompleted: v.optional(v.boolean()),
-		// Reward kinds.
 		userId: v.optional(v.string()),
 		expiresAt: v.optional(v.number())
 	},
+	returns: v.null(),
 	handler: async (ctx, args): Promise<null> => {
 		let to: string;
 		let content: EmailContent;
@@ -63,13 +55,14 @@ export const sendEmail = internalAction({
 
 		if (args.kind === 'rewardUnlocked' || args.kind === 'rewardExpiryWarning') {
 			if (!args.userId) return null;
+
 			const data: RewardEmailData | null = await ctx.runQuery(
 				internal.emails.helpers.getRewardEmailData.getRewardEmailData,
 				{ userId: args.userId }
 			);
 			if (!data) return null;
-			to = data.email;
 
+			to = data.email;
 			if (args.kind === 'rewardUnlocked') {
 				content = rewardUnlockedEmail(
 					data.name,
@@ -88,8 +81,8 @@ export const sendEmail = internalAction({
 				idempotencyKey = `rewardExpiryWarning-${args.userId}-${args.expiresAt}`;
 			}
 		} else {
-			// All remaining kinds are order-backed.
 			if (!args.orderId) return null;
+
 			const order: Doc<'orders'> | null = await ctx.runQuery(
 				internal.emails.helpers.getOrderForEmail.getOrderForEmail,
 				{ orderId: args.orderId }
@@ -125,7 +118,7 @@ export const sendEmail = internalAction({
 					content = newOrderOwnerEmail(order);
 					break;
 				default:
-					return null; // unreachable — keeps `content` definitely assigned
+					return null;
 			}
 
 			to = args.kind === 'newOrderOwner' ? COMPANY_DATA.EMAIL : order.email;
@@ -134,11 +127,11 @@ export const sendEmail = internalAction({
 
 		try {
 			await sendViaResend(to, content, idempotencyKey);
-		} catch (err) {
-			// Log and drop — an undelivered email is a shrug; never fail into the money path.
-			console.error('[emails] send failed', { kind: args.kind, err });
-			throw err; // let Convex retry the action; the idempotency key prevents doubles
+		} catch (error) {
+			console.error('[emails] send failed', { kind: args.kind, error });
+			throw error;
 		}
+
 		return null;
 	}
 });

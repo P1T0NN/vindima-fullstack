@@ -10,30 +10,30 @@
 import { v } from 'convex/values';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 import type { ConvexMutationResult } from '@/shared/types/types';
 
-export const deleteProduct = adminMutation('deleteProduct')({
+// STORAGE
+import { deleteStoredFiles } from '@/convex/storage/r2';
+
+export const deleteProduct = adminMutation({
 	args: { productId: v.id('products') },
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		const product = await ctx.db.get(args.productId);
 		if (!product) {
-			return { success: false, message: { key: 'ProductMessages.PRODUCT_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos ese producto.' };
 		}
 
-		// Ever activated → refuse; archive instead. Records the blocked attempt.
+		// Ever activated → refuse; archive instead.
 		if (product.wasActive) {
-			ctx.audit(AUDIT_ACTIONS.PRODUCT_DELETE, {
-				resource: { table: 'products', id: args.productId },
-				status: 'failure',
-				errorMessage: 'PRODUCT_NOT_DRAFT'
-			});
-			return { success: false, message: { key: 'ProductMessages.PRODUCT_NOT_DRAFT' } };
+			return {
+				success: false,
+				message: 'Este producto ha estado activo, así que solo se puede archivar, no eliminar.'
+			};
 		}
 
 		// Never-activated draft — safe to hard-delete. Remove variants first (no FK cascade).
@@ -42,13 +42,9 @@ export const deleteProduct = adminMutation('deleteProduct')({
 			.withIndex('by_product', (q) => q.eq('productId', args.productId))
 			.collect();
 		for (const variant of variants) await ctx.db.delete(variant._id);
+		await deleteStoredFiles(ctx, product.images);
 		await ctx.db.delete(args.productId);
 
-		ctx.audit(AUDIT_ACTIONS.PRODUCT_DELETE, {
-			resource: { table: 'products', id: args.productId },
-			before: { slug: product.slug, variantCount: variants.length }
-		});
-
-		return { success: true, message: { key: 'ProductMessages.PRODUCT_DELETED' } };
+		return { success: true, message: 'Producto eliminado.' };
 	}
 });

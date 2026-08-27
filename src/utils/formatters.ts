@@ -1,7 +1,7 @@
 // UTILS
 import { INTL_LOCALE } from './intlLocale';
 
-/** Locale-aware currency formatting via `Intl` (major units, e.g. dollars). */
+/** Currency formatting via `Intl` (major units, e.g. dollars). */
 export function formatMoney(amount: number, currency = 'USD'): string {
 	return new Intl.NumberFormat(INTL_LOCALE, { style: 'currency', currency }).format(amount);
 }
@@ -27,7 +27,7 @@ export function fromMinorUnits(minor: number, currency = 'USD'): number {
 	return minor / 10 ** moneyMinorDigits(currency);
 }
 
-/** Long-form localized date from an epoch-ms timestamp, e.g. "22 de julio de 2026". */
+/** Long-form Spanish date from an epoch-ms timestamp, e.g. "22 de julio de 2026". */
 export function formatDateLong(epochMs: number): string {
 	return new Intl.DateTimeFormat(INTL_LOCALE, {
 		day: 'numeric',
@@ -37,7 +37,7 @@ export function formatDateLong(epochMs: number): string {
 }
 
 /**
- * Locale-aware currency formatting from MINOR units (e.g. cents). The minor-unit
+ * Currency formatting from MINOR units (e.g. cents). The minor-unit
  * exponent is derived from the currency via `Intl`, so this is correct for
  * 2-decimal currencies (USD/EUR/MXN), 0-decimal (JPY/KRW), and 3-decimal (KWD)
  * alike — never a hardcoded `/100`.

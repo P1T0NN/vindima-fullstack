@@ -11,7 +11,7 @@
  *     with storage refs before the mutation call.
  *
  * No custom validation messages for now: a schema failure marks the field client-side and
- * returns a generic envelope key server-side.
+ * returns a generic display-ready message server-side.
  */
 
 // LIBRARIES

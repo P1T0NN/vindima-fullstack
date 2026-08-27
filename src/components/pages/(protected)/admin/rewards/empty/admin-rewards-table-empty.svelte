@@ -1,15 +1,13 @@
 <script lang="ts">
 	// CONFIG
-	import { REWARDS_CONFIG } from '@/shared/config';
+	import { REWARDS_CONFIG } from '@/shared/features/rewards/config';
 
-	// LUCIDE ICONS
-	import GiftIcon from '@lucide/svelte/icons/gift';
-</script>
+	</script>
 
 <div
 	class="flex flex-col items-center gap-2 rounded-xl border border-dashed px-6 py-12 text-center"
 >
-	<GiftIcon class="size-6 text-muted-foreground" aria-hidden="true" />
+	<span class="icon-[lucide--gift] size-6 text-muted-foreground" aria-hidden="true" ></span>
 
 	<p class="text-sm font-medium">Todavía no hay artículos de recompensa</p>
 

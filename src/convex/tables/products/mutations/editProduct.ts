@@ -26,17 +26,17 @@ import { v } from 'convex/values';
 import { zodToConvexFields } from 'convex-helpers/server/zod4';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminUploadMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // SCHEMAS
 import { editProductSchema } from '@/shared/features/products/schemas/editProductSchemas';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 
 // UTILS
 import { trimToUndefined } from '@/shared/utils/stringUtils';
+import { deleteStoredFiles, resolveStoredFileUrls } from '@/convex/storage/r2';
 
 // HELPERS
 import { resolveImageUrls } from '../helpers/resolveImageUrls';
@@ -45,7 +45,7 @@ import { resolveImageUrls } from '../helpers/resolveImageUrls';
 import type { Doc } from '@/convex/_generated/dataModel';
 import type { ConvexMutationResult } from '@/shared/types/types';
 
-export const editProduct = adminMutation('editProduct')({
+export const editProduct = adminUploadMutation({
 	args: {
 		// Shape + input rules come from the SHARED schema; the id fields are overridden with
 		// real `v.id` validators so the handler keeps typed document ids.
@@ -60,11 +60,11 @@ export const editProduct = adminMutation('editProduct')({
 		// unique refs and positive integer prices. DB-dependent gates follow below.
 		const parsed = editProductSchema.safeParse(args);
 		if (!parsed.success) {
-			return { success: false, message: { key: 'GenericMessages.UNEXPECTED_ERROR' } };
+			return { success: false, message: 'Ocurrió un error inesperado. Inténtalo de nuevo.' };
 		}
 
 		const product = await ctx.db.get(args.productId);
-		if (!product) return fail('PRODUCT_NOT_FOUND');
+		if (!product) return fail('No encontramos ese producto.');
 
 		const name = parsed.data.name; // already trimmed by the schema
 
@@ -74,7 +74,7 @@ export const editProduct = adminMutation('editProduct')({
 				.query('productCategories')
 				.withIndex('by_slug', (q) => q.eq('slug', args.category!))
 				.unique();
-			if (!categoryRow) return fail('CATEGORY_INVALID');
+			if (!categoryRow) return fail('Esa categoría no existe. Elige una de la lista.');
 		}
 
 		// One indexed read of this product's variants powers gates 1/4 and payload validation —
@@ -99,7 +99,7 @@ export const editProduct = adminMutation('editProduct')({
 			// Gate 1 — exists and belongs to this product (absent from this product's variant
 			// list covers both "missing" and "another product's id").
 			const existing = existingById.get(variantId);
-			if (!existing) return fail('VARIANT_NOT_FOUND');
+			if (!existing) return fail('No encontramos esa variante.');
 			if (existing.deletedAt !== undefined) {
 				removedSet.delete(variantId); // already gone — no-op
 				continue;
@@ -107,14 +107,20 @@ export const editProduct = adminMutation('editProduct')({
 			// Gate 2 — a reward item can gain new claims at any moment; the owner removes it
 			// from /admin/rewards first (RewardItemsSystemDesign.md §4.7).
 			if (existing.rewardEligible === true) {
-				return fail('VARIANT_REWARD_ELIGIBLE');
+				return fail(
+					'Esta variante es un artículo de recompensa. Primero elimínala de la lista de recompensas.'
+				);
 			}
 			// Gate 3 — an active claim holds the customer's reserved free item (stale-config case).
 			const activeClaim = await ctx.db
 				.query('rewardClaims')
 				.withIndex('by_item_status', (q) => q.eq('itemRef', existing.ref).eq('status', 'active'))
 				.first();
-			if (activeClaim) return fail('VARIANT_HAS_ACTIVE_CLAIM');
+			if (activeClaim) {
+				return fail(
+					'Un cliente tiene esta variante reservada como recompensa. Inténtalo de nuevo cuando su reclamación se use o se cancele.'
+				);
+			}
 
 			removals.push(existing);
 		}
@@ -124,7 +130,9 @@ export const editProduct = adminMutation('editProduct')({
 		const newRows = args.variants.filter((variant) => !variant.variantId);
 		const liveAfter =
 			existingLive.filter((variant) => !removedSet.has(variant._id)).length + newRows.length;
-		if (liveAfter < 1) return fail('LAST_VARIANT');
+		if (liveAfter < 1) {
+			return fail('No se puede eliminar la última variante: un producto necesita al menos una.');
+		}
 
 		// Kept payload variants must be valid BEFORE any write. Tombstoned rows (another admin
 		// removed them mid-edit) are skipped silently (§8 A5) — the row is gone from every UI;
@@ -133,7 +141,7 @@ export const editProduct = adminMutation('editProduct')({
 		for (const variant of args.variants) {
 			if (!variant.variantId || removedSet.has(variant.variantId)) continue;
 			const existing = existingById.get(variant.variantId);
-			if (!existing) return fail('VARIANT_NOT_FOUND');
+			if (!existing) return fail('No encontramos esa variante.');
 			if (existing.deletedAt !== undefined) skipVariantIds.add(variant.variantId);
 		}
 
@@ -146,7 +154,7 @@ export const editProduct = adminMutation('editProduct')({
 				.withIndex('by_ref', (q) => q.eq('ref', variant.ref))
 				.unique();
 			if (refTaken && !(removedSet.has(refTaken._id) && !product.wasActive)) {
-				return fail('REF_TAKEN');
+				return fail('Esa referencia de variante ya está en uso.');
 			}
 		}
 
@@ -156,10 +164,22 @@ export const editProduct = adminMutation('editProduct')({
 		// desired ordered list (existing URLs pass through, new refs resolve); `[0]` = cover.
 		// An explicit empty list removes all images; omitting the arg keeps them.
 		const patch: Record<string, unknown> = {};
+		let nextImages: string[] | undefined;
 		if (name !== undefined) patch.name = name;
 		if (args.description !== undefined) patch.description = trimToUndefined(args.description);
 		if (args.images !== undefined) {
-			patch.images = await resolveImageUrls(ctx, args.images);
+			const uploadedKeys = args.uploadedFiles ?? [];
+			const uploadedUrls = await resolveStoredFileUrls(uploadedKeys);
+			const uploadedUrlByKey = new Map(
+				uploadedKeys.map((key, index) => [key, uploadedUrls[index]])
+			);
+			const images = resolveImageUrls(
+				args.images.map((image) => uploadedUrlByKey.get(image) ?? image)
+			);
+			if (images.length === 0)
+				return fail('No se pudo guardar la imagen del producto. Vuelve a subirla.');
+			patch.images = images;
+			nextImages = images;
 		}
 		if (args.category !== undefined) patch.category = args.category;
 		if (args.featured !== undefined) patch.featured = args.featured;
@@ -182,11 +202,6 @@ export const editProduct = adminMutation('editProduct')({
 			} else {
 				await ctx.db.delete(removal._id);
 			}
-			ctx.audit(AUDIT_ACTIONS.VARIANT_DELETE, {
-				resource: { table: 'productVariants', id: removal._id },
-				before: { ref: removal.ref, priceMinor: removal.priceMinor },
-				after: { mode }
-			});
 		}
 
 		// Upsert variants: patch existing (ref immutable), insert new. Order = the order the admin
@@ -221,23 +236,12 @@ export const editProduct = adminMutation('editProduct')({
 				});
 			}
 		}
+		if (nextImages !== undefined) await deleteStoredFiles(ctx, product.images, nextImages);
 
-		ctx.audit(AUDIT_ACTIONS.PRODUCT_UPDATE, {
-			resource: { table: 'products', id: args.productId },
-			before: { slug: product.slug, category: product.category, status: product.status },
-			after: {
-				category: args.category ?? product.category,
-				// `patch.status` is set only when the change was actually applied.
-				status: (patch.status as string | undefined) ?? product.status,
-				variantCount: args.variants.length,
-				removedVariants: removals.length
-			}
-		});
-
-		return { success: true, message: { key: 'ProductMessages.PRODUCT_UPDATED' } };
+		return { success: true, message: 'Producto actualizado.' };
 	}
 });
 
-function fail(key: string): ConvexMutationResult {
-	return { success: false, message: { key: `ProductMessages.${key}` } };
+function fail(message: string): ConvexMutationResult {
+	return { success: false, message };
 }

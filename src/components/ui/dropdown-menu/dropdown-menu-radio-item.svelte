@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
-	import CheckIcon from '@lucide/svelte/icons/check';
-	import { cn, type WithoutChild } from '@/utils/utils.js';
+		import { cn, type WithoutChild } from '@/utils/utils.js';
 
 	let {
 		ref = $bindable(null),
@@ -26,7 +25,7 @@
 			data-slot="dropdown-menu-radio-item-indicator"
 		>
 			{#if checked}
-				<CheckIcon />
+				<span class="icon-[lucide--check]" ></span>
 			{/if}
 		</span>
 		{@render childrenProp?.({ checked })}

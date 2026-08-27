@@ -1,5 +1,5 @@
-// Dual-runtime auth schema. Message convention: see `loginSchema.ts` — default error map
-// covers the plain cases; bespoke messages are bare catalog keys.
+// Dual-runtime auth schema. Message convention: see `loginSchema.ts` — the shared default
+// error map covers the plain cases and bespoke messages stay display-ready.
 
 // LIBRARIES
 import { z } from 'zod';

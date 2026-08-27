@@ -1,17 +1,20 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 
 	// STATE
 	import { authClass } from '@/features/auth/classes/authClass.svelte';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
+	import Spinner from '@/components/ui/spinner/spinner.svelte';
 
 	// UTILS
-	import { safeMutation } from '@/utils/convexHelpers';
-	import { toastResult } from '@/utils/toastResult';
+	import { toastMessage } from '@/utils/toastMessage';
+import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
 
 	// TYPES
@@ -27,7 +30,7 @@
 		onClaimed: (message: string) => void;
 	} = $props();
 
-	const convex = useConvexClient();
+	const claimReward = useMutation(api.tables.rewardClaims.mutations.claimReward.claimReward);
 
 	const rewards = $derived(authClass.currentUser?.rewards ?? null);
 	const availableRewards = $derived(rewards?.availableRewards ?? 0);
@@ -50,15 +53,32 @@
 		if (!selectedItem || isBusy) return;
 		isBusy = true;
 		try {
-			const result = await safeMutation(
-				convex,
-				api.tables.rewardClaims.mutations.claimReward.claimReward,
-				{ itemRef: selectedItem }
-			);
-			if (toastResult(result)) {
-				selectedItem = null;
-				onClaimed('Recompensa reservada. La agregaremos a tu próximo pedido.');
+			let result;
+			try {
+				result = await claimReward({ itemRef: selectedItem });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
 			}
+			const message = result.message;
+			if (!result.success) {
+				toastMessage({ type: 'error', error: null, message });
+				return;
+			}
+			toastMessage({ type: 'success', message });
+
+			selectedItem = null;
+			onClaimed('Recompensa reservada. La agregaremos a tu próximo pedido.');
 		} finally {
 			isBusy = false;
 		}
@@ -113,6 +133,7 @@
 		disabled={!selectedItem || isBusy}
 		class="mt-4 h-auto min-h-11 px-5 py-3 text-sm tracking-wider uppercase"
 	>
+		{#if isBusy}<Spinner class="size-3.5" />{/if}
 		Reclamar esta recompensa
 	</Button>
 </div>

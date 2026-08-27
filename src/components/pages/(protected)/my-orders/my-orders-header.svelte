@@ -5,15 +5,13 @@
 	// UTILS
 	import { appHref } from '@/utils/app-navigation.js';
 
-	// LUCIDE ICONS
-	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
-</script>
+	</script>
 
 <a
 	href={appHref(PROTECTED_PAGE_ENDPOINTS.ACCOUNT)}
 	class="group -mx-2 -mt-2 mb-6 inline-flex items-center gap-1.5 p-2 text-xs font-medium tracking-wide text-gold-ink uppercase no-underline transition-colors hover:text-accent"
 >
-	<ArrowLeftIcon class="size-3.5 transition-transform group-hover:-translate-x-0.5" />
+	<span class="icon-[lucide--arrow-left] size-3.5 transition-transform group-hover:-translate-x-0.5" ></span>
 	Volver a la cuenta
 </a>
 

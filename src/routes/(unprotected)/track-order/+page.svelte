@@ -3,8 +3,8 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
-	import Section from '@/components/ui/section/section.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
 	import TrackOrderHeader from '@/components/pages/(unprotected)/track-order/track-order-header.svelte';
 	import TrackOrderForm from '@/components/pages/(unprotected)/track-order/track-order-form.svelte';
 

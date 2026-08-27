@@ -1,24 +1,25 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 
 	// COMPONENTS
 	import ActionButton from '@/components/ui/action-button/action-button.svelte';
 
 	// UTILS
-	import { safeMutation } from '@/utils/convexHelpers';
-	import { toastResult } from '@/utils/toastResult';
-
-	// LUCIDE ICONS
-	import CheckIcon from '@lucide/svelte/icons/check';
+	import { toastMessage } from '@/utils/toastMessage';
+import { hasErrorMessage } from '@/shared/utils/errorMessage';
 
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';
 
 	let { order }: { order: Doc<'orders'> } = $props();
 
-	const convex = useConvexClient();
+	const setOrderFulfillment = useMutation(
+		api.tables.orders.mutations.setOrderFulfillment.setOrderFulfillment
+	);
 
 	// Fulfillment moves processing → shipped → delivered (same track the customer rail shows).
 	const STEPS = [
@@ -34,12 +35,29 @@
 		if (busy) return;
 		busy = stage;
 		try {
-			const res = await safeMutation(
-				convex,
-				api.tables.orders.mutations.setOrderFulfillment.setOrderFulfillment,
-				{ orderId: order._id, fulfillment: stage }
-			);
-			toastResult(res);
+			let result;
+			try {
+				result = await setOrderFulfillment({ orderId: order._id, fulfillment: stage });
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
+			}
+			const message = result.message;
+			if (!result.success) {
+				toastMessage({ type: 'error', error: null, message });
+				return;
+			}
+			toastMessage({ type: 'success', message });
 		} finally {
 			busy = null;
 		}
@@ -53,7 +71,7 @@
 				<span
 					class="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-accent-foreground"
 				>
-					<CheckIcon class="size-4" strokeWidth={2.2} />
+					<span class="icon-[lucide--check] size-4"></span>
 					{step.label}
 				</span>
 			{:else}

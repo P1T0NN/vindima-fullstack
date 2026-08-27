@@ -1,23 +1,22 @@
 /**
  * Declared section for the admin "edit category" form — the edit counterpart to
- * `createCategorySections`, rendered as one titled Card in `ConvexMutationForm`.
+ * `createCategorySections`, rendered as one titled Card in `Form`.
  *
- * Same three fields as create, since the same three things are owner-facing. The `slug` is
- * absent here too — it's immutable (products store it verbatim) and never shown. Only the
- * image copy differs: on edit the picker starts filled, so it explains replace-vs-keep.
+ * The image picker is declared as an upload field so `Form` renders its native `UploadFile`
+ * control; the edit form seeds the bound upload list with the existing image.
  */
 
 // TYPES
-import type { MutationFormSection } from '@/components/ui/mutation-form/types';
+import type { FormSection } from '@/components/ui/custom-components/form/formTypes';
 
-export const editCategorySections: MutationFormSection[] = [
+export const editCategorySections: FormSection[] = [
 	{
-		id: 'category',
+		kind: 'section',
 		title: 'Categoría',
 		description: 'Así se ve en la portada de la tienda.',
 		fields: [
 			{
-				id: 'name',
+				name: 'name',
 				label: 'Nombre',
 				kind: 'input',
 				required: true,
@@ -26,28 +25,25 @@ export const editCategorySections: MutationFormSection[] = [
 					'El título de la tarjeta, y como aparece al elegir la categoría de un producto.'
 			},
 			{
-				id: 'subtitle',
+				name: 'subtitle',
 				label: 'Subtítulo',
 				kind: 'input',
 				placeholder: 'p. ej. Para picar',
 				description: 'Etiqueta corta en mayúsculas sobre el título de la página. Opcional.'
 			},
 			{
-				id: 'description',
+				name: 'description',
 				label: 'Descripción',
 				kind: 'textarea',
-				rows: 2,
 				placeholder: 'p. ej. Charcutería y queso para compartir',
 				description: 'Una línea corta bajo el título. Máximo 120 caracteres.'
 			},
 			{
-				id: 'image',
+				name: 'image',
 				label: 'Imagen',
-				kind: 'upload-single',
+				kind: 'upload',
 				accept: 'image/*',
-				uploadPrefix: 'categories',
-				allowUrl: true,
-				description: 'Sube otra para reemplazarla. Si la dejas vacía, se mantiene la actual.'
+				description: 'Sube una imagen nueva para reemplazar la actual.'
 			}
 		]
 	}

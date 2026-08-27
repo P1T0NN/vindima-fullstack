@@ -4,20 +4,11 @@
 
 	// COMPONENTS
 	import * as Sidebar from '@/components/ui/sidebar/index.js';
-	import AppSidebar from '@/components/ui/app-sidebar/app-sidebar.svelte';
-	import SiteHeader from '@/components/ui/app-sidebar/site-header.svelte';
+	import AppSidebar from '@/components/ui/custom-components/app-sidebar/app-sidebar.svelte';
+	import SiteHeader from '@/components/ui/custom-components/app-sidebar/site-header.svelte';
 
 	// TYPES
-	import type { AppSidebarNavItems } from '@/components/ui/app-sidebar/types.js';
-
-	// LUCIDE ICONS
-	import LayoutDashboardIcon from '@lucide/svelte/icons/layout-dashboard';
-	import UsersIcon from '@lucide/svelte/icons/users';
-	import PackageIcon from '@lucide/svelte/icons/package';
-	import TagIcon from '@lucide/svelte/icons/tag';
-	import GiftIcon from '@lucide/svelte/icons/gift';
-	import ShoppingBagIcon from '@lucide/svelte/icons/shopping-bag';
-	import SparklesIcon from '@lucide/svelte/icons/sparkles';
+	import type { AppSidebarNavItems } from '@/components/ui/custom-components/app-sidebar/types.js';
 
 	// CONFIG
 	import { FEATURES } from '@/shared/config.js';
@@ -32,12 +23,7 @@
 					{
 						name: 'Panel',
 						url: ADMIN_PAGE_ENDPOINTS.DASHBOARD,
-						icon: LayoutDashboardIcon
-					},
-					{
-						name: 'Usuarios',
-						url: ADMIN_PAGE_ENDPOINTS.USERS,
-						icon: UsersIcon
+						icon: 'icon-[lucide--layout-dashboard]'
 					}
 				]
 			},
@@ -47,17 +33,17 @@
 					{
 						name: 'Productos',
 						url: ADMIN_PAGE_ENDPOINTS.PRODUCTS,
-						icon: PackageIcon
+						icon: 'icon-[lucide--package]'
 					},
 					{
 						name: 'Categorías',
 						url: ADMIN_PAGE_ENDPOINTS.CATEGORIES,
-						icon: TagIcon
+						icon: 'icon-[lucide--tag]'
 					},
 					{
 						name: 'Recompensas',
 						url: ADMIN_PAGE_ENDPOINTS.REWARDS,
-						icon: GiftIcon
+						icon: 'icon-[lucide--gift]'
 					},
 					// Add-to-cart suggestions — hidden when the feature is off.
 					...(FEATURES.UPSELLS
@@ -65,7 +51,7 @@
 								{
 									name: 'Sugerencias',
 									url: ADMIN_PAGE_ENDPOINTS.UPSELLS,
-									icon: SparklesIcon
+									icon: 'icon-[lucide--sparkles]'
 								}
 							]
 						: [])
@@ -77,7 +63,7 @@
 					{
 						name: 'Pedidos',
 						url: ADMIN_PAGE_ENDPOINTS.ORDERS,
-						icon: ShoppingBagIcon
+						icon: 'icon-[lucide--shopping-bag]'
 					}
 				]
 			}

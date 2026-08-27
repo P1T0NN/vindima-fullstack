@@ -1,21 +1,29 @@
 <script lang="ts">
+	// ASSETS
+	import espacio1 from '../../../../../../static/root/espacio-1.png?enhanced';
+	import espacio10 from '../../../../../../static/root/espacio-10.png?enhanced';
+	import espacio11 from '../../../../../../static/root/espacio-11.png?enhanced';
+	import espacio2 from '../../../../../../static/root/espacio-2.png?enhanced';
+	import espacio3 from '../../../../../../static/root/espacio-3.png?enhanced';
+	import espacio4 from '../../../../../../static/root/espacio-4.png?enhanced';
+	import espacio5 from '../../../../../../static/root/espacio-5.png?enhanced';
+	import espacio6 from '../../../../../../static/root/espacio-6.png?enhanced';
+	import espacio7 from '../../../../../../static/root/espacio-7.png?enhanced';
+	import espacio8 from '../../../../../../static/root/espacio-8.png?enhanced';
+	import espacio9 from '../../../../../../static/root/espacio-9.png?enhanced';
+	import olives from '../../../../../../static/assets/olives.png?enhanced';
+
 	// LIBRARIES
 	import Autoplay from 'embla-carousel-autoplay';
 	import { MediaQuery } from 'svelte/reactivity';
 
-	// CONFIG
-	import { ASSETS_DATA } from '@/shared/config.js';
-
 	// COMPONENTS
 	import * as Carousel from '@/components/ui/carousel/index.js';
-	import Section from '@/components/ui/section/section.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
+	import StaticImage from '@/components/ui/custom-components/static-image/static-image.svelte';
 
 	// TYPES
 	import type { CarouselAPI } from '@/components/ui/carousel/context.js';
-
-	// LUCIDE ICONS
-	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 
 	/**
 	 * Photographs of the table. Everything downstream derives from this list's length —
@@ -28,56 +36,67 @@
 	const ESPACIO_ENTRIES = [
 		{
 			slug: 'espacio-1',
+			image: espacio1,
 			title: 'Tapas y montaditos',
 			alt: 'Bandeja de montaditos: pan del día con quesos, embutidos y encurtidos.'
 		},
 		{
 			slug: 'espacio-2',
+			image: espacio2,
 			title: 'Vindima',
 			alt: 'Postre de frutos rojos con granola, junto a una rebanada de tortilla y pan.'
 		},
 		{
 			slug: 'espacio-3',
+			image: espacio3,
 			title: 'Paradoja Malbec',
 			alt: 'Vino Paradoja'
 		},
 		{
 			slug: 'espacio-4',
+			image: espacio4,
 			title: 'Noche de tabla',
 			alt: 'Tabla servida de noche sobre la mesa de madera, con una copa de tinto al lado.'
 		},
 		{
 			slug: 'espacio-5',
+			image: espacio5,
 			title: 'Para llevar',
 			alt: 'Cuatro cajas para llevar con charcutería, quesos, encurtidos y fruta.'
 		},
 		{
 			slug: 'espacio-6',
+			image: espacio6,
 			title: 'Tabla para dos',
 			alt: 'Tabla en bandeja de madera, servida para dos, con vino y platos puestos.'
 		},
 		{
 			slug: 'espacio-7',
+			image: espacio7,
 			title: 'En la terraza',
 			alt: 'Tabla en la terraza con una botella de Paradoja Blanc y dos copas de vino blanco.'
 		},
 		{
 			slug: 'espacio-8',
+			image: espacio8,
 			title: 'Bowls para llevar',
 			alt: 'Bowls para llevar'
 		},
 		{
 			slug: 'espacio-9',
+			image: espacio9,
 			title: 'Servida a la mesa',
 			alt: 'Una tabla recién montada, llevada a la mesa en su bandeja de madera.'
 		},
 		{
 			slug: 'espacio-10',
+			image: espacio10,
 			title: 'Clericot',
 			alt: 'Postre de frutos rojos y una rebanada de tortilla, servidos al cierre de la noche.'
 		},
 		{
 			slug: 'espacio-11',
+			image: espacio11,
 			title: 'Tapas',
 			alt: 'Tapas de queso con aceituna y jamón'
 		}
@@ -85,8 +104,6 @@
 
 	const TOTAL = ESPACIO_ENTRIES.length;
 	const AUTOPLAY_DELAY_MS = 4000;
-
-	const src = (slug: string, width: number) => `/root/opt/${slug}-${width}w.webp`;
 
 	/**
 	 * Autoplay runs continuously and yields only to direct manipulation. `stopOnInteraction:
@@ -142,8 +159,8 @@
 	yPadding="none"
 	class="relative overflow-hidden bg-accent py-20 sm:py-24"
 >
-	<img
-		src={ASSETS_DATA.OLIVES}
+	<StaticImage
+		src={olives}
 		alt=""
 		aria-hidden="true"
 		class="pointer-events-none absolute -top-12 -right-16 hidden w-64 opacity-10 sm:block"
@@ -186,12 +203,8 @@
 						aria-label="{i + 1} de {TOTAL}"
 					>
 						<figure class="m-0">
-							<img
-								src={src(entry.slug, 960)}
-								srcset="{src(entry.slug, 640)} 640w, {src(entry.slug, 960)} 960w, {src(
-									entry.slug,
-									1280
-								)} 1280w"
+							<StaticImage
+								src={entry.image}
 								sizes="(min-width: 1024px) 31vw, (min-width: 640px) 46vw, 78vw"
 								alt={entry.alt}
 								class="aspect-square w-full rounded-lg border border-primary/25 object-cover"
@@ -239,7 +252,7 @@
 					class={railButtonClass}
 					aria-label="Foto anterior"
 				>
-					<ChevronLeftIcon class="size-4" strokeWidth={1.6} aria-hidden="true" />
+					<span class="icon-[lucide--chevron-left] size-4" aria-hidden="true"></span>
 				</button>
 
 				<button
@@ -248,7 +261,7 @@
 					class={railButtonClass}
 					aria-label="Foto siguiente"
 				>
-					<ChevronRightIcon class="size-4" strokeWidth={1.6} aria-hidden="true" />
+					<span class="icon-[lucide--chevron-right] size-4" aria-hidden="true"></span>
 				</button>
 
 				<button

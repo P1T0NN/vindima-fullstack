@@ -3,8 +3,6 @@ import { resolve } from '$app/paths';
 
 export const ADMIN_PAGE_ENDPOINTS = {
 	DASHBOARD: resolve('/admin/dashboard'),
-	USERS: resolve('/admin/users'),
-	USER: resolve('/admin/users/:id'),
 	PRODUCTS: resolve('/admin/products'),
 	ADD_PRODUCT: resolve('/admin/products/add-product'),
 	EDIT_PRODUCT: resolve('/admin/products/edit-product/:id'),

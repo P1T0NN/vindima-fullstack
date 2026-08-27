@@ -3,11 +3,10 @@ import { v } from 'convex/values';
 import { internal } from '@/convex/_generated/api';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 
 // TYPES
 import type { ConvexMutationResult } from '@/shared/types/types';
@@ -19,27 +18,22 @@ import type { ConvexMutationResult } from '@/shared/types/types';
  * (`CheckoutPageSystemDesign.md` §6.2): status → `paid`, grant stamp, record first purchase,
  * apply any reward claim, clear the cart, and fire the receipt + owner emails. Idempotent.
  */
-export const settleOrder = adminMutation('settleOrder')({
+export const settleOrder = adminMutation({
 	args: { orderId: v.id('orders') },
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		const order = await ctx.db.get(args.orderId);
 		if (!order) {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos ese pedido.' };
 		}
 		if (order.status !== 'pending') {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' } };
+			return { success: false, message: 'Este pedido ya no se puede modificar.' };
 		}
 
 		await ctx.runMutation(internal.tables.orders.mutations.markOrderPaid.markOrderPaid, {
 			orderId: order._id
 		});
 
-		ctx.audit(AUDIT_ACTIONS.ORDER_MARK_PAID, {
-			resource: { table: 'orders', id: order._id },
-			after: { number: order.number, totalMinor: order.amounts.totalMinor }
-		});
-
-		return { success: true, message: { key: 'CheckoutMessages.ORDER_MARKED_PAID' } };
+		return { success: true, message: 'Pedido marcado como pagado.' };
 	}
 });

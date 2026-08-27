@@ -6,11 +6,12 @@ import { action } from '@/convex/_generated/server';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG
-import { CHECKOUT_CONFIG, STRIPE_CONFIG } from '@/shared/config.js';
+import { CHECKOUT_CONFIG } from '@/shared/config.js';
+import { STRIPE_CONFIG } from '@/shared/features/stripe/config.js';
 
 // AUTH / RATE LIMIT
-import { getAuthUserId } from '@/convex/auth/helpers/getAuthUserId';
-import { convexRateLimiter } from '@/convex/convexRateLimiter';
+import { getAuthUserId } from '@/convex/betterAuth/helpers/getAuthUserId';
+import { enforceRateLimit } from '@/convex/rateLimits/helpers/enforceRateLimit';
 
 // STRIPE (all SDK access goes through these helpers — see convex/stripe/stripeClient.ts)
 import { retrieveCheckoutSession } from '@/convex/stripe/helpers/retrieveCheckoutSession';
@@ -25,7 +26,7 @@ import { stripeSessionExpiresAt } from '@/shared/features/stripe/utils/stripeSes
 import { successPageUrl, checkoutPageUrl } from '../helpers/orderUrls';
 
 // VALIDATORS
-import { mutationResultWith } from '@/convex/helpers/mutationResult';
+import { mutationResultWith } from '@/convex/validators/mutationResult';
 
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
@@ -50,7 +51,7 @@ function amountMismatch(orderId: string, expected: number, actual: number): Conv
 	});
 	return new ConvexError({
 		code: 'PAYMENT_AMOUNT_MISMATCH',
-		message: { key: 'CheckoutMessages.PAYMENT_AMOUNT_MISMATCH' }
+		message: 'No pudimos confirmar el importe de tu pedido. Vuelve a intentarlo.'
 	} satisfies ConvexErrorPayload) as ConvexError<never>;
 }
 
@@ -78,29 +79,29 @@ export const createCheckoutSession = action({
 			{ orderId: args.orderId }
 		);
 		if (!order) {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos ese pedido.' };
 		}
 
 		// Access = the fetchOrder rule (checkout spec §6.1). Hostile input by default.
 		if (order.userId) {
 			const userId = await getAuthUserId(ctx);
 			if (userId !== order.userId) {
-				return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' } };
+				return { success: false, message: 'No encontramos ese pedido.' };
 			}
 		} else if (!args.email || args.email.trim().toLowerCase() !== order.email.toLowerCase()) {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos ese pedido.' };
 		}
 
 		// A cash order has no pay page.
 		if ((order.paymentMethod ?? 'cash') !== 'online') {
-			return { success: false, message: { key: 'CheckoutMessages.INVALID_PAYMENT_METHOD' } };
+			return { success: false, message: 'Ese método de pago no está disponible.' };
 		}
 
 		// Already settled: a stale email CTA lands on the receipt, not an error.
 		if (order.status === 'paid') {
 			return {
 				success: true,
-				message: { key: 'CheckoutMessages.ORDER_PLACED' },
+				message: 'Pedido realizado.',
 				data: { url: successPageUrl(order) }
 			};
 		}
@@ -108,15 +109,11 @@ export const createCheckoutSession = action({
 		// stays accepted for rows placed before the draft rule shipped (and for a cash order that
 		// was switched to online after it was already placed).
 		if (order.status !== 'pending' && order.status !== 'draft') {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' } };
+			return { success: false, message: 'Este pedido ya no se puede modificar.' };
 		}
 
-		// This endpoint creates objects on an external API — keyed by order so one order can't be
-		// used as a free Stripe-API lever.
-		await convexRateLimiter.limit(ctx, 'createCheckoutSession', {
-			key: order._id,
-			throws: true
-		});
+		// Global rate limit — this endpoint creates objects on an external API.
+		await enforceRateLimit(ctx);
 
 		// A fully-free order (claimed reward + pickup) has nothing to collect, and Stripe cannot
 		// create a zero-amount session — settle it directly (§7.1.5).
@@ -126,7 +123,7 @@ export const createCheckoutSession = action({
 			});
 			return {
 				success: true,
-				message: { key: 'CheckoutMessages.ORDER_PLACED' },
+				message: 'Pedido realizado.',
 				data: { url: successPageUrl(order) }
 			};
 		}
@@ -147,7 +144,7 @@ export const createCheckoutSession = action({
 				if (open?.status === 'open' && open.url) {
 					return {
 						success: true,
-						message: { key: 'CheckoutMessages.ORDER_PLACED' },
+						message: 'Pedido realizado.',
 						data: { url: open.url }
 					};
 				}
@@ -155,7 +152,7 @@ export const createCheckoutSession = action({
 					// Paid; the webhook is in flight. The success page shows "confirming…".
 					return {
 						success: true,
-						message: { key: 'CheckoutMessages.ORDER_PLACED' },
+						message: 'Pedido realizado.',
 						data: { url: successPageUrl(order) }
 					};
 				}
@@ -173,7 +170,7 @@ export const createCheckoutSession = action({
 				now: Date.now()
 			});
 			if (expiresAt === null) {
-				return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' } };
+				return { success: false, message: 'Este pedido ya no se puede modificar.' };
 			}
 
 			// 3 ── The welcome discount travels as an ad-hoc, single-use coupon created on THIS
@@ -249,7 +246,10 @@ export const createCheckoutSession = action({
 			}
 			if (!session.url) {
 				console.error('[orders] stripe session has no url', { orderId: order._id });
-				return { success: false, message: { key: 'CheckoutMessages.PAYMENT_SESSION_FAILED' } };
+				return {
+					success: false,
+					message: 'No pudimos abrir la página de pago. Inténtalo de nuevo o elige pago en efectivo.'
+				};
 			}
 
 			await ctx.runMutation(internal.tables.orders.mutations.setPaymentSession.setPaymentSession, {
@@ -259,7 +259,7 @@ export const createCheckoutSession = action({
 
 			return {
 				success: true,
-				message: { key: 'CheckoutMessages.ORDER_PLACED' },
+				message: 'Pedido realizado.',
 				data: { url: session.url }
 			};
 		} catch (err) {
@@ -268,7 +268,10 @@ export const createCheckoutSession = action({
 			// Everything else — Stripe down, amount under the currency minimum, bad config — is a
 			// soft failure: the order stays `pending` and the pay page offers a retry (§13).
 			console.error('[orders] stripe checkout session failed', { orderId: order._id, err });
-			return { success: false, message: { key: 'CheckoutMessages.PAYMENT_SESSION_FAILED' } };
+			return {
+				success: false,
+				message: 'No pudimos abrir la página de pago. Inténtalo de nuevo o elige pago en efectivo.'
+			};
 		}
 	}
 });

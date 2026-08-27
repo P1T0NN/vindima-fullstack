@@ -14,46 +14,47 @@
 import { zodToConvexFields } from 'convex-helpers/server/zod4';
 
 // MIDDLEWARE
-import { adminMutation } from '@/convex/auth/middleware/authMiddleware';
-import { AUDIT_ACTIONS } from '@/convex/tables/auditLog/auditLogConfigs';
+import { adminUploadMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // SCHEMAS
 import { createCategorySchema } from '@/shared/features/productCategories/schemas/productCategoriesSchemas';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 import type { ConvexMutationResult } from '@/shared/types/types';
 
 // UTILS
 import { slugify } from '@/shared/utils/slugify';
 import { trimToUndefined } from '@/shared/utils/stringUtils';
+import { isUsableImageUrl } from '@/shared/utils/imageValue';
+import { resolveStoredFileUrls } from '@/convex/storage/r2';
 
-// HELPERS
-import { resolveImageUrl } from '@/convex/storage/r2/resolveImageUrl';
-
-export const createCategory = adminMutation('createCategory')({
+export const createCategory = adminUploadMutation({
 	args: zodToConvexFields(createCategorySchema.shape),
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		// Authoritative run of the shared schema (name non-empty after trim).
 		const parsed = createCategorySchema.safeParse(args);
-		if (!parsed.success) return fail('CATEGORY_NAME_REQUIRED');
+		if (!parsed.success) return fail('Se requiere un nombre de categoría.');
 		const name = parsed.data.name;
 
 		// Non-Latin names can slugify to nothing — treated as a missing name in v1 (§8).
 		const slug = slugify(name);
-		if (!slug) return fail('CATEGORY_NAME_REQUIRED');
+		if (!slug) return fail('Se requiere un nombre de categoría.');
 
 		const taken = await ctx.db
 			.query('productCategories')
 			.withIndex('by_slug', (q) => q.eq('slug', slug))
 			.unique();
-		if (taken) return fail('CATEGORY_TAKEN');
+		if (taken) return fail('Esa categoría ya existe.');
 
 		// The card image is required, so an unresolvable ref fails the whole create rather
 		// than silently producing a category that renders as a hole on the storefront.
-		const image = await resolveImageUrl(ctx, parsed.data.image);
-		if (!image) return fail('CATEGORY_IMAGE_INVALID');
+		const [uploadedImage] = await resolveStoredFileUrls(args.uploadedFiles ?? []);
+		const image = uploadedImage ?? parsed.data.image;
+		if (!isUsableImageUrl(image)) {
+			return fail('No se pudo guardar la imagen de la categoría. Vuelve a subirla.');
+		}
 
 		const description = trimToUndefined(parsed.data.description);
 		const subtitle = trimToUndefined(parsed.data.subtitle);
@@ -62,7 +63,7 @@ export const createCategory = adminMutation('createCategory')({
 		const all = await ctx.db.query('productCategories').collect();
 		const sortOrder = all.reduce((max, c) => Math.max(max, c.sortOrder), -1) + 1;
 
-		const categoryId = await ctx.db.insert('productCategories', {
+		await ctx.db.insert('productCategories', {
 			slug,
 			name,
 			subtitle,
@@ -71,15 +72,10 @@ export const createCategory = adminMutation('createCategory')({
 			sortOrder
 		});
 
-		ctx.audit(AUDIT_ACTIONS.CATEGORY_CREATE, {
-			resource: { table: 'productCategories', id: categoryId },
-			after: { slug, name }
-		});
-
-		return { success: true, message: { key: 'ProductMessages.CATEGORY_CREATED' } };
+		return { success: true, message: 'Categoría creada.' };
 	}
 });
 
-function fail(key: string): ConvexMutationResult {
-	return { success: false, message: { key: `ProductMessages.${key}` } };
+function fail(message: string): ConvexMutationResult {
+	return { success: false, message };
 }

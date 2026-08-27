@@ -610,7 +610,7 @@ method. **The email module is not touched.**
   bundle can reach. Enforced structurally: value imports live only in `src/convex/stripe/**`,
   and Stripe's types are named once in `src/shared/features/stripe/types/stripeTypes.ts` via a
   type-only import (see the boundary in §15).
-- **All Stripe value settings live in `STRIPE_CONFIG` (`src/shared/config.ts`)**, same as every
+- **All Stripe value settings live in `STRIPE_CONFIG` (`src/shared/features/stripe/config.ts`)**, same as every
   other subsystem's knobs: the pinned `API_VERSION`, the session-window bounds and margins
   (§7.3.4), the pinned per-account behaviours (Adaptive Pricing / Stripe Tax — both coupled to
   the §7.4 assertion), and the labels Stripe's hosted page renders. Only the two **secrets** are
@@ -731,7 +731,7 @@ _registered Convex functions_, so the Stripe operations — plain in-process fun
 to do network I/O — are `helpers/`, matching `convex/emails/helpers/`.
 
 ```
-src/shared/config.ts                      ← STRIPE_CONFIG: every Stripe value setting
+src/shared/features/stripe/config.ts      ← STRIPE_CONFIG: every Stripe value setting
                                              (API version pin, session bounds/margins,
                                              pinned account behaviours, hosted-page labels)
 
@@ -754,7 +754,7 @@ src/convex/stripe/                        ← the ONLY value-import of the SDK (
 src/convex/tables/orders/                 ← domain: orders, settlement, refund policy
 ├── providers/stripe.ts                   ← §5.1 (pure, no Stripe import — returns the pay URL)
 ├── providers/registry.ts                 ← 'online' case
-├── helpers/orderUrls.ts                  ← pay / success / cancel URLs from PUBLIC_SITE_URL
+├── helpers/orderUrls.ts                  ← pay / success / cancel URLs from PUBLIC_ORIGIN
 ├── helpers/getOrderForPayment.ts         ← internal query (actions have no ctx.db)
 ├── helpers/isSameDraftInput.ts           ← §5.3.5 pure-retry comparison
 ├── actions/createCheckoutSession.ts      ← §7 (public; builds params, asserts the amount)

@@ -1,7 +1,8 @@
 // LIBRARIES
 import { error } from '@sveltejs/kit';
+import { PUBLIC_CONVEX_URL } from '$env/static/public';
 import { api } from '@/convex/_generated/api';
-import { createConvexHttpClient } from '@mmailaender/convex-better-auth-svelte/sveltekit';
+import { createConvexHttpClient } from 'convex-svelte/sveltekit';
 
 // CONFIG
 import { FEATURES } from '@/shared/config';
@@ -26,7 +27,7 @@ import type { UpsellCatalog } from '@/shared/features/upsells/types/upsellsTypes
  * reach here.
  */
 export const load: PageServerLoad = async ({ params, isDataRequest }) => {
-	const client = createConvexHttpClient();
+	const client = createConvexHttpClient({ url: PUBLIC_CONVEX_URL });
 	const pagePromise = client.query(
 		api.tables.productCategories.queries.fetchCategoryPage.fetchCategoryPage,
 		{ slug: params.category }

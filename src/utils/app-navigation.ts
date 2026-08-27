@@ -6,7 +6,7 @@ import { resolve } from '$app/paths';
  * Canonical app path → SvelteKit href.
  *
  * Use with `PAGE_ENDPOINTS` constants, e.g. `appHref(PROTECTED_PAGE_ENDPOINTS.ACCOUNT)`.
- * For dynamic segments: `appHref(ADMIN_PAGE_ENDPOINTS.USER.replace(':id', userId))`.
+ * For dynamic segments: `appHref(ADMIN_PAGE_ENDPOINTS.ORDER.replace(':id', orderId))`.
  */
 export function appHref(href: string): string {
 	// Homepage section anchors must be root-absolute (`/#shop`), not relative (`#shop`),

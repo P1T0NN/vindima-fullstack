@@ -4,7 +4,7 @@
  * `tables/productVariants/schemas/productVariantsSchema.ts`. Every product has ≥ 1 variant.
  *
  * Product content (name/description) is single-language plain text — it is DATA, not UI
- * copy. Only outcome messages (`message: { key }`) are translated on the client.
+ * copy. Outcome messages are returned as display-ready text.
  *
  * Register in `src/convex/schema.ts`.
  */

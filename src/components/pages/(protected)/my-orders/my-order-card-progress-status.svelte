@@ -1,7 +1,4 @@
 <script lang="ts">
-	// LUCIDE ICONS
-	import CheckIcon from '@lucide/svelte/icons/check';
-
 	// TYPES
 	import type { ORDER_STATUS_STYLES } from '@/features/orders/data/ordersData.js';
 
@@ -39,7 +36,7 @@
 						{!done && !active ? 'border-border text-muted-foreground/50' : ''}"
 				>
 					{#if done}
-						<CheckIcon class="size-3.5" strokeWidth={2.4} />
+						<span class="icon-[lucide--check] size-3.5" ></span>
 					{:else}
 						<span
 							class="relative flex size-1.5 rounded-full {active

@@ -1,5 +1,5 @@
 /**
- * Declared sections for the place-order form — each renders as a titled Card in `ConvexMutationForm`.
+ * Declared sections for the place-order form — each renders as a titled Card in `Form`.
  *
  * The shape depends on config and on what the shopper picked, so this is a function rather than a
  * constant: the mode picker only appears when there is a choice to make, and the address block only
@@ -8,116 +8,103 @@
 
 // TYPES
 import type {
-	MutationFormFieldDef,
-	MutationFormSection,
-	MutationFormSelectOption
-} from '@/components/ui/mutation-form/types';
+	FieldConfig,
+	FormSection,
+	FormSelectOption
+} from '@/components/ui/custom-components/form/formTypes';
 
-const CONTACT_FIELDS: MutationFormFieldDef[] = [
+const CONTACT_FIELDS: FieldConfig[] = [
 	{
-		id: 'name',
+		name: 'name',
 		label: 'Nombre',
 		kind: 'input',
 		required: true,
-		autocomplete: 'name',
-		placeholder: 'Juan Pérez',
-		colSpan: 1
+		placeholder: 'Juan Pérez'
 	},
 	{
-		id: 'email',
+		name: 'email',
 		label: 'Correo electrónico',
 		kind: 'input',
 		type: 'email',
 		required: true,
-		autocomplete: 'email',
-		placeholder: 'correo@ejemplo.com',
-		colSpan: 1
+		placeholder: 'correo@ejemplo.com'
 	},
 	{
-		id: 'phone',
+		name: 'phone',
 		label: 'Teléfono',
 		kind: 'input',
 		type: 'tel',
-		autocomplete: 'tel',
 		placeholder: '449 000 0000',
 		description: 'Opcional - Usaremos este número para contactarte sobre tu pedido'
 	}
 ];
 
-const ADDRESS_FIELDS: MutationFormFieldDef[] = [
+const ADDRESS_FIELDS: FieldConfig[] = [
 	{
-		id: 'line1',
+		name: 'line1',
 		label: 'Dirección',
 		kind: 'input',
 		required: true,
-		autocomplete: 'address-line1',
 		placeholder: 'Calle Principal 123'
 	},
 	{
-		id: 'line2',
+		name: 'line2',
 		label: 'Departamento, interior, etc.',
 		kind: 'input',
-		autocomplete: 'address-line2',
 		placeholder: 'Departamento, interior, piso...',
 		description: 'Opcional.'
 	},
 	{
-		id: 'city',
+		name: 'city',
 		label: 'Ciudad',
 		kind: 'input',
 		required: true,
-		autocomplete: 'address-level2',
-		placeholder: 'Aguascalientes',
-		colSpan: 1
+		placeholder: 'Aguascalientes'
 	},
 	{
-		id: 'postcode',
+		name: 'postcode',
 		label: 'Código postal',
 		kind: 'input',
 		required: true,
-		autocomplete: 'postal-code',
-		placeholder: '20000',
-		colSpan: 1
+		placeholder: '20000'
 	},
 	{
-		id: 'country',
+		name: 'country',
 		label: 'País',
 		kind: 'input',
 		required: true,
-		autocomplete: 'country-name',
 		placeholder: 'México'
 	}
 ];
 
-const NOTE_FIELD: MutationFormFieldDef = {
-	id: 'note',
+const NOTE_FIELD: FieldConfig = {
+	name: 'note',
 	label: 'Nota del pedido',
 	kind: 'textarea',
-	rows: 2,
 	placeholder: '¿Algo que debamos saber?',
 	description: 'Opcional.'
 };
 
 export function createPlaceOrderForm(params: {
 	/** Fulfillment modes enabled in config. A single option renders no picker. */
-	modeOptions: MutationFormSelectOption[];
+	modeOptions: FormSelectOption[];
 	/** Payment methods offered (disabled ones still render as "coming soon" cards). */
-	paymentOptions: MutationFormSelectOption[];
+	paymentOptions: FormSelectOption[];
 	/** Whether the picked mode collects a shipping address. */
 	showAddress: boolean;
-}): MutationFormSection[] {
+}): FormSection[] {
 	const { modeOptions, paymentOptions, showAddress } = params;
 
 	return [
 		{
-			id: 'contact',
+			kind: 'section',
 			title: 'Tus datos',
 			description: 'A dónde llegará la confirmación del pedido.',
 			class: 'lg:col-start-1',
 			fields: CONTACT_FIELDS
 		},
 		{
-			id: 'delivery',
+			kind: 'section',
 			title: 'Entrega',
 			description: 'Cómo quieres recibir tu pedido.',
 			class: 'lg:col-start-1',
@@ -125,13 +112,13 @@ export function createPlaceOrderForm(params: {
 				...(modeOptions.length > 1
 					? [
 							{
-								id: 'mode',
+								name: 'mode',
 								label: 'Método',
 								kind: 'radio',
 								options: modeOptions,
 								radioOrientation: 'horizontal',
 								required: true
-							} satisfies MutationFormFieldDef
+							} satisfies FieldConfig
 						]
 					: []),
 				...(showAddress ? ADDRESS_FIELDS : []),
@@ -139,13 +126,13 @@ export function createPlaceOrderForm(params: {
 			]
 		},
 		{
-			id: 'payment',
+			kind: 'section',
 			title: 'Pago',
 			description: 'Cómo quieres pagar tu pedido.',
 			class: 'lg:col-start-1',
 			fields: [
 				{
-					id: 'payment',
+					name: 'payment',
 					label: 'Método de pago',
 					kind: 'radio',
 					options: paymentOptions,

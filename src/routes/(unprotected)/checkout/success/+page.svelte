@@ -5,7 +5,7 @@
 
 	// LIBRARIES
 	import { SvelteMap } from 'svelte/reactivity';
-	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
+	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '@/convex/_generated/api';
 
 	// STATE
@@ -15,8 +15,8 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
-	import Section from '@/components/ui/section/section.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
 	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import { Button } from '@/components/ui/button/index.js';
 
@@ -24,11 +24,6 @@
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { clearAttemptId } from '@/features/orders/utils/checkoutAttempt.js';
 	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
-
-	// LUCIDE ICONS
-	import PackageIcon from '@lucide/svelte/icons/package';
-	import SparklesIcon from '@lucide/svelte/icons/sparkles';
-	import MailIcon from '@lucide/svelte/icons/mail';
 
 	// TYPES
 	import type { Id } from '@/convex/_generated/dataModel';
@@ -284,7 +279,7 @@
 				{/if}
 
 				<p class="mt-8 flex items-start gap-2.5 text-xs leading-relaxed text-muted-foreground">
-					<MailIcon class="mt-0.5 size-3.5 shrink-0" strokeWidth={1.8} />
+					<span class="mt-0.5 icon-[lucide--mail] size-3.5 shrink-0"></span>
 					<span>Enviamos la confirmación a <span class="text-foreground">{order.email}</span>.</span
 					>
 				</p>
@@ -330,7 +325,7 @@
 										class="size-full object-cover"
 									/>
 								{:else}
-									<PackageIcon class="size-5 text-muted-foreground/40" strokeWidth={1.5} />
+									<span class="icon-[lucide--package] size-5 text-muted-foreground/40"></span>
 								{/if}
 							</div>
 							<div class="min-w-0 flex-1">
@@ -339,7 +334,7 @@
 								</p>
 								<p class="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
 									{#if line.isRewardLine}
-										<SparklesIcon class="size-3 text-chart-2" strokeWidth={2} />
+										<span class="icon-[lucide--sparkles] size-3 text-chart-2"></span>
 										<span class="text-gold-ink">Recompensa</span>
 									{:else}
 										{line.qty} x {money(line.unitPriceMinor)}

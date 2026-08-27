@@ -1,10 +1,8 @@
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import {
-	BOTID_CHALLENGE_PATH,
-	BOTID_PROXY_PREFIX
-} from './src/config/botidProxy.ts';
+import { BOTID_CHALLENGE_PATH, BOTID_PROXY_PREFIX } from './src/config/botidProxy.ts';
+import { enhancedImages } from '@sveltejs/enhanced-img';
 
 export default defineConfig({
 	// BotID client loads same-origin challenge/proxy scripts. Vite dev has no
@@ -28,8 +26,5 @@ export default defineConfig({
 	preview: {
 		port: 5173
 	},
-	plugins: [
-        tailwindcss(),
-        sveltekit()
-    ]
+	plugins: [tailwindcss(), enhancedImages(), sveltekit()]
 });

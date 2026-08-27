@@ -27,13 +27,13 @@ export const releaseRewardClaim = internalMutation({
 		if (!claim) {
 			throw new ConvexError({
 				code: 'REWARD_CLAIM_NOT_FOUND',
-				message: { key: 'RewardMessages.CLAIM_NOT_FOUND' }
+				message: 'No encontramos esa reclamación de recompensa.'
 			} satisfies ConvexErrorPayload);
 		}
 		if (claim.status === 'cancelled') {
 			throw new ConvexError({
 				code: 'REWARD_CLAIM_CANCELLED',
-				message: { key: 'RewardMessages.CLAIM_CANCELLED' }
+				message: 'Recompensa devuelta a tu saldo.'
 			} satisfies ConvexErrorPayload);
 		}
 		if (claim.status === 'active') return claim._id;

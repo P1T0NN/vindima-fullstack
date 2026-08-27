@@ -1,6 +1,6 @@
 <script lang="ts">
 	// CONFIG
-	import { CART_CONFIG } from '@/shared/config';
+	import { CART_CONFIG } from '@/shared/features/cart/config';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';

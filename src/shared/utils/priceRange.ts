@@ -2,7 +2,7 @@
 import { formatMoneyMinor } from '@/utils/formatters';
 
 // CONFIG
-import { CART_CONFIG } from '@/shared/config';
+import { CART_CONFIG } from '@/shared/features/cart/config';
 
 /**
  * Formats a product's variant price span as `"min – max"` (or a single price, or an em dash

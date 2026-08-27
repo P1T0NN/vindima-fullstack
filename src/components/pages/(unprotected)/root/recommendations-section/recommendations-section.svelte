@@ -1,12 +1,19 @@
 <script lang="ts">
-	// CONFIG
-	import { ASSETS_DATA } from '@/shared/config.js';
+	// ASSETS
+	import olive from '../../../../../../static/assets/olive.png?enhanced';
+	import olives from '../../../../../../static/assets/olives.png?enhanced';
+	import paradojaBlanc from '../../../../../../static/shop/vinos-de-autor/paradoja-blanc.png?enhanced';
+	import paradojaGran from '../../../../../../static/shop/vinos-de-autor/paradoja-gran.png?enhanced';
+	import piensos from '../../../../../../static/shop/vinos-de-autor/piensos.png?enhanced';
+	import postos from '../../../../../../static/shop/vinos-de-autor/postos.png?enhanced';
 
 	// COMPONENTS
 	import { Card } from '@/components/ui/card/index.js';
-	import Section from '@/components/ui/section/section.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
+	import StaticImage from '@/components/ui/custom-components/static-image/static-image.svelte';
 
 	// UTILS
+	import type { Picture } from '@sveltejs/enhanced-img';
 	import { appHref } from '@/utils/app-navigation.js';
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 	import { cn } from '@/utils/utils.js';
@@ -15,7 +22,7 @@
 	type WineCard = {
 		name: string;
 		variety: string;
-		photo: string;
+		photo: Picture;
 		note: string;
 		service: string;
 		pairings: PairingChip[];
@@ -29,7 +36,7 @@
 		{
 			name: 'Paradoja Blanc',
 			variety: 'Sauvignon Blanc Orgánico',
-			photo: '/shop/opt/vinos-de-autor/paradoja-blanc-640w.webp',
+			photo: paradojaBlanc,
 			note: `
 				Bouquet potente,  intensos aromas primarios a piña, durazno y manzana verde; y ligeras notas herbales y de pimiento verde. 
 				100% Orgánico. Sin sulfitos añadidos. Certificación orgánica  en Estados Unidos, México y Canadá.
@@ -38,13 +45,13 @@
 			pairings: [
 				{ label: 'Tabla 4 Estaciones', href: '/shop/tablas' },
 				{ label: 'Hogaza Brie & Romero', href: '/shop/hogazas' },
-				{ label: "Bowl dormancia", href: '/shop/bowls'}
+				{ label: 'Bowl dormancia', href: '/shop/bowls' }
 			]
 		},
 		{
 			name: 'Piensos',
 			variety: 'Malbec Orgánico',
-			photo: '/shop/opt/vinos-de-autor/piensos-640w.webp',
+			photo: piensos,
 			note: `
 				De color violáceo y bouquet medio; aromas primarios de moras, frutos del bosque y flor de jamaica, con notas de violeta, lavanda y eucalipto, aromas secundarios con ligeras notas especiadas.
 				100% Orgánico. Sin sulfitos añadidos. Certificación orgánica  en Estados Unidos, México y Canadá.
@@ -59,7 +66,7 @@
 		{
 			name: 'Postos',
 			variety: 'Tempranillo Orgánico',
-			photo: '/shop/opt/vinos-de-autor/postos-640w.webp',
+			photo: postos,
 			note: `
 				De color atejado, de bouquet potente; aromas primarios a frutos rojos maduros, notas de cereza negra y aromas secundariosde clavo y madera avainillada. Elaborado con uva 100% orgánica.
 				Certificación orgánica en Estados Unidos, México y Canadá. Bajo en Sulfitos. Crianza en Barrica Francesa
@@ -75,7 +82,7 @@
 		{
 			name: 'Paradoja Gran Reserva',
 			variety: 'Malbec Orgánico',
-			photo: '/shop/opt/vinos-de-autor/paradoja-gran-640w.webp',
+			photo: paradojaGran,
 			note: `
 				Vino de color violáceo intenso, de capa media y cuerpo acentuado, con un bouquet potente.
 				Aromas primarios a frutos negros compotados como ciruela pasa y violetas, aromas secundarios a roble con ligeros toques de miel, especias y clavo.
@@ -105,16 +112,16 @@
 	surface="background"
 	class="relative overflow-hidden pt-14 pb-16 sm:pb-20"
 >
-	<img
-		src={ASSETS_DATA.OLIVES}
+	<StaticImage
+		src={olives}
 		alt=""
 		aria-hidden="true"
 		class="pointer-events-none absolute top-25 -right-12 hidden w-55 opacity-15 lg:block"
 		loading="lazy"
 		decoding="async"
 	/>
-	<img
-		src={ASSETS_DATA.OLIVE}
+	<StaticImage
+		src={olive}
 		alt=""
 		aria-hidden="true"
 		class="pointer-events-none absolute top-140 -left-8 hidden w-35 rotate-16 opacity-15 lg:block"
@@ -141,7 +148,7 @@
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 			{#each wines as wine (wine.name)}
 				<Card class="flex-row gap-0 overflow-hidden rounded-xl border-0 bg-card p-0">
-					<img
+					<StaticImage
 						src={wine.photo}
 						alt="Botella de {wine.name}"
 						class="w-30 shrink-0 self-stretch object-cover sm:w-37.5"

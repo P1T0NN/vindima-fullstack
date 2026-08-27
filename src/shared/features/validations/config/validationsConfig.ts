@@ -10,7 +10,7 @@ import { mapDefaultValidationErrors } from '../utils/mapDefaultValidationErrors.
  * Install the map as zod's global default. Call once per runtime at startup — the Svelte
  * side does it in `src/hooks.ts` (universal, so SSR and browser both get it). Convex
  * validates with `convex/values` first, but its mutations DO re-run the shared schemas
- * with `safeParse`, so the codes stay consistent on both sides.
+ * with `safeParse`, so validation stays consistent on both sides.
  */
 export function applyDefaultValidationMessages(): void {
 	z.config({ customError: mapDefaultValidationErrors });

@@ -3,7 +3,9 @@ import { internalMutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG
-import { BATCH_CONFIG, FEATURES, REWARDS_CONFIG } from '@/shared/config.js';
+import { BATCH_CONFIG } from '@/shared/features/batch/config.js';
+import { FEATURES } from '@/shared/config.js';
+import { REWARDS_CONFIG } from '@/shared/features/rewards/config.js';
 
 // HELPERS
 import { isExpired, expiryWarning } from '@/shared/features/rewards/utils/rewardsUtils';

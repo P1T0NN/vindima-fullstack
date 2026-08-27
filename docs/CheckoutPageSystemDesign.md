@@ -195,7 +195,7 @@ status — do the mapping in one util (`ordersUtils.ts`), not in components:
 
 ### 4.3 The single knob: `CHECKOUT_CONFIG` (+ `FEATURES.CHECKOUT`)
 
-In `src/shared/config.ts`, next to `CART_CONFIG` / `REWARDS_CONFIG` (same one-file rule):
+In `src/shared/config.ts`:
 
 ```ts
 export const CHECKOUT_CONFIG = {

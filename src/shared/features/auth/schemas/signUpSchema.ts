@@ -1,11 +1,11 @@
-// Dual-runtime auth schema. Message convention: see `loginSchema.ts` — default error map
-// covers the plain cases; bespoke messages are bare catalog keys.
+// Dual-runtime auth schema. The default error map covers the plain cases; bespoke messages
+// stay as display-ready text in the schema.
 
 // LIBRARIES
 import { z } from 'zod';
 
 // CONFIG
-import { AUTH_DATA } from '@/shared/config';
+import { AUTH_DATA } from '@/shared/features/auth/config';
 
 // HELPERS
 import { isDeniedPassword } from '../utils/denyPasswordList.js';
@@ -14,11 +14,11 @@ const password = z
 	.string()
 	.min(1)
 	.min(AUTH_DATA.PASSWORD_MIN_LENGTH)
-	.refine((input) => !isDeniedPassword(input), 'ValidationMessages.Auth.passwordTooCommon');
+	.refine((input) => !isDeniedPassword(input), 'Esa contraseña es demasiado común. Elige una más segura.');
 
 const passwordsMustMatch = {
 	path: ['confirmPassword'],
-	error: 'ValidationMessages.Auth.passwordsMustMatch'
+	error: 'Las contraseñas deben coincidir.'
 };
 
 /** Inline dialog/sheet sign-up: one `name` field. */

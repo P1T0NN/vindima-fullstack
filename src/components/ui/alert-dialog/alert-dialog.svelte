@@ -99,6 +99,9 @@
 
 	dialog.alert-dialog {
 		margin: auto;
+		overflow-x: clip;
+		overflow-wrap: anywhere;
+		white-space: normal;
 	}
 
 	:global(.alert-dialog__header) {

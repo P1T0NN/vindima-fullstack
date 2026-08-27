@@ -1,6 +1,6 @@
 <script lang="ts">
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import PasswordResetForm from '@/features/auth/components/password-reset-form/password-reset-form.svelte';
 </script>
 

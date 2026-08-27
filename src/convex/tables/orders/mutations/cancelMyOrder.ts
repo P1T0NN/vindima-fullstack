@@ -3,10 +3,10 @@ import { v } from 'convex/values';
 import { internal } from '@/convex/_generated/api';
 
 // MIDDLEWARE
-import { authMutation } from '@/convex/auth/middleware/authMiddleware';
+import { authenticatedMutation } from '@/convex/builders/convexFunctionBuilders';
 
 // VALIDATORS
-import { mutationResult } from '@/convex/helpers/mutationResult';
+import { mutationResult } from '@/convex/validators/mutationResult';
 
 /**
  * Public (auth-gated) — the customer cancels their own still-`pending` order (e.g. abandoned
@@ -14,19 +14,19 @@ import { mutationResult } from '@/convex/helpers/mutationResult';
  * order was holding so the free item returns to the account. Paid orders are refund territory
  * (admin `markOrderRefunded`), never self-serve. Returns the `{ success, message }` envelope.
  */
-export const cancelMyOrder = authMutation('cancelMyOrder')({
+export const cancelMyOrder = authenticatedMutation({
 	args: { orderId: v.id('orders') },
 	returns: mutationResult,
 	handler: async (ctx, args) => {
 		const order = await ctx.db.get(args.orderId);
 		if (!order) {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_FOUND' } };
+			return { success: false, message: 'No encontramos ese pedido.' };
 		}
-		if (order.userId !== ctx.userId) {
-			return { success: false, message: { key: 'CheckoutMessages.NOT_YOUR_ORDER' } };
+		if (order.userId !== ctx.identity.subject) {
+			return { success: false, message: 'Este pedido no es tuyo.' };
 		}
 		if (order.status !== 'pending') {
-			return { success: false, message: { key: 'CheckoutMessages.ORDER_NOT_PENDING' } };
+			return { success: false, message: 'Este pedido ya no se puede modificar.' };
 		}
 
 		await ctx.db.patch(order._id, {
@@ -66,6 +66,6 @@ export const cancelMyOrder = authMutation('cancelMyOrder')({
 			cancelReason: 'user'
 		});
 
-		return { success: true, message: { key: 'CheckoutMessages.ORDER_CANCELLED' } };
+		return { success: true, message: 'Pedido cancelado.' };
 	}
 });

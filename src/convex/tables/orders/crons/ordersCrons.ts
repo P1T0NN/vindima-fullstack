@@ -3,7 +3,8 @@ import { internalMutation } from '@/convex/functions';
 import { internal } from '@/convex/_generated/api';
 
 // CONFIG
-import { BATCH_CONFIG, CHECKOUT_CONFIG, FEATURES } from '@/shared/config.js';
+import { BATCH_CONFIG } from '@/shared/features/batch/config.js';
+import { CHECKOUT_CONFIG, FEATURES } from '@/shared/config.js';
 
 // TYPES
 import type { MutationCtx } from '@/convex/_generated/server';
@@ -45,7 +46,6 @@ export const expirePendingOrders = internalMutation({
 			// A missing paymentMethod is a pre-Stripe row: historical default `cash`.
 			const cutoff = order.paymentMethod === 'online' ? onlineCutoff : cashCutoff;
 			if (order._creationTime >= cutoff) continue; // cash order still inside its longer hold
-			// Work-queue counter follows automatically (pending → closed) — see `convex/counters.ts`.
 			await ctx.db.patch(order._id, { status: 'cancelled' });
 			if (order.claimId) {
 				await ctx.runMutation(
@@ -117,7 +117,7 @@ async function sweepAbandonedDrafts(ctx: MutationCtx, cutoff: number): Promise<n
 			);
 		}
 
-		// The trigger removes the row from its bucket in the same transaction.
+		// The row is gone, releasing the free item and never surfacing as a real order.
 		await ctx.db.delete(draft._id);
 
 		// No O6: there is no order to tell the customer about. They were never emailed one.

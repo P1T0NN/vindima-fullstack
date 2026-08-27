@@ -1,12 +1,12 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 
 	// COMPONENTS
 	import CreateUpsellButton from '@/components/pages/(protected)/admin/upsells/create-upsell-button.svelte';
-	import { ErrorComponent } from '@/components/ui/error-component/index.js';
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
+	import { ErrorComponent } from '@/components/ui/custom-components/error-component/index.js';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import AdminUpsellsHeader from '@/components/pages/(protected)/admin/upsells/admin-upsells-header.svelte';
 	import AdminUpsellCard from '@/components/pages/(protected)/admin/upsells/admin-upsell-card/admin-upsell-card.svelte';
 	import AdminUpsellsCustomizeDialog from '@/components/pages/(protected)/admin/upsells/admin-upsells-customize-dialog/admin-upsells-customize-dialog.svelte';
@@ -23,10 +23,13 @@
 	const rules = $derived((rulesQuery.data?.rules ?? []) as UpsellAdminRule[]);
 	const existingKeys = $derived(rules.map((r) => buildTriggerKey(r.trigger)));
 
-	const dialogId = $props.id();
-
 	let builderOpen = $state(false);
 	let editingRule = $state<UpsellAdminRule | null>(null);
+
+	function openCreate() {
+		editingRule = null;
+		builderOpen = true;
+	}
 
 	// A natively-triggered open must seed CREATE mode — drop the previous edit's rule on close.
 	$effect(() => {
@@ -45,7 +48,7 @@
 		<AdminUpsellsHeader />
 
 		{#if rules.length > 0}
-			<CreateUpsellButton {dialogId} />
+			<CreateUpsellButton onOpen={openCreate} />
 		{/if}
 	</div>
 
@@ -58,7 +61,7 @@
 	{:else if rulesQuery.isLoading}
 		<AdminUpsellsLoading />
 	{:else if rules.length === 0}
-		<AdminUpsellsEmpty {dialogId} />
+		<AdminUpsellsEmpty onOpen={openCreate} />
 	{:else}
 		<div class="flex flex-col gap-3">
 			{#each rules as rule (rule.id)}
@@ -69,9 +72,4 @@
 </section>
 
 <!-- Always mounted so the close animation runs; `open` gates visibility. -->
-<AdminUpsellsCustomizeDialog 
-	bind:open={builderOpen} 
-	{dialogId} 
-	rule={editingRule} 
-	{existingKeys} 
-/>
+<AdminUpsellsCustomizeDialog bind:open={builderOpen} rule={editingRule} {existingKeys} />

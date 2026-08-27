@@ -9,15 +9,19 @@ import { browser } from '$app/environment';
 
 // LIBRARIES
 import { api } from '@/convex/_generated/api';
+import { useMutation } from 'convex-svelte';
+import { ConvexError } from 'convex/values';
+import { isRateLimitError } from '@convex-dev/rate-limiter';
 
 // CONFIG
-import { CART_CONFIG } from '@/shared/config';
+import { CART_CONFIG } from '@/shared/features/cart/config';
 
 // COMPONENTS
 import { toast } from 'svelte-sonner';
 
 // UTILS
-import { safeMutation } from '@/utils/convexHelpers';
+import { toastMessage } from '@/utils/toastMessage';
+import { hasErrorMessage } from '@/shared/utils/errorMessage';
 import {
 	parseStoredCart,
 	serializeCart,
@@ -26,8 +30,10 @@ import {
 	type CartLine
 } from '@/shared/features/cart/cartUtils';
 
-// TYPES
-import type { ConvexClient } from 'convex/browser';
+const addLine = useMutation(api.tables.cart.mutations.addLine.addLine);
+const setLineQty = useMutation(api.tables.cart.mutations.setLineQty.setLineQty);
+const clearCart = useMutation(api.tables.cart.mutations.clearCart.clearCart);
+const mergeGuestCart = useMutation(api.tables.cart.mutations.mergeGuestCart.mergeGuestCart);
 
 class CartState {
 	/** The rendered cart. Optimistic in auth mode; server truth reconciles on settle. */
@@ -40,7 +46,6 @@ class CartState {
 	count = $derived(this.lines.reduce((n, l) => n + l.qty, 0));
 
 	#authenticated = false;
-	#convex: ConvexClient | null = null;
 	/** In-flight server writes (incl. debounce windows). While > 0, local is authoritative. */
 	#pendingWrites = 0;
 	/** Latest server lines received while local was authoritative; applied on settle. */
@@ -83,12 +88,11 @@ class CartState {
 			() => (overflow = true)
 		);
 		if (this.#authenticated) {
-			this.#write(() =>
-				safeMutation(this.#convex!, api.tables.cart.mutations.addLine.addLine, { productRef, qty })
-			);
+			this.#write(() => addLine({ productRef, qty }).catch((e) => this.#report(e)));
 		} else {
 			this.#persistGuest();
-			if (overflow) toast.error('Tu carrito está lleno. Elimina un producto antes de agregar otro.');
+			if (overflow)
+				toast.error('Tu carrito está lleno. Elimina un producto antes de agregar otro.');
 		}
 	}
 
@@ -103,12 +107,7 @@ class CartState {
 	remove(productRef: string) {
 		this.lines = this.lines.filter((l) => l.productRef !== productRef);
 		if (this.#authenticated) {
-			this.#write(() =>
-				safeMutation(this.#convex!, api.tables.cart.mutations.setLineQty.setLineQty, {
-					productRef,
-					qty: 0
-				})
-			);
+			this.#write(() => setLineQty({ productRef, qty: 0 }).catch((e) => this.#report(e)));
 		} else {
 			this.#persistGuest();
 		}
@@ -124,9 +123,7 @@ class CartState {
 	 */
 	pruneUnavailable(resolved: Array<{ productRef: string; unitPriceMinor: number | null }>) {
 		const byRef = new Map(resolved.map((row) => [row.productRef, row]));
-		const dead = this.lines.filter(
-			(line) => byRef.get(line.productRef)?.unitPriceMinor === null
-		);
+		const dead = this.lines.filter((line) => byRef.get(line.productRef)?.unitPriceMinor === null);
 		if (dead.length === 0) return;
 		for (const line of dead) this.remove(line.productRef);
 		toast.info(
@@ -140,20 +137,17 @@ class CartState {
 	clear() {
 		this.lines = [];
 		if (this.#authenticated) {
-			this.#write(() =>
-				safeMutation(this.#convex!, api.tables.cart.mutations.clearCart.clearCart, {})
-			);
+			this.#write(() => clearCart({}).catch((e) => this.#report(e)));
 		} else {
 			this.#persistGuest();
 		}
 	}
 
 	/**
-	 * Called from the root layout with the current auth state + Convex client.
+	 * Called from the root layout with the current auth state.
 	 * Handles the guest→server merge on login and the reset-to-empty on logout.
 	 */
-	setAuth(authenticated: boolean, convex: ConvexClient) {
-		this.#convex = convex;
+	setAuth(authenticated: boolean) {
 		if (authenticated === this.#authenticated) return;
 		this.#authenticated = authenticated;
 
@@ -163,11 +157,10 @@ class CartState {
 			const guestLines = this.lines;
 			if (guestLines.length > 0) {
 				this.#write(async () => {
-					const res = await safeMutation(
-						this.#convex!,
-						api.tables.cart.mutations.mergeGuestCart.mergeGuestCart,
-						{ lines: guestLines }
-					);
+					const res = await mergeGuestCart({ lines: guestLines }).catch((e) => {
+						this.#report(e);
+						return null;
+					});
 					if (res) this.#clearGuestStorage(); // success → drop the guest copy
 				});
 			}
@@ -200,10 +193,7 @@ class CartState {
 			setTimeout(async () => {
 				this.#timers.delete(ref);
 				try {
-					await safeMutation(this.#convex!, api.tables.cart.mutations.setLineQty.setLineQty, {
-						productRef: ref,
-						qty
-					});
+					await setLineQty({ productRef: ref, qty }).catch((e) => this.#report(e));
 				} finally {
 					this.#dirtyRefs.delete(ref);
 					this.#release();
@@ -225,6 +215,16 @@ class CartState {
 		this.#pendingWrites = Math.max(0, this.#pendingWrites - 1);
 		if (this.#pendingWrites === 0 && this.#authenticated && this.#latestServer !== undefined) {
 			this.lines = this.#latestServer;
+		}
+	}
+
+	#report(error: unknown) {
+		if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+			toastMessage({ type: 'error', error, message: error.data.message });
+		} else if (isRateLimitError(error)) {
+			toastMessage({ type: 'error', error, message: '' });
+		} else {
+			console.error('[cart] unhandled mutation error', error);
 		}
 	}
 

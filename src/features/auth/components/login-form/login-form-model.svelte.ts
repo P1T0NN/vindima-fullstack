@@ -8,8 +8,8 @@ import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 import { appGoto } from '@/utils/app-navigation.js';
 import { authClient } from '@/features/auth/lib/auth-client';
 import { loginSchema } from '@/shared/features/auth/schemas/loginSchema.js';
-import { zodIssuesToFieldErrors } from '@/features/validations/utils/fieldErrors';
-import { rateLimitMessage } from '@/features/validations/utils/translateFromBackend';
+import { zodIssuesToFieldErrors } from '@/shared/features/validations/utils/zodFieldErrors';
+import { formatRateLimitMessage } from '@/utils/toastMessage';
 
 // TYPES
 import type { LoginFormStep, LoginField } from './loginFormTypes.js';
@@ -67,7 +67,7 @@ export function createLoginForm(copy: LoginFormCopy) {
 					});
 					if (otpError) {
 						console.error('Login: send verification OTP failed:', otpError);
-						errorMessage = rateLimitMessage(
+						errorMessage = formatRateLimitMessage(
 							otpError.message,
 							'No se pudo enviar el código de verificación. Inténtalo de nuevo.'
 						);
@@ -79,7 +79,7 @@ export function createLoginForm(copy: LoginFormCopy) {
 					return;
 				}
 				console.error('Login: sign in failed:', error);
-				errorMessage = rateLimitMessage(error.message, copy.signInFailed());
+				errorMessage = formatRateLimitMessage(error.message, copy.signInFailed());
 				return;
 			}
 			await onVerifySuccess();

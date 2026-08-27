@@ -2,7 +2,6 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { WithElementRef } from '@/utils/utils.js';
 	import { cn } from '@/utils/utils.js';
-	import MinusIcon from '@lucide/svelte/icons/minus';
 
 	let {
 		ref = $bindable(null),
@@ -22,6 +21,6 @@
 	{#if children}
 		{@render children?.()}
 	{:else}
-		<MinusIcon />
+		<span class="icon-[lucide--minus]" ></span>
 	{/if}
 </div>

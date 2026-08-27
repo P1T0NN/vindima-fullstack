@@ -7,7 +7,7 @@
 import { browser } from '$app/environment';
 
 // CONFIG
-import { UPSELLS_CONFIG } from '@/shared/config';
+import { UPSELLS_CONFIG } from '@/shared/features/upsells/config';
 
 // STATE
 import { cart } from '@/features/cart/cart.svelte';

@@ -1,11 +1,11 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient, useQuery } from '@mmailaender/convex-svelte';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 
 	// COMPONENTS
-	import SvelteHead from '@/components/ui/svelte-head/svelte-head.svelte';
-	import { ErrorComponent } from '@/components/ui/error-component/index.js';
+	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
+	import { ErrorComponent } from '@/components/ui/custom-components/error-component/index.js';
 	import AdminDashboardHeader from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-header.svelte';
 	import AdminDashboardOrdersAlerts from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-orders-alerts.svelte';
 	import AdminDashboardKpiRow from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-kpi-row.svelte';
@@ -34,10 +34,10 @@
 	);
 </script>
 
-<SvelteHead 
-	title="Panel" 
-	noindex 
-	description="Panel de administración: ventas, pedidos y actividad de la tienda." 
+<SvelteHead
+	title="Panel"
+	noindex
+	description="Panel de administración: ventas, pedidos y actividad de la tienda."
 />
 
 <section class="flex w-full flex-col gap-6 p-4 md:p-6">

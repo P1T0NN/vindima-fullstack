@@ -1,5 +1,5 @@
 // CONFIG
-import { STRIPE_CONFIG } from '@/shared/config.js';
+import { STRIPE_CONFIG } from '@/shared/features/stripe/config.js';
 
 /**
  * Stripe session-window values in milliseconds — the unit conversion layer over

@@ -7,13 +7,11 @@
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
-	import Section from '@/components/ui/section/section.svelte';
+	import Section from '@/components/ui/custom-components/section/section.svelte';
 	import { Skeleton } from '@/components/ui/skeleton/index.js';
 	import CategoryProductGridLoading from '@/features/products/components/category-product-grid/category-product-grid-loading.svelte';
 
-	// LUCIDE ICONS
-	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
-</script>
+	</script>
 
 <!-- Pending state for /shop/[category] while the streamed page data resolves (client-side
      navigations only — direct hits and crawlers get fully awaited SSR HTML). Mirrors the
@@ -25,7 +23,7 @@
 >
 	<div class="relative {PAGE_CONTAINER}">
 		<Button href="{resolve('/')}#shop" class="mb-8">
-			<ArrowLeftIcon class="size-4" strokeWidth={1.75} />
+			<span class="icon-[lucide--arrow-left] size-4" ></span>
 			Volver a la tienda
 		</Button>
 

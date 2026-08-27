@@ -3,8 +3,9 @@
 	import { page } from '$app/state';
 
 	// LIBRARIES
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useAuth, useMutation } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	import { isRateLimitError } from '@convex-dev/rate-limiter';
 	import { api } from '@/convex/_generated/api';
 
 	// CLASSES
@@ -16,29 +17,19 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
-	import ConvexMutationForm from '@/components/ui/mutation-form/convex-mutation-form.svelte';
+	import Form from '@/components/ui/custom-components/form/form.svelte';
 	import CheckoutSummary from './checkout-summary/checkout-summary.svelte';
-	import { CardSelect } from '@/components/ui/card-select/index.js';
-
-	// LUCIDE ICONS
-	import StoreIcon from '@lucide/svelte/icons/store';
-	import TruckIcon from '@lucide/svelte/icons/truck';
-	import BanknoteIcon from '@lucide/svelte/icons/banknote';
-	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
 
 	// SCHEMAS
-	import {
-		placeOrderFormSchema,
-		type PlaceOrderFormInput
-	} from '@/shared/features/orders/schemas/ordersSchemas';
+	import type { PlaceOrderFormInput } from '@/shared/features/orders/schemas/ordersSchemas';
 
 	// FORMS
 	import { createPlaceOrderForm } from '@/features/orders/forms/placeOrderForm';
 
 	// UTILS
-	import { toastError } from '@/utils/toastResult';
+	import { toastMessage } from '@/utils/toastMessage';
+	import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	import { appGoto } from '@/utils/app-navigation.js';
-	import { safeMutation } from '@/utils/convexHelpers';
 	import { toPlaceOrderArgs } from '@/features/orders/utils/ordersUtils.js';
 	import {
 		readOrCreateAttemptId,
@@ -49,7 +40,7 @@
 	import type { FunctionReturnType } from 'convex/server';
 
 	const auth = useAuth();
-	const convex = useConvexClient();
+	const placeOrder = useMutation(api.tables.orders.mutations.placeOrder.placeOrder);
 
 	// The idempotency key is read fresh at every submit and PERSISTS across mounts/tabs
 	// (`StripeSystemDesign.md` §5.3): while the order is pending, resubmitting updates that same
@@ -78,22 +69,6 @@
 		{ value: 'online', label: 'Pago en línea', disabled: !canOnline }
 	];
 	const defaultPayment = canCash ? 'cash' : canOnline ? 'online' : 'cash';
-
-	// Icon + blurb per card value, for the rich card pickers (fulfillment + payment).
-	const fulfillmentMeta = {
-		pickup: {
-			icon: StoreIcon,
-			description: 'Recoge tu pedido en tienda cuando esté listo. Sin costo de envío.'
-		},
-		delivery: { icon: TruckIcon, description: 'Entregamos en la dirección que indiques abajo.' }
-	};
-	const paymentMeta = {
-		cash: {
-			icon: BanknoteIcon,
-			description: 'Paga al recoger o en la entrega. Sin pago en línea.'
-		},
-		online: { icon: CreditCardIcon, description: 'Paga con tarjeta en una página segura.' }
-	};
 
 	// Prefill source, read once at init. The two cover each other's blind spot: `authClass` is live
 	// but still empty this early on a hard load, while `page.data` is the SSR snapshot and doesn't
@@ -128,40 +103,57 @@
 
 	/** Placement navigates instead of staying put, so the result is handled here rather than by the
 	 *  form's default handling. */
-	async function handleResult(result: unknown, allowRetry = true): Promise<boolean> {
+	async function handleResult(result: unknown, allowRetry = true): Promise<void> {
 		const res = result as PlaceOrderResult;
 
 		// The stored attempt id points at a draft owned by somebody else (shared computer, or a
 		// draft started under a different session). Self-heal silently — forget it, mint a new one,
 		// place once more — so the shopper never sees this as an error.
-		if (allowRetry && !res.success && res.message?.key === 'CheckoutMessages.ATTEMPT_CONFLICT') {
+		if (
+			allowRetry &&
+			!res.success &&
+			res.message === 'Iniciamos un pedido nuevo. Inténtalo de nuevo.'
+		) {
 			clearAttemptId();
-			const retried = await safeMutation(
-				convex,
-				api.tables.orders.mutations.placeOrder.placeOrder,
-				placeOrderArgs()
-			);
-			if (!retried) return false;
-			return await handleResult(retried, false);
+			let retried: PlaceOrderResult;
+			try {
+				retried = await placeOrder(placeOrderArgs());
+			} catch (error) {
+				if (error instanceof ConvexError && hasErrorMessage(error.data)) {
+					toastMessage({
+						type: 'error',
+						error,
+						message: error.data.message
+					});
+				} else if (isRateLimitError(error)) {
+					toastMessage({ type: 'error', error, message: '' });
+				} else {
+					throw error;
+				}
+				return;
+			}
+			return handleResult(retried, false);
 		}
 
 		// Soft failures (checkout disabled, unavailable lines) toast their backend message and mark
 		// the offending lines in the summary.
 		//
-		// Deliberately NOT `toastResult`: that also toasts the SUCCESS message, and every success
-		// path here navigates away immediately — so "Pedido realizado" only ever flashed for a
-		// frame on the way to Stripe or the confirmation page. The destination states it properly.
+		// Deliberately no success toast: every success path here navigates away immediately — so
+		// "Pedido realizado" would only flash for a frame on the way to Stripe or the confirmation
+		// page. The destination states it properly.
 		if (!res.success || !res.data?.orderId) {
-			toastError(res);
+			if (!res.success) {
+				toastMessage({ type: 'error', error: null, message: res.message });
+			}
 			unavailableRefs = res.data?.unavailableRefs ?? [];
-			return false;
+			return;
 		}
 
 		// Online payment → our pay page, which mints the Stripe session and redirects on. Cash →
 		// straight to the confirmation page.
 		if (res.data.payment?.kind === 'redirect') {
 			window.location.href = res.data.payment.url;
-			return true;
+			return;
 		}
 
 		cart.clear();
@@ -170,58 +162,28 @@
 		await appGoto(
 			`${UNPROTECTED_PAGE_ENDPOINTS.CHECKOUT_SUCCESS}?order=${res.data.orderId}${email}`
 		);
-		return true;
+		return;
 	}
+
+	let submitting = $state(false);
 </script>
 
-<ConvexMutationForm
+<Form
 	bind:values
-	{sections}
-	schema={placeOrderFormSchema}
-	runFunction={api.tables.orders.mutations.placeOrder.placeOrder}
-	transformArgs={() => placeOrderArgs()}
-	onResult={(result) => handleResult(result)}
+	fields={sections}
+	function={api.tables.orders.mutations.placeOrder.placeOrder}
+	prepareArgs={() => placeOrderArgs()}
+	onSuccess={(result) => handleResult(result)}
 	resetOnSuccess={false}
-	customFields={{ mode: modeField, payment: paymentField }}
+	bind:submitting
 	class="lg:grid lg:grid-cols-[1fr_380px] lg:items-start lg:gap-8"
-	{actions}
-/>
-
-{#snippet cardField(
-	{
-		field,
-		value,
-		setValue,
-		inputId
-	}: {
-		field: { id: string; options?: { value: string; label: string; disabled?: boolean }[] };
-		value: unknown;
-		setValue: (next: unknown) => void;
-		inputId: string;
-	},
-	meta: Record<string, { icon?: typeof StoreIcon; description?: string }>
-)}
-	<CardSelect
-		options={field.options ?? []}
-		selected={value as string}
-		name={field.id}
-		labelledby={`${inputId}-label`}
-		{meta}
-		onselect={setValue}
-	/>
-{/snippet}
-
-<!-- Rich card pickers, in place of the default radio groups. -->
-{#snippet modeField(props: Parameters<typeof cardField>[0])}
-	{@render cardField(props, fulfillmentMeta)}
-{/snippet}
-{#snippet paymentField(props: Parameters<typeof cardField>[0])}
-	{@render cardField(props, paymentMeta)}
-{/snippet}
-
-<!-- The summary carries the submit button, so it is the form's `actions` rather than a sibling. -->
-{#snippet actions({ busy }: { busy: boolean })}
+>
 	<aside class="lg:sticky lg:top-6 lg:col-start-2 lg:row-span-full lg:row-start-1">
-		<CheckoutSummary mode={values.mode} payment={values.payment} {unavailableRefs} {busy} />
+		<CheckoutSummary
+			mode={values.mode}
+			payment={values.payment}
+			{unavailableRefs}
+			busy={submitting}
+		/>
 	</aside>
-{/snippet}
+</Form>

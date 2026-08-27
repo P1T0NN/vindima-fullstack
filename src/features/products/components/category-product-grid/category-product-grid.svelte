@@ -1,6 +1,6 @@
 <script lang="ts">
 	// CONFIG
-	import { CART_CONFIG } from '@/shared/config.js';
+	import { CART_CONFIG } from '@/shared/features/cart/config.js';
 
 	// CLASSES
 	import { cart } from '@/features/cart/cart.svelte';

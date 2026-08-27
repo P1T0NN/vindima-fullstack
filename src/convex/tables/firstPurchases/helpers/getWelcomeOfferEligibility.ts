@@ -1,8 +1,8 @@
 // CONFIG
-import { REWARDS_CONFIG } from '@/shared/config.js';
+import { REWARDS_CONFIG } from '@/shared/features/rewards/config.js';
 
 // AUTH
-import { authComponent } from '@/convex/auth/auth';
+import { authComponent } from '@/convex/betterAuth/config';
 
 // TYPES
 import type { QueryCtx, MutationCtx } from '@/convex/_generated/server';

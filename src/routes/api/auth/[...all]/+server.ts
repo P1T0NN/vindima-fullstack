@@ -71,7 +71,7 @@ const proxy: RequestHandler = async (event) => {
 	}
 	forwarded.set(CLIENT_IP_HEADER, clientIp);
 
-	for (const name of [...newRequest.headers.keys()]) newRequest.headers.delete(name);
+	for (const name of new Set(newRequest.headers.keys())) newRequest.headers.delete(name);
 	for (const [name, value] of forwarded.entries()) newRequest.headers.set(name, value);
 
 	return fetch(newRequest, { method: request.method, redirect: 'manual' });
