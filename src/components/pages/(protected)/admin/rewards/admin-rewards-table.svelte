@@ -23,6 +23,7 @@
 
 	<DataList
 		pagination={rewardItems}
+		placement="above"
 		key={(item: RewardItemRow) => item._id}
 		class="gap-0 divide-y divide-border rounded-xl border bg-card px-4"
 	>

@@ -28,7 +28,7 @@
 <section class="flex w-full flex-col gap-4 p-4 md:p-6">
 	<AdminCategoriesHeader />
 
-	<DataTable pagination={categories} key={(category) => category._id}>
+	<DataTable pagination={categories} placement="above" key={(category) => category._id}>
 		{#snippet head()}
 			<TableHead>Categoría</TableHead>
 		{/snippet}
