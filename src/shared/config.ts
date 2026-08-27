@@ -25,7 +25,7 @@ export const COMPANY_DATA = {
 		IGNORE_NOTICE: 'If you did not request this email, you can safely ignore it.'
 	},
 	DOMAIN: 'vindimawinebar.com',
-	LOGO: '/logo/logo.png',
+	LOGO: '/logo/opt/logo-640w.webp',
 	DESCRIPTION:
 		'Vinícola orgánica - vinos de autor, charcutería y experiencias para grandes anfitriones.',
 	WHATSAPP_NUMBER,
@@ -76,22 +76,22 @@ export const COMPANY_DATA = {
 /**
  * Decorative art renders at ≤220px wide, so the 640w WebP variants are already
  * oversized for every call site — the raw PNGs (up to 917 KB each) stay in
- * `static/assets/` as the source material for enhanced image components.
+ * `static/assets/` so they can be regenerated with `bun run optimize-images`.
  */
 export const ASSETS_DATA = {
-	BOARD: '/assets/board.png',
-	BOTTLE_OUTLINE: '/assets/bottle-outline.png',
-	BOTTLE: '/assets/bottle.png',
-	BOWL_PLATTER: '/assets/bowl-platter.png',
-	CHEESE: '/assets/cheese.png',
-	DESSERT: '/assets/dessert.png',
-	GLASS_SOFT: '/assets/glass-soft.png',
-	GLASS: '/assets/glass.png',
-	HOGAZA: '/assets/hogaza.png',
-	OLIVE: '/assets/olive.png',
-	OLIVES: '/assets/olives.png',
-	TAPA: '/assets/tapa.png',
-	WINE_BOTTLE: '/assets/win-bottle.png'
+	BOARD: '/assets/opt/board-640w.webp',
+	BOTTLE_OUTLINE: '/assets/opt/bottle-outline-640w.webp',
+	BOTTLE: '/assets/opt/bottle-640w.webp',
+	BOWL_PLATTER: '/assets/opt/bowl-platter-640w.webp',
+	CHEESE: '/assets/opt/cheese-640w.webp',
+	DESSERT: '/assets/opt/dessert-640w.webp',
+	GLASS_SOFT: '/assets/opt/glass-soft-640w.webp',
+	GLASS: '/assets/opt/glass-640w.webp',
+	HOGAZA: '/assets/opt/hogaza-640w.webp',
+	OLIVE: '/assets/opt/olive-640w.webp',
+	OLIVES: '/assets/opt/olives-640w.webp',
+	TAPA: '/assets/opt/tapa-640w.webp',
+	WINE_BOTTLE: '/assets/opt/wine-bottle-640w.webp'
 } as const;
 
 /**

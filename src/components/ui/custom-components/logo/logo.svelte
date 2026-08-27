@@ -1,12 +1,12 @@
 <script lang="ts">
-	import logoImage from '../../../../../static/logo/logo.png?enhanced';
-
 	import { COMPANY_DATA } from '@/shared/config.js';
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 	import Link from '@/components/ui/custom-components/link/link.svelte';
 	import StaticImage from '@/components/ui/custom-components/static-image/static-image.svelte';
 	import { cn } from '@/utils/utils.js';
 	import type { HTMLAnchorAttributes } from 'svelte/elements';
+
+	const logoImage = '/logo/opt/logo-640w.webp';
 
 	type Props = {
 		class?: string;

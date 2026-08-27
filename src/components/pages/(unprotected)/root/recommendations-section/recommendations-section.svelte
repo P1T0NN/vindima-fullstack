@@ -1,11 +1,11 @@
 <script lang="ts">
 	// ASSETS
-	import olive from '../../../../../../static/assets/olive.png?enhanced';
-	import olives from '../../../../../../static/assets/olives.png?enhanced';
-	import paradojaBlanc from '../../../../../../static/shop/vinos-de-autor/paradoja-blanc.png?enhanced';
-	import paradojaGran from '../../../../../../static/shop/vinos-de-autor/paradoja-gran.png?enhanced';
-	import piensos from '../../../../../../static/shop/vinos-de-autor/piensos.png?enhanced';
-	import postos from '../../../../../../static/shop/vinos-de-autor/postos.png?enhanced';
+	const olive = '/assets/opt/olive-640w.webp';
+	const olives = '/assets/opt/olives-640w.webp';
+	const paradojaBlanc = '/shop/vinos-de-autor/opt/paradoja-blanc-640w.webp';
+	const paradojaGran = '/shop/vinos-de-autor/opt/paradoja-gran-640w.webp';
+	const piensos = '/shop/vinos-de-autor/opt/piensos-640w.webp';
+	const postos = '/shop/vinos-de-autor/opt/postos-640w.webp';
 
 	// COMPONENTS
 	import { Card } from '@/components/ui/card/index.js';
@@ -13,7 +13,6 @@
 	import StaticImage from '@/components/ui/custom-components/static-image/static-image.svelte';
 
 	// UTILS
-	import type { Picture } from '@sveltejs/enhanced-img';
 	import { appHref } from '@/utils/app-navigation.js';
 	import { PAGE_CONTAINER } from '@/shared/ui/pageContainer.js';
 	import { cn } from '@/utils/utils.js';
@@ -22,7 +21,7 @@
 	type WineCard = {
 		name: string;
 		variety: string;
-		photo: Picture;
+		photo: string;
 		note: string;
 		service: string;
 		pairings: PairingChip[];

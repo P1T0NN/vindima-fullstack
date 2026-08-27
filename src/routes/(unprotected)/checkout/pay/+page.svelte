@@ -10,8 +10,6 @@
 	import { api } from '@/convex/_generated/api';
 
 	// CONFIG
-	import logoImage from '../../../../../static/logo/logo.png?enhanced';
-
 	import { COMPANY_DATA } from '@/shared/config.js';
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
@@ -27,6 +25,8 @@
 
 	// TYPES
 	import type { Id } from '@/convex/_generated/dataModel';
+
+	const logoImage = '/logo/opt/logo-640w.webp';
 
 	/**
 	 * The single "get me to Stripe" surface (`StripeSystemDesign.md` §7.5). Reached from the

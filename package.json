@@ -9,6 +9,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"optimize-images": "node scripts/optimize-images.mjs assets logo root shop/tablas shop/vinos-de-autor",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -24,7 +25,6 @@
 		"@internationalized/date": "^3.12.0",
 		"@lucide/svelte": "^1.34.0",
 		"@sveltejs/adapter-vercel": "^6.3.4",
-		"@sveltejs/enhanced-img": "^0.11.0",
 		"@sveltejs/kit": "^2.61.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.1.17",

@@ -1,11 +1,11 @@
 <script lang="ts">
 	// ASSETS
-	import aboutImage from '../../../../../../static/root/about-image.png?enhanced';
-	import bottle from '../../../../../../static/assets/bottle.png?enhanced';
-	import fotoDelVinedo from '../../../../../../static/root/foto-del-vinedo.jpg?enhanced';
-	import glass from '../../../../../../static/assets/glass.png?enhanced';
-	import olive from '../../../../../../static/assets/olive.png?enhanced';
-	import olives from '../../../../../../static/assets/olives.png?enhanced';
+	const aboutImage = '/root/opt/about-image-640w.webp';
+	const bottle = '/assets/opt/bottle-640w.webp';
+	const fotoDelVinedo = '/root/opt/foto-del-vinedo-960w.webp';
+	const glass = '/assets/opt/glass-640w.webp';
+	const olive = '/assets/opt/olive-640w.webp';
+	const olives = '/assets/opt/olives-640w.webp';
 
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 

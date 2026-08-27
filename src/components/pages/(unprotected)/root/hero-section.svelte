@@ -3,8 +3,8 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// ASSETS
-	import glass from '../../../../../static/assets/glass.png?enhanced';
-	import heroSectionWineBottle from '../../../../../static/root/hero-section-wine-bottle.png?enhanced';
+	const glass = '/assets/opt/glass-640w.webp';
+	const heroSectionWineBottle = '/root/opt/hero-section-wine-bottle-433w.webp';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';

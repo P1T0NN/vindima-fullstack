@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { EnhancedImgAttributes } from '@sveltejs/enhanced-img';
+	import type { HTMLImgAttributes } from 'svelte/elements';
 
-	type Props = EnhancedImgAttributes;
+	type Props = Omit<HTMLImgAttributes, 'src'> & { src: string };
 
 	let { src, ...restProps }: Props = $props();
 </script>
 
-<enhanced:img {src} {...restProps} />
+<img {src} {...restProps} />

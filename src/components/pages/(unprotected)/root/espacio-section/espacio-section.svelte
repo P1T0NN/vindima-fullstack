@@ -1,17 +1,17 @@
 <script lang="ts">
 	// ASSETS
-	import espacio1 from '../../../../../../static/root/espacio-1.png?enhanced';
-	import espacio10 from '../../../../../../static/root/espacio-10.png?enhanced';
-	import espacio11 from '../../../../../../static/root/espacio-11.png?enhanced';
-	import espacio2 from '../../../../../../static/root/espacio-2.png?enhanced';
-	import espacio3 from '../../../../../../static/root/espacio-3.png?enhanced';
-	import espacio4 from '../../../../../../static/root/espacio-4.png?enhanced';
-	import espacio5 from '../../../../../../static/root/espacio-5.png?enhanced';
-	import espacio6 from '../../../../../../static/root/espacio-6.png?enhanced';
-	import espacio7 from '../../../../../../static/root/espacio-7.png?enhanced';
-	import espacio8 from '../../../../../../static/root/espacio-8.png?enhanced';
-	import espacio9 from '../../../../../../static/root/espacio-9.png?enhanced';
-	import olives from '../../../../../../static/assets/olives.png?enhanced';
+	const espacio1 = '/root/opt/espacio-1-640w.webp';
+	const espacio10 = '/root/opt/espacio-10-640w.webp';
+	const espacio11 = '/root/opt/espacio-11-640w.webp';
+	const espacio2 = '/root/opt/espacio-2-640w.webp';
+	const espacio3 = '/root/opt/espacio-3-640w.webp';
+	const espacio4 = '/root/opt/espacio-4-640w.webp';
+	const espacio5 = '/root/opt/espacio-5-640w.webp';
+	const espacio6 = '/root/opt/espacio-6-640w.webp';
+	const espacio7 = '/root/opt/espacio-7-640w.webp';
+	const espacio8 = '/root/opt/espacio-8-640w.webp';
+	const espacio9 = '/root/opt/espacio-9-640w.webp';
+	const olives = '/assets/opt/olives-640w.webp';
 
 	// LIBRARIES
 	import Autoplay from 'embla-carousel-autoplay';
