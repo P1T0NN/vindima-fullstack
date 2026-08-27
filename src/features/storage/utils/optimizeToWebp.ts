@@ -1,5 +1,6 @@
 // LIBRARIES
 import imageCompression from 'browser-image-compression';
+import imageCompressionLibraryUrl from 'browser-image-compression/dist/browser-image-compression.js?url';
 
 // CONFIG
 import { STORAGE_CLIENT_OPTIMIZE_CONFIG } from '@/shared/features/storage/config';
@@ -25,7 +26,8 @@ export async function optimizeToWebp(
 		maxWidthOrHeight,
 		initialQuality: quality,
 		fileType: 'image/webp',
-		useWebWorker: true
+		useWebWorker: true,
+		libURL: imageCompressionLibraryUrl
 	});
 
 	// browser-image-compression keeps the original name — drop the old extension
