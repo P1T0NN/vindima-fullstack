@@ -23,18 +23,15 @@
 	const rules = $derived((rulesQuery.data?.rules ?? []) as UpsellAdminRule[]);
 	const existingKeys = $derived(rules.map((r) => buildTriggerKey(r.trigger)));
 
-	let builderOpen = $state(false);
-	let editingRule = $state<UpsellAdminRule | null>(null);
+	let customizeDialog: AdminUpsellsCustomizeDialog;
 
 	function openCreate() {
-		editingRule = null;
-		builderOpen = true;
+		customizeDialog.open(null);
 	}
 
-	// A natively-triggered open must seed CREATE mode — drop the previous edit's rule on close.
-	$effect(() => {
-		if (!builderOpen) editingRule = null;
-	});
+	function openEdit(rule: UpsellAdminRule) {
+		customizeDialog.open(rule);
+	}
 </script>
 
 <SvelteHead
@@ -65,11 +62,10 @@
 	{:else}
 		<div class="flex flex-col gap-3">
 			{#each rules as rule (rule.id)}
-				<AdminUpsellCard {rule} bind:editingRule bind:builderOpen />
+				<AdminUpsellCard {rule} onEdit={openEdit} />
 			{/each}
 		</div>
 	{/if}
 </section>
 
-<!-- Always mounted so the close animation runs; `open` gates visibility. -->
-<AdminUpsellsCustomizeDialog bind:open={builderOpen} rule={editingRule} {existingKeys} />
+<AdminUpsellsCustomizeDialog bind:this={customizeDialog} {existingKeys} />

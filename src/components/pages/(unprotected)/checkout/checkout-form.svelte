@@ -4,7 +4,7 @@
 
 	// LIBRARIES
 	import type { CalendarDate } from '@internationalized/date';
-	import { useAuth, useMutation } from 'convex-svelte';
+	import { useAuth, useMutation, useQuery } from 'convex-svelte';
 	import { ConvexError } from 'convex/values';
 	import { isRateLimitError } from '@convex-dev/rate-limiter';
 	import { api } from '@/convex/_generated/api';
@@ -13,8 +13,6 @@
 	import { cart } from '@/features/cart/cart.svelte';
 	import { authClass } from '@/features/auth/classes/authClass.svelte';
 
-	// CONFIG
-	import { CHECKOUT_CONFIG } from '@/shared/config.js';
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
@@ -61,13 +59,6 @@
 			{ pickupDate: pickupDate?.toString() ?? '', pickupTime: pickupTime ?? '' }
 		);
 
-	const canPickup = CHECKOUT_CONFIG.FULFILLMENT.PICKUP;
-	const canDeliver = CHECKOUT_CONFIG.FULFILLMENT.DELIVERY !== null;
-	const modeOptions = [
-		...(canPickup ? [{ value: 'pickup', label: 'Recoger en tienda' }] : []),
-		...(canDeliver ? [{ value: 'delivery', label: 'Entrega a domicilio' }] : [])
-	];
-
 	const defaultPayment = 'online';
 
 	// Prefill source, read once at init. The two cover each other's blind spot: `authClass` is live
@@ -80,13 +71,7 @@
 		name: user?.name ?? '',
 		email: user?.email ?? '',
 		phone: '',
-		mode: canPickup ? 'pickup' : 'delivery',
 		payment: defaultPayment,
-		line1: '',
-		line2: '',
-		city: '',
-		postcode: '',
-		country: '',
 		pickupDate: '',
 		pickupTime: '',
 		note: ''
@@ -94,6 +79,31 @@
 
 	let pickupDate = $state<CalendarDate | undefined>();
 	let pickupTime = $state<string | null>(null);
+	let availabilityMessage = $state('');
+
+	const availabilityQuery = useQuery(
+		api.tables.availability.queries.fetchAvailability.fetchBlockedPickupTimes,
+		() => (pickupDate ? { date: pickupDate.toString() } : 'skip')
+	);
+	const pickupDateKey = $derived(pickupDate?.toString() ?? null);
+	const availability = $derived(
+		availabilityQuery.data?.date === pickupDateKey ? availabilityQuery.data : null
+	);
+	const blockedTimes = $derived(availability?.blockedTimes ?? []);
+	const availabilityLoading = $derived(
+		pickupDateKey !== null && !availabilityQuery.error && availability === null
+	);
+	const availabilityError = $derived(pickupDateKey !== null && Boolean(availabilityQuery.error));
+
+	$effect(() => {
+		if (!pickupTime) return;
+		if (blockedTimes.includes(pickupTime)) {
+			pickupTime = null;
+			availabilityMessage = 'Ese horario ya no está disponible. Elige otro.';
+			return;
+		}
+		availabilityMessage = '';
+	});
 
 	function validateCheckout(input: Record<string, unknown>): Partial<Record<string, string>> {
 		const validation = placeOrderFormSchema.safeParse({
@@ -101,12 +111,17 @@
 			pickupDate: pickupDate?.toString() ?? '',
 			pickupTime: pickupTime ?? ''
 		});
-		return validation.success ? {} : zodIssuesToFieldErrors(validation.error.issues);
+		const errors = validation.success ? {} : zodIssuesToFieldErrors(validation.error.issues);
+		if (availabilityLoading) {
+			errors.pickupTime = 'Espera mientras consultamos los horarios disponibles.';
+		}
+		if (availabilityError) {
+			errors.pickupTime = 'No pudimos consultar los horarios. Inténtalo de nuevo.';
+		}
+		return errors;
 	}
 
-	const sections = $derived(
-		createPlaceOrderForm({ modeOptions, showAddress: values.mode === 'delivery' })
-	);
+	const sections = $derived(createPlaceOrderForm());
 
 	// Refs the server rejected on the last attempt — the summary greys them out.
 	let unavailableRefs = $state<string[]>([]);
@@ -210,18 +225,27 @@
 						data-validation-target="true"
 						tabindex="-1"
 					>
-						<CalendarWithTime bind:value={pickupDate} bind:selectedTime={pickupTime} />
+						<CalendarWithTime
+							bind:value={pickupDate}
+							bind:selectedTime={pickupTime}
+							{blockedTimes}
+							{availabilityLoading}
+							{availabilityError}
+						/>
 					</div>
+					{#if availabilityMessage}
+						<p class="text-sm text-destructive" role="status" aria-live="polite">
+							{availabilityMessage}
+						</p>
+					{/if}
 					<input
 						class="sr-only"
 						name="pickupDate"
 						aria-label="Fecha de recogida"
 						aria-invalid={fieldErrors.pickupDate ? 'true' : undefined}
-						aria-describedby={
-							fieldErrors.pickupDate || fieldErrors.pickupTime
-								? 'checkout-pickup-schedule-error'
-								: undefined
-						}
+						aria-describedby={fieldErrors.pickupDate || fieldErrors.pickupTime
+							? 'checkout-pickup-schedule-error'
+							: undefined}
 						value={pickupDate?.toString() ?? ''}
 						required
 					/>
@@ -230,11 +254,9 @@
 						name="pickupTime"
 						aria-label="Hora de recogida"
 						aria-invalid={fieldErrors.pickupTime ? 'true' : undefined}
-						aria-describedby={
-							fieldErrors.pickupDate || fieldErrors.pickupTime
-								? 'checkout-pickup-schedule-error'
-								: undefined
-						}
+						aria-describedby={fieldErrors.pickupDate || fieldErrors.pickupTime
+							? 'checkout-pickup-schedule-error'
+							: undefined}
 						value={pickupTime ?? ''}
 						required
 					/>
@@ -251,11 +273,6 @@
 	</Form>
 
 	<aside class="mt-6 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1 lg:mt-0">
-		<CheckoutSummary
-			mode={values.mode}
-			{unavailableRefs}
-			busy={submitting}
-			formId="checkout-form"
-		/>
+		<CheckoutSummary {unavailableRefs} busy={submitting} formId="checkout-form" />
 	</aside>
 </div>

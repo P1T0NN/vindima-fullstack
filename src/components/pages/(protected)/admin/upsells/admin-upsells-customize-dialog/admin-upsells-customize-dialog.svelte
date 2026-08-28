@@ -22,65 +22,49 @@
 		UpsellTrigger
 	} from '@/shared/features/upsells/types/upsellsTypes';
 
-	let {
-		open = $bindable(),
-		rule,
-		existingKeys
-	}: {
-		open: boolean;
-		/** The rule being edited, or `null` to create a new one. */
-		rule: UpsellAdminRule | null;
-		/** triggerKeys of every existing rule — for the inline "ya existe" check. */
-		existingKeys: string[];
-	} = $props();
+	let { existingKeys }: { existingKeys: string[] } = $props();
 
-	let triggerButton = $state<HTMLButtonElement>();
-	let closeButton = $state<HTMLButtonElement>();
-	let nativeOpen = $state(false);
+	let dialog: NativeDialog;
+	let rule = $state<UpsellAdminRule | null>(null);
+	let editorSession = $state(0);
 
-	$effect(() => {
-		if (open && triggerButton && !nativeOpen) {
-			nativeOpen = true;
-			triggerButton.click();
-		} else if (!open && nativeOpen && closeButton) {
-			nativeOpen = false;
-			closeButton.click();
-		}
-	});
+	export function open(nextRule: UpsellAdminRule | null) {
+		rule = nextRule;
+		resetForm();
+		editorSession += 1;
+		dialog.open();
+	}
 
 	function dismiss(close: () => void) {
-		nativeOpen = false;
 		close();
-		open = false;
+		resetForm();
+		rule = null;
 	}
 
 	const MAX = UPSELLS_CONFIG.MAX_ITEMS_PER_RULE;
 
-	// ─── Form state (seeded from `rule` each time the dialog opens) ───
-	let kind = $state<'product' | 'category' | 'global'>('product');
-	let productSlug = $state('');
+	// ─── Form state (derived from `rule`, then locally overridable while editing) ───
+	const formSeed = $derived.by(() => ({
+		kind: rule?.trigger.kind ?? ('product' as const),
+		productSlug: rule?.trigger.kind === 'product' ? rule.trigger.slug : '',
+		productLabel: rule?.trigger.kind === 'product' ? rule.triggerLabel : '',
+		categorySlug: rule?.trigger.kind === 'category' ? rule.trigger.category : '',
+		selectedRefs: rule?.items.map((item) => item.ref) ?? []
+	}));
+	let kind = $derived(formSeed.kind);
+	let productSlug = $derived(formSeed.productSlug);
 	/** Display name of the picked trigger product (so we can show it without the full catalog). */
-	let productLabel = $state('');
-	let categorySlug = $state('');
-	let selectedRefs = $state<string[]>([]);
+	let productLabel = $derived(formSeed.productLabel);
+	let categorySlug = $derived(formSeed.categorySlug);
+	let selectedRefs = $derived(formSeed.selectedRefs);
 
-	$effect(() => {
-		if (!open) return;
-		// Seed on open — reads `rule`; writes don't create deps so this won't loop.
-		if (rule) {
-			kind = rule.trigger.kind;
-			productSlug = rule.trigger.kind === 'product' ? rule.trigger.slug : '';
-			productLabel = rule.trigger.kind === 'product' ? rule.triggerLabel : '';
-			categorySlug = rule.trigger.kind === 'category' ? rule.trigger.category : '';
-			selectedRefs = rule.items.map((i) => i.ref);
-		} else {
-			kind = 'product';
-			productSlug = '';
-			productLabel = '';
-			categorySlug = '';
-			selectedRefs = [];
-		}
-	});
+	function resetForm() {
+		kind = formSeed.kind;
+		productSlug = formSeed.productSlug;
+		productLabel = formSeed.productLabel;
+		categorySlug = formSeed.categorySlug;
+		selectedRefs = formSeed.selectedRefs;
+	}
 
 	// ─── Trigger + validation ───
 	const ruleTrigger = $derived<UpsellTrigger>(
@@ -105,17 +89,10 @@
 </script>
 
 <NativeDialog
+	bind:this={dialog}
 	class="flex max-w-lg flex-col gap-5 rounded-xl bg-popover p-5 text-popover-foreground ring-1 ring-foreground/10"
 >
-	{#snippet trigger({ open: openDialog })}
-		<button bind:this={triggerButton} hidden type="button" onclick={openDialog}>
-			Abrir editor de sugerencias
-		</button>
-	{/snippet}
-
 	{#snippet children({ close })}
-		<button bind:this={closeButton} hidden type="button" onclick={close}>Cerrar editor</button>
-
 		<div class="flex items-start justify-between gap-3">
 			<h2 class="text-lg font-semibold">
 				{#if rule}
@@ -136,8 +113,8 @@
 			</Button>
 		</div>
 
-		<!-- 1. WHEN — keyed on `open` so picker internals (search text) reset each time. -->
-		{#key open}
+		<!-- 1. WHEN — keyed per editor session so picker search text resets each time. -->
+		{#key editorSession}
 			<AdminUpsellsWhenDisplayed
 				bind:kind
 				bind:productSlug
@@ -147,8 +124,8 @@
 			/>
 		{/key}
 
-		<!-- 2. WHAT — keyed on `open` so the item search resets each time. -->
-		{#key open}
+		<!-- 2. WHAT — the same session key resets item-search internals. -->
+		{#key editorSession}
 			<AdminUpsellsWhatDisplays
 				bind:selectedRefs
 				excludeSlug={kind === 'product' ? productSlug : ''}

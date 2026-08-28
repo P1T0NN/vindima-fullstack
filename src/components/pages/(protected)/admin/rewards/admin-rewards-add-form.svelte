@@ -21,18 +21,10 @@
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { formatVariantName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
 	import { toastMessage } from '@/utils/toastMessage';
-import { hasErrorMessage } from '@/shared/utils/errorMessage';
+	import { hasErrorMessage } from '@/shared/utils/errorMessage';
 
 	// TYPES
 	import type { Id } from '@/convex/_generated/dataModel';
-
-	type RewardProductSearchRow = {
-		variantId: string;
-		productName: string;
-		variantLabel: string | null;
-		priceMinor: number;
-		imageUrl: string | null;
-	};
 
 	const setVariantRewardEligible = useMutation(
 		api.tables.productVariants.mutations.setVariantRewardEligible.setVariantRewardEligible

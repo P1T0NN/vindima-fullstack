@@ -22,8 +22,7 @@
 	// UTILS
 	import {
 		shippingFeeMinor,
-		orderTotalMinor,
-		type DeliveryKind
+		orderTotalMinor
 	} from '@/shared/features/checkout/utils/checkoutUtils';
 	import { welcomeDiscountMinor } from '@/shared/features/rewards/utils/rewardsUtils';
 	import { formatMoneyMinor } from '@/utils/formatters.js';
@@ -32,13 +31,10 @@
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
 
 	let {
-		mode,
 		unavailableRefs = [],
 		busy = false,
 		formId
 	}: {
-		/** Picked fulfillment mode — drives the shipping line. */
-		mode: DeliveryKind;
 		/** Refs the server rejected on the last attempt — greyed out alongside unpriced lines. */
 		unavailableRefs?: string[];
 		/** Order placement in flight. */
@@ -99,7 +95,7 @@
 	const rewardProduct = $derived(activeClaim ? (findProduct(activeClaim.itemRef) ?? null) : null);
 
 	const shippingMinor = $derived(
-		subtotalMinor > 0 ? shippingFeeMinor(mode, subtotalMinor - discountMinor) : 0
+		subtotalMinor > 0 ? shippingFeeMinor('pickup', subtotalMinor - discountMinor) : 0
 	);
 	const totalMinor = $derived(orderTotalMinor(subtotalMinor, discountMinor, shippingMinor));
 

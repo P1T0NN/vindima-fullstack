@@ -16,11 +16,17 @@
 	type Props = {
 		value?: CalendarDate;
 		selectedTime?: string | null;
+		blockedTimes?: readonly string[];
+		availabilityLoading?: boolean;
+		availabilityError?: boolean;
 	};
 
 	let {
 		value = $bindable<CalendarDate | undefined>(),
-		selectedTime = $bindable<string | null>(null)
+		selectedTime = $bindable<string | null>(null),
+		blockedTimes = [],
+		availabilityLoading = false,
+		availabilityError = false
 	}: Props = $props();
 
 	const minimumDate = today(PICKUP_TIME_ZONE);
@@ -38,7 +44,7 @@
 				calendarLabel="Fecha de recogida"
 				locale="es-MX"
 				weekStartsOn={1}
-				class="bg-transparent p-0 [--cell-size:--spacing(10)] data-unavailable:line-through data-unavailable:opacity-100 md:[--cell-size:--spacing(12)] **:data-outside-month:hidden"
+				class="bg-transparent p-0 [--cell-size:--spacing(10)] **:data-outside-month:hidden data-unavailable:line-through data-unavailable:opacity-100 md:[--cell-size:--spacing(12)]"
 				weekdayFormat="short"
 			/>
 		</div>
@@ -47,18 +53,31 @@
 		>
 			<div class="grid gap-2">
 				{#each PICKUP_TIME_SLOTS as time (time)}
+					{@const blocked = blockedTimes.includes(time)}
+					{@const label = formatPickupTime(time)}
 					<Button
 						type="button"
-						variant={selectedTime === time ? 'default' : 'outline'}
+						variant={selectedTime === time && !blocked ? 'default' : 'outline'}
 						aria-pressed={selectedTime === time}
-						disabled={!value}
+						aria-label={`${label}, ${blocked ? 'no disponible' : 'disponible'}`}
+						disabled={!value || availabilityLoading || availabilityError || blocked}
 						onclick={() => (selectedTime = time)}
-						class="w-full shadow-none"
+						class={blocked
+							? 'w-full text-muted-foreground line-through decoration-1 shadow-none'
+							: 'w-full shadow-none'}
 					>
-						{formatPickupTime(time)}
+						{label}
 					</Button>
 				{/each}
 			</div>
+
+			{#if value && availabilityLoading}
+				<p class="text-xs text-muted-foreground" role="status">Consultando disponibilidad...</p>
+			{:else if value && availabilityError}
+				<p class="text-xs text-destructive" role="alert">No pudimos consultar los horarios.</p>
+			{:else if value && blockedTimes.length === PICKUP_TIME_SLOTS.length}
+				<p class="text-xs text-muted-foreground" role="status">No hay horarios disponibles.</p>
+			{/if}
 		</div>
 	</Card.Content>
 

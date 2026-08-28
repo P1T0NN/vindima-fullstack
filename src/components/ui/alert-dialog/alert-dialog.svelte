@@ -39,18 +39,13 @@
 
 	const dialogId = $props.id();
 
-	let dialog = $state<HTMLDialogElement | null>(null);
-
 	function setOpen(nextOpen: boolean) {
 		open = nextOpen;
 		onOpenChange?.(nextOpen);
 	}
 
 	// Programmatic control (URL-driven open, bind:open after async actions).
-
-	$effect(() => {
-		if (!dialog) return;
-
+	function syncDialogOpen(dialog: HTMLDialogElement) {
 		if (open && !dialog.open) {
 			dialog.showModal();
 			return;
@@ -59,7 +54,7 @@
 		if (!open && dialog.open) {
 			dialog.close();
 		}
-	});
+	}
 </script>
 
 {#if !hideTrigger}
@@ -76,7 +71,7 @@
 
 <dialog
 	id={dialogId}
-	bind:this={dialog}
+	{@attach syncDialogOpen}
 	class={cn(
 		'alert-dialog max-w-[calc(100%-2rem)] gap-4 rounded-xl bg-popover p-4 text-popover-foreground shadow-brand-elevated ring-1 ring-foreground/10 sm:max-w-sm',
 		className

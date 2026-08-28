@@ -64,6 +64,11 @@
 						name: 'Pedidos',
 						url: ADMIN_PAGE_ENDPOINTS.ORDERS,
 						icon: 'icon-[lucide--shopping-bag]'
+					},
+					{
+						name: 'Disponibilidad',
+						url: ADMIN_PAGE_ENDPOINTS.AVAILABILITY,
+						icon: 'icon-[lucide--calendar-clock]'
 					}
 				]
 			}

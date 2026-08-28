@@ -118,8 +118,8 @@ export function isNavActive(pathname: string, activeHash: string, href: string):
  * that actually exist for the `#hash` nav items, so missing sections are simply
  * skipped. Universal: keys off `navItems`, assumes no specific ids.
  *
- * Call from a browser-only `$effect` and return the cleanup. Re-run on route change
- * (pass `pathname` as the effect's dependency) so sections are re-resolved per page.
+ * Call from a browser-only `afterNavigate` callback and retain the cleanup so sections are
+ * re-resolved for each mounted page.
  *
  * @param headerOffset height of the sticky header in px (detection band starts below it).
  */
@@ -145,11 +145,11 @@ export function startScrollSpy(headerOffset = 72): () => void {
 	const scrollPadding =
 		parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || headerOffset;
 
-	const visible = new Map<string, boolean>();
+	const visible: Record<string, boolean> = {};
 	const observer = new IntersectionObserver(
 		(entries) => {
-			for (const e of entries) visible.set(e.target.id, e.isIntersecting);
-			const top = sections.find((s) => visible.get(s.id));
+			for (const e of entries) visible[e.target.id] = e.isIntersecting;
+			const top = sections.find((s) => visible[s.id]);
 			scrollSpy.active = top ? `#${top.id}` : '';
 		},
 		{ rootMargin: `-${scrollPadding}px 0px -70% 0px`, threshold: 0 }

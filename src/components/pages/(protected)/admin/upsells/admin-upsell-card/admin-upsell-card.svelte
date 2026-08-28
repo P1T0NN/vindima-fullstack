@@ -17,7 +17,7 @@
 	// UTILS
 	import { toastMessage } from '@/utils/toastMessage';
 	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
-import { hasErrorMessage } from '@/shared/utils/errorMessage';
+	import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	import { cn } from '@/utils/utils.js';
 
 	// TYPES
@@ -25,13 +25,10 @@ import { hasErrorMessage } from '@/shared/utils/errorMessage';
 
 	let {
 		rule,
-		editingRule = $bindable(null),
-		builderOpen = $bindable(false)
+		onEdit
 	}: {
 		rule: UpsellAdminRule;
-		/** The builder's current rule + open state — this card opens the dialog on itself. */
-		editingRule?: UpsellAdminRule | null;
-		builderOpen?: boolean;
+		onEdit: (rule: UpsellAdminRule) => void;
 	} = $props();
 
 	const setUpsellRuleEnabled = useMutation(
@@ -49,8 +46,7 @@ import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	const triggerBroken = $derived(rule.triggerStatus === 'missing');
 
 	function edit() {
-		editingRule = rule;
-		builderOpen = true;
+		onEdit(rule);
 	}
 
 	async function toggle(next: boolean) {

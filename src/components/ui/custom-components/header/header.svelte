@@ -1,6 +1,8 @@
 <script lang="ts">
 	// SVELTEKIT
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { onDestroy } from 'svelte';
 
 	// LIBRARIES
 	import { useAuth } from 'convex-svelte';
@@ -54,18 +56,17 @@
 	// Gold CTA: Join the Club (signed out) · Admin Dashboard (admin) · My Rewards (member).
 	const cta = $derived(resolveHeaderCta(authClass.currentUser, isAuthenticated));
 
-	let headerEl = $state<HTMLElement>();
-
-	// Scrollspy: one IntersectionObserver, re-created per route so it targets the
-	// current page's sections. Runs client-only ($effect never runs during SSR).
-	$effect(() => {
-		if (!pathnameLogical) return;
-		return startScrollSpy(headerEl?.offsetHeight ?? 72);
+	// Scrollspy: one IntersectionObserver, re-created after navigation so it targets the
+	// current page's mounted sections. `afterNavigate` is client-only and event-driven.
+	let stopScrollSpy: (() => void) | undefined;
+	afterNavigate(() => {
+		stopScrollSpy?.();
+		stopScrollSpy = startScrollSpy();
 	});
+	onDestroy(() => stopScrollSpy?.());
 </script>
 
 <header
-	bind:this={headerEl}
 	class={cn(
 		'z-50 w-full max-w-full overflow-x-clip border-b border-border bg-background',
 		isSticky ? 'sticky top-0' : 'relative',
@@ -105,9 +106,9 @@
 
 			<Link href={cta.href} class={cn(btnGoldClass, 'hidden gap-2 md:inline-flex')}>
 				{#if cta.variant === 'admin'}
-					<span class="icon-[lucide--layout-dashboard] size-3.5 shrink-0" aria-hidden="true" ></span>
+					<span class="icon-[lucide--layout-dashboard] size-3.5 shrink-0" aria-hidden="true"></span>
 				{:else}
-					<span class="icon-[lucide--sparkles] size-3.5 shrink-0" aria-hidden="true" ></span>
+					<span class="icon-[lucide--sparkles] size-3.5 shrink-0" aria-hidden="true"></span>
 				{/if}
 				{cta.label}
 			</Link>
@@ -120,7 +121,7 @@
 					? `Carrito, ${cart.count} artículo`
 					: `Carrito, ${cart.count} artículos`}
 			>
-				<span class="icon-[lucide--shopping-bag] size-[21px]" ></span>
+				<span class="icon-[lucide--shopping-bag] size-[21px]"></span>
 				{#if cart.count > 0}
 					<span
 						class="absolute top-[5px] right-[3px] flex h-4 min-w-4 items-center justify-center rounded-[9px] bg-accent px-[3px] text-center text-xs leading-4 font-semibold text-primary tabular-nums"

@@ -31,9 +31,8 @@ export function formatOrderDate(ms: number): string {
 type PlaceOrderArgs = FunctionArgs<typeof api.tables.orders.mutations.placeOrder.placeOrder>;
 
 /**
- * The flat place-order form model → `placeOrder`'s nested args. The form is flat (one key per
- * rendered field); the mutation wants `{ contact, delivery: { kind, address } }` plus two fields
- * that aren't form inputs — the idempotency `attemptId` and the cart `lines` — passed in and merged.
+ * The flat pickup-only place-order form model → `placeOrder`'s nested args. The mutation also
+ * receives the idempotency `attemptId` and cart `lines` from the checkout flow.
  */
 export function toPlaceOrderArgs(
 	values: PlaceOrderFormInput,
@@ -46,23 +45,11 @@ export function toPlaceOrderArgs(
 		lines,
 		contact: { name: values.name, email: values.email, phone: values.phone },
 		paymentMethod: values.payment,
-		delivery:
-			values.mode === 'pickup'
-				? {
-						kind: 'pickup',
-						pickupDate: pickupSchedule?.pickupDate ?? '',
-						pickupTime: pickupSchedule?.pickupTime ?? ''
-					}
-				: {
-						kind: 'delivery',
-						address: {
-							line1: values.line1,
-							line2: values.line2 || undefined,
-							city: values.city,
-							postcode: values.postcode,
-							country: values.country
-						}
-					},
+		delivery: {
+			kind: 'pickup',
+			pickupDate: pickupSchedule?.pickupDate ?? '',
+			pickupTime: pickupSchedule?.pickupTime ?? ''
+		},
 		note: values.note || undefined
 	};
 }

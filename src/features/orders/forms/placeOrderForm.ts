@@ -1,17 +1,10 @@
-/**
- * Declared sections for the place-order form — each renders as a titled Card in `Form`.
- *
- * The shape depends on config and on what the shopper picked, so this is a function rather than a
- * constant: the mode picker only appears when there is a choice to make, and the address block only
- * when the picked mode needs one.
- */
+/** Declared sections for the pickup-only place-order form. */
 
 // TYPES
 import type {
 	CustomField,
 	FieldConfig,
-	FormSection,
-	FormSelectOption
+	FormSection
 } from '@/components/ui/custom-components/form/formTypes';
 
 const CONTACT_FIELDS: FieldConfig[] = [
@@ -40,44 +33,6 @@ const CONTACT_FIELDS: FieldConfig[] = [
 	}
 ];
 
-const ADDRESS_FIELDS: FieldConfig[] = [
-	{
-		name: 'line1',
-		label: 'Dirección',
-		kind: 'input',
-		required: true,
-		placeholder: 'Calle Principal 123'
-	},
-	{
-		name: 'line2',
-		label: 'Departamento, interior, etc.',
-		kind: 'input',
-		placeholder: 'Departamento, interior, piso...',
-		description: 'Opcional.'
-	},
-	{
-		name: 'city',
-		label: 'Ciudad',
-		kind: 'input',
-		required: true,
-		placeholder: 'Aguascalientes'
-	},
-	{
-		name: 'postcode',
-		label: 'Código postal',
-		kind: 'input',
-		required: true,
-		placeholder: '20000'
-	},
-	{
-		name: 'country',
-		label: 'País',
-		kind: 'input',
-		required: true,
-		placeholder: 'México'
-	}
-];
-
 const NOTE_FIELD: FieldConfig = {
 	name: 'note',
 	label: 'Nota del pedido',
@@ -88,14 +43,7 @@ const NOTE_FIELD: FieldConfig = {
 
 const PICKUP_SCHEDULE_FIELD: CustomField = { kind: 'custom', name: 'pickupSchedule' };
 
-export function createPlaceOrderForm(params: {
-	/** Fulfillment modes enabled in config. A single option renders no picker. */
-	modeOptions: FormSelectOption[];
-	/** Whether the picked mode collects a shipping address. */
-	showAddress: boolean;
-}): FormSection[] {
-	const { modeOptions, showAddress } = params;
-
+export function createPlaceOrderForm(): FormSection[] {
 	return [
 		{
 			kind: 'section',
@@ -106,27 +54,10 @@ export function createPlaceOrderForm(params: {
 		},
 		{
 			kind: 'section',
-			title: showAddress ? 'Entrega' : 'Recoger pedido',
-			description: showAddress
-				? 'Cómo quieres recibir tu pedido.'
-				: 'Recuerda que Vindima está abierto de martes a domingo.',
+			title: 'Recoger pedido',
+			description: 'Recuerda que Vindima está abierto de martes a domingo.',
 			class: 'lg:col-start-1',
-			fields: [
-				...(modeOptions.length > 1
-					? [
-							{
-								name: 'mode',
-								label: 'Método',
-								kind: 'radio',
-								options: modeOptions,
-								radioOrientation: 'horizontal',
-								required: true
-							} satisfies FieldConfig
-						]
-					: []),
-				...(showAddress ? ADDRESS_FIELDS : [PICKUP_SCHEDULE_FIELD]),
-				NOTE_FIELD
-			]
+			fields: [PICKUP_SCHEDULE_FIELD, NOTE_FIELD]
 		}
 	];
 }

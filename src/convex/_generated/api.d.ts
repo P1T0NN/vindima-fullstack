@@ -58,6 +58,10 @@ import type * as stripe_helpers_retrieveCheckoutSession from "../stripe/helpers/
 import type * as stripe_helpers_verifyStripeWebhookEvent from "../stripe/helpers/verifyStripeWebhookEvent.js";
 import type * as stripe_stripeClient from "../stripe/stripeClient.js";
 import type * as stripe_utils_isStripeAlreadyDoneError from "../stripe/utils/isStripeAlreadyDoneError.js";
+import type * as tables_availability_helpers_isPickupSlotBlocked from "../tables/availability/helpers/isPickupSlotBlocked.js";
+import type * as tables_availability_mutations_setAvailability from "../tables/availability/mutations/setAvailability.js";
+import type * as tables_availability_queries_fetchAvailability from "../tables/availability/queries/fetchAvailability.js";
+import type * as tables_availability_schemas_availabilitySchema from "../tables/availability/schemas/availabilitySchema.js";
 import type * as tables_cart_helpers_loadCart from "../tables/cart/helpers/loadCart.js";
 import type * as tables_cart_helpers_resolveRefs from "../tables/cart/helpers/resolveRefs.js";
 import type * as tables_cart_mutations_addLine from "../tables/cart/mutations/addLine.js";
@@ -241,6 +245,10 @@ declare const fullApi: ApiFromModules<{
   "stripe/helpers/verifyStripeWebhookEvent": typeof stripe_helpers_verifyStripeWebhookEvent;
   "stripe/stripeClient": typeof stripe_stripeClient;
   "stripe/utils/isStripeAlreadyDoneError": typeof stripe_utils_isStripeAlreadyDoneError;
+  "tables/availability/helpers/isPickupSlotBlocked": typeof tables_availability_helpers_isPickupSlotBlocked;
+  "tables/availability/mutations/setAvailability": typeof tables_availability_mutations_setAvailability;
+  "tables/availability/queries/fetchAvailability": typeof tables_availability_queries_fetchAvailability;
+  "tables/availability/schemas/availabilitySchema": typeof tables_availability_schemas_availabilitySchema;
   "tables/cart/helpers/loadCart": typeof tables_cart_helpers_loadCart;
   "tables/cart/helpers/resolveRefs": typeof tables_cart_helpers_resolveRefs;
   "tables/cart/mutations/addLine": typeof tables_cart_mutations_addLine;

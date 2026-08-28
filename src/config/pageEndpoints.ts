@@ -12,6 +12,7 @@ export const ADMIN_PAGE_ENDPOINTS = {
 	REWARDS: resolve('/admin/rewards'),
 	UPSELLS: resolve('/admin/upsells'),
 	ORDERS: resolve('/admin/orders'),
+	AVAILABILITY: resolve('/admin/availability'),
 	ORDER: resolve('/admin/orders/:id')
 } as const;
 

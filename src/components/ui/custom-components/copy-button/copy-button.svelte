@@ -1,4 +1,7 @@
 <script lang="ts">
+	// SVELTE
+	import { onDestroy } from 'svelte';
+
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
 
@@ -33,7 +36,7 @@
 		}
 	}
 
-	$effect(() => () => {
+	onDestroy(() => {
 		if (timer) clearTimeout(timer);
 	});
 </script>
@@ -48,8 +51,8 @@
 	onclick={handleCopy}
 >
 	{#if copied}
-		<span class="icon-[lucide--check]" ></span>
+		<span class="icon-[lucide--check]"></span>
 	{:else}
-		<span class="icon-[lucide--copy]" ></span>
+		<span class="icon-[lucide--copy]"></span>
 	{/if}
 </Button>

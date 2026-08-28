@@ -5,9 +5,8 @@
  *     derives its args from it (`zodToConvexFields`) and re-runs `safeParse`
  *     authoritatively; semantic rules (feature flags, guest policy, idempotency, pricing)
  *     stay in the mutation.
- *   - `placeOrderFormSchema` — the flat FORM shape (one key per rendered field);
- *     `transformArgs` on the checkout form nests it into the wire shape. Address fields
- *     are only required when the delivery mode needs them, so they validate conditionally.
+ *   - `placeOrderFormSchema` — the flat pickup-only FORM shape (one key per rendered field);
+ *     `transformArgs` on the checkout form nests it into the wire shape.
  *   - `trackOrderFormSchema` — the guest tracking form. Client-only: `fetchOrderByNumber` is a
  *     query and declares its own `v.` args, so this schema exists to keep an unparseable number
  *     or a malformed address from ever becoming a round trip.
@@ -63,34 +62,17 @@ export const placeOrderSchema = z.object({
 
 export type PlaceOrderWireInput = z.infer<typeof placeOrderSchema>;
 
-/** Address fields that must be filled in before a delivery order can be placed. */
-const REQUIRED_ADDRESS_FIELDS = ['line1', 'city', 'postcode', 'country'] as const;
-
 export const placeOrderFormSchema = z
 	.object({
 		name: z.string().min(1),
 		email: z.email(),
 		phone: z.string().trim().min(1),
-		mode: z.enum(['pickup', 'delivery']),
 		payment: z.literal('online'),
-		line1: z.string(),
-		line2: z.string(),
-		city: z.string(),
-		postcode: z.string(),
-		country: z.string(),
 		pickupDate: z.string(),
 		pickupTime: z.string(),
 		note: z.string()
 	})
 	.superRefine((values, ctx) => {
-		if (values.mode === 'delivery') {
-			for (const field of REQUIRED_ADDRESS_FIELDS) {
-				if (values[field].trim()) continue;
-				ctx.addIssue({ code: 'custom', path: [field], message: 'Este campo es obligatorio' });
-			}
-			return;
-		}
-
 		if (!isPickupDate(values.pickupDate)) {
 			ctx.addIssue({
 				code: 'custom',

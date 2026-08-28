@@ -3,6 +3,7 @@ import { placeOrderFormSchema } from '../../orders/schemas/ordersSchemas.js';
 import { formatPickupDate } from './formatPickupDate.js';
 import { isPickupDate } from './isPickupDate.js';
 import { isPickupTimeSlot } from './isPickupTimeSlot.js';
+import { setPickupTimeBlocked } from './setPickupTimeBlocked.js';
 
 if (
 	PICKUP_TIME_SLOTS.length !== 16 ||
@@ -24,13 +25,7 @@ const validPickup = {
 	name: 'Ana',
 	email: 'ana@example.com',
 	phone: '449 000 0000',
-	mode: 'pickup',
 	payment: 'online',
-	line1: '',
-	line2: '',
-	city: '',
-	postcode: '',
-	country: '',
 	pickupDate: '2099-01-06',
 	pickupTime: '21:00',
 	note: ''
@@ -51,6 +46,15 @@ if (
 	!missingSchedule.error.issues.some(({ path }) => path[0] === 'pickupTime')
 ) {
 	throw new Error('Checkout validation check failed');
+}
+
+if (
+	JSON.stringify(setPickupTimeBlocked([], '14:00', true)) !== JSON.stringify(['14:00']) ||
+	JSON.stringify(setPickupTimeBlocked(['14:00'], '14:00', true)) !== JSON.stringify(['14:00']) ||
+	JSON.stringify(setPickupTimeBlocked(['14:00', '14:30'], '14:00', false)) !==
+		JSON.stringify(['14:30'])
+) {
+	throw new Error('Pickup availability check failed');
 }
 
 console.log('Pickup schedule checks passed');

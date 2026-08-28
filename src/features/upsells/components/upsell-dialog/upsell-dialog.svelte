@@ -1,4 +1,7 @@
 <script lang="ts">
+	// SVELTE
+	import { onMount } from 'svelte';
+
 	// Add-to-cart pairing dialog (UpsellsSystemDesign.md §7). Framed as the house recommending
 	// what completes the shopper's choice, not a hard sell. One-tap "Agregar"; every close path
 	// lands the shopper in their cart. Native <dialog> (NativeDialog) — Esc, backdrop, focus trap.
@@ -13,35 +16,23 @@
 	import UpsellDialogItem from './upsell-dialog-item.svelte';
 	import UpsellDialogCloseButton from './upsell-dialog-close-button.svelte';
 
-	let triggerButton = $state<HTMLButtonElement>();
-	let closeButton = $state<HTMLButtonElement>();
-	let nativeOpen = $state(false);
+	let dialog: NativeDialog;
 
-	$effect(() => {
-		if (upsells.isOpen && triggerButton && !nativeOpen) {
-			nativeOpen = true;
-			triggerButton.click();
-		} else if (!upsells.isOpen && nativeOpen && closeButton) {
-			nativeOpen = false;
-			closeButton.click();
-		}
-	});
+	onMount(() =>
+		upsells.connectDialog(
+			() => dialog.open(),
+			() => dialog.close()
+		)
+	);
 
 	function dismiss(close: () => void) {
-		nativeOpen = false;
 		close();
 		upsells.handleOpenChange(false);
 	}
 </script>
 
-<NativeDialog>
-	{#snippet trigger({ open })}
-		<button bind:this={triggerButton} hidden type="button" onclick={open}>Abrir sugerencias</button>
-	{/snippet}
-
+<NativeDialog bind:this={dialog}>
 	{#snippet children({ close })}
-		<button bind:this={closeButton} hidden type="button" onclick={close}>Cerrar sugerencias</button>
-
 		<Button
 			variant="ghost"
 			size="icon-sm"

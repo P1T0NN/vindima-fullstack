@@ -28,8 +28,9 @@ const SHOWN_KEY = UPSELLS_CONFIG.SHOWN_STORAGE_KEY;
 class UpsellsState {
 	/** Resolved, enabled rules — seeded from the shop loader (one-shot, no subscription). */
 	#rules: UpsellCatalogRule[] = [];
+	#openDialog: (() => void) | undefined;
+	#closeDialog: (() => void) | undefined;
 
-	isOpen = $state(false);
 	/** Items rendered in the currently open dialog (already filtered + capped). */
 	items = $state<UpsellCatalogItem[]>([]);
 	/** Display name of the product that was just added — shown in the dialog header. */
@@ -38,6 +39,16 @@ class UpsellsState {
 	/** Seed the catalog. Idempotent; called wherever the product grid mounts. */
 	setCatalog(rules: UpsellCatalogRule[]) {
 		this.#rules = rules;
+	}
+
+	/** Connect the mounted native dialog to the event-driven controller. */
+	connectDialog(open: () => void, close: () => void): () => void {
+		this.#openDialog = open;
+		this.#closeDialog = close;
+		return () => {
+			if (this.#openDialog === open) this.#openDialog = undefined;
+			if (this.#closeDialog === close) this.#closeDialog = undefined;
+		};
 	}
 
 	/**
@@ -57,8 +68,8 @@ class UpsellsState {
 
 		this.items = items;
 		this.addedName = added.name;
-		this.isOpen = true;
 		this.#markShown(rule.id);
+		this.#openDialog?.();
 		return true;
 	}
 
@@ -69,7 +80,7 @@ class UpsellsState {
 	 */
 	addItem(ref: string) {
 		cart.add(ref);
-		this.isOpen = false;
+		this.#closeDialog?.();
 		cart.open();
 	}
 
@@ -80,7 +91,6 @@ class UpsellsState {
 	 */
 	handleOpenChange(open: boolean) {
 		if (open) return;
-		this.isOpen = false;
 		cart.open();
 	}
 

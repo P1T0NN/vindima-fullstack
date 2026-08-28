@@ -23,10 +23,22 @@
 		class?: string;
 	} = $props();
 
-	let dialogEl = $state<HTMLDialogElement>();
+	let dialogEl: HTMLDialogElement | undefined;
 
-	const open = () => dialogEl?.showModal();
-	const close = () => dialogEl?.close();
+	function captureDialog(element: HTMLDialogElement) {
+		dialogEl = element;
+		return () => {
+			if (dialogEl === element) dialogEl = undefined;
+		};
+	}
+
+	export function open() {
+		dialogEl?.showModal();
+	}
+
+	export function close() {
+		dialogEl?.close();
+	}
 </script>
 
 {#if trigger}
@@ -34,7 +46,7 @@
 {/if}
 
 <dialog
-	bind:this={dialogEl}
+	{@attach captureDialog}
 	oncancel={(e) => e.preventDefault()}
 	class={cn(
 		'native-dialog m-auto w-full max-w-md rounded-2xl border bg-popover p-0 text-popover-foreground shadow-lg backdrop:bg-black/50 backdrop:backdrop-blur-sm',

@@ -14,6 +14,7 @@ import { productsTable } from './tables/products/schemas/productsSchema';
 import { productVariantsTable } from './tables/productVariants/schemas/productVariantsSchema';
 import { productCategoriesTable } from './tables/productCategories/schemas/productCategoriesSchema';
 import { upsellsTable } from './tables/upsells/schemas/upsellsSchema';
+import { availabilityTable } from './tables/availability/schemas/availabilitySchema';
 
 const schema = defineSchema({
 	// Users (with `role` and other custom fields) live in the better-auth component;
@@ -42,6 +43,9 @@ const schema = defineSchema({
 	// CheckoutPageSystemDesign.md. Toggle population via FEATURES.CHECKOUT (table always
 	// declared so flipping needs no migration).
 	orders: ordersTable,
+
+	// Pickup schedule exceptions, one bounded row per date. Missing row means all slots are open.
+	availability: availabilityTable,
 
 	// Product catalog — `products` (display unit) + `productVariants` (sellable unit). The
 	// single price/name/image authority; the variant `ref` is the opaque string the cart,

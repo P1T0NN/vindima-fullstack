@@ -1,4 +1,7 @@
 <script lang="ts">
+	// LIBRARIES
+	import { onMount } from 'svelte';
+
 	// CONFIG
 	import { CART_CONFIG } from '@/shared/features/cart/config';
 
@@ -8,12 +11,7 @@
 	import { Input } from '@/components/ui/input/index.js';
 	import { Switch } from '@/components/ui/switch/index.js';
 	import { Label } from '@/components/ui/label/index.js';
-	import {
-		Field,
-		FieldLabel,
-		FieldError,
-		FieldDescription
-	} from '@/components/ui/field/index.js';
+	import { Field, FieldLabel, FieldError, FieldDescription } from '@/components/ui/field/index.js';
 
 	// UTILS
 	import { toMinorUnits, fromMinorUnits } from '@/utils/formatters.js';
@@ -49,14 +47,21 @@
 	const refLocked = $derived(!!variant.variantId);
 
 	// Auto-fill the reference from product + label until the admin types their own — most
-	// admins won't know what a "reference" should look like. Programmatic writes don't fire
-	// `oninput`, so only real typing flips the flag.
+	// admins won't know what a "reference" should look like.
 	let refDirty = $state(!!variant.ref);
-	$effect(() => {
-		if (refDirty || refLocked) return;
-		const suggested = suggestVariantRef(refBase, variant.label);
-		if (variant.ref !== suggested) variant.ref = suggested;
+	onMount(() => {
+		if (!refDirty && !refLocked) variant.ref = suggestVariantRef(refBase, variant.label);
 	});
+
+	function setRef(value: string): void {
+		refDirty = true;
+		variant.ref = value;
+	}
+
+	function setLabel(value: string): void {
+		variant.label = value;
+		if (!refDirty && !refLocked) variant.ref = suggestVariantRef(refBase, value);
+	}
 </script>
 
 <Card class="gap-3 rounded-lg p-3 shadow-none">
@@ -65,10 +70,9 @@
 			<FieldLabel for="ref-{index}">Ref</FieldLabel>
 			<Input
 				id="ref-{index}"
-				bind:value={variant.ref}
+				bind:value={() => variant.ref, setRef}
 				placeholder="tabla-quesos-grande"
 				disabled={refLocked}
-				oninput={() => (refDirty = true)}
 				aria-invalid={errors.ref ? 'true' : undefined}
 			/>
 			{#if errors.ref}
@@ -80,8 +84,7 @@
 						cambiarse.
 					{:else}
 						Código breve que identifica esta opción - se rellena automáticamente a partir del
-						producto y la etiqueta. Los clientes no lo ven y, una vez guardado, no se puede
-						cambiar.
+						producto y la etiqueta. Los clientes no lo ven y, una vez guardado, no se puede cambiar.
 					{/if}
 				</FieldDescription>
 			{/if}
@@ -112,7 +115,11 @@
 
 	<Field>
 		<FieldLabel for="label-{index}">Etiqueta</FieldLabel>
-		<Input id="label-{index}" bind:value={variant.label} placeholder="Grande" />
+		<Input
+			id="label-{index}"
+			bind:value={() => variant.label ?? '', setLabel}
+			placeholder="Grande"
+		/>
 		<FieldDescription>
 			Opcional - nombre de la opción que ven los clientes (Pequeño, Grande, Copa, Botella...).
 			Déjalo vacío si el producto solo se vende en una opción.

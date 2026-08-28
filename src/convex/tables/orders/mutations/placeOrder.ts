@@ -16,6 +16,7 @@ import { calculateOrderPrice } from '../helpers/calculateOrderPrice';
 import { buildOrderSearchText } from '../helpers/buildOrderSearchText';
 import { isSameDraftInput } from '../helpers/isSameDraftInput';
 import { getPaymentProvider } from '../providers/registry';
+import { isPickupSlotBlocked } from '../../availability/helpers/isPickupSlotBlocked';
 
 // SCHEMAS
 import { placeOrderSchema } from '@/shared/features/orders/schemas/ordersSchemas';
@@ -166,6 +167,12 @@ export const placeOrder = mutation({
 		}
 		if (args.delivery.kind === 'delivery' && !CHECKOUT_CONFIG.FULFILLMENT.DELIVERY) {
 			return { success: false, message: 'Esa opción de entrega no está disponible.' };
+		}
+		if (
+			args.delivery.kind === 'pickup' &&
+			(await isPickupSlotBlocked(ctx, args.delivery.pickupDate, args.delivery.pickupTime))
+		) {
+			return { success: false, message: 'Ese horario ya no está disponible. Elige otro.' };
 		}
 
 		// Chosen payment method must be enabled in config (a client can't pick a disabled card).

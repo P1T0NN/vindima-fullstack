@@ -110,6 +110,20 @@ export const createCheckoutSession = action({
 		if (order.status !== 'pending' && order.status !== 'draft') {
 			return { success: false, message: 'Este pedido ya no se puede modificar.' };
 		}
+		if (
+			order.delivery.kind === 'pickup' &&
+			order.delivery.pickupDate &&
+			order.delivery.pickupTime &&
+			(await ctx.runQuery(
+				internal.tables.availability.helpers.isPickupSlotBlocked.checkPickupSlotBlocked,
+				{
+					date: order.delivery.pickupDate,
+					time: order.delivery.pickupTime
+				}
+			))
+		) {
+			return { success: false, message: 'Ese horario ya no está disponible. Elige otro.' };
+		}
 
 		// Global rate limit — this endpoint creates objects on an external API.
 		await enforceRateLimit(ctx);

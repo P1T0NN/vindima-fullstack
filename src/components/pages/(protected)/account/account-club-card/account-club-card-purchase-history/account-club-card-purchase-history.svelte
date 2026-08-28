@@ -72,27 +72,36 @@
 
 	// Focus choreography lives HERE because it crosses siblings: a claim/cancel unmounts the
 	// button the user pressed, and its replacement callout only renders once the auth store
-	// pushes the new reward state — so the child reports success, and an effect focuses the
-	// sibling once it mounts.
+	// pushes the new reward state. Function bindings focus the sibling as soon as it mounts.
 	let liveMessage = $state('');
-	let pendingFocusClaim = $state(false);
-	let pendingFocusPicker = $state(false);
-	let claimCallout = $state<HTMLDivElement | null>(null);
-	let pickerCallout = $state<HTMLDivElement | null>(null);
+	let pendingFocusClaim = false;
+	let pendingFocusPicker = false;
+	let claimCallout: HTMLDivElement | null = null;
+	let pickerCallout: HTMLDivElement | null = null;
 
-	$effect(() => {
-		if (pendingFocusClaim && claimCallout) {
-			claimCallout.focus();
-			pendingFocusClaim = false;
-		}
-	});
+	function focusClaimWhenReady() {
+		pendingFocusClaim = true;
+		if (!claimCallout) return;
+		claimCallout.focus();
+		pendingFocusClaim = false;
+	}
 
-	$effect(() => {
-		if (pendingFocusPicker && pickerCallout) {
-			pickerCallout.focus();
-			pendingFocusPicker = false;
-		}
-	});
+	function focusPickerWhenReady() {
+		pendingFocusPicker = true;
+		if (!pickerCallout) return;
+		pickerCallout.focus();
+		pendingFocusPicker = false;
+	}
+
+	function setClaimCallout(element: HTMLDivElement | null) {
+		claimCallout = element;
+		if (element && pendingFocusClaim) focusClaimWhenReady();
+	}
+
+	function setPickerCallout(element: HTMLDivElement | null) {
+		pickerCallout = element;
+		if (element && pendingFocusPicker) focusPickerWhenReady();
+	}
 </script>
 
 <div class="px-5 py-8 sm:px-10">
@@ -130,18 +139,18 @@
 	<!-- Reward callout: reserved claim → reward ready (picker) → next-reward hint -->
 	{#if activeClaim}
 		<AccountClubCardClaimedReward
-			bind:el={claimCallout}
+			bind:el={() => claimCallout, setClaimCallout}
 			onCancelled={(message) => {
 				liveMessage = message;
-				pendingFocusPicker = true;
+				focusPickerWhenReady();
 			}}
 		/>
 	{:else if availableRewards > 0}
 		<AccountClubCardChooseReward
-			bind:el={pickerCallout}
+			bind:el={() => pickerCallout, setPickerCallout}
 			onClaimed={(message) => {
 				liveMessage = message;
-				pendingFocusClaim = true;
+				focusClaimWhenReady();
 			}}
 		/>
 	{:else if featureOn}

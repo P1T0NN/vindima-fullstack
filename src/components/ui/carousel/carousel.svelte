@@ -1,18 +1,19 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import {
 		type CarouselAPI,
 		type CarouselProps,
 		type EmblaContext,
-		setEmblaContext,
-	} from "./context.js";
-	import { cn, type WithElementRef } from "@/utils/utils.js";
+		setEmblaContext
+	} from './context.js';
+	import { cn, type WithElementRef } from '@/utils/utils.js';
 
 	let {
 		ref = $bindable(null),
 		opts = {},
 		plugins = [],
 		setApi = () => {},
-		orientation = "horizontal",
+		orientation = 'horizontal',
 		class: className,
 		children,
 		...restProps
@@ -32,7 +33,7 @@
 		onInit,
 		scrollSnaps: [],
 		selectedIndex: 0,
-		scrollTo,
+		scrollTo
 	});
 
 	setEmblaContext(carouselState);
@@ -57,10 +58,10 @@
 	}
 
 	function handleKeyDown(e: KeyboardEvent) {
-		if (e.key === "ArrowLeft") {
+		if (e.key === 'ArrowLeft') {
 			e.preventDefault();
 			scrollPrev();
-		} else if (e.key === "ArrowRight") {
+		} else if (e.key === 'ArrowRight') {
 			e.preventDefault();
 			scrollNext();
 		}
@@ -71,21 +72,17 @@
 		setApi(carouselState.api);
 
 		carouselState.scrollSnaps = carouselState.api.scrollSnapList();
-		carouselState.api.on("select", onSelect);
+		carouselState.api.on('select', onSelect);
 		onSelect();
 	}
 
-	$effect(() => {
-		return () => {
-			carouselState.api?.off("select", onSelect);
-		};
-	});
+	onDestroy(() => carouselState.api?.off('select', onSelect));
 </script>
 
 <div
 	bind:this={ref}
 	data-slot="carousel"
-	class={cn("relative", className)}
+	class={cn('relative', className)}
 	role="region"
 	aria-roledescription="carousel"
 	{...restProps}

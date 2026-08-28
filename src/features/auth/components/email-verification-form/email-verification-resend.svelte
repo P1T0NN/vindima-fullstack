@@ -1,4 +1,7 @@
 <script lang="ts">
+	// SVELTE
+	import { onDestroy } from 'svelte';
+
 	// LIBRARIES
 	import { toast } from 'svelte-sonner';
 
@@ -52,7 +55,7 @@
 		}, 1000);
 	}
 
-	$effect(() => () => clearCooldownInterval());
+	onDestroy(clearCooldownInterval);
 
 	async function handleResend() {
 		if (blocked) return;
@@ -68,7 +71,10 @@
 			if (error) {
 				console.error('Email verification: resend failed:', error);
 				toast.error(
-					formatRateLimitMessage(error.message, 'No se pudo reenviar el código. Inténtalo de nuevo.')
+					formatRateLimitMessage(
+						error.message,
+						'No se pudo reenviar el código. Inténtalo de nuevo.'
+					)
 				);
 			}
 		} catch (error) {
