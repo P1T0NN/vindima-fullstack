@@ -17,9 +17,9 @@ import {
  * unit prices are SNAPSHOTTED at placement so order history is immune to later catalog or
  * price changes. All money is integer minor units — no floats anywhere.
  *
- * Two-phase lifecycle: placement (`status: 'pending'`, reversible, holds the price snapshot)
- * and settlement (`markOrderPaid` → `status: 'paid'`, where every reward/side-effect fires
- * exactly once). Terminal states (`cancelled`/`refunded`) never regress.
+ * Two-phase lifecycle: placement (`status: 'draft'`, reversible, holds the price snapshot) and
+ * settlement (`markOrderPaid` → `status: 'paid'`, where every reward/side-effect fires exactly
+ * once). Terminal states (`cancelled`/`refunded`) never regress.
  *
  * Portable: copy the `tables/orders` folder, add `orders` to the root schema, register
  * `placeOrder`/`cancelMyOrder` in the rate-limit registry, wire the cron. Lines store an
@@ -48,7 +48,7 @@ export const ordersTable = defineTable({
 	 *  A draft is excluded from every customer, admin, counter, search and email surface, and is
 	 *  hard-deleted by the cron if abandoned — so "the order is created when Stripe confirms it"
 	 *  holds observably. The webhook turns it into a real order by flipping it straight to
-	 *  `paid`; it never passes through `pending`. Cash orders are never drafts. */
+	 *  `paid`; it never passes through `pending`. */
 	status: v.union(
 		v.literal('draft'),
 		v.literal('pending'),
@@ -70,8 +70,8 @@ export const ordersTable = defineTable({
 	currency: v.string(),
 
 	delivery: orderDeliveryValidator,
-	/** Shopper's chosen payment method (spec §8.1). Optional so pre-existing rows validate;
-	 *  a missing value means the historical default, `cash` (the old manual-only behaviour). */
+	/** Shopper's chosen payment method (spec §8.1). Optional so pre-existing rows validate; new
+	 *  checkout rows always store `online`. */
 	paymentMethod: v.optional(orderPaymentMethodValidator),
 	/** Optional customer note ("no onions", "call on arrival"). Display only. */
 	note: v.optional(v.string()),
@@ -79,7 +79,7 @@ export const ordersTable = defineTable({
 	/** Reward claim consumed by this order, if any (applied on settle, released on cancel). */
 	claimId: v.optional(v.id('rewardClaims')),
 	/** Provider's payment reference — the Stripe PaymentIntent id, set at settlement. Absent
-	 *  for the 'manual' provider. A historical fact, never re-read as a live reference. */
+	 *  for legacy rows without an online payment. A historical fact, never re-read as a live reference. */
 	paymentRef: v.optional(v.string()),
 
 	/** Epoch-ms the order was settled (`markOrderPaid`) — the single money-path timestamp the
@@ -92,7 +92,7 @@ export const ordersTable = defineTable({
 	/** Stripe Checkout Session currently attached to this order (`StripeSystemDesign.md` §6).
 	 *  Cleared — and the session expired — whenever the draft changes or is cancelled; the
 	 *  webhook only settles a payment whose session matches this value (§8.2). Retained on
-	 *  settled orders as audit history. Meaningless for cash orders. */
+	 *  settled orders as audit history. */
 	paymentSessionRef: v.optional(v.string()),
 	/** Monotonic counter, bumped every time a payment session is invalidated. It seeds the
 	 *  Stripe idempotency key (`sess:{orderId}:{attempt}`), which is what makes two racing

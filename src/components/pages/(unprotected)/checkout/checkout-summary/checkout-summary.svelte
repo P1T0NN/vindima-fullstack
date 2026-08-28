@@ -33,18 +33,18 @@
 
 	let {
 		mode,
-		payment = 'cash',
 		unavailableRefs = [],
-		busy = false
+		busy = false,
+		formId
 	}: {
 		/** Picked fulfillment mode — drives the shipping line. */
 		mode: DeliveryKind;
-		/** Picked payment method — drives the button label + trust line. */
-		payment?: 'cash' | 'online';
 		/** Refs the server rejected on the last attempt — greyed out alongside unpriced lines. */
 		unavailableRefs?: string[];
 		/** Order placement in flight. */
 		busy?: boolean;
+		/** ID of the form submitted by the summary action. */
+		formId?: string;
 	} = $props();
 
 	// Everything rendered here is display-only — the server re-prices at placement.
@@ -107,14 +107,8 @@
 
 	const cantSubmit = $derived(busy || loading || subtotalMinor === 0);
 
-	// Button verb + trust line follow the chosen method: online continues to a hosted page,
-	// cash confirms the order and is paid offline.
-	const submitVerb = $derived(payment === 'online' ? 'Continuar al pago' : 'Hacer pedido');
-	const trustLine = $derived(
-		payment === 'online'
-			? 'Serás redirigido a una página de pago segura.'
-			: 'Sin pago en línea: paga al recoger o en la entrega.'
-	);
+	const submitVerb = 'Continuar al pago';
+	const trustLine = 'Serás redirigido a una página de pago segura.';
 </script>
 
 <div class="flex flex-col gap-4">
@@ -148,6 +142,7 @@
 	</Card>
 
 	<Button
+		form={formId}
 		type="submit"
 		class="h-12 w-full justify-center text-sm tracking-wider uppercase"
 		disabled={cantSubmit}

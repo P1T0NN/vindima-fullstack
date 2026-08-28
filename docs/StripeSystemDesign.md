@@ -30,8 +30,7 @@ emailed a receipt-shaped message, and the customer had a permanent-looking order
 was never taken. That is a lie the system tells on the shopper's behalf, so it goes.
 
 **The rule.** `placeOrder` writes an unpaid online order as `status: 'draft'`
-(`unpaidStatus()` in `placeOrder.ts` — a pure function of `paymentMethod`). Cash is untouched:
-still a real `pending` order, immediately, with its O1.
+Every checkout order now follows this path: it is a `draft` until the hosted payment succeeds.
 
 A `draft` exists only because `placeOrder` is a mutation (it cannot call Stripe) and a Checkout
 Session cannot carry the lines, contact, delivery and reward claim the settlement needs. It is
@@ -56,7 +55,7 @@ tree (§8.2) is edited in exactly one place: branch 4's "payable" test widens fr
 move into the webhook — the webhook still just flips a row that already exists.
 
 **Abandoned drafts are DELETED, not cancelled** (`sweepAbandonedDrafts`, same cron run as the
-pending sweep, same `PENDING_EXPIRY_HOURS_ONLINE` window). A cancelled row would be a record of
+pending sweep, using the same `PENDING_EXPIRY_HOURS` window). A cancelled row would be a record of
 an order that never happened, and one would accumulate per abandoned checkout forever. Deleting
 cannot eat a real payment: `stripeSessionExpiresAt` already caps a session at
 `order expiry − 1h`, so the session is dead at least an hour before its draft is old enough to
@@ -69,10 +68,8 @@ unreachable (kept for forks). A shopper who abandons simply checks out again; th
 `attemptId` resolves to the same draft, so nothing duplicates. §12.2's ledger row for the draft
 order now reads "deleted by the cron" rather than "cancelled by the cron".
 
-**Switching method mid-checkout** moves the same row between the two worlds, because the status
-is a function of `paymentMethod` alone: `online → cash` promotes the draft to a real `pending`
-order (writes `searchText`, moves the counter bucket, and sends the O1 it never got);
-`cash → online` demotes it back to a draft.
+There is no payment-method switch mid-checkout. The single `online` method always keeps the row
+as a draft until Stripe confirms payment.
 
 ---
 
@@ -84,7 +81,7 @@ order (writes `searchText`, moves the counter bucket, and sends the O1 it never 
    is refunded automatically, not settled.
 2. **Settlement stays where it is.** `markOrderPaid` remains THE settlement seam
    (`CheckoutPageSystemDesign.md` §6.2). Stripe only ever _calls_ it (via webhook); it adds
-   zero new settlement logic. Cash orders don't change by a single line.
+   zero new settlement logic.
 3. **At most one open payment session per order, and at most one live draft order per
    browser** (§5.3 + §7.3). Together these make double-charging structurally impossible —
    not "handled", impossible — and prevent duplicate pending orders from ever existing.
@@ -154,10 +151,10 @@ session on the new account (§7.3 fail-soft).
                          /checkout  (unchanged form; `online` card now enabled)
                               │ placeOrder (MUTATION — cannot call Stripe, and doesn't)
                               │ attemptId is PERSISTENT (localStorage, §5.3) ⇒ while the
-                              │ order is pending, re-submits UPDATE it in place — the
+                              │ order is a draft, re-submits UPDATE it in place — the
                               │ browser can only ever have ONE live draft order
                               ▼
-                   orders doc: status 'pending', paymentMethod 'online'
+                   orders doc: status 'draft', paymentMethod 'online'
                               │ returns { kind:'redirect', url: SITE_URL/checkout/pay?order=… }
                               ▼
         ┌──────────────  /checkout/pay  ─────────────────────────────┐
@@ -198,11 +195,9 @@ session on the new account (§7.3 fail-soft).
                     clears cart + the stored attemptId (§10.3)
 ```
 
-**Cash orders are untouched.** `paymentMethod: 'cash'` → `manualProvider` → `{ kind: 'none' }`
-→ order stays `pending` until staff settle (`settleOrder`) or `SETTLE_ON_PLACE` settles it
-immediately. No session, no webhook, no Stripe API call. The only shared code paths are
-`markOrderPaid` (built for exactly this) and the draft-until-paid placement semantics (§5.3),
-which apply to cash drafts identically and cost them nothing.
+**All checkout orders use Stripe Checkout.** Placement creates a `draft`; the hosted session and
+webhook are the only payment path. No order becomes visible, searchable, or eligible for order
+side effects until `markOrderPaid` receives a successful payment confirmation.
 
 ## 5. Provider Wiring (the seam, fulfilled)
 
@@ -280,15 +275,15 @@ both ghost data and a double-charge vector. Both die with two coordinated change
 1. Look up by `by_attempt` (unchanged, one indexed point read).
 2. **No existing order** → create, exactly as today.
 3. **Existing, `status === 'paid'`** (user re-submitted a stale form after settling) → return
-   it, do nothing. The client ends up on the success page either directly (cash) or via the pay
-   page's already-paid short-circuit (§7.1.4).
+   it, do nothing. The client ends up on the success page either directly or via the pay page's
+   already-paid short-circuit (§7.1.4).
    **Existing, `cancelled` / `refunded`** → the attempt is **spent**: return `ATTEMPT_CONFLICT`
    so the client mints a fresh id and resubmits once (same self-heal as case 4).
    _Corrected 2026-07-25 after a live test._ Returning a dead order instead reported success and
    then sent the shopper to a pay page that could only reject it — and since the attempt id is
    persistent, that dead end repeated on **every** subsequent checkout from that browser until
    localStorage was cleared by hand. Reachable two ways: a customer cancelling their own order,
-   or the expiry cron cancelling an abandoned one 48h later. Never short-circuit on a terminal
+   or the expiry cron cancelling an abandoned one after the configured window. Never short-circuit on a terminal
    non-paid order.
 4. **Existing, pending, but identity mismatch** — `existing.userId !== null &&
 existing.userId !== callerUserId` (shared computer, user switch missed the clear) →
@@ -305,9 +300,7 @@ existing.userId !== callerUserId` (shared computer, user switch missed the clear
    the work-queue aggregate. **If `paymentSessionRef` exists: clear it and schedule
    `expireStripeSession(oldRef)`** (internal action, §9.3) — the stale session becomes
    unpayable within seconds, and the §8.2 session-match check covers the sub-second race
-   window mechanically. Then dispatch the provider as usual (a method switch `online → cash`
-   simply stops producing pay-page redirects; `cash → online` starts; a cash draft updated
-   under `SETTLE_ON_PLACE` settles immediately, mirroring the create path).
+   window mechanically. The single online provider then creates the current pay-page redirect.
 7. No second O1 email on update (anti-spam). The already-sent O1's CTA is the pay-page URL,
    which always reflects the current draft (§5.1) — nothing in the old email goes stale
    except cosmetic copy, accepted.
@@ -332,11 +325,10 @@ paymentSessionRef: v.optional(v.string()),
 
 `paymentRef` (already in the schema) stores the **PaymentIntent id** on settlement — that is
 the id refunds need (§9). Two refs, two jobs: `paymentSessionRef` = the in-flight session,
-`paymentRef` = the completed payment. Both optional, both meaningless for cash orders.
+`paymentRef` = the completed payment. Both remain optional for legacy rows and are historical facts.
 
-`fetchOrder` additionally returns `paymentMethod` (raw field passthrough — allowed by
-`GeneralSystemDesignRule.md` § backend-returns-data) so the success page can distinguish
-"waiting for webhook" from "pay at pickup" (§10.3).
+The `fetchOrder` projection exposes only the payment-pending state needed by the confirmation
+page; the payment method is fixed by the checkout contract.
 
 No new indexes: `by_attempt` (draft lookup), `by_status` (cron), and the webhook's `db.get`
 by id cover everything.
@@ -352,7 +344,7 @@ Args: `{ orderId: Id<'orders'>, email?: string }`. Returns `{ url: string }` or 
 1. Load the order via internal query. Not found → `ORDER_NOT_FOUND`.
 2. **Access = the `fetchOrder` rule, exactly:** auth caller must own the order; guest caller
    must supply matching `email`. An action is a public endpoint — treat it as hostile input.
-3. `paymentMethod !== 'online'` → `INVALID_PAYMENT_METHOD` (a cash order has no pay page).
+3. `paymentMethod !== 'online'` → `INVALID_PAYMENT_METHOD` (only hosted online checkout is supported).
 4. `status === 'paid'` → return `{ url: successPageUrl }` — clicking a stale email CTA after
    paying lands on the receipt, not an error. `cancelled`/`refunded` → `ORDER_NOT_PENDING`.
 5. `amounts.totalMinor === 0` (fully-free order: claimed reward + pickup): nothing to
@@ -502,7 +494,7 @@ order = db.get(S.metadata.orderId)
 2a   order.paymentRef === S.payment_intent → 200                             (replay — idempotent no-op)
 2b   different payment_intent              → AUTO-REFUND S, error log, 200   (second payment for a paid order)
 3  order.status cancelled / refunded       → AUTO-REFUND S, error log, 200   (payment for a dead order)
-4  order.status === 'pending':
+4  order.status === 'pending' or 'draft':
 4a   S.id === order.paymentSessionRef
      AND S.amount_total === order.amounts.totalMinor
                                            → markOrderPaid({orderId, paymentRef: S.payment_intent}), 200
@@ -529,9 +521,7 @@ level: `markOrderPaid` no-ops on paid orders, and both refund actions are idempo
 
 ### 9.1 Admin refunds (`refundOrder` grows one branch; the seam stays `markOrderRefunded`)
 
-- **`cash` (or no `paymentRef`):** unchanged — `markOrderRefunded` synchronously; refund
-  coordinated offline, as the refund email already says.
-- **`online` with `paymentRef`:** **money moves first, status follows.**
+- **With `paymentRef`:** **money moves first, status follows.**
   `refundOrder` validates (`paid` only), then schedules internal action
   `refundStripePayment({ orderId })` and returns `ORDER_REFUND_STARTED` (new key). The
   action: `stripe.refunds.create({ payment_intent: order.paymentRef }, { idempotencyKey: 'refund:' + order._id })`
@@ -583,14 +573,9 @@ two seconds.
 
 Stripe redirects to `success_url` typically 1–3s _before_ the webhook settles the order. The
 page already subscribes to the order (`useQuery` — justified: the status changes under the
-viewer without them acting, the textbook subscription case). Add one state, keyed on
-`status + paymentMethod`:
-
-| `status`  | `paymentMethod` | Headline sentence                                                                                                                     |
-| --------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `pending` | `online`        | Subtle spinner + "Estamos confirmando tu pago…" — flips live to "Pago recibido — ¡gracias!" when the webhook lands (usually seconds). |
-| `pending` | `cash`          | "Paga cuando recojas tu pedido." (current copy, unchanged)                                                                            |
-| `paid`    | any             | "Pago recibido — ¡gracias!" (current copy, unchanged)                                                                                 |
+viewer without them acting, the textbook subscription case). A draft/pending order shows a
+subtle "Estamos confirmando tu pago…" state until the webhook lands; a paid order shows the
+normal confirmation.
 
 On mount, next to the existing `cart.clear()`: clear the stored `attemptId` (§5.3 — the
 checkout intent is complete; the next checkout starts a fresh draft). No polling, no timeout
@@ -663,7 +648,7 @@ failure whose resolution, lands on the platform owner.
 | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Double-click "Continuar al pago" / two pay-page tabs                           | §7.3: reuse + idempotency-key rotation ⇒ both land on the _same_ session. One order, one session, one possible charge.                                                                                                                                                                                                                                                                                  |
 | **Abandon → edit cart → re-order (same browser, any tab)**                     | Same persistent `attemptId` → the **same order** is updated in place; its old session is expired at edit time (§5.3.6). One order, current amounts, nothing superseded left payable. _(This replaces the earlier draft's "accepted double-order edge" — closed by construction.)_                                                                                                                       |
-| Stale tab pays a just-superseded session (the seconds before the expire lands) | Webhook §8.2.4b: session id ≠ current `paymentSessionRef` → payment auto-refunded, order stays `pending` and payable at the correct amount. Zero staff action.                                                                                                                                                                                                                                          |
+| Stale tab pays a just-superseded session (the seconds before the expire lands) | Webhook §8.2.4b: session id ≠ current `paymentSessionRef` → payment auto-refunded, order stays a draft and payable at the correct amount. Zero staff action.                                                                                                                                                                                                                                          |
 | Payment lands for a cancelled/refunded/already-paid order                      | §8.2 branches 2b/3: auto-refund + loud log + `200`. Was a manual runbook entry in the checkout spec's era; now it's code.                                                                                                                                                                                                                                                                               |
 | User pays, closes tab before redirect to success                               | Webhook settles anyway (it never depended on the browser). O2 email carries the receipt. Success page reachable from the O1/O2 links.                                                                                                                                                                                                                                                                   |
 | Webhook arrives before the redirect lands                                      | Success page reads `paid` immediately — shows the receipt state, skipping "confirmando". Both orders of arrival are first-class.                                                                                                                                                                                                                                                                        |
@@ -672,16 +657,15 @@ failure whose resolution, lands on the platform owner.
 | Shared computer, second user inherits the stored `attemptId`                   | §5.3.4 `ATTEMPT_CONFLICT` → client clears, regenerates, resubmits once. No cross-user draft access, no user-visible friction beyond one silent retry.                                                                                                                                                                                                                                                   |
 | Same shopper, two different browsers/devices                                   | Two genuinely independent draft orders — that is user intent (e.g. office + home), not a system flaw; each is individually consistent, each session prices its own order, and an unpaid one dies by cron. Auto-cancelling a user's _other_ pending orders was considered and rejected: it would destroy legitimate place-two-pay-both flows to prevent a scenario that is already financially coherent. |
 | Session expires mid-payment-attempt                                            | Stripe blocks payment on an expired session. Pay page mints a fresh one (§7.3).                                                                                                                                                                                                                                                                                                                         |
-| Order expires (48h cron) with an open session                                  | Impossible by construction: `expires_at ≤ order expiry − 1h` (§7.3.4). The cron never cancels an order that still has a payable session — and therefore needs zero Stripe code.                                                                                                                                                                                                                         |
+| Order expires with an open session                                            | Impossible by construction: `expires_at ≤ order expiry − 1h` (§7.3.4). The cron never cancels an order that still has a payable session — and therefore needs zero Stripe code.                                                                                                                                                                                                                         |
 | `cancelMyOrder` on an online order with an open session                        | The mutation clears `paymentSessionRef` + schedules `expireStripeSession` (§9.3). A cancelled order is unpayable within seconds; §8.2.3 refunds the race window.                                                                                                                                                                                                                                        |
 | Delayed payment methods (OXXO, SEPA) enabled in a store's dashboard            | `completed(unpaid)` → wait; `async_payment_succeeded` → settle; `async_payment_failed` → cron path. Zero template changes (§8.2). Stores using them should set `PENDING_EXPIRY_HOURS` generously above the method's voucher window.                                                                                                                                                                     |
 | Total is 0 (claimed reward + pickup) with `online` selected                    | No session possible or needed: settle directly, redirect to success (§7.1.5).                                                                                                                                                                                                                                                                                                                           |
-| Total below Stripe's currency minimum (~$0.50 USD eq.)                         | `sessions.create` fails → pay page shows the error + "elige Efectivo" hint. Not preempted in code: the minimum is per-currency Stripe policy, not ours to duplicate.                                                                                                                                                                                                                                    |
+| Total below Stripe's currency minimum (~$0.50 USD eq.)                         | `sessions.create` fails → pay page shows the error and a retry action. Not preempted in code: the minimum is per-currency Stripe policy, not ours to duplicate.                                                                                                                                                                                                                                      |
 | Zero-decimal currencies (JPY, etc.)                                            | `unit_amount` is already minor units end-to-end; a store whose `CART_CONFIG.CURRENCY` is zero-decimal must ensure its catalog prices use that convention (the existing `formatMoneyMinor` contract, not a Stripe-specific rule). Template default (2-decimal MXN/USD/EUR) needs nothing.                                                                                                                |
-| Stripe API down at session creation                                            | Action throws → pay page error + retry button. The order is safe (`pending`); the O1 email link retries later for free.                                                                                                                                                                                                                                                                                 |
+| Stripe API down at session creation                                            | Action throws → pay page error + retry button. The draft is safe; the shopper can retry from the pay page.                                                                                                                                                                                                                                                                                           |
 | Stripe API down at refund                                                      | Order stays `paid` (truth), error logged, admin retries. §9.1. Orphan refunds retry via their idempotency key on the next webhook delivery.                                                                                                                                                                                                                                                             |
 | Account switch with in-flight pending online orders                            | Old sessions unretrievable with the new key → §7.3 fail-soft creates fresh sessions on the new account. Old _paid_ orders keep old ids as inert history. Webhooks from the old account no longer verify → `400`, correctly ignored.                                                                                                                                                                     |
-| `SETTLE_ON_PLACE: true` store flips `ONLINE` on                                | Unaffected: that flag only fires on `payment.kind === 'none'` (cash), including the §5.3.6 update path. Online orders always settle by webhook.                                                                                                                                                                                                                                                         |
 | Guest online order                                                             | `customer_email` from the order; pay page + success page carry `&email=` exactly like `fetchOrder` demands. No account, full flow.                                                                                                                                                                                                                                                                      |
 | Malicious caller hits `createCheckoutSession` with someone else's orderId      | Owner/email check (§7.1.2) → denied. Even a "successful" abuse only produces a session paying _us_ for that order at _our_ snapshot price.                                                                                                                                                                                                                                                              |
 
@@ -701,8 +685,8 @@ Each step deployable and testable before the next (Stripe test mode + `stripe li
 
 1. **Schema**: add `paymentSessionRef` to `ordersSchema.ts`. Deploy — additive, no migration.
 2. **Draft-until-paid** (§5.3): `placeOrder` update-in-place branch + `ATTEMPT_CONFLICT` +
-   client persistent `attemptId` (+ clears on success mount / auth change). Test with cash
-   orders — this amendment is method-agnostic and shippable before any Stripe code. Add the
+   client persistent `attemptId` (+ clears on success mount / auth change). Test the draft
+   lifecycle before exercising Stripe. Add the
    one-line pointer to `CheckoutPageSystemDesign.md` §6.1.
 3. **SDK plumbing**: `npm i stripe`; `helpers/stripeClient.ts`; set the two env vars on the
    dev deployment.
@@ -781,8 +765,8 @@ action, which owns verification and the decision tree.
 
 ## 16. Verification Checklist (must pass before calling it done)
 
-- [ ] Cash order end-to-end behaves as before (place, settle, refund, emails, rewards) —
-      plus: re-submitting with changed lines while pending **updates the same order** (same
+- [ ] Online order end-to-end behaves as designed (place, pay, refund, emails, rewards) —
+      plus: re-submitting with changed lines while in draft **updates the same order** (same
       `_id`, same `number`, new amounts, aggregate correct).
 - [ ] Pure retry (identical args) returns the same order with **no** writes and no session churn.
 - [ ] Draft edit on an online order: old session becomes `expired` at Stripe within seconds;
@@ -809,8 +793,8 @@ action, which owns verification and the decision tree.
 - [ ] `ATTEMPT_CONFLICT`: sign in as a different user with a stale stored `attemptId` →
       one silent client retry, fresh order, other user's draft untouched.
 - [ ] Guest online order: full flow with `&email=`; wrong email → denied.
-- [ ] `ONLINE: false` restores today's exact behavior (card greyed, server rejects, registry
-      unreachable) — draft-until-paid remains active for cash (it's method-agnostic).
+- [ ] `ONLINE: false` disables checkout and the server rejects placement; the registry remains
+      unreachable.
 - [ ] **The switch test (§2):** repeat the core flow against a second Stripe test account by
       changing only the two env vars + adding its webhook. Everything works; a pending order
       from the first account gets a fresh session on the second.
@@ -823,7 +807,7 @@ action, which owns verification and the decision tree.
       `src/convex/stripe/`, plus the single `import type` in
       `src/shared/features/stripe/types/stripeTypes.ts`.
 - [ ] Session-window math (`stripeSessionExpiresAt`) — verify by hand, there is no automated
-      check: a fresh order gets `now + 24h − 1min`; an order 30h into a 48h window gets
+      check: a fresh order gets `now + 24h − 1min`; an order near the configured expiry gets
       `now + 17h`; an order in its last 30min returns `null` (no session, place a fresh order).
 - [ ] No brand/product names in the module (universal-template rule).
 

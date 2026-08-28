@@ -18,7 +18,7 @@ export function orderDetail(order: Doc<'orders'>) {
 		number: order.number,
 		placedAt: order._creationTime,
 		status: order.status,
-		displayStatus: orderDisplayStatus(order.status, order.fulfillment, order.paymentMethod),
+		displayStatus: orderDisplayStatus(order.status, order.fulfillment),
 		fulfillment: order.fulfillment,
 		email: order.email,
 		name: order.name,
@@ -28,11 +28,8 @@ export function orderDetail(order: Doc<'orders'>) {
 		currency: order.currency,
 		delivery: order.delivery,
 		note: order.note ?? null,
-		/** True while money is still owed — `draft` (online, unpaid) or `pending` (cash, or a
-		 *  pre-draft-rule online row). */
-		paymentPending: order.status === 'pending' || order.status === 'draft',
-		/** Raw field passthrough — lets the UI tell "awaiting the webhook" from "pay at pickup". */
-		paymentMethod: order.paymentMethod ?? 'cash'
+		/** Payment is online-only; this flag covers the webhook confirmation window. */
+		paymentPending: order.status === 'pending' || order.status === 'draft'
 	};
 }
 

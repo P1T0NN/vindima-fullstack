@@ -1,5 +1,6 @@
 <script lang="ts" generics="Mutation extends FunctionReference<'mutation'>">
 	// LIBRARIES
+	import { tick } from 'svelte';
 	import { useMutation } from 'convex-svelte';
 	import { api } from '@convex/_generated/api';
 
@@ -18,10 +19,10 @@
 	import { optimizeToWebp } from '@/features/storage/utils/optimizeToWebp.js';
 
 	// TYPES
-	import type { HTMLAttributes } from 'svelte/elements';
+	import type { HTMLFormAttributes } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
 	import type { FunctionArgs, FunctionReference, FunctionReturnType } from 'convex/server';
-	import type { FieldConfig, FormFieldContext, FormFieldValue } from './formTypes.js';
+	import type { CustomField, FieldConfig, FormFieldContext, FormFieldValue } from './formTypes.js';
 	import type { PreviewFile } from '@/features/uploadFile/types/uploadFileTypes.js';
 
 	type MutationValue = FunctionArgs<Mutation>[keyof FunctionArgs<Mutation>];
@@ -36,13 +37,19 @@
 	};
 	type PreparedMutationArgs = Omit<FunctionArgs<Mutation>, 'uploadedFiles' | 'retainedFiles'>;
 	type ExtraFieldsContext = FormFieldContext<FormValue>;
-	type Props = Omit<WithElementRef<HTMLAttributes<HTMLFormElement>>, 'onsubmit'> & {
+	type Props = Omit<WithElementRef<HTMLFormAttributes>, 'onsubmit'> & {
 		/** Convex mutation reference run with the current values. */
 		function: Mutation;
 		/** Field presentation config (kinds, labels, placeholders). */
 		fields?: FieldConfig[];
 		/** Custom fields rendered after `fields`, with access to shared form values. */
 		extraFields?: Snippet<[ExtraFieldsContext]>;
+		/** Renderer for custom field markers included in a field configuration. */
+		renderCustomField?: Snippet<[CustomField, Partial<Record<string, string>>]>;
+		/** Validate the flat form values before uploads or the mutation run. */
+		validate?: (values: MutationValues) => Partial<Record<string, string>>;
+		/** Toast text shown when `validate` returns field errors. */
+		validationErrorMessage?: string;
 		/** Called with the mutation result after a successful submit. */
 		onSuccess?: (result: FunctionReturnType<Mutation>) => void | Promise<void>;
 		/** Toast text after the mutation resolves. */
@@ -68,6 +75,9 @@
 		function: convexFunction,
 		fields = [],
 		extraFields,
+		renderCustomField,
+		validate,
+		validationErrorMessage = 'Revisa los campos marcados.',
 		onSuccess,
 		successMessage = 'Saved successfully.',
 		errorMessage = 'Something went wrong.',
@@ -104,8 +114,15 @@
 	const fieldKey = (field: FieldConfig, index: number) =>
 		field.kind === 'section' ? 'section-' + index : field.name;
 
+	let fieldErrors = $state<Partial<Record<string, string>>>({});
+
 	const setLocalValue = (name: string, value: FormValue | undefined) => {
 		values = { ...values, [name]: value };
+		if (fieldErrors[name]) {
+			const nextErrors = { ...fieldErrors };
+			delete nextErrors[name];
+			fieldErrors = nextErrors;
+		}
 	};
 	const localInputValue = (name: string) => {
 		const value = values[name];
@@ -171,6 +188,20 @@
 		if (submitting) return;
 
 		const formElement = event.currentTarget;
+		if (validate) {
+			const nextErrors = validate({ ...values });
+			if (Object.keys(nextErrors).length > 0) {
+				fieldErrors = nextErrors;
+				toastMessage({ type: 'error', error: null, message: validationErrorMessage });
+				await tick();
+				formElement
+					.querySelector<HTMLElement>('[data-validation-target="true"], [aria-invalid="true"]')
+					?.focus();
+				return;
+			}
+		}
+		fieldErrors = {};
+
 		let uploadedFiles: string[] = [];
 		let retainedFiles: string[] = [];
 		let result: FunctionReturnType<Mutation>;
@@ -199,7 +230,7 @@
 				Object.assign(mutationArgs, { uploadedFiles });
 			}
 			// SAFETY: fields write directly into the function-derived values object;
-			// native validation runs first and Convex validators remain authoritative.
+			// Client validation runs first; Convex validators remain authoritative.
 			result = await mutation(mutationArgs as FunctionArgs<Mutation>);
 		} catch (error) {
 			await removeUploads(uploadedFiles);
@@ -224,6 +255,7 @@
 	{#if field.kind === 'input'}
 		<FormInput
 			{field}
+			error={fieldErrors[field.name]}
 			value={localInputValue(field.name)}
 			disabled={submitting || field.disabled}
 			onValueChange={(value) => setLocalValue(field.name, value)}
@@ -231,6 +263,7 @@
 	{:else if field.kind === 'textarea'}
 		<FormTextarea
 			{field}
+			error={fieldErrors[field.name]}
 			value={localInputValue(field.name)}
 			disabled={submitting || field.disabled}
 			onValueChange={(value) => setLocalValue(field.name, value)}
@@ -251,6 +284,8 @@
 		/>
 	{:else if field.kind === 'upload'}
 		<FormUploadFile {field} bind:uploadFiles {submitting} />
+	{:else if field.kind === 'custom'}
+		{@render renderCustomField?.(field, fieldErrors)}
 	{:else if field.kind === 'section'}
 		<FormSection {field} renderField={renderLocalField} />
 	{/if}

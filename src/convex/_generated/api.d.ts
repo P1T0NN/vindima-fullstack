@@ -96,7 +96,6 @@ import type * as tables_orders_mutations_setFulfillment from "../tables/orders/m
 import type * as tables_orders_mutations_setOrderFulfillment from "../tables/orders/mutations/setOrderFulfillment.js";
 import type * as tables_orders_mutations_setPaymentSession from "../tables/orders/mutations/setPaymentSession.js";
 import type * as tables_orders_mutations_settleOrder from "../tables/orders/mutations/settleOrder.js";
-import type * as tables_orders_providers_manual from "../tables/orders/providers/manual.js";
 import type * as tables_orders_providers_registry from "../tables/orders/providers/registry.js";
 import type * as tables_orders_providers_stripe from "../tables/orders/providers/stripe.js";
 import type * as tables_orders_providers_types from "../tables/orders/providers/types.js";
@@ -280,7 +279,6 @@ declare const fullApi: ApiFromModules<{
   "tables/orders/mutations/setOrderFulfillment": typeof tables_orders_mutations_setOrderFulfillment;
   "tables/orders/mutations/setPaymentSession": typeof tables_orders_mutations_setPaymentSession;
   "tables/orders/mutations/settleOrder": typeof tables_orders_mutations_settleOrder;
-  "tables/orders/providers/manual": typeof tables_orders_providers_manual;
   "tables/orders/providers/registry": typeof tables_orders_providers_registry;
   "tables/orders/providers/stripe": typeof tables_orders_providers_stripe;
   "tables/orders/providers/types": typeof tables_orders_providers_types;

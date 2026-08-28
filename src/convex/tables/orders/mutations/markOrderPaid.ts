@@ -11,7 +11,7 @@ import type { ConvexErrorPayload } from '@/shared/types/types';
 
 /**
  * Internal — THE settlement seam (see `CheckoutPageSystemDesign.md` §6.2 + §7). The ONLY
- * place order side effects fire. Called by the manual admin flow or a payment webhook.
+ * place order side effects fire. Called by an admin reconciliation flow or a payment webhook.
  *
  * **Idempotent:** an order already `paid` → no-op (webhook replay safe). A `cancelled` /
  * `refunded` order → throw (`ORDER_NOT_PENDING`): a settlement webhook for a dead order is

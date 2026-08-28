@@ -160,7 +160,6 @@ export function createSignUpPageForm(copy: SignUpFormCopy) {
 			password: String(formData.get('password') ?? ''),
 			confirmPassword: String(formData.get('confirmPassword') ?? ''),
 			phone: String(formData.get('phone') ?? ''),
-			birthday: String(formData.get('birthday') ?? ''),
 			flow: String(formData.get('flow') ?? '')
 		});
 
@@ -182,8 +181,7 @@ export function createSignUpPageForm(copy: SignUpFormCopy) {
 				name,
 				email: p.data.email,
 				password: p.data.password,
-				...(p.data.phone ? { phone: p.data.phone } : {}),
-				birthday: p.data.birthday
+				...(p.data.phone ? { phone: p.data.phone } : {})
 			});
 
 			if (error) {

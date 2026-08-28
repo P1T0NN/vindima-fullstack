@@ -4,7 +4,7 @@ import { v } from 'convex/values';
 
 /**
  * Punch-card reward accounts (RewardSystem.md). Model: every qualifying paid order earns
- * 1 stamp; `STAMPS_PER_REWARD` stamps (default 5) = 1 free item. No points, no cash value.
+ * 1 stamp; `STAMPS_PER_REWARD` stamps (default 5) = 1 free item. No points or monetary value.
  *
  * One row per user, created lazily on the first stamp. Denormalized cache of the
  * append-only `rewardLedger` (see `tables/rewardLedger`) maintained in the same

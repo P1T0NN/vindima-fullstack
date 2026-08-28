@@ -29,25 +29,6 @@ import { mutationResultWith } from '@/convex/validators/mutationResult';
 import type { MutationCtx } from '@/convex/_generated/server';
 import type { Doc } from '@/convex/_generated/dataModel';
 
-type OrderPaymentMethod = NonNullable<Doc<'orders'>['paymentMethod']>;
-
-/**
- * The status an unpaid order carries, as a pure function of how it will be paid.
- *
- * **Online is never placed as a real order.** Nothing is charged yet, so the row is a `draft`:
- * invisible to the customer, the admin, the counters, the search index and every email, and
- * hard-deleted by the cron if abandoned. Stripe's webhook is what turns it into an order, by
- * flipping it straight to `paid`. Cash is the opposite — the shopper committed to paying at the
- * counter, so it is a real `pending` order the moment it is placed, exactly as before.
- *
- * Because it is a function of `paymentMethod` alone, a shopper switching method mid-checkout
- * moves the SAME row between the two worlds with no extra branches: cash → online demotes it to
- * a draft, online → cash promotes it to a real order (and sends the O1 it never got).
- */
-function unpaidStatus(paymentMethod: OrderPaymentMethod): 'draft' | 'pending' {
-	return paymentMethod === 'online' ? 'draft' : 'pending';
-}
-
 /** Is this row still an in-progress checkout the same attempt may keep editing? */
 function isLiveDraft(status: Doc<'orders'>['status']): boolean {
 	return status === 'pending' || status === 'draft';
@@ -81,9 +62,8 @@ async function holdsCurrentClaim(
  * The server is the price authority: it re-resolves and re-prices everything via
  * `calculateOrderPrice` (checkout spec §5), ignoring any client-computed amounts.
  *
- * **An `online` order is not created here** — it is placed as a `draft` (see `unpaidStatus`), so
- * nothing is emailed, listed, counted or searchable until Stripe confirms the payment. Cash is
- * unchanged: a real `pending` order, immediately.
+ * **An `online` order is not created here** — it is placed as a `draft`, so
+ * nothing is emailed, listed, counted or searchable until Stripe confirms the payment.
  *
  * **Idempotency is now draft-shaped.** `attemptId` persists per browser, so while an order is
  * live (`pending` or `draft`) this mutation resolves to that SAME order every time:
@@ -95,7 +75,7 @@ async function holdsCurrentClaim(
  * and no superseded payment session left payable.
  *
  * Returns the shared `{ success, message, data? }` envelope. `data.payment` tells the client
- * what to do next (nothing for cash; a pay-page redirect for online).
+ * what to do next: a pay-page redirect.
  */
 export const placeOrder = mutation({
 	// Wire shape + input rules come from the SHARED `placeOrderSchema` — the checkout form's
@@ -149,15 +129,16 @@ export const placeOrder = mutation({
 		// shopper to a pay page that can only reject it (`ORDER_NOT_PENDING`), and because the
 		// attempt id is persistent that dead end would repeat on EVERY future checkout from this
 		// browser until localStorage was cleared by hand. Reachable two ways: the customer cancels
-		// their own order, or the pending-expiry cron cancels an abandoned one 48h later. So the
-		// attempt is spent — hand the client the same self-heal it already performs for a draft
+		// their own order, or the pending-expiry cron cancels an abandoned one after the configured
+		// expiry window. The attempt is spent — hand the client the same self-heal it already performs
+		// for a draft
 		// owned by someone else: forget the id, mint a new one, resubmit once.
 		if (existing && !isLiveDraft(existing.status)) {
 			if (existing.status !== 'paid') {
 				return { success: false, message: 'Iniciamos un pedido nuevo. Inténtalo de nuevo.' };
 			}
 
-			const payment = await getPaymentProvider(existing.paymentMethod ?? 'cash').createPayment(
+			const payment = await getPaymentProvider(existing.paymentMethod ?? 'online').createPayment(
 				existing
 			);
 			return {
@@ -188,10 +169,7 @@ export const placeOrder = mutation({
 		}
 
 		// Chosen payment method must be enabled in config (a client can't pick a disabled card).
-		const methodEnabled =
-			(args.paymentMethod === 'cash' && CHECKOUT_CONFIG.PAYMENT_METHODS.CASH) ||
-			(args.paymentMethod === 'online' && CHECKOUT_CONFIG.PAYMENT_METHODS.ONLINE);
-		if (!methodEnabled) {
+		if (!CHECKOUT_CONFIG.PAYMENT_METHODS.ONLINE) {
 			return { success: false, message: 'Ese método de pago no está disponible.' };
 		}
 
@@ -214,7 +192,7 @@ export const placeOrder = mutation({
 				(await holdsCurrentClaim(ctx, existing, userId))
 			) {
 				// Pure retry — zero writes, live payment session preserved (§5.3.5).
-				const payment = await getPaymentProvider(existing.paymentMethod ?? 'cash').createPayment(
+				const payment = await getPaymentProvider(existing.paymentMethod ?? 'online').createPayment(
 					existing
 				);
 				return {
@@ -248,10 +226,8 @@ export const placeOrder = mutation({
 			// mints a genuinely new session instead of replaying this one (§7.3.2/§7.3.3).
 			const staleSessionRef = existing.paymentSessionRef;
 
-			// Switching payment method moves this row between the two worlds (see `unpaidStatus`).
-			// `searchText` follows it: the admin search index must never surface a draft, and the
-			// blob is what puts a row in that index at all.
-			const status = unpaidStatus(args.paymentMethod);
+			// Keep the unpaid draft out of admin search until payment settles.
+			const status = 'draft' as const;
 
 			await ctx.db.patch(existing._id, {
 				userId: userId ?? existing.userId,
@@ -296,26 +272,7 @@ export const placeOrder = mutation({
 
 			const payment = await getPaymentProvider(args.paymentMethod).createPayment(updated);
 
-			// Same settle-on-place rule as a fresh cash order (idempotent; no-op if already paid).
-			if (payment.kind === 'none' && CHECKOUT_CONFIG.SETTLE_ON_PLACE) {
-				await ctx.runMutation(internal.tables.orders.mutations.markOrderPaid.markOrderPaid, {
-					orderId: existing._id
-				});
-			}
-
-			// O1 fires here in exactly one case: a draft just became a real order because the
-			// shopper switched to cash. It got no email as a draft, and it is now a pending order
-			// the store will prepare — so it needs the same "order received" a fresh cash order
-			// gets. Every other edit stays silent (anti-spam, §5.3.7), and a settle-on-place store
-			// skips it because O2 already covers a settled order.
-			const promoted = await ctx.db.get(existing._id);
-			if (existing.status === 'draft' && promoted?.status === 'pending') {
-				void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
-					kind: 'orderReceived',
-					orderId: existing._id
-				});
-			}
-
+			// Draft edits stay silent. The payment receipt is sent after Stripe settlement.
 			return {
 				success: true,
 				message: 'Pedido realizado.',
@@ -342,7 +299,7 @@ export const placeOrder = mutation({
 			};
 		}
 
-		const status = unpaidStatus(args.paymentMethod);
+		const status = 'draft' as const;
 
 		const orderId = await ctx.db.insert('orders', {
 			userId: userId ?? null,
@@ -351,8 +308,7 @@ export const placeOrder = mutation({
 			phone: args.contact.phone,
 			number: 'PENDING', // patched below once we have the id
 			attemptId: args.attemptId,
-			// Online → `draft`: nothing has been charged, so no order exists yet as far as the
-			// customer, the store and the books are concerned. Cash → `pending`, unchanged.
+			// Nothing has been charged, so this is not a real order until Stripe confirms payment.
 			status,
 			fulfillment: null,
 			lines: priced.lines,
@@ -387,31 +343,10 @@ export const placeOrder = mutation({
 
 		const order = (await ctx.db.get(orderId))!;
 
-		const payment = await getPaymentProvider(order.paymentMethod ?? 'cash').createPayment(order);
+		const payment = await getPaymentProvider(order.paymentMethod ?? 'online').createPayment(order);
 
-		// Manual orders have no online payment step. Optionally settle right away (mark paid → grant
-		// stamp, record first purchase, apply claim) so rewards count now, rather than waiting for a
-		// staff "confirm payment" action. markOrderPaid is idempotent and a no-op for guests.
-		// Skipped for `redirect` orders — those settle via the Stripe webhook.
-		if (payment.kind === 'none' && CHECKOUT_CONFIG.SETTLE_ON_PLACE) {
-			await ctx.runMutation(internal.tables.orders.mutations.markOrderPaid.markOrderPaid, {
-				orderId
-			});
-		}
-
-		// O1 "order received" — ONLY when the order is still pending (the collapse rule,
-		// `EmailSystemDesign.md` §4.2). This now excludes online orders on both counts: they are
-		// `draft`, and telling someone we received an order we were never paid for is the exact
-		// behaviour this rule exists to stop. Their receipt is O2, sent by the webhook. A
-		// settle-on-place cash order is already paid → O2 covers it too.
-		const settled = await ctx.db.get(orderId);
-		if (settled?.status === 'pending') {
-			void ctx.scheduler.runAfter(0, internal.emails.sendEmail.sendEmail, {
-				kind: 'orderReceived',
-				orderId
-			});
-		}
-
+		// Stripe creates the hosted payment session after this mutation; its webhook settles the
+		// draft and sends the receipt.
 		return {
 			success: true,
 			message: 'Pedido realizado.',

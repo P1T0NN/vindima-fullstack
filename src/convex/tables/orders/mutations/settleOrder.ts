@@ -12,8 +12,8 @@ import { mutationResult } from '@/convex/validators/mutationResult';
 import type { ConvexMutationResult } from '@/shared/types/types';
 
 /**
- * Admin-facing "mark paid" — the manual "confirm payment on pickup/delivery" flow. Soft-checks
- * the order (exists, still `pending`) so the dialog gets the normal `{ success, message }`
+ * Admin-facing payment reconciliation. Soft-checks the order (exists, still `pending`) so the
+ * dialog gets the normal `{ success, message }`
  * envelope, then delegates settlement to the internal `markOrderPaid` — THE settlement seam
  * (`CheckoutPageSystemDesign.md` §6.2): status → `paid`, grant stamp, record first purchase,
  * apply any reward claim, clear the cart, and fire the receipt + owner emails. Idempotent.

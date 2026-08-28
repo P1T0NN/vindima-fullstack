@@ -149,53 +149,25 @@ export const CHECKOUT_CONFIG = {
 		 * Offer delivery (address form + the shipping fee below). Set to `null` to disable
 		 * delivery entirely (pickup-only store).
 		 */
-		DELIVERY: {
-			/** Flat shipping fee, minor units. */
-			FEE_MINOR_UNITS: 5000,
-			/** Post-discount subtotal at which shipping becomes free. null = never free. */
-			FREE_ABOVE_MINOR_UNITS: 50000 as number | null
-		} as { FEE_MINOR_UNITS: number; FREE_ABOVE_MINOR_UNITS: number | null } | null
+		DELIVERY: null as { FEE_MINOR_UNITS: number; FREE_ABOVE_MINOR_UNITS: number | null } | null
 	},
 
 	/**
-	 * Payment methods offered at checkout — the shopper picks one as a card (spec §8.1). The
-	 * provider registry maps method → settlement provider: `CASH` → the manual provider (order
-	 * placed `pending`, paid offline on pickup/delivery; staff settle it), `ONLINE` → Stripe
-	 * Checkout (hosted redirect, settled by webhook — see `StripeSystemDesign.md`). With a single
-	 * method enabled the checkout shows no picker and uses it directly.
+	 * Payment methods offered at checkout. Online payments use Stripe Checkout (hosted redirect,
+	 * settled by webhook — see `StripeSystemDesign.md`). With one method enabled the checkout uses
+	 * it directly.
 	 *
 	 * `ONLINE: true` REQUIRES two Convex env vars and one dashboard webhook per deployment
 	 * (`StripeSystemDesign.md` §17): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and an endpoint
-	 * at `https://<deployment>.convex.site/stripe/webhook`. Set it back to `false` for a
-	 * cash-only store: the card renders disabled ("Próximamente") and the server rejects the
-	 * method, so no shopper can reach a dead payment path.
+	 * at `https://<deployment>.convex.site/stripe/webhook`. Set it to `false` to disable checkout
+	 * until Stripe is configured.
 	 */
 	PAYMENT_METHODS: {
-		CASH: true,
 		ONLINE: true
 	},
 
-	/**
-	 * Settle a manual (offline-paid) order the moment it's placed — mark it paid and fire the
-	 * reward side-effects (stamp, first-purchase record, claim) — instead of leaving it `pending`
-	 * for staff to confirm. Useful before a real "confirm payment" admin flow (or Stripe) exists,
-	 * so placing an order exercises the whole rewards path. No effect on `redirect` orders (those
-	 * settle via the payment webhook). Set to `false` for a true pay-on-delivery model where
-	 * rewards should only count once staff mark the order paid.
-	 */
-	SETTLE_ON_PLACE: false,
-
-	/** Hours a `pending` CASH order lives before the cron cancels it (and frees any reward
-	 *  claim). Cash orders wait for the customer to show up, so they get the long window. */
-	PENDING_EXPIRY_HOURS: 48,
-
-	/**
-	 * Hours a `pending` ONLINE order lives before the cron cancels it. Shorter than the cash
-	 * window: an online order nobody paid is an abandoned Stripe redirect, not a customer on
-	 * their way. 24 h also matches Stripe's maximum Checkout Session lifetime, so the order
-	 * and its last possible payment session die together.
-	 */
-	PENDING_EXPIRY_HOURS_ONLINE: 24,
+	/** Hours an unpaid checkout stays open before the cron cancels or deletes it. */
+	PENDING_EXPIRY_HOURS: 24,
 
 	/** Documentation, not a subsystem: prices are tax-inclusive. See spec §2. */
 	TAX_MODE: 'included' as const

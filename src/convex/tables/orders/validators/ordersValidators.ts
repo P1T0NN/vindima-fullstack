@@ -29,12 +29,17 @@ export const orderAmountsValidator = v.object({
 	totalMinor: v.number()
 });
 
-/** How the shopper chose to pay (spec §8.1). `cash` = offline/manual; `online` = hosted page (Stripe). */
-export const orderPaymentMethodValidator = v.union(v.literal('cash'), v.literal('online'));
+/** The hosted payment method used by checkout (Stripe Checkout). */
+export const orderPaymentMethodValidator = v.literal('online');
 
 /** Where/how the customer receives the order. */
 export const orderDeliveryValidator = v.union(
-	v.object({ kind: v.literal('pickup') }),
+	v.object({
+		kind: v.literal('pickup'),
+		// Optional keeps historical pickup orders readable; new orders validate these on the wire.
+		pickupDate: v.optional(v.string()),
+		pickupTime: v.optional(v.string())
+	}),
 	v.object({
 		kind: v.literal('delivery'),
 		address: v.object({

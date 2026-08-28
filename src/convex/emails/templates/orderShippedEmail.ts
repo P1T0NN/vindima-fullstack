@@ -1,9 +1,6 @@
 // CONFIG
 import { COMPANY_DATA } from '@/shared/config.js';
 
-// UTILS
-import { formatMoneyMinor } from '@/utils/formatters';
-
 // LAYOUT
 import { renderEmail, h1, p, panel, firstName, esc } from './emailLayout';
 import {
@@ -21,8 +18,7 @@ import type { EmailContent } from '@/shared/features/emails/types/emailsTypes';
  * O3 (delivery: "en camino") + O4 (pickup: "listo para recoger") — one admin action
  * (`fulfillment → 'shipped'`) drives both; the copy branches on `delivery.kind`
  * (`EmailSystemDesign.md` §5 O3/O4). No prices — the receipt already carried them.
- * Pickup makes the order number prominent (staff ask for it) + a pay-on-pickup reminder
- * when the order is still `pending`.
+ * Pickup makes the order number prominent because staff ask for it at the counter.
  */
 export function orderShippedEmail(order: Doc<'orders'>): EmailContent {
 	const hi = firstName(order.name);
@@ -30,9 +26,6 @@ export function orderShippedEmail(order: Doc<'orders'>): EmailContent {
 	const isPickup = order.delivery.kind === 'pickup';
 
 	if (isPickup) {
-		const total = formatMoneyMinor(order.amounts.totalMinor, order.currency);
-		const payReminder = order.status === 'pending' ? p(`Pagas al recoger - ${total}.`) : '';
-
 		const bodyHtml =
 			h1('Tu pedido está listo para recoger') +
 			p(`${greeting}tu pedido ya te espera en la tienda.`) +
@@ -41,8 +34,7 @@ export function orderShippedEmail(order: Doc<'orders'>): EmailContent {
 					`<p style="margin:0 0 16px;font-family:'Courier New',Courier,monospace;font-size:24px;font-weight:bold;color:#510128;">${esc(order.number)}</p>` +
 					orderLinesRows(order)
 			) +
-			p('Menciona tu número de pedido al llegar.') +
-			payReminder;
+			p('Menciona tu número de pedido al llegar.');
 
 		const html = renderEmail('Tu pedido ya te espera en la tienda.', bodyHtml);
 		const text = [
@@ -53,8 +45,7 @@ export function orderShippedEmail(order: Doc<'orders'>): EmailContent {
 			`Número de pedido: ${order.number}`,
 			orderLinesText(order),
 			'',
-			'Menciona tu número de pedido al llegar.',
-			order.status === 'pending' ? `Pagas al recoger - ${total}.` : ''
+			'Menciona tu número de pedido al llegar.'
 		]
 			.filter(Boolean)
 			.join('\n');

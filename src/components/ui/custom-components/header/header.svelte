@@ -49,9 +49,9 @@
 	const accountHref = $derived(
 		isAuthenticated ? PROTECTED_PAGE_ENDPOINTS.ACCOUNT : UNPROTECTED_PAGE_ENDPOINTS.LOGIN
 	);
-	const accountLabel = $derived(isAuthenticated ? 'Mi cuenta' : 'Iniciar sesiÃ³n');
+	const accountLabel = $derived(isAuthenticated ? 'Mi cuenta' : 'Iniciar sesión');
 
-	// Gold CTA: Join the Club (signed out) Â· Admin Dashboard (admin) Â· My Rewards (member).
+	// Gold CTA: Join the Club (signed out) · Admin Dashboard (admin) · My Rewards (member).
 	const cta = $derived(resolveHeaderCta(authClass.currentUser, isAuthenticated));
 
 	let headerEl = $state<HTMLElement>();
@@ -96,7 +96,7 @@
 		</nav>
 
 		<!-- -mr-3 cancels the trailing icon button's own 12px inset (cart `p-3`, menu `size-11`
-		     around a 20px glyph) so the glyph â€” not its tap target â€” lines up with the gutter
+		     around a 20px glyph) so the glyph — not its tap target — lines up with the gutter
 		     the logo starts at. Tap targets stay full size. -->
 		<div class="-mr-3 flex items-center justify-end gap-3">
 			<Link href={accountHref} class={cn(navLinkCompactClass, 'hidden sm:inline-flex')}>
@@ -117,8 +117,8 @@
 				onclick={() => cart.toggle()}
 				class="relative flex items-center justify-center rounded-sm p-3 text-accent transition-opacity outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary/40"
 				aria-label={cart.count === 1
-					? `Carrito, ${cart.count} artÃ­culo`
-					: `Carrito, ${cart.count} artÃ­culos`}
+					? `Carrito, ${cart.count} artículo`
+					: `Carrito, ${cart.count} artículos`}
 			>
 				<span class="icon-[lucide--shopping-bag] size-[21px]" ></span>
 				{#if cart.count > 0}

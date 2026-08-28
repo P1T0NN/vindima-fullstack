@@ -28,11 +28,8 @@ export function orderCancelledEmail(
 		? p('Tu artículo gratis volvió a tu cuenta - úsalo cuando quieras.', true)
 		: '';
 
-	// The hold window differs by payment method (missing paymentMethod = historical cash).
-	const holdHours =
-		order.paymentMethod === 'online'
-			? CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE
-			: CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS;
+	// All unpaid checkouts use the same hold window.
+	const holdHours = CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS;
 
 	const context =
 		reason === 'expired'

@@ -27,7 +27,7 @@
 
 ## 2. Non-Goals (deliberately excluded — YAGNI)
 
-- **Points, tiers, multipliers, cash-value redemption.** The punch card replaces all of it.
+- **Points, tiers, multipliers, monetary-value redemption.** The punch card replaces all of it.
   If a future project needs a points economy, that's a different module — don't bolt it on here.
 - **Multiple stamps per order / spend-proportional stamping.** 1 qualifying order = 1 stamp,
   always. A `MIN_ORDER_MINOR_UNITS` threshold covers "don't stamp a €2 order" without

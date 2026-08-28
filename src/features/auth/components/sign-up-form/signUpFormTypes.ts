@@ -20,5 +20,4 @@ export type SignUpPageField =
 	| 'email'
 	| 'password'
 	| 'confirmPassword'
-	| 'phone'
-	| 'birthday';
+	| 'phone';

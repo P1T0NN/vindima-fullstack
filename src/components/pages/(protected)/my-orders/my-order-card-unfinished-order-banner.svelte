@@ -27,7 +27,7 @@
 			class="icon-[lucide--triangle-alert] mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400"
 		></span>
 		<p class="text-sm leading-relaxed text-amber-900 dark:text-amber-200">
-			Tu pago no se completó. Guardamos este pedido por {CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE}&nbsp;horas.
+			Tu pago no se completó. Guardamos este pedido por {CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS}&nbsp;horas.
 			Puedes terminarlo cuando quieras.
 		</p>
 	</div>

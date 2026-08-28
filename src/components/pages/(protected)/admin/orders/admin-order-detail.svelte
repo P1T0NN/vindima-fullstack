@@ -5,14 +5,15 @@
 	// COMPONENTS
 	import { Card } from '@/components/ui/card/index.js';
 	import { Button } from '@/components/ui/button/index.js';
-	import AdminOrderMarkPaidButton from './admin-order-mark-paid-button.svelte';
-	import AdminOrderFulfillment from './admin-order-fulfillment.svelte';
 	import AdminOrderRefundButton from './admin-order-refund-button.svelte';
 
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { formatOrderDate } from '@/features/orders/utils/ordersUtils.js';
 	import { orderStatusLabel, orderStatusBadgeClass } from '@/features/orders/utils/orderStatus.js';
+	import { formatPickupDate } from '@/shared/features/checkout/utils/formatPickupDate.js';
+	import { formatPickupTime } from '@/shared/features/checkout/utils/formatPickupTime.js';
+	import { isPickupTimeSlot } from '@/shared/features/checkout/utils/isPickupTimeSlot.js';
 
 	// TYPES
 	import type { Doc } from '@/convex/_generated/dataModel';
@@ -31,16 +32,23 @@
 				? 'Gratis'
 				: money(order.amounts.shippingMinor)
 	);
+	const pickup = $derived(order.delivery.kind === 'pickup' ? order.delivery : null);
+	const pickupDateLabel = $derived(pickup?.pickupDate ? formatPickupDate(pickup.pickupDate) : '');
+	const pickupTimeLabel = $derived(
+		pickup?.pickupTime && isPickupTimeSlot(pickup.pickupTime)
+			? formatPickupTime(pickup.pickupTime)
+			: ''
+	);
 
-	// Any state-changing action available? (drives whether the actions card renders.)
-	const hasActions = $derived(order.status === 'pending' || order.status === 'paid');
+	// The only manual action is refunding a paid order.
+	const hasActions = $derived(order.status === 'paid');
 </script>
 
 <div class="flex flex-col gap-6">
 	<!-- Header: back + number + status. -->
 	<div class="flex flex-col gap-4">
 		<Button href={resolve('/admin/orders')} variant="outline" size="sm" class="w-fit">
-			<span class="icon-[lucide--arrow-left] size-4" ></span>
+			<span class="icon-[lucide--arrow-left] size-4"></span>
 			Pedidos
 		</Button>
 
@@ -59,25 +67,15 @@
 		</div>
 	</div>
 
-	<!-- Actions: mark paid (pending) · fulfillment + refund (paid). -->
+	<!-- Actions: refund (paid). -->
 	{#if hasActions}
 		<Card class="flex flex-col gap-4 p-5">
 			<h2 class="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Acciones</h2>
 
-			{#if order.status === 'pending'}
-				<AdminOrderMarkPaidButton {order} />
-			{:else if order.status === 'paid'}
-				<div class="flex flex-col gap-4">
-					<div class="flex flex-col gap-2">
-						<span class="text-xs tracking-wide text-muted-foreground uppercase">Entrega</span>
-						<AdminOrderFulfillment {order} />
-					</div>
-					<div class="flex flex-col gap-2 border-t pt-4">
-						<span class="text-xs tracking-wide text-muted-foreground uppercase">Reembolso</span>
-						<AdminOrderRefundButton {order} />
-					</div>
-				</div>
-			{/if}
+			<div class="flex flex-col gap-2">
+				<span class="text-xs tracking-wide text-muted-foreground uppercase">Reembolso</span>
+				<AdminOrderRefundButton {order} />
+			</div>
 		</Card>
 	{/if}
 
@@ -91,10 +89,13 @@
 				{#each order.lines as line, i (i)}
 					<li class="flex items-baseline justify-between gap-4 py-2.5 text-sm">
 						<span class="min-w-0">
-							{line.name}{#if line.qty > 1}<span class="text-muted-foreground"> x {line.qty}</span
+							{line.name}{#if line.qty > 1}<span class="text-muted-foreground">
+									x {line.qty}</span
 								>{/if}
 						</span>
-						<span class={`shrink-0 tabular-nums ${line.isRewardLine ? 'text-gold-ink italic' : ''}`}>
+						<span
+							class={`shrink-0 tabular-nums ${line.isRewardLine ? 'text-gold-ink italic' : ''}`}
+						>
 							{line.isRewardLine ? 'Gratis' : money(line.unitPriceMinor * line.qty)}
 						</span>
 					</li>
@@ -130,7 +131,7 @@
 					Cliente
 				</h2>
 				<p class="text-sm font-medium">{order.name || '-'}</p>
-				<a href={`mailto:${order.email}`} class="text-sm text-accent break-all hover:underline">
+				<a href={`mailto:${order.email}`} class="text-sm break-all text-accent hover:underline">
 					{order.email}
 				</a>
 				{#if order.phone}
@@ -149,6 +150,22 @@
 				</h2>
 				{#if order.delivery.kind === 'pickup'}
 					<p class="text-sm font-medium">Recoger en tienda</p>
+					{#if pickupDateLabel || pickupTimeLabel}
+						<dl class="mt-1 flex flex-col gap-1.5 text-sm text-muted-foreground">
+							{#if pickupDateLabel}
+								<div class="flex justify-between gap-4">
+									<dt>Día</dt>
+									<dd class="text-right text-foreground">{pickupDateLabel}</dd>
+								</div>
+							{/if}
+							{#if pickupTimeLabel}
+								<div class="flex justify-between gap-4">
+									<dt>Hora</dt>
+									<dd class="text-right text-foreground">{pickupTimeLabel}</dd>
+								</div>
+							{/if}
+						</dl>
+					{/if}
 				{:else}
 					<p class="text-sm leading-relaxed">
 						{order.delivery.address.line1}<br />

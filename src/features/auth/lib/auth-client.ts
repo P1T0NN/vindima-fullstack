@@ -20,8 +20,7 @@ export const authClient = createAuthClient({
 	plugins: [
 		inferAdditionalFields({
 			user: {
-				phone: { type: 'string', required: false, input: true },
-				birthday: { type: 'string', required: false, input: true }
+				phone: { type: 'string', required: false, input: true }
 			}
 		}),
 		convexClient(),

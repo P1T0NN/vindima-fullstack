@@ -23,8 +23,7 @@
 	const id = $props.id();
 
 	const benefits = [
-		'10% de descuento en toda la tienda',
-		'Regalo de cumpleaños',
+		'10% de descuento en tu primer pedido',
 		'5 compras = 1 recompensa',
 		'Maridajes pensados para tu mesa'
 	] as const;

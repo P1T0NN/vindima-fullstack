@@ -38,16 +38,21 @@ type PlaceOrderArgs = FunctionArgs<typeof api.tables.orders.mutations.placeOrder
 export function toPlaceOrderArgs(
 	values: PlaceOrderFormInput,
 	attemptId: string,
-	lines: { productRef: string; qty: number }[]
+	lines: { productRef: string; qty: number }[],
+	pickupSchedule?: { pickupDate: string; pickupTime: string }
 ): PlaceOrderArgs {
 	return {
 		attemptId,
 		lines,
-		contact: { name: values.name, email: values.email, phone: values.phone || undefined },
+		contact: { name: values.name, email: values.email, phone: values.phone },
 		paymentMethod: values.payment,
 		delivery:
 			values.mode === 'pickup'
-				? { kind: 'pickup' }
+				? {
+						kind: 'pickup',
+						pickupDate: pickupSchedule?.pickupDate ?? '',
+						pickupTime: pickupSchedule?.pickupTime ?? ''
+					}
 				: {
 						kind: 'delivery',
 						address: {

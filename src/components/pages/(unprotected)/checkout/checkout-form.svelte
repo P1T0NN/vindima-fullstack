@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 
 	// LIBRARIES
+	import type { CalendarDate } from '@internationalized/date';
 	import { useAuth, useMutation } from 'convex-svelte';
 	import { ConvexError } from 'convex/values';
 	import { isRateLimitError } from '@convex-dev/rate-limiter';
@@ -18,16 +19,22 @@
 
 	// COMPONENTS
 	import Form from '@/components/ui/custom-components/form/form.svelte';
+	import CalendarWithTime from '@/components/ui/custom-components/calendar-with-time/calendar-with-time.svelte';
+	import { FieldError } from '@/components/ui/field/index.js';
 	import CheckoutSummary from './checkout-summary/checkout-summary.svelte';
 
 	// SCHEMAS
-	import type { PlaceOrderFormInput } from '@/shared/features/orders/schemas/ordersSchemas';
+	import {
+		placeOrderFormSchema,
+		type PlaceOrderFormInput
+	} from '@/shared/features/orders/schemas/ordersSchemas';
 
 	// FORMS
 	import { createPlaceOrderForm } from '@/features/orders/forms/placeOrderForm';
 
 	// UTILS
 	import { toastMessage } from '@/utils/toastMessage';
+	import { zodIssuesToFieldErrors } from '@/shared/features/validations/utils/zodFieldErrors.js';
 	import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	import { appGoto } from '@/utils/app-navigation.js';
 	import { toPlaceOrderArgs } from '@/features/orders/utils/ordersUtils.js';
@@ -50,7 +57,8 @@
 		toPlaceOrderArgs(
 			values,
 			readOrCreateAttemptId(),
-			cart.lines.map((l) => ({ productRef: l.productRef, qty: l.qty }))
+			cart.lines.map((l) => ({ productRef: l.productRef, qty: l.qty })),
+			{ pickupDate: pickupDate?.toString() ?? '', pickupTime: pickupTime ?? '' }
 		);
 
 	const canPickup = CHECKOUT_CONFIG.FULFILLMENT.PICKUP;
@@ -60,15 +68,7 @@
 		...(canDeliver ? [{ value: 'delivery', label: 'Entrega a domicilio' }] : [])
 	];
 
-	// Payment methods: cash shows only when enabled; online always renders so the shopper sees the
-	// choice, greyed out ("Próximamente") when a store runs cash-only (PAYMENT_METHODS.ONLINE).
-	const canCash = CHECKOUT_CONFIG.PAYMENT_METHODS.CASH;
-	const canOnline = CHECKOUT_CONFIG.PAYMENT_METHODS.ONLINE;
-	const paymentOptions = [
-		...(canCash ? [{ value: 'cash', label: 'Efectivo' }] : []),
-		{ value: 'online', label: 'Pago en línea', disabled: !canOnline }
-	];
-	const defaultPayment = canCash ? 'cash' : canOnline ? 'online' : 'cash';
+	const defaultPayment = 'online';
 
 	// Prefill source, read once at init. The two cover each other's blind spot: `authClass` is live
 	// but still empty this early on a hard load, while `page.data` is the SSR snapshot and doesn't
@@ -87,11 +87,25 @@
 		city: '',
 		postcode: '',
 		country: '',
+		pickupDate: '',
+		pickupTime: '',
 		note: ''
 	});
 
+	let pickupDate = $state<CalendarDate | undefined>();
+	let pickupTime = $state<string | null>(null);
+
+	function validateCheckout(input: Record<string, unknown>): Partial<Record<string, string>> {
+		const validation = placeOrderFormSchema.safeParse({
+			...input,
+			pickupDate: pickupDate?.toString() ?? '',
+			pickupTime: pickupTime ?? ''
+		});
+		return validation.success ? {} : zodIssuesToFieldErrors(validation.error.issues);
+	}
+
 	const sections = $derived(
-		createPlaceOrderForm({ modeOptions, paymentOptions, showAddress: values.mode === 'delivery' })
+		createPlaceOrderForm({ modeOptions, showAddress: values.mode === 'delivery' })
 	);
 
 	// Refs the server rejected on the last attempt — the summary greys them out.
@@ -149,8 +163,7 @@
 			return;
 		}
 
-		// Online payment → our pay page, which mints the Stripe session and redirects on. Cash →
-		// straight to the confirmation page.
+		// Online payment → our pay page, which mints the Stripe session and redirects on.
 		if (res.data.payment?.kind === 'redirect') {
 			window.location.href = res.data.payment.url;
 			return;
@@ -168,22 +181,81 @@
 	let submitting = $state(false);
 </script>
 
-<Form
-	bind:values
-	fields={sections}
-	function={api.tables.orders.mutations.placeOrder.placeOrder}
-	prepareArgs={() => placeOrderArgs()}
-	onSuccess={(result) => handleResult(result)}
-	resetOnSuccess={false}
-	bind:submitting
-	class="lg:grid lg:grid-cols-[1fr_380px] lg:items-start lg:gap-8"
->
-	<aside class="lg:sticky lg:top-6 lg:col-start-2 lg:row-span-full lg:row-start-1">
+<div class="lg:grid lg:grid-cols-[1fr_380px] lg:items-start lg:gap-8">
+	<Form
+		id="checkout-form"
+		bind:values
+		fields={sections}
+		function={api.tables.orders.mutations.placeOrder.placeOrder}
+		prepareArgs={() => placeOrderArgs()}
+		validate={validateCheckout}
+		validationErrorMessage="Hay errores en los campos. Revísalos antes de continuar."
+		novalidate
+		onSuccess={(result) => handleResult(result)}
+		resetOnSuccess={false}
+		bind:submitting
+		class="lg:col-start-1 lg:row-start-1"
+	>
+		{#snippet renderCustomField(field, fieldErrors)}
+			{#if field.name === 'pickupSchedule'}
+				<div class="space-y-3">
+					<div class="space-y-1">
+						<p class="text-sm font-medium">¿Qué día quieres recoger tu pedido?</p>
+						<p class="text-sm text-muted-foreground">¿A qué hora te queda bien?</p>
+					</div>
+					<div
+						class={fieldErrors.pickupDate || fieldErrors.pickupTime
+							? 'rounded-lg border border-destructive ring-3 ring-destructive/20'
+							: 'rounded-lg'}
+						data-validation-target="true"
+						tabindex="-1"
+					>
+						<CalendarWithTime bind:value={pickupDate} bind:selectedTime={pickupTime} />
+					</div>
+					<input
+						class="sr-only"
+						name="pickupDate"
+						aria-label="Fecha de recogida"
+						aria-invalid={fieldErrors.pickupDate ? 'true' : undefined}
+						aria-describedby={
+							fieldErrors.pickupDate || fieldErrors.pickupTime
+								? 'checkout-pickup-schedule-error'
+								: undefined
+						}
+						value={pickupDate?.toString() ?? ''}
+						required
+					/>
+					<input
+						class="sr-only"
+						name="pickupTime"
+						aria-label="Hora de recogida"
+						aria-invalid={fieldErrors.pickupTime ? 'true' : undefined}
+						aria-describedby={
+							fieldErrors.pickupDate || fieldErrors.pickupTime
+								? 'checkout-pickup-schedule-error'
+								: undefined
+						}
+						value={pickupTime ?? ''}
+						required
+					/>
+					{#if fieldErrors.pickupDate || fieldErrors.pickupTime}
+						<FieldError id="checkout-pickup-schedule-error">
+							{fieldErrors.pickupDate ?? ''}
+							{#if fieldErrors.pickupDate && fieldErrors.pickupTime}<br />{/if}
+							{fieldErrors.pickupTime ?? ''}
+						</FieldError>
+					{/if}
+				</div>
+			{/if}
+		{/snippet}
+	</Form>
+
+	<aside class="mt-6 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1 lg:mt-0">
 		<CheckoutSummary
 			mode={values.mode}
-			payment={values.payment}
 			{unavailableRefs}
 			busy={submitting}
+			formId="checkout-form"
 		/>
 	</aside>
-</Form>
+</div>

@@ -19,7 +19,7 @@
 
 	// Doc → display. `unpaid` is its own state now: a pending ONLINE order was never charged,
 	// so it must not read as "en proceso" (see `orderDisplayStatus`).
-	const status = $derived(orderDisplayStatus(order.status, order.fulfillment, order.paymentMethod));
+	const status = $derived(orderDisplayStatus(order.status, order.fulfillment));
 	const isCancelled = $derived(status === 'cancelled');
 	const isUnpaid = $derived(status === 'unpaid');
 	/** Any pending order can be dropped by its owner; paid ones are refund territory (admin). */
@@ -60,7 +60,6 @@
 	<MyOrderCardPriceBreakdown totalMinor={order.amounts.totalMinor} currency={order.currency} />
 
 	{#if canCancel && !isUnpaid}
-		<!-- Pending CASH order: confirmed and being prepared, but still the shopper's to drop. -->
 		<div class="flex justify-end border-t border-accent/10 px-5 py-3 sm:px-6">
 			<MyOrderCardCancelButton orderId={order._id} orderNumber={order.number} />
 		</div>

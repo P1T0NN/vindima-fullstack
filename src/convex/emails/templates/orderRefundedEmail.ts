@@ -10,17 +10,16 @@ import type { EmailContent } from '@/shared/features/emails/types/emailsTypes';
 
 /**
  * O7 — refund issued (`EmailSystemDesign.md` §5 O7). Quiet and factual, no CTA. Copy differs
- * by how the order was paid: `cash` money moves offline (staff coordinate); `online` (Stripe)
- * lands back on the payment method in a few business days.
+ * Provider-backed refunds return money to the original payment method in a few business days;
+ * legacy rows without a provider reference receive neutral follow-up copy.
  */
 export function orderRefundedEmail(order: Doc<'orders'>): EmailContent {
 	const hi = firstName(order.name);
 	const amount = formatMoneyMinor(order.amounts.totalMinor, order.currency);
 
-	const nextLine =
-		order.paymentMethod === 'online'
-			? 'Verás el reembolso en tu método de pago en 5-10 días hábiles.'
-			: 'Te contactaremos para coordinar la devolución.';
+	const nextLine = order.paymentRef
+		? 'Verás el reembolso en tu método de pago en 5-10 días hábiles.'
+		: 'Te contactaremos para coordinar la devolución.';
 
 	const bodyHtml =
 		h1('Procesamos tu reembolso') +

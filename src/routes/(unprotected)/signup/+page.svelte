@@ -9,7 +9,6 @@
 	import Spinner from '@/components/ui/spinner/spinner.svelte';
 	import { Card } from '@/components/ui/card/index.js';
 	import { Input } from '@/components/ui/input/index.js';
-	import { BirthdayInput } from '@/components/ui/custom-components/birthday-input/index.js';
 	import { Label } from '@/components/ui/label/index.js';
 	import Link from '@/components/ui/custom-components/link/link.svelte';
 	import Logo from '@/components/ui/custom-components/logo/logo.svelte';
@@ -24,8 +23,7 @@
 	const id = $props.id();
 
 	const benefits = [
-		'10% de descuento en toda la tienda',
-		'Regalo de cumpleaños',
+		'10% de descuento en tu primer pedido',
 		'5 compras = 1 recompensa',
 		'Maridajes pensados para tu mesa'
 	] as const;
@@ -219,28 +217,6 @@
 							/>
 							{#if form.fieldErrors.phone}
 								<FieldError id="signup-phone-{id}-error">{form.fieldErrors.phone}</FieldError>
-							{/if}
-						</div>
-
-						<div class="flex flex-col gap-1.5">
-							<Label
-								for="signup-birthday-{id}"
-								class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
-							>
-								Cumpleaños (DD/MM)
-							</Label>
-							<BirthdayInput
-								id="signup-birthday-{id}"
-								name="birthday"
-								placeholder="DD/MM"
-								aria-invalid={form.fieldErrors.birthday ? 'true' : undefined}
-								aria-describedby={form.fieldErrors.birthday
-									? `signup-birthday-${id}-error`
-									: undefined}
-								class="h-auto rounded-sm px-3 py-3"
-							/>
-							{#if form.fieldErrors.birthday}
-								<FieldError id="signup-birthday-{id}-error">{form.fieldErrors.birthday}</FieldError>
 							{/if}
 						</div>
 					</div>

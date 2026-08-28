@@ -14,7 +14,10 @@ const password = z
 	.string()
 	.min(1)
 	.min(AUTH_DATA.PASSWORD_MIN_LENGTH)
-	.refine((input) => !isDeniedPassword(input), 'Esa contraseña es demasiado común. Elige una más segura.');
+	.refine(
+		(input) => !isDeniedPassword(input),
+		'Esa contraseña es demasiado común. Elige una más segura.'
+	);
 
 const passwordsMustMatch = {
 	path: ['confirmPassword'],
@@ -34,7 +37,7 @@ export const signUpSchema = z
 	// whole contract on either runtime.
 	.refine((data) => data.password === data.confirmPassword, passwordsMustMatch);
 
-/** Full `/signup` page: split name, optional phone, birthday. */
+/** Full `/signup` page: split name and optional phone. */
 export const signUpPageSchema = z
 	.object({
 		firstName: z.string().trim().min(1),
@@ -47,7 +50,6 @@ export const signUpPageSchema = z
 			.trim()
 			.transform((value) => (value.length > 0 ? value : undefined))
 			.optional(),
-		birthday: z.string().trim().min(1),
 		flow: z.literal('signUp')
 	})
 	.refine((data) => data.password === data.confirmPassword, passwordsMustMatch);

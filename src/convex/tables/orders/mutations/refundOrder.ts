@@ -17,13 +17,8 @@ import type { ConvexMutationResult } from '@/shared/types/types';
  * `markOrderRefunded` (`paid → refunded` + stamp revoke; deliberately no welcome-offer restore
  * and no applied-claim clawback — RewardSystem.md §6/§9/§15.7).
  *
- * Two paths by payment method (`StripeSystemDesign.md` §9.1):
- * - **cash** (or any order without a `paymentRef`): flip now. There is no online payment to
- *   reverse; the refund is coordinated offline, exactly as the O7 email already says.
- * - **online**: **money moves first, status follows.** We only schedule the Stripe refund here
- *   and report `ORDER_REFUND_STARTED`; `refundStripePayment` flips the order once Stripe
- *   confirms. If Stripe fails, the order stays `paid` — the truth — and the admin retries.
- *   Flipping first would put a lie in the books.
+ * Orders with a payment reference are refunded asynchronously through Stripe. Legacy rows
+ * without one can be marked refunded immediately.
  */
 export const refundOrder = adminMutation({
 	args: { orderId: v.id('orders') },
@@ -37,9 +32,7 @@ export const refundOrder = adminMutation({
 			return { success: false, message: 'Esta acción solo aplica a pedidos pagados.' };
 		}
 
-		const refundsOnline = order.paymentMethod === 'online' && !!order.paymentRef;
-
-		if (refundsOnline) {
+		if (order.paymentRef) {
 			await ctx.scheduler.runAfter(
 				0,
 				internal.tables.orders.actions.refundStripePayment.refundStripePayment,

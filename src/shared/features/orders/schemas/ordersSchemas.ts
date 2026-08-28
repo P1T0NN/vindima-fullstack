@@ -17,11 +17,19 @@
 import { z } from 'zod';
 
 // UTILS
+import { isPickupDate } from '../../checkout/utils/isPickupDate';
+import { isPickupTimeSlot } from '../../checkout/utils/isPickupTimeSlot';
 import { normalizeOrderNumber } from '../utils/orderNumber';
 
 /** Where/how the customer receives the order (mirrors `orderDeliveryValidator`). */
 export const orderDeliverySchema = z.discriminatedUnion('kind', [
-	z.object({ kind: z.literal('pickup') }),
+	z.object({
+		kind: z.literal('pickup'),
+		pickupDate: z.string().refine(isPickupDate, 'Selecciona un día válido para recoger tu pedido.'),
+		pickupTime: z
+			.string()
+			.refine(isPickupTimeSlot, 'Selecciona una hora válida para recoger tu pedido.')
+	}),
 	z.object({
 		kind: z.literal('delivery'),
 		address: z.object({
@@ -45,11 +53,11 @@ export const placeOrderSchema = z.object({
 	contact: z.object({
 		name: z.string().trim().min(1),
 		email: z.email(),
-		phone: z.string().optional()
+		phone: z.string().trim().min(1)
 	}),
 	delivery: orderDeliverySchema,
 	/** Shopper's chosen payment method — the server also checks it's enabled in config. */
-	paymentMethod: z.enum(['cash', 'online']),
+	paymentMethod: z.literal('online'),
 	note: z.string().optional()
 });
 
@@ -62,21 +70,40 @@ export const placeOrderFormSchema = z
 	.object({
 		name: z.string().min(1),
 		email: z.email(),
-		phone: z.string(),
+		phone: z.string().trim().min(1),
 		mode: z.enum(['pickup', 'delivery']),
-		payment: z.enum(['cash', 'online']),
+		payment: z.literal('online'),
 		line1: z.string(),
 		line2: z.string(),
 		city: z.string(),
 		postcode: z.string(),
 		country: z.string(),
+		pickupDate: z.string(),
+		pickupTime: z.string(),
 		note: z.string()
 	})
 	.superRefine((values, ctx) => {
-		if (values.mode !== 'delivery') return;
-		for (const field of REQUIRED_ADDRESS_FIELDS) {
-			if (values[field].trim()) continue;
-			ctx.addIssue({ code: 'custom', path: [field], message: 'Este campo es obligatorio' });
+		if (values.mode === 'delivery') {
+			for (const field of REQUIRED_ADDRESS_FIELDS) {
+				if (values[field].trim()) continue;
+				ctx.addIssue({ code: 'custom', path: [field], message: 'Este campo es obligatorio' });
+			}
+			return;
+		}
+
+		if (!isPickupDate(values.pickupDate)) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['pickupDate'],
+				message: 'Selecciona un día válido para recoger tu pedido.'
+			});
+		}
+		if (!isPickupTimeSlot(values.pickupTime)) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['pickupTime'],
+				message: 'Selecciona una hora para recoger tu pedido.'
+			});
 		}
 	});
 

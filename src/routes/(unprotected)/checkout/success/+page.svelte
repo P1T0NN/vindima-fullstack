@@ -24,6 +24,9 @@
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { clearAttemptId } from '@/features/orders/utils/checkoutAttempt.js';
 	import { resolvedDisplayName } from '@/shared/features/productVariants/utils/variantDisplayName.js';
+	import { formatPickupDate } from '@/shared/features/checkout/utils/formatPickupDate.js';
+	import { formatPickupTime } from '@/shared/features/checkout/utils/formatPickupTime.js';
+	import { isPickupTimeSlot } from '@/shared/features/checkout/utils/isPickupTimeSlot.js';
 
 	// TYPES
 	import type { Id } from '@/convex/_generated/dataModel';
@@ -43,10 +46,16 @@
 	/** Online order whose payment webhook hasn't landed yet — the only non-final state here.
 	 *  `draft` is the normal case (an online order only becomes a real one when Stripe confirms
 	 *  it); `pending` covers rows placed before that rule shipped. */
-	const confirmingPayment = $derived(!!order?.paymentPending && order?.paymentMethod === 'online');
-	/** Cash order: confirmed, paid in person on handover. */
-	const paysOnPickup = $derived(!!order?.paymentPending && order?.paymentMethod !== 'online');
+	const hasPendingPayment = $derived(!!order?.paymentPending);
+	const confirmingPayment = $derived(hasPendingPayment);
 	const isPickup = $derived(order?.delivery.kind === 'pickup');
+	const pickup = $derived(order?.delivery.kind === 'pickup' ? order.delivery : null);
+	const pickupDateLabel = $derived(pickup?.pickupDate ? formatPickupDate(pickup.pickupDate) : '');
+	const pickupTimeLabel = $derived(
+		pickup?.pickupTime && isPickupTimeSlot(pickup.pickupTime)
+			? formatPickupTime(pickup.pickupTime)
+			: ''
+	);
 
 	/** First name only — a thank-you reads as a person speaking, not a system. */
 	const firstName = $derived((order?.name ?? '').trim().split(/\s+/)[0] ?? '');
@@ -115,7 +124,7 @@
 						? isPickup
 							? 'Listo para recoger'
 							: 'Pedido en camino'
-						: paysOnPickup
+						: hasPendingPayment
 							? 'Pedido recibido'
 							: 'Pedido confirmado'
 	);
@@ -129,7 +138,7 @@
 	const steps = $derived.by(() => {
 		const paymentLabel = confirmingPayment
 			? 'Confirmando tu pago'
-			: paysOnPickup
+			: hasPendingPayment
 				? 'Pedido recibido'
 				: 'Pago recibido';
 
@@ -151,9 +160,9 @@
 			}
 		];
 
-		// Fulfillment only once the money side is settled (paid, or cash paid on handover) —
+		// Fulfillment only once the money side is settled (paid) —
 		// while the webhook is still confirming, the payment row is the whole story.
-		if (isPaid || paysOnPickup) {
+		if (isPaid) {
 			rows.push(
 				{ label: 'Preparando tu pedido', state: preparing, spinner: false },
 				{
@@ -224,9 +233,9 @@
 						{isPickup
 							? 'Tu pedido está listo para recoger en tienda.'
 							: 'Tu pedido va en camino a la dirección que indicaste.'}
-					{:else if paysOnPickup}
-						Pagas al {isPickup ? 'recoger' : 'recibir'} tu pedido. Te escribimos en cuanto esté
-						{isPickup ? 'listo' : 'en camino'}.
+					{:else if hasPendingPayment}
+						Tu pedido quedó registrado. Te escribimos en cuanto esté
+						{isPickup ? 'listo para recoger' : 'en camino'}.
 					{:else}
 						Tu pago se recibió correctamente. Te escribimos en cuanto tu pedido esté
 						{isPickup ? 'listo para recoger' : 'en camino'}.
@@ -393,6 +402,26 @@
 								.address.line2}{/if}<br />
 						{order.delivery.address.city}, {order.delivery.address.postcode}, {order.delivery
 							.address.country}
+					</div>
+				{:else if pickupDateLabel || pickupTimeLabel}
+					<div
+						class="border-t border-accent/10 px-5 py-4 text-xs leading-relaxed text-muted-foreground sm:px-6"
+					>
+						<p class="mb-2 font-medium tracking-[0.13em] text-accent uppercase">Recoger pedido</p>
+						<dl class="space-y-1.5">
+							{#if pickupDateLabel}
+								<div class="flex justify-between gap-4">
+									<dt>Día</dt>
+									<dd class="text-right text-foreground">{pickupDateLabel}</dd>
+								</div>
+							{/if}
+							{#if pickupTimeLabel}
+								<div class="flex justify-between gap-4">
+									<dt>Hora</dt>
+									<dd class="text-right text-foreground">{pickupTimeLabel}</dd>
+								</div>
+							{/if}
+						</dl>
 					</div>
 				{/if}
 			</aside>

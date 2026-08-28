@@ -66,12 +66,17 @@ export type UploadField = BaseField & {
 	accept?: string;
 };
 
+export type CustomField = {
+	kind: 'custom';
+	name: string;
+};
+
 export type FormControlField =
 	| InputField
 	| TextareaField
 	| SelectField
 	| RadioField
 	| CheckboxField;
-export type FieldConfig = FormControlField | FormSection | UploadField;
+export type FieldConfig = FormControlField | FormSection | UploadField | CustomField;
 
 export type ExtraFields<Value = FormFieldValue> = Snippet<[FormFieldContext<Value>]>;

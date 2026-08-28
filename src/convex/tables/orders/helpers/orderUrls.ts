@@ -21,7 +21,6 @@ const SUCCESS_PATH = '/checkout/success';
  * to localhost rather than production.
  *
  * Throws when unset: a missing origin would silently send paying customers to the wrong host.
- * Only the `online` path reaches this, so cash-only stores never see it (§11).
  */
 function siteOrigin(): string {
 	const raw = process.env.PUBLIC_ORIGIN;

@@ -11,21 +11,18 @@ import type { Doc } from '@/convex/_generated/dataModel';
  */
 
 /** What the client must do after `placeOrder` succeeds. */
-export type PaymentInstruction =
-	| { kind: 'none' } // order placed; pay offline (manual provider)
-	| { kind: 'redirect'; url: string }; // navigate to a hosted payment page
+export type PaymentInstruction = { kind: 'redirect'; url: string }; // navigate to a hosted payment page
 
 /** Convex validator mirror of {@link PaymentInstruction} (used in `placeOrder`'s returns). */
-export const paymentInstructionValidator = v.union(
-	v.object({ kind: v.literal('none') }),
-	v.object({ kind: v.literal('redirect'), url: v.string() })
-);
+export const paymentInstructionValidator = v.object({
+	kind: v.literal('redirect'),
+	url: v.string()
+});
 
 export type PaymentProvider = {
 	/**
-	 * Called inside `placeOrder` after the order is inserted. The `manual` provider returns
-	 * `{ kind: 'none' }` synchronously; a hosted provider (Stripe) creates a session via an
-	 * action and returns its redirect URL.
+	 * Called inside `placeOrder` after the order is inserted. The hosted Stripe provider creates a
+	 * session via an action and returns its redirect URL.
 	 */
 	createPayment(order: Doc<'orders'>): Promise<PaymentInstruction>;
 };

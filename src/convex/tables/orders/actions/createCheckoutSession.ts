@@ -92,8 +92,8 @@ export const createCheckoutSession = action({
 			return { success: false, message: 'No encontramos ese pedido.' };
 		}
 
-		// A cash order has no pay page.
-		if ((order.paymentMethod ?? 'cash') !== 'online') {
+		// Only online orders can reach the hosted payment page.
+		if (order.paymentMethod !== 'online') {
 			return { success: false, message: 'Ese método de pago no está disponible.' };
 		}
 
@@ -106,8 +106,7 @@ export const createCheckoutSession = action({
 			};
 		}
 		// `draft` is the normal state here — an online order awaiting its first payment. `pending`
-		// stays accepted for rows placed before the draft rule shipped (and for a cash order that
-		// was switched to online after it was already placed).
+		// stays accepted for rows placed before the draft rule shipped.
 		if (order.status !== 'pending' && order.status !== 'draft') {
 			return { success: false, message: 'Este pedido ya no se puede modificar.' };
 		}
@@ -166,7 +165,7 @@ export const createCheckoutSession = action({
 			// 2 ── The order must have enough life left to be payable (§7.3.4).
 			const expiresAt = stripeSessionExpiresAt({
 				orderCreatedAt: order._creationTime,
-				pendingExpiryHours: CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE,
+				pendingExpiryHours: CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS,
 				now: Date.now()
 			});
 			if (expiresAt === null) {
@@ -248,7 +247,7 @@ export const createCheckoutSession = action({
 				console.error('[orders] stripe session has no url', { orderId: order._id });
 				return {
 					success: false,
-					message: 'No pudimos abrir la página de pago. Inténtalo de nuevo o elige pago en efectivo.'
+					message: 'No pudimos abrir la página de pago. Inténtalo de nuevo.'
 				};
 			}
 
@@ -266,11 +265,11 @@ export const createCheckoutSession = action({
 			// Our own typed refusals (amount mismatch) must stay loud.
 			if (err instanceof ConvexError) throw err;
 			// Everything else — Stripe down, amount under the currency minimum, bad config — is a
-			// soft failure: the order stays `pending` and the pay page offers a retry (§13).
+			// soft failure: the draft stays safe and the pay page offers a retry (§13).
 			console.error('[orders] stripe checkout session failed', { orderId: order._id, err });
 			return {
 				success: false,
-				message: 'No pudimos abrir la página de pago. Inténtalo de nuevo o elige pago en efectivo.'
+				message: 'No pudimos abrir la página de pago. Inténtalo de nuevo.'
 			};
 		}
 	}

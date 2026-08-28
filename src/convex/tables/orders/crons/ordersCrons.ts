@@ -17,15 +17,13 @@ const EXPIRE_BATCH = BATCH_CONFIG.ORDER_EXPIRE;
 /**
  * Cancel `pending` orders past their hold window, releasing any reward claim they hold so an
  * abandoned checkout can't keep a customer's free item hostage forever
- * (`CheckoutPageSystemDesign.md` §6.2). Two windows: online orders expire after
- * `PENDING_EXPIRY_HOURS_ONLINE` (an unpaid redirect is abandonment), cash orders after the
- * longer `PENDING_EXPIRY_HOURS` (the customer may still be coming). Scans the `by_status`
- * index, which orders pending orders oldest-first, so we stop at the first order younger
- * than the SHORTER window — nothing past it can exceed either. No-op when checkout is
+ * (`CheckoutPageSystemDesign.md` §6.2). Unpaid checkout orders expire after
+ * `PENDING_EXPIRY_HOURS`. Scans the `by_status` index, which orders pending orders oldest-first,
+ * so we stop at the first order younger than the configured window. No-op when checkout is
  * disabled.
  *
- * Second job, same run: `sweepAbandonedDrafts` DELETES unpaid online drafts past the online
- * window. See that function for why deleting (rather than cancelling) is both correct and safe.
+ * Second job, same run: `sweepAbandonedDrafts` DELETES unpaid drafts past the same window. See
+ * that function for why deleting (rather than cancelling) is both correct and safe.
  */
 export const expirePendingOrders = internalMutation({
 	args: {},
@@ -33,8 +31,7 @@ export const expirePendingOrders = internalMutation({
 		if (!FEATURES.CHECKOUT) return { cancelled: 0, deleted: 0 };
 
 		const now = Date.now();
-		const cashCutoff = now - CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS * HOUR_MS;
-		const onlineCutoff = now - CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS_ONLINE * HOUR_MS;
+		const cutoff = now - CHECKOUT_CONFIG.PENDING_EXPIRY_HOURS * HOUR_MS;
 		const pending = await ctx.db
 			.query('orders')
 			.withIndex('by_status', (q) => q.eq('status', 'pending'))
@@ -42,10 +39,7 @@ export const expirePendingOrders = internalMutation({
 
 		let cancelled = 0;
 		for (const order of pending) {
-			if (order._creationTime >= onlineCutoff) break; // fresher than the shortest window
-			// A missing paymentMethod is a pre-Stripe row: historical default `cash`.
-			const cutoff = order.paymentMethod === 'online' ? onlineCutoff : cashCutoff;
-			if (order._creationTime >= cutoff) continue; // cash order still inside its longer hold
+			if (order._creationTime >= cutoff) break; // fresher than the configured window
 			await ctx.db.patch(order._id, { status: 'cancelled' });
 			if (order.claimId) {
 				await ctx.runMutation(
@@ -68,7 +62,7 @@ export const expirePendingOrders = internalMutation({
 			console.warn('[orders] expirePendingOrders hit batch cap', { batch: EXPIRE_BATCH });
 		}
 
-		const deleted = await sweepAbandonedDrafts(ctx, onlineCutoff);
+		const deleted = await sweepAbandonedDrafts(ctx, cutoff);
 		return { cancelled, deleted };
 	}
 });
@@ -81,7 +75,7 @@ export const expirePendingOrders = internalMutation({
  * record of an order that, by the rule this whole status exists to enforce, never happened — and
  * would pile up one dead row per abandoned checkout forever. So the row goes.
  *
- * **Why deleting cannot eat a real payment.** The same `PENDING_EXPIRY_HOURS_ONLINE` window
+ * **Why deleting cannot eat a real payment.** The same `PENDING_EXPIRY_HOURS` window
  * bounds both this sweep and `stripeSessionExpiresAt`, and the latter subtracts an hour: a
  * draft's Stripe session is guaranteed dead at least an hour before the draft is old enough to
  * be swept. The `expireCheckoutSession` call below is a second belt over that. And if a payment

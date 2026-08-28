@@ -8,6 +8,7 @@
 
 // TYPES
 import type {
+	CustomField,
 	FieldConfig,
 	FormSection,
 	FormSelectOption
@@ -34,8 +35,8 @@ const CONTACT_FIELDS: FieldConfig[] = [
 		label: 'Teléfono',
 		kind: 'input',
 		type: 'tel',
-		placeholder: '449 000 0000',
-		description: 'Opcional - Usaremos este número para contactarte sobre tu pedido'
+		required: true,
+		placeholder: '449 000 0000'
 	}
 ];
 
@@ -85,15 +86,15 @@ const NOTE_FIELD: FieldConfig = {
 	description: 'Opcional.'
 };
 
+const PICKUP_SCHEDULE_FIELD: CustomField = { kind: 'custom', name: 'pickupSchedule' };
+
 export function createPlaceOrderForm(params: {
 	/** Fulfillment modes enabled in config. A single option renders no picker. */
 	modeOptions: FormSelectOption[];
-	/** Payment methods offered (disabled ones still render as "coming soon" cards). */
-	paymentOptions: FormSelectOption[];
 	/** Whether the picked mode collects a shipping address. */
 	showAddress: boolean;
 }): FormSection[] {
-	const { modeOptions, paymentOptions, showAddress } = params;
+	const { modeOptions, showAddress } = params;
 
 	return [
 		{
@@ -105,8 +106,10 @@ export function createPlaceOrderForm(params: {
 		},
 		{
 			kind: 'section',
-			title: 'Entrega',
-			description: 'Cómo quieres recibir tu pedido.',
+			title: showAddress ? 'Entrega' : 'Recoger pedido',
+			description: showAddress
+				? 'Cómo quieres recibir tu pedido.'
+				: 'Recuerda que Vindima está abierto de martes a domingo.',
 			class: 'lg:col-start-1',
 			fields: [
 				...(modeOptions.length > 1
@@ -121,23 +124,8 @@ export function createPlaceOrderForm(params: {
 							} satisfies FieldConfig
 						]
 					: []),
-				...(showAddress ? ADDRESS_FIELDS : []),
+				...(showAddress ? ADDRESS_FIELDS : [PICKUP_SCHEDULE_FIELD]),
 				NOTE_FIELD
-			]
-		},
-		{
-			kind: 'section',
-			title: 'Pago',
-			description: 'Cómo quieres pagar tu pedido.',
-			class: 'lg:col-start-1',
-			fields: [
-				{
-					name: 'payment',
-					label: 'Método de pago',
-					kind: 'radio',
-					options: paymentOptions,
-					required: true
-				}
 			]
 		}
 	];

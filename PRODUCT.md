@@ -7,7 +7,7 @@ register: brand (public storefront: /, /shop, checkout funnel) · product (accou
 Vindima is the online storefront of an organic winery and table-experience house in
 Aguascalientes, México. It sells wine, charcuterie boards (tablas), hogazas and paired
 experiences for people hosting other people at home. The site takes orders for in-store
-pickup or local delivery, paid online (Stripe) or in cash at pickup, and runs a
+pickup or local delivery, paid online (Stripe), and runs a
 stamp-based loyalty club (buy N times, earn a free item).
 
 ## Users

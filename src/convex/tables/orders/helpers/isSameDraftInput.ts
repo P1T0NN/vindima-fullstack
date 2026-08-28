@@ -11,7 +11,10 @@ function sameText(a: string | undefined, b: string | undefined): boolean {
 
 function sameDelivery(a: Delivery, b: Delivery): boolean {
 	if (a.kind !== b.kind) return false;
-	if (a.kind === 'pickup' || b.kind === 'pickup') return true;
+	if (a.kind === 'pickup' && b.kind === 'pickup') {
+		return sameText(a.pickupDate, b.pickupDate) && sameText(a.pickupTime, b.pickupTime);
+	}
+	if (a.kind === 'pickup' || b.kind === 'pickup') return false;
 	return (
 		a.address.line1 === b.address.line1 &&
 		sameText(a.address.line2, b.address.line2) &&
@@ -36,7 +39,7 @@ function sameDelivery(a: Delivery, b: Delivery): boolean {
  */
 export function isSameDraftInput(
 	order: Doc<'orders'>,
-	input: Pick<PlaceOrderWireInput, 'contact' | 'delivery' | 'paymentMethod' | 'note'>,
+	input: Pick<PlaceOrderWireInput, 'contact' | 'delivery' | 'note'>,
 	clampedLines: { productRef: string; qty: number }[]
 ): boolean {
 	const orderedLines = order.lines.filter((line) => !line.isRewardLine);
@@ -45,9 +48,6 @@ export function isSameDraftInput(
 		if (orderedLines[i].productRef !== clampedLines[i].productRef) return false;
 		if (orderedLines[i].qty !== clampedLines[i].qty) return false;
 	}
-
-	// A missing `paymentMethod` on an old row means the historical default, `cash`.
-	if ((order.paymentMethod ?? 'cash') !== input.paymentMethod) return false;
 
 	return (
 		order.email === input.contact.email &&

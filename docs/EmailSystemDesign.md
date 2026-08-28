@@ -117,12 +117,9 @@ owns when they fire. Note: OTP emails are the one case where the send is *not* f
 | O6 | Order expired | `expirePendingOrders` cron, per cancelled order | `order.email` | always |
 | O7 | Refund issued | `markOrderRefunded` / `refundOrder`, after status flips | `order.email` | always |
 
-**The collapse rule (important):** with `CHECKOUT_CONFIG.SETTLE_ON_PLACE = true` (current
-config), placement and settlement happen in the same breath — sending O1 *and* O2 would hit
-the customer with two emails for one click. Rule: **O1 fires only if the order remains
-`pending` after `placeOrder` returns.** When settlement is immediate, the customer gets only
-O2 (the receipt), which contains everything O1 would have said. When Stripe lands
-(`PAYMENT_PROVIDER: 'redirect'`), orders genuinely wait in `pending` and O1 earns its place.
+**The online checkout rule:** placement creates a `draft`, so O1 is not sent for a new checkout.
+Stripe settles the draft through the webhook and O2 is the first customer email. O1 remains a
+small reusable template for a future resumable-payment flow that explicitly supplies `paymentUrl`.
 
 **Deliberately no email:** `fulfillment = 'processing'` (noise — "we have your order" was
 already said by O1/O2) and `fulfillment = 'delivered'` (the package's arrival is its own
@@ -157,7 +154,7 @@ fulfillment type + address, line items, total, link to `/admin` orders. No prose
 
 | # | Email | Arrives with | Notes |
 |---|-------|--------------|-------|
-| L1 | Payment failed | Stripe adapter | webhook `payment_failed` → "your order is still reserved, retry here". Needs the pending order to survive (it does — 48h window). |
+| L1 | Payment failed | Stripe adapter | webhook `payment_failed` → "your order is still reserved, retry here". Needs the draft to survive (it does — 24h window). |
 | L2 | Refund processed (provider) | Stripe adapter | today O7 covers manual refunds; Stripe refunds re-use O7's template with a "5–10 días hábiles" line. |
 | L3 | Welcome / account created | if the project ever wants it | currently A2 (verify email) doubles as the welcome touch. A separate welcome email is redundant until there's onboarding content to put in it. |
 | L4 | Back in stock / abandoned cart | never by default | consent-gated marketing. Requires explicit opt-in storage. Do not build into the template. |
@@ -220,11 +217,10 @@ organic winery, not a bank and not an influencer.
   en tienda — sin costo"*), **Total** bold. The email must match the checkout screen
   number-for-number — same one-honest-number principle as `CheckoutPageSystemDesign.md` §1.2.
 - **Fulfillment sub-block:** delivery → the address as entered; pickup → store pickup line.
-- **Next (this is O1's whole reason to exist):** manual provider → *"Pagas al
-  {recibir/recoger} tu pedido. Te avisaremos cuando esté en camino/listo."* redirect
-  provider → *"Completa tu pago para confirmarlo — tu pedido se reserva por
-  {PENDING_EXPIRY_HOURS} horas."* + CTA button **"Completar pago"** → `paymentUrl`.
-- **CTA:** only in the redirect case.
+- **Next (this is O1's whole reason to exist):** *"Completa tu pago para confirmarlo — tu
+  pedido se reserva por {PENDING_EXPIRY_HOURS} horas."* + CTA button **"Completar pago"** →
+  `paymentUrl`.
+- **CTA:** only when `paymentUrl` is supplied.
 
 ### O2 — Payment confirmed / receipt
 - **Subject:** `Pedido confirmado {number}`
@@ -258,8 +254,7 @@ organic winery, not a bank and not an influencer.
 - **Data block:** order number huge (staff will ask for it at the counter), item list
   (names + qty), and the pickup location/hours line (from config/copy — see §8 note on
   adding `PICKUP_INSTRUCTIONS` to `CHECKOUT_CONFIG` rather than hardcoding).
-- **Next:** *"Menciona tu número de pedido al llegar."* + payment reminder when the order
-  is still `pending` (pay-on-pickup model): *"Pagas al recoger — {total}."*
+- **Next:** *"Menciona tu número de pedido al llegar."*
 - **CTA:** none.
 
 ### O5 — Cancelled by customer
@@ -270,7 +265,7 @@ organic winery, not a bank and not an influencer.
   cancelled reads as alarming).
 - **Data block:** compact item list + total that was *not* charged. If a reward claim was
   released: *"Tu artículo gratis volvió a tu cuenta — úsalo cuando quieras."*
-- **Next:** *"No se realizó ningún cargo."* (manual provider always true pre-settlement).
+- **Next:** *"No se realizó ningún cargo."* (the payment was never settled).
 - **CTA:** **"Volver a la tienda"** → shop URL. Gentle, single.
 
 ### O6 — Expired
@@ -283,9 +278,9 @@ organic winery, not a bank and not an influencer.
 - **Subject:** `Reembolso de tu pedido {number}`
 - **H1:** *"Procesamos tu reembolso"*
 - **Data block:** refunded amount bold, order number, date.
-- **Next:** manual: *"Te contactaremos para coordinar la devolución."* (offline money moves
-  offline). Stripe (L2, later): *"Verás el reembolso en tu método de pago en 5–10 días
-  hábiles."*
+- **Next:** provider-backed orders → *"Verás el reembolso en tu método de pago en 5–10 días
+  hábiles."* Legacy rows without a provider reference → *"Te contactaremos para coordinar la
+  devolución."*
 - **CTA:** none. Money emails stay quiet and factual.
 
 ### R1 — Free item unlocked
@@ -419,8 +414,7 @@ Template files contain copy + layout only — no Resend, no ctx, no db. Pure
 1. `FEATURES.EMAILS` flag + `send.ts` seam + refactor `sendVerificationOTP.ts` through it
    (A1–A4 get the sandwich). Smallest end-to-end proof — OTP flows already fire in dev.
 2. `orderSummaryTable.ts` + O2 (receipt) + S1 (owner copy) at the `markOrderPaid` seam.
-   With `SETTLE_ON_PLACE = true` this makes every dev order send real email — the whole
-   pipeline is exercised by existing flows.
+   Stripe webhook settlement exercises the whole pipeline.
 3. O5/O6/O7 (cancel/expire/refund) — same summary helper, three small templates.
 4. O3/O4 at `setFulfillment`.
 5. O1 with the collapse rule (only meaningful once orders can stay pending — but the
