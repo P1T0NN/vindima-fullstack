@@ -11,7 +11,7 @@
 	variant="outline"
 	size="sm"
 	onclick={onClose}
-	class="mx-auto mt-5 min-h-11 px-5 tracking-wide text-muted-foreground normal-case"
+	class="mt-5 w-full min-h-11 px-5 tracking-wide text-muted-foreground normal-case sm:ml-auto sm:w-auto"
 >
 	No, gracias
 </Button>

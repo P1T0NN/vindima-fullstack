@@ -149,8 +149,12 @@ export function startScrollSpy(headerOffset = 72): () => void {
 	const observer = new IntersectionObserver(
 		(entries) => {
 			for (const e of entries) visible[e.target.id] = e.isIntersecting;
-			const top = sections.find((s) => visible[s.id]);
-			scrollSpy.active = top ? `#${top.id}` : '';
+			const current = sections.filter((section) => visible[section.id]).sort(
+				(a, b) =>
+					Math.abs(a.getBoundingClientRect().top - scrollPadding) -
+					Math.abs(b.getBoundingClientRect().top - scrollPadding)
+			)[0];
+			scrollSpy.active = current ? `#${current.id}` : '';
 		},
 		{ rootMargin: `-${scrollPadding}px 0px -70% 0px`, threshold: 0 }
 	);

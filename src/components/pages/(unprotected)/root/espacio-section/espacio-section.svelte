@@ -2,7 +2,6 @@
 	// ASSETS
 	const espacio1 = '/root/opt/espacio-1-640w.webp';
 	const espacio10 = '/root/opt/espacio-10-640w.webp';
-	const espacio11 = '/root/opt/espacio-11-640w.webp';
 	const espacio2 = '/root/opt/espacio-2-640w.webp';
 	const espacio3 = '/root/opt/espacio-3-640w.webp';
 	const espacio4 = '/root/opt/espacio-4-640w.webp';
@@ -27,7 +26,7 @@
 
 	/**
 	 * Photographs of the table. Everything downstream derives from this list's length —
-	 * slides, counter, progress track — so an eleventh photo is one entry and nothing else.
+	 * slides, counter, progress track — so another photo is one entry and nothing else.
 	 *
 	 * The set spans three orientations (2.5:1 panoramas, ~1.2 landscapes, 0.70 portraits),
 	 * which is why the frame is square: a center crop to 1:1 was checked against all ten and
@@ -37,66 +36,60 @@
 		{
 			slug: 'espacio-1',
 			image: espacio1,
-			title: 'Tapas y montaditos',
-			alt: 'Bandeja de montaditos: pan del día con quesos, embutidos y encurtidos.'
-		},
-		{
-			slug: 'espacio-2',
-			image: espacio2,
 			title: 'Vindima',
 			alt: 'Postre de frutos rojos con granola, junto a una rebanada de tortilla y pan.'
 		},
 		{
-			slug: 'espacio-3',
-			image: espacio3,
+			slug: 'espacio-2',
+			image: espacio2,
 			title: 'Paradoja Malbec',
 			alt: 'Vino Paradoja'
 		},
 		{
-			slug: 'espacio-4',
-			image: espacio4,
+			slug: 'espacio-3',
+			image: espacio3,
 			title: 'Noche de tabla',
 			alt: 'Tabla servida de noche sobre la mesa de madera, con una copa de tinto al lado.'
 		},
 		{
-			slug: 'espacio-5',
-			image: espacio5,
+			slug: 'espacio-4',
+			image: espacio4,
 			title: 'Para llevar',
 			alt: 'Cuatro cajas para llevar con charcutería, quesos, encurtidos y fruta.'
 		},
 		{
-			slug: 'espacio-6',
-			image: espacio6,
+			slug: 'espacio-5',
+			image: espacio5,
 			title: 'Tabla para dos',
 			alt: 'Tabla en bandeja de madera, servida para dos, con vino y platos puestos.'
 		},
 		{
-			slug: 'espacio-7',
-			image: espacio7,
+			slug: 'espacio-6',
+			image: espacio6,
 			title: 'En la terraza',
 			alt: 'Tabla en la terraza con una botella de Paradoja Blanc y dos copas de vino blanco.'
 		},
 		{
-			slug: 'espacio-8',
-			image: espacio8,
+			slug: 'espacio-7',
+			image: espacio7,
 			title: 'Bowls para llevar',
 			alt: 'Bowls para llevar'
 		},
 		{
-			slug: 'espacio-9',
-			image: espacio9,
+			slug: 'espacio-8',
+			image: espacio8,
 			title: 'Servida a la mesa',
 			alt: 'Una tabla recién montada, llevada a la mesa en su bandeja de madera.'
 		},
 		{
-			slug: 'espacio-10',
-			image: espacio10,
+			slug: 'espacio-9',
+			image: espacio9,
 			title: 'Clericot',
 			alt: 'Postre de frutos rojos y una rebanada de tortilla, servidos al cierre de la noche.'
 		},
 		{
-			slug: 'espacio-11',
-			image: espacio11,
+			slug: 'espacio-10',
+			image: espacio10,
 			title: 'Tapas',
 			alt: 'Tapas de queso con aceituna y jamón'
 		}

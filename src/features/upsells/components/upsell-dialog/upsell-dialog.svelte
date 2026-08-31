@@ -31,14 +31,17 @@
 	}
 </script>
 
-<NativeDialog bind:this={dialog}>
+<NativeDialog
+	bind:this={dialog}
+	class="flex w-[calc(100%-2rem)] max-w-md flex-col p-5 sm:p-7"
+>
 	{#snippet children({ close })}
 		<Button
 			variant="ghost"
 			size="icon-sm"
 			onclick={() => dismiss(close)}
 			aria-label="Cerrar"
-			class="absolute top-4 right-4 text-muted-foreground hover:text-accent"
+			class="absolute top-3 right-3 text-muted-foreground hover:text-accent sm:top-4 sm:right-4"
 		>
 			<span class="icon-[lucide--x] size-4" aria-hidden="true"></span>
 		</Button>
@@ -53,7 +56,7 @@
 		</div>
 
 		<!-- The clincher: the suggested action (add a pairing) is the same action that unlocks the saving. -->
-		<div class="mt-4 flex items-center justify-center gap-2 text-center">
+		<div class="mt-5 flex items-center gap-2">
 			<span class="icon-[lucide--sparkles] size-3.5 shrink-0 text-chart-2" aria-hidden="true"
 			></span>
 			<p class="text-[12.5px] leading-snug text-accent">
