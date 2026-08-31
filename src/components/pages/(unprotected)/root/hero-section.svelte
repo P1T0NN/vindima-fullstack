@@ -3,6 +3,8 @@
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// ASSETS
+	const board = '/assets/opt/board-640w.webp';
+	const dessert = '/assets/opt/dessert-640w.webp';
 	const glass = '/assets/opt/glass-640w.webp';
 	const heroSectionWineBottle = '/root/opt/hero-section-wine-bottle-433w.webp';
 
@@ -22,6 +24,27 @@
 	yPadding="none"
 	class="relative overflow-hidden border-b border-border bg-background"
 >
+	<StaticImage
+		src={board}
+		alt=""
+		aria-hidden="true"
+		class="pointer-events-none absolute -top-12 -right-16 hidden w-72 opacity-10 sm:block"
+		width="640"
+		height="509"
+		loading="lazy"
+		decoding="async"
+	/>
+	<StaticImage
+		src={dessert}
+		alt=""
+		aria-hidden="true"
+		class="pointer-events-none absolute -bottom-10 -left-14 hidden w-64 opacity-10 sm:block"
+		width="640"
+		height="480"
+		loading="lazy"
+		decoding="async"
+	/>
+
 	<div class={cn(PAGE_CONTAINER, 'py-10 pb-11')}>
 		<div
 			class="relative flex min-h-hero-lg items-center border border-primary/60 px-6 py-17.5 sm:px-14"
