@@ -36,7 +36,9 @@
 	} = $props();
 
 	const hasPrevPage = $derived(!loading && page > 1);
-	const totalPages = $derived(total != null && pageSize ? Math.ceil(total / pageSize) : undefined);
+	const totalPages = $derived(
+		total != null && pageSize ? Math.max(1, Math.ceil(total / pageSize)) : undefined
+	);
 	const hasNextPage = $derived(
 		!loading && nextCursor != null && (totalPages === undefined || page < totalPages)
 	);

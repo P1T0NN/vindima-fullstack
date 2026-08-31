@@ -18,7 +18,7 @@ const ADDRESS = {
  */
 export const COMPANY_DATA = {
 	NAME: 'Vindima',
-	EMAIL: 'info@kurosava.com',
+	EMAIL: 'vindima.ags@gmail.com',
 	RESEND_EMAIL: 'info@vindimawinebar.com',
 	EMAIL_COPY: {
 		FOOTER_NOTICE: 'You are receiving this email because of activity on your account.',

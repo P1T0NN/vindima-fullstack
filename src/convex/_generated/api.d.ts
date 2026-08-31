@@ -128,6 +128,7 @@ import type * as tables_productCategories_schemas_productCategoriesSchema from "
 import type * as tables_productCategories_validators_productCategoriesValidators from "../tables/productCategories/validators/productCategoriesValidators.js";
 import type * as tables_productVariants_aggregates_productVariantFilterAggregate from "../tables/productVariants/aggregates/productVariantFilterAggregate.js";
 import type * as tables_productVariants_counters_rewardEligibleVariantTotalCounter from "../tables/productVariants/counters/rewardEligibleVariantTotalCounter.js";
+import type * as tables_productVariants_mutations_repairRewardEligibleVariantCounter from "../tables/productVariants/mutations/repairRewardEligibleVariantCounter.js";
 import type * as tables_productVariants_mutations_setVariantRewardEligible from "../tables/productVariants/mutations/setVariantRewardEligible.js";
 import type * as tables_productVariants_queries_fetchProductVariantsForSearch from "../tables/productVariants/queries/fetchProductVariantsForSearch.js";
 import type * as tables_productVariants_queries_fetchRewardItems from "../tables/productVariants/queries/fetchRewardItems.js";
@@ -143,6 +144,7 @@ import type * as tables_products_helpers_resolveImageUrls from "../tables/produc
 import type * as tables_products_mutations_createProduct from "../tables/products/mutations/createProduct.js";
 import type * as tables_products_mutations_deleteProduct from "../tables/products/mutations/deleteProduct.js";
 import type * as tables_products_mutations_editProduct from "../tables/products/mutations/editProduct.js";
+import type * as tables_products_mutations_repairProductTotalCounter from "../tables/products/mutations/repairProductTotalCounter.js";
 import type * as tables_products_mutations_setProductStatus from "../tables/products/mutations/setProductStatus.js";
 import type * as tables_products_queries_fetchAllProducts from "../tables/products/queries/fetchAllProducts.js";
 import type * as tables_products_queries_fetchProductById from "../tables/products/queries/fetchProductById.js";
@@ -315,6 +317,7 @@ declare const fullApi: ApiFromModules<{
   "tables/productCategories/validators/productCategoriesValidators": typeof tables_productCategories_validators_productCategoriesValidators;
   "tables/productVariants/aggregates/productVariantFilterAggregate": typeof tables_productVariants_aggregates_productVariantFilterAggregate;
   "tables/productVariants/counters/rewardEligibleVariantTotalCounter": typeof tables_productVariants_counters_rewardEligibleVariantTotalCounter;
+  "tables/productVariants/mutations/repairRewardEligibleVariantCounter": typeof tables_productVariants_mutations_repairRewardEligibleVariantCounter;
   "tables/productVariants/mutations/setVariantRewardEligible": typeof tables_productVariants_mutations_setVariantRewardEligible;
   "tables/productVariants/queries/fetchProductVariantsForSearch": typeof tables_productVariants_queries_fetchProductVariantsForSearch;
   "tables/productVariants/queries/fetchRewardItems": typeof tables_productVariants_queries_fetchRewardItems;
@@ -330,6 +333,7 @@ declare const fullApi: ApiFromModules<{
   "tables/products/mutations/createProduct": typeof tables_products_mutations_createProduct;
   "tables/products/mutations/deleteProduct": typeof tables_products_mutations_deleteProduct;
   "tables/products/mutations/editProduct": typeof tables_products_mutations_editProduct;
+  "tables/products/mutations/repairProductTotalCounter": typeof tables_products_mutations_repairProductTotalCounter;
   "tables/products/mutations/setProductStatus": typeof tables_products_mutations_setProductStatus;
   "tables/products/queries/fetchAllProducts": typeof tables_products_queries_fetchAllProducts;
   "tables/products/queries/fetchProductById": typeof tables_products_queries_fetchProductById;
