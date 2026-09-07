@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { adminMutation } from '@/convex/builders/convexFunctionBuilders';
 import { mutationResult } from '@/convex/validators/mutationResult';
-import { PICKUP_TIME_SLOTS } from '@/shared/features/checkout/config.js';
+import { getPickupTimeSlots } from '@/shared/features/checkout/config.js';
 import { isPickupDate } from '@/shared/features/checkout/utils/isPickupDate.js';
 import type { ConvexMutationResult } from '@/shared/types/types';
 
@@ -10,7 +10,7 @@ export const setAvailability = adminMutation({
 	returns: mutationResult,
 	handler: async (ctx, args): Promise<ConvexMutationResult> => {
 		const requested = new Set(args.blockedTimes);
-		const blockedTimes = PICKUP_TIME_SLOTS.filter((time) => requested.has(time));
+		const blockedTimes = getPickupTimeSlots(args.date).filter((time) => requested.has(time));
 		if (
 			!isPickupDate(args.date) ||
 			requested.size !== args.blockedTimes.length ||

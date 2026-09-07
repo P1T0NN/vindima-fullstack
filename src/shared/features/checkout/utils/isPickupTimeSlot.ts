@@ -1,5 +1,5 @@
-import { PICKUP_TIME_SLOTS } from '../config.js';
+import { getPickupTimeSlots, PICKUP_TIME_SLOTS } from '../config.js';
 
-export function isPickupTimeSlot(value: string): boolean {
-	return PICKUP_TIME_SLOTS.includes(value);
+export function isPickupTimeSlot(value: string, date?: string): boolean {
+	return (date ? getPickupTimeSlots(date) : PICKUP_TIME_SLOTS).includes(value);
 }

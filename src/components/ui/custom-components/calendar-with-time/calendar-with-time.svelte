@@ -9,7 +9,7 @@
 	import CalendarWithTimeFooter from './calendar-with-time-footer.svelte';
 
 	// UTILS
-	import { PICKUP_TIME_SLOTS, PICKUP_TIME_ZONE } from '@/shared/features/checkout/config.js';
+	import { getPickupTimeSlots, PICKUP_TIME_ZONE } from '@/shared/features/checkout/config.js';
 	import { formatPickupTime } from '@/shared/features/checkout/utils/formatPickupTime.js';
 	import { isPickupDate } from '@/shared/features/checkout/utils/isPickupDate.js';
 
@@ -30,6 +30,15 @@
 	}: Props = $props();
 
 	const minimumDate = today(PICKUP_TIME_ZONE);
+	const timeSlots = $derived(getPickupTimeSlots(value?.toString() ?? ''));
+	const blockedSlotCount = $derived(timeSlots.filter((time) => blockedTimes.includes(time)).length);
+	const selectedTimeUnavailable = $derived(
+		selectedTime !== null && !timeSlots.includes(selectedTime)
+	);
+
+	$effect(() => {
+		if (selectedTimeUnavailable) selectedTime = null;
+	});
 </script>
 
 <Card.Root class="gap-0 p-0">
@@ -52,7 +61,7 @@
 			class="no-scrollbar inset-y-0 end-0 flex max-h-72 w-full scroll-pb-6 flex-col gap-4 overflow-y-auto border-t p-6 md:absolute md:max-h-none md:w-48 md:border-s md:border-t-0"
 		>
 			<div class="grid gap-2">
-				{#each PICKUP_TIME_SLOTS as time (time)}
+				{#each timeSlots as time (time)}
 					{@const blocked = blockedTimes.includes(time)}
 					{@const label = formatPickupTime(time)}
 					<Button
@@ -75,7 +84,7 @@
 				<p class="text-xs text-muted-foreground" role="status">Consultando disponibilidad...</p>
 			{:else if value && availabilityError}
 				<p class="text-xs text-destructive" role="alert">No pudimos consultar los horarios.</p>
-			{:else if value && blockedTimes.length === PICKUP_TIME_SLOTS.length}
+			{:else if value && timeSlots.length > 0 && blockedSlotCount === timeSlots.length}
 				<p class="text-xs text-muted-foreground" role="status">No hay horarios disponibles.</p>
 			{/if}
 		</div>

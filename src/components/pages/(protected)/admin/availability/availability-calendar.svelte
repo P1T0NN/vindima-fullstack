@@ -12,7 +12,7 @@
 	import { api } from '@/convex/_generated/api';
 
 	// CONFIG
-	import { PICKUP_TIME_ZONE } from '@/shared/features/checkout/config.js';
+	import { getPickupTimeSlots, PICKUP_TIME_ZONE } from '@/shared/features/checkout/config.js';
 
 	// COMPONENTS
 	import Calendar from '@/components/ui/calendar/calendar.svelte';
@@ -50,7 +50,8 @@
 	);
 
 	function blockedCount(date: DateValue): number {
-		return blockedByDate.get(date.toString())?.length ?? 0;
+		const blockedTimes = blockedByDate.get(date.toString()) ?? [];
+		return getPickupTimeSlots(date.toString()).filter((time) => blockedTimes.includes(time)).length;
 	}
 
 	function setVisibleMonth(month: DateValue): void {

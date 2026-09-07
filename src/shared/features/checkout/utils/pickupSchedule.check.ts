@@ -1,4 +1,4 @@
-import { PICKUP_TIME_SLOTS } from '../config.js';
+import { getPickupTimeSlots, PICKUP_TIME_SLOTS } from '../config.js';
 import { placeOrderFormSchema } from '../../orders/schemas/ordersSchemas.js';
 import { formatPickupDate } from './formatPickupDate.js';
 import { isPickupDate } from './isPickupDate.js';
@@ -6,13 +6,18 @@ import { isPickupTimeSlot } from './isPickupTimeSlot.js';
 import { setPickupTimeBlocked } from './setPickupTimeBlocked.js';
 
 if (
-	PICKUP_TIME_SLOTS.length !== 16 ||
-	PICKUP_TIME_SLOTS[0] !== '13:30' ||
-	PICKUP_TIME_SLOTS.at(-1) !== '21:00' ||
+	PICKUP_TIME_SLOTS.length !== 22 ||
+	PICKUP_TIME_SLOTS[0] !== '13:00' ||
+	PICKUP_TIME_SLOTS.at(-1) !== '22:45' ||
+	getPickupTimeSlots('2099-01-06').at(-1) !== '21:00' ||
+	getPickupTimeSlots('2099-01-07')[0] !== '14:30' ||
+	getPickupTimeSlots('2099-01-08').at(-1) !== '22:45' ||
+	getPickupTimeSlots('2099-01-11').at(-1) !== '18:15' ||
 	!isPickupDate('2099-01-06') ||
 	isPickupDate('2099-01-05') ||
-	!isPickupTimeSlot('21:00') ||
-	isPickupTimeSlot('21:15')
+	!isPickupTimeSlot('21:00', '2099-01-06') ||
+	isPickupTimeSlot('21:15', '2099-01-06') ||
+	isPickupTimeSlot('22:45', '2099-01-11')
 ) {
 	throw new Error('Pickup schedule check failed');
 }

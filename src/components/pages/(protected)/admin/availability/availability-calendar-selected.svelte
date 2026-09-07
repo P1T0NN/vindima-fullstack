@@ -7,7 +7,7 @@
 	import { api } from '@/convex/_generated/api';
 
 	// CONFIG
-	import { PICKUP_TIME_SLOTS, PICKUP_TIME_ZONE } from '@/shared/features/checkout/config.js';
+	import { getPickupTimeSlots, PICKUP_TIME_ZONE } from '@/shared/features/checkout/config.js';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
@@ -34,6 +34,7 @@
 		timeZone: PICKUP_TIME_ZONE
 	});
 	const selectedDateKey = $derived(selectedDate.toString());
+	const timeSlots = $derived(getPickupTimeSlots(selectedDateKey));
 	const availabilityQuery = useQuery(
 		api.tables.availability.queries.fetchAvailability.fetchAvailability,
 		() => ({ from: selectedDateKey, to: selectedDateKey })
@@ -47,7 +48,10 @@
 	const selectedBlockedTimes = $derived(
 		availability?.dates.find((entry) => entry.date === selectedDateKey)?.blockedTimes ?? []
 	);
-	const allDayBlocked = $derived(selectedBlockedTimes.length === PICKUP_TIME_SLOTS.length);
+	const blockedSlotCount = $derived(
+		timeSlots.filter((time) => selectedBlockedTimes.includes(time)).length
+	);
+	const allDayBlocked = $derived(timeSlots.length > 0 && blockedSlotCount === timeSlots.length);
 	const selectedDateLabel = $derived(dateFormatter.format(selectedDate.toDate(PICKUP_TIME_ZONE)));
 
 	const setAvailability = useMutation(
@@ -90,9 +94,9 @@
 	<div class="min-w-0">
 		<h2 class="font-semibold capitalize">{selectedDateLabel}</h2>
 		<p class="mt-1 text-sm text-muted-foreground">
-			{selectedBlockedTimes.length === 0
+			{blockedSlotCount === 0
 				? 'Todos los horarios están disponibles.'
-				: `${selectedBlockedTimes.length} de ${PICKUP_TIME_SLOTS.length} horarios bloqueados.`}
+				: `${blockedSlotCount} de ${timeSlots.length} horarios bloqueados.`}
 		</p>
 	</div>
 
@@ -103,7 +107,7 @@
 		disabled={saving || !availability}
 		onclick={() =>
 			saveBlockedTimes(
-				allDayBlocked ? [] : [...PICKUP_TIME_SLOTS],
+				allDayBlocked ? [] : [...timeSlots],
 				allDayBlocked ? 'Has desbloqueado todo el día.' : 'Has bloqueado todo el día.'
 			)}
 	>
@@ -112,7 +116,7 @@
 </div>
 
 <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-	{#each PICKUP_TIME_SLOTS as time (time)}
+	{#each timeSlots as time (time)}
 		{@const blocked = selectedBlockedTimes.includes(time)}
 		<Button
 			type="button"
@@ -122,7 +126,7 @@
 			disabled={saving || !availability}
 			onclick={() =>
 				saveBlockedTimes(
-					setPickupTimeBlocked(selectedBlockedTimes, time, !blocked),
+					setPickupTimeBlocked(selectedBlockedTimes, time, !blocked, timeSlots),
 					blocked
 						? `Has desbloqueado el horario de ${formatPickupTime(time)}.`
 						: `Has bloqueado el horario de ${formatPickupTime(time)}.`

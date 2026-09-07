@@ -22,13 +22,23 @@ import { normalizeOrderNumber } from '../utils/orderNumber';
 
 /** Where/how the customer receives the order (mirrors `orderDeliveryValidator`). */
 export const orderDeliverySchema = z.discriminatedUnion('kind', [
-	z.object({
-		kind: z.literal('pickup'),
-		pickupDate: z.string().refine(isPickupDate, 'Selecciona un día válido para recoger tu pedido.'),
-		pickupTime: z
-			.string()
-			.refine(isPickupTimeSlot, 'Selecciona una hora válida para recoger tu pedido.')
-	}),
+	z
+		.object({
+			kind: z.literal('pickup'),
+			pickupDate: z
+				.string()
+				.refine(isPickupDate, 'Selecciona un día válido para recoger tu pedido.'),
+			pickupTime: z.string()
+		})
+		.superRefine(({ pickupDate, pickupTime }, ctx) => {
+			if (!isPickupTimeSlot(pickupTime, pickupDate)) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['pickupTime'],
+					message: 'Selecciona una hora válida para recoger tu pedido.'
+				});
+			}
+		}),
 	z.object({
 		kind: z.literal('delivery'),
 		address: z.object({
@@ -80,7 +90,7 @@ export const placeOrderFormSchema = z
 				message: 'Selecciona un día válido para recoger tu pedido.'
 			});
 		}
-		if (!isPickupTimeSlot(values.pickupTime)) {
+		if (!isPickupTimeSlot(values.pickupTime, values.pickupDate)) {
 			ctx.addIssue({
 				code: 'custom',
 				path: ['pickupTime'],

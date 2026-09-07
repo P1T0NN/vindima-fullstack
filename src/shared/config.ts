@@ -47,27 +47,27 @@ export const COMPANY_DATA = {
 		{
 			DAYS: 'Martes y Miércoles',
 			TIME: '1:00 PM -9:15 PM',
-			SCHEMA_DAYS: ['Tuesday', 'Wednesday'],
+			SCHEMA_DAYS: ['Tuesday'],
 			OPENS: '13:00',
 			CLOSES: '21:15'
 		},
 		{
 			DAYS: 'Jueves, Viernes y Sábado',
-			TIME: '1:00 PM -10:30 PM',
+			TIME: '1:00 PM -11:00 PM',
 			SCHEMA_DAYS: ['Thursday', 'Friday', 'Saturday'],
 			OPENS: '13:00',
-			CLOSES: '22:30'
+			CLOSES: '23:00'
 		},
 		{
 			DAYS: 'Domingo',
-			TIME: '1:00 PM -5:00 PM',
+			TIME: '1:00 PM -6:30 PM',
 			SCHEMA_DAYS: ['Sunday'],
 			OPENS: '13:00',
-			CLOSES: '17:00'
+			CLOSES: '18:30'
 		}
 	],
 	INSTAGRAM_URL: 'https://www.instagram.com/vindima.ags/',
-	PHONE: '1 449 940 9233',
+	PHONE: '+52 449 940 9233',
 	OG_IMAGE: '/assets/og-image.png',
 	OG_IMAGE_WIDTH: 1200,
 	OG_IMAGE_HEIGHT: 630
