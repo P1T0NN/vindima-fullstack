@@ -25,16 +25,14 @@ function toTime(totalMinutes: number): string {
 }
 
 function slotsForHours(opens: string, closes: string): string[] {
-	const firstSlot = toMinutes(opens);
-	const lastSlot = toMinutes(closes) - 15;
+	const firstSlot = toMinutes(opens) + 30;
+	const lastSlot = toMinutes(closes);
 	const slots: string[] = [];
 
-	for (let totalMinutes = firstSlot; totalMinutes <= lastSlot; totalMinutes += 30) {
+	for (let totalMinutes = firstSlot; totalMinutes < lastSlot; totalMinutes += 30) {
 		slots.push(toTime(totalMinutes));
 	}
 
-	const finalSlot = toTime(lastSlot);
-	if (slots.at(-1) !== finalSlot) slots.push(finalSlot);
 	return slots;
 }
 

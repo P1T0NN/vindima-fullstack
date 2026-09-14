@@ -45,23 +45,30 @@ export const COMPANY_DATA = {
 	 */
 	HOURS: [
 		{
-			DAYS: 'Martes y Miércoles',
-			TIME: '1:00 PM -9:15 PM',
+			DAYS: 'Martes',
+			TIME: '1:00 PM - 9:15 PM',
 			SCHEMA_DAYS: ['Tuesday'],
 			OPENS: '13:00',
 			CLOSES: '21:15'
 		},
 		{
-			DAYS: 'Jueves, Viernes y Sábado',
-			TIME: '1:00 PM -11:00 PM',
-			SCHEMA_DAYS: ['Thursday', 'Friday', 'Saturday'],
+			DAYS: 'Miércoles',
+			TIME: '2:30 PM - 9:15 PM',
+			SCHEMA_DAYS: ['Wednesday'],
+			OPENS: '14:30',
+			CLOSES: '21:15'
+		},
+		{
+			DAYS: 'Jueves y Viernes',
+			TIME: '1:00 PM - 11:00 PM',
+			SCHEMA_DAYS: ['Thursday', 'Friday'],
 			OPENS: '13:00',
 			CLOSES: '23:00'
 		},
 		{
-			DAYS: 'Domingo',
-			TIME: '1:00 PM -6:30 PM',
-			SCHEMA_DAYS: ['Sunday'],
+			DAYS: 'Sábado y Domingo',
+			TIME: '1:00 PM - 6:30 PM',
+			SCHEMA_DAYS: ['Saturday', 'Sunday'],
 			OPENS: '13:00',
 			CLOSES: '18:30'
 		}
