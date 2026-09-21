@@ -66,9 +66,16 @@ export const COMPANY_DATA = {
 			CLOSES: '23:00'
 		},
 		{
-			DAYS: 'Sábado y Domingo',
+			DAYS: 'Sábado',
+			TIME: '1:00 PM - 11:00 PM',
+			SCHEMA_DAYS: ['Saturday'],
+			OPENS: '13:00',
+			CLOSES: '23:00'
+		},
+		{
+			DAYS: 'Domingo',
 			TIME: '1:00 PM - 6:30 PM',
-			SCHEMA_DAYS: ['Saturday', 'Sunday'],
+			SCHEMA_DAYS: ['Sunday'],
 			OPENS: '13:00',
 			CLOSES: '18:30'
 		}
@@ -186,6 +193,4 @@ export const CHECKOUT_CONFIG = {
  *
  * SvelteKit remote functions POST to `/_app/remote/<hash>/call`.
  */
-export const BOTID_PROTECTED_ROUTES = [
-	{ path: '/_app/remote/*', method: 'POST' as const }
-];
+export const BOTID_PROTECTED_ROUTES = [{ path: '/_app/remote/*', method: 'POST' as const }];
