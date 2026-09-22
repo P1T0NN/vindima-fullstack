@@ -77,6 +77,7 @@ import type * as tables_firstPurchases_mutations_recordFirstPurchase from "../ta
 import type * as tables_firstPurchases_schemas_firstPurchasesSchema from "../tables/firstPurchases/schemas/firstPurchasesSchema.js";
 import type * as tables_orders_actions_createCheckoutSession from "../tables/orders/actions/createCheckoutSession.js";
 import type * as tables_orders_actions_handleStripeEvent from "../tables/orders/actions/handleStripeEvent.js";
+import type * as tables_orders_actions_notifyPaidOrder from "../tables/orders/actions/notifyPaidOrder.js";
 import type * as tables_orders_actions_refundOrphanPayment from "../tables/orders/actions/refundOrphanPayment.js";
 import type * as tables_orders_actions_refundStripePayment from "../tables/orders/actions/refundStripePayment.js";
 import type * as tables_orders_aggregates_orderFilterAggregate from "../tables/orders/aggregates/orderFilterAggregate.js";
@@ -266,6 +267,7 @@ declare const fullApi: ApiFromModules<{
   "tables/firstPurchases/schemas/firstPurchasesSchema": typeof tables_firstPurchases_schemas_firstPurchasesSchema;
   "tables/orders/actions/createCheckoutSession": typeof tables_orders_actions_createCheckoutSession;
   "tables/orders/actions/handleStripeEvent": typeof tables_orders_actions_handleStripeEvent;
+  "tables/orders/actions/notifyPaidOrder": typeof tables_orders_actions_notifyPaidOrder;
   "tables/orders/actions/refundOrphanPayment": typeof tables_orders_actions_refundOrphanPayment;
   "tables/orders/actions/refundStripePayment": typeof tables_orders_actions_refundStripePayment;
   "tables/orders/aggregates/orderFilterAggregate": typeof tables_orders_aggregates_orderFilterAggregate;

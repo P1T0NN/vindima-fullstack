@@ -146,6 +146,9 @@ export const markOrderPaid = internalMutation({
 			kind: 'newOrderOwner',
 			orderId: order._id
 		});
+		void ctx.scheduler.runAfter(0, internal.tables.orders.actions.notifyPaidOrder.notifyPaidOrder, {
+			number: order.number
+		});
 
 		return null;
 	}

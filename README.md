@@ -55,6 +55,17 @@ Production-leaning starter combining:
 
 ## Customizing
 
+### Personal WhatsApp paid-order alerts
+
+CallMeBot sends an alert when an order first becomes paid. Save the current bot number from [CallMeBot's setup page](https://www.callmebot.com/blog/free-api-whatsapp-messages/) in your phone, send it `I allow callmebot to send me messages` on WhatsApp, and wait for your API key. Set these on the Convex deployment that handles orders (phone includes country code):
+
+```bash
+bunx convex env set CALLMEBOT_PHONE "+34123456789"
+bunx convex env set CALLMEBOT_APIKEY "your-api-key"
+```
+
+Use `--prod` for the production deployment. Keep the API key in Convex environment variables, never in a browser env file.
+
 - **Branding** — edit `src/shared/config.ts` (`CONVEX_PROJECT_SETTINGS`: company name, contact email, sender domain).
 - **Roles** — `role` is an `additionalField` on the BA `user` table (`src/convex/auth.ts`). Default `'user'`. Promote to `'admin'` via Convex dashboard or a server-only mutation. `requireAdmin` (`src/convex/auth/helpers/requireAdmin.ts`) gates admin endpoints.
 - **Feature flags** — `src/shared/config.ts` (`FEATURES`, e.g. enable audit logging / rewards).
