@@ -1184,4 +1184,58 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
+    queries: {
+      getUser: {
+        getUser: FunctionReference<
+          "query",
+          "internal",
+          { id: string },
+          null | {
+            banned: boolean;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            id: string;
+            image: null | string;
+            name: string;
+            role: string;
+          },
+          Name
+        >;
+      };
+      listUsers: {
+        listUsers: FunctionReference<
+          "query",
+          "internal",
+          {
+            filters?: Record<string, string>;
+            paginationOpts: {
+              cursor: string | null;
+              endCursor?: string | null;
+              id?: number;
+              maximumBytesRead?: number;
+              maximumRowsRead?: number;
+              numItems: number;
+            };
+            search?: string;
+          },
+          {
+            hasNextPage: boolean;
+            items: Array<{
+              banned: boolean;
+              createdAt: number;
+              email: string;
+              emailVerified: boolean;
+              id: string;
+              image: null | string;
+              name: string;
+              role: string;
+            }>;
+            nextCursor: null | string;
+            pageSize: number;
+          },
+          Name
+        >;
+      };
+    };
   };

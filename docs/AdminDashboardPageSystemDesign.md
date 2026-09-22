@@ -1,5 +1,10 @@
 # Admin Dashboard Page — Design & Implementation Spec (`/admin/dashboard`)
 
+> **Update (2026-09-22):** The order-alert work queue described below was removed. Stripe
+> confirms payments automatically, so pending checkout orders are not admin tasks. The current
+> dashboard starts with KPIs and uses one one-shot `fetchDashboard` query; it has no live
+> `fetchOrdersCounts` subscription. The remainder of this document records the original design.
+
 > Status: **BUILT 2026-07-23** (code-complete, browser pass pending). One deviation from the
 > original plan, by owner decision: the table-sourced "v1" (§4) was skipped — trends/KPIs/
 > breakdowns run on `@piton-/analytics-convex` from day one (what §9 called Phase 3). §4's

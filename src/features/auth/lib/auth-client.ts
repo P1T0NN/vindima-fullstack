@@ -1,7 +1,7 @@
 // LIBRARIES
 import { createAuthClient } from 'better-auth/svelte';
 import { convexClient } from '@convex-dev/better-auth/client/plugins';
-import { emailOTPClient, inferAdditionalFields } from 'better-auth/client/plugins';
+import { adminClient, emailOTPClient, inferAdditionalFields } from 'better-auth/client/plugins';
 
 // COMPONENTS
 import { toast } from 'svelte-sonner';
@@ -9,9 +9,7 @@ import { toast } from 'svelte-sonner';
 // UTILS
 import { formatRateLimitMessage } from '@/utils/toastMessage';
 
-// The Better Auth `adminClient()` plugin isn't installed — there is no admin
-// user-management surface here. Re-add it only if you need `authClient.admin.*`
-// directly.
+// Admin user views use authenticated Convex queries; role changes use Better Auth's admin API.
 
 export const authClient = createAuthClient({
 	sessionOptions: {
@@ -24,6 +22,7 @@ export const authClient = createAuthClient({
 			}
 		}),
 		convexClient(),
+		adminClient(),
 		emailOTPClient()
 	],
 	fetchOptions: {

@@ -1,13 +1,12 @@
 <script lang="ts">
 	// LIBRARIES
 	import { api } from '@/convex/_generated/api';
-	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { useConvexClient } from 'convex-svelte';
 
 	// COMPONENTS
 	import SvelteHead from '@/components/ui/custom-components/svelte-head/svelte-head.svelte';
 	import { ErrorComponent } from '@/components/ui/custom-components/error-component/index.js';
 	import AdminDashboardHeader from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-header.svelte';
-	import AdminDashboardOrdersAlerts from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-orders-alerts.svelte';
 	import AdminDashboardKpiRow from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-kpi-row.svelte';
 	import AdminDashboardRevenueChart from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-revenue-chart.svelte';
 	import AdminDashboardTopList from '@/components/pages/(protected)/admin/dashboard/admin-dashboard-top-list.svelte';
@@ -26,12 +25,6 @@
 	const dashboard = $derived(
 		convex.query(api.tables.orders.queries.fetchDashboard.fetchDashboard, { period })
 	);
-
-	// Zone 1 stays LIVE — the page's single subscription (see fetchOrdersCounts).
-	const ordersCountsQuery = useQuery(
-		api.tables.orders.queries.fetchOrdersCounts.fetchOrdersCounts,
-		{}
-	);
 </script>
 
 <SvelteHead
@@ -46,31 +39,22 @@
 	{#await dashboard}
 		<AdminDashboardLoading />
 	{:then payload}
-		<!-- Order counts prefer the live subscription, falling back to the one-shot payload
-		     for the very first paint. -->
-		{@const ordersCounts = ordersCountsQuery.data ?? payload.ordersCounts}
 		<div class="flex flex-col gap-6">
-			<!-- Zone 1 · Order alerts (live) -->
-			<AdminDashboardOrdersAlerts
-				pendingCount={ordersCounts.pendingCount}
-				toFulfillCount={ordersCounts.toFulfillCount}
-			/>
-
-			<!-- Zone 2 · KPIs -->
+			<!-- KPIs -->
 			<AdminDashboardKpiRow
 				current={payload.kpis.current}
 				previous={payload.kpis.previous}
 				currency={payload.currency}
 			/>
 
-			<!-- Zone 3 · Trend -->
+			<!-- Trend -->
 			<AdminDashboardRevenueChart
 				series={payload.revenueSeries}
 				{period}
 				currency={payload.currency}
 			/>
 
-			<!-- Zone 4 · Rankings -->
+			<!-- Rankings -->
 			<div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
 				<AdminDashboardTopList
 					title="Top productos"

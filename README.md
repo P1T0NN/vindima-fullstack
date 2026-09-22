@@ -76,11 +76,11 @@ After enabling/removing a BA plugin (admin, organization, two-factor, etc.) or c
 
 ```bash
 bunx @better-auth/cli@latest generate \
-  --config src/convex/auth/component/auth.ts \
-  --output src/convex/auth/component/schema.ts -y
+  --config src/convex/betterAuth/auth.ts \
+  --output src/convex/betterAuth/generatedSchema.ts -y
 ```
 
-Then `bunx convex dev` will push the updated tables.
+Keep custom indexes in `src/convex/betterAuth/schema.ts`; the generated file is overwritten by this command. Then `bunx convex dev` will push the updated tables.
 
 ## Project structure
 

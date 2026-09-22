@@ -58,6 +58,16 @@
 				]
 			},
 			{
+				label: 'Clientes',
+				items: [
+					{
+						name: 'Usuarios',
+						url: ADMIN_PAGE_ENDPOINTS.USERS,
+						icon: 'icon-[lucide--users]'
+					}
+				]
+			},
+			{
 				label: 'Pedidos',
 				items: [
 					{

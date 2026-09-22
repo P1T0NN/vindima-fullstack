@@ -1,7 +1,7 @@
 /**
  * THE admin-dashboard query (`AdminDashboardPageSystemDesign.md` §4). One call returns
  * everything `/admin/dashboard` renders for a period. Fetched ONE-SHOT from the page (see
- * GeneralSystemDesignRule.md); only `fetchOrdersCounts` (separate file) is subscribed.
+ * GeneralSystemDesignRule.md); the dashboard has no live subscription.
  *
  * Single-source rule: EVERY number below is computed from the orders / firstPurchases /
  * productCategories tables — exact, and windowed on store-local midnights via the
@@ -17,9 +17,6 @@ import { query } from '@/convex/_generated/server';
 
 // AUTH
 import { requireAdminIdentity } from '@/convex/betterAuth/helpers/requireIdentity';
-
-// HELPERS
-import { countOrders } from './fetchOrdersCounts';
 
 // CONFIG
 import { CART_CONFIG } from '@/shared/features/cart/config';
@@ -57,7 +54,6 @@ export const fetchDashboard = query({
 		period: v.union(v.literal('today'), v.literal('7d'), v.literal('30d'), v.literal('90d'))
 	},
 	returns: v.object({
-		ordersCounts: v.object({ pendingCount: v.number(), toFulfillCount: v.number() }),
 		kpis: v.object({ current: kpisValidator, previous: kpisValidator }),
 		revenueSeries: v.array(v.object({ t: v.number(), valueMinor: v.number() })),
 		topProducts: v.array(v.object({ name: v.string(), revenueMinor: v.number() })),
@@ -81,7 +77,6 @@ export const fetchDashboard = query({
 		]);
 
 		return {
-			ordersCounts: await countOrders(ctx),
 			kpis: { current: kpisFrom(current), previous: kpisFrom(previous) },
 			revenueSeries: seriesFrom(current.settled, args.period, currentStart, now),
 			topProducts: productsFrom(current.settled),

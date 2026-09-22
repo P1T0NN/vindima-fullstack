@@ -46,7 +46,6 @@ export type DashboardKpis = {
 
 /** Everything `/admin/dashboard` renders, from ONE `fetchDashboard` call. */
 export type DashboardPayload = {
-	ordersCounts: { pendingCount: number; toFulfillCount: number };
 	kpis: { current: DashboardKpis; previous: DashboardKpis };
 	/** Store-local day buckets (hour buckets when period = today), oldest first, gaps zero-filled. */
 	revenueSeries: { t: number; valueMinor: number }[];

@@ -111,7 +111,6 @@ import type * as tables_orders_queries_fetchOrder from "../tables/orders/queries
 import type * as tables_orders_queries_fetchOrderByNumber from "../tables/orders/queries/fetchOrderByNumber.js";
 import type * as tables_orders_queries_fetchOrderForAdmin from "../tables/orders/queries/fetchOrderForAdmin.js";
 import type * as tables_orders_queries_fetchOrders from "../tables/orders/queries/fetchOrders.js";
-import type * as tables_orders_queries_fetchOrdersCounts from "../tables/orders/queries/fetchOrdersCounts.js";
 import type * as tables_orders_registerOrdersCrons from "../tables/orders/registerOrdersCrons.js";
 import type * as tables_orders_schemas_ordersSchema from "../tables/orders/schemas/ordersSchema.js";
 import type * as tables_orders_validators_ordersValidators from "../tables/orders/validators/ordersValidators.js";
@@ -185,6 +184,8 @@ import type * as tables_upsells_queries_fetchUpsellCatalog from "../tables/upsel
 import type * as tables_upsells_queries_fetchUpsellRules from "../tables/upsells/queries/fetchUpsellRules.js";
 import type * as tables_upsells_schemas_upsellsSchema from "../tables/upsells/schemas/upsellsSchema.js";
 import type * as tables_upsells_validators_upsellsValidators from "../tables/upsells/validators/upsellsValidators.js";
+import type * as tables_users_queries_fetchUserAdmin from "../tables/users/queries/fetchUserAdmin.js";
+import type * as tables_users_queries_fetchUsersAdmin from "../tables/users/queries/fetchUsersAdmin.js";
 import type * as utils_buildFilterWhere from "../utils/buildFilterWhere.js";
 import type * as utils_cursorPagination from "../utils/cursorPagination.js";
 import type * as validators_mutationResult from "../validators/mutationResult.js";
@@ -301,7 +302,6 @@ declare const fullApi: ApiFromModules<{
   "tables/orders/queries/fetchOrderByNumber": typeof tables_orders_queries_fetchOrderByNumber;
   "tables/orders/queries/fetchOrderForAdmin": typeof tables_orders_queries_fetchOrderForAdmin;
   "tables/orders/queries/fetchOrders": typeof tables_orders_queries_fetchOrders;
-  "tables/orders/queries/fetchOrdersCounts": typeof tables_orders_queries_fetchOrdersCounts;
   "tables/orders/registerOrdersCrons": typeof tables_orders_registerOrdersCrons;
   "tables/orders/schemas/ordersSchema": typeof tables_orders_schemas_ordersSchema;
   "tables/orders/validators/ordersValidators": typeof tables_orders_validators_ordersValidators;
@@ -375,6 +375,8 @@ declare const fullApi: ApiFromModules<{
   "tables/upsells/queries/fetchUpsellRules": typeof tables_upsells_queries_fetchUpsellRules;
   "tables/upsells/schemas/upsellsSchema": typeof tables_upsells_schemas_upsellsSchema;
   "tables/upsells/validators/upsellsValidators": typeof tables_upsells_validators_upsellsValidators;
+  "tables/users/queries/fetchUserAdmin": typeof tables_users_queries_fetchUserAdmin;
+  "tables/users/queries/fetchUsersAdmin": typeof tables_users_queries_fetchUsersAdmin;
   "utils/buildFilterWhere": typeof utils_buildFilterWhere;
   "utils/cursorPagination": typeof utils_cursorPagination;
   "validators/mutationResult": typeof validators_mutationResult;
