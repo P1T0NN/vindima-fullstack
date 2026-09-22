@@ -13,6 +13,7 @@ import authSchema from './schema.js';
 
 // CONFIG
 import authConfig from './auth.config.js';
+import { AUTH_DATA } from '@/shared/features/auth/config.js';
 
 // EMAILS
 import { sendVerificationOTPEmail } from './emails/sendVerificationOTPEmail.js';
@@ -61,6 +62,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) =>
 		plugins: [
 			admin(),
 			emailOTP({
+				otpLength: AUTH_DATA.OTP_LENGTH,
 				storeOTP: 'hashed',
 				overrideDefaultEmailVerification: true,
 				sendVerificationOTP: async (data) => {
