@@ -57,15 +57,15 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
-		"@convex-dev/aggregate": "^0.2.2",
+		"@convex-dev/aggregate": "^0.3.1",
 		"@convex-dev/better-auth": "^0.12.1",
 		"@convex-dev/migrations": "^0.3.6",
 		"@convex-dev/r2": "^0.10.2",
-		"@convex-dev/rate-limiter": "^0.3.2",
+		"@convex-dev/rate-limiter": "^0.4.0",
 		"@convex-dev/sharded-counter": "^0.2.1",
 		"@mmailaender/convex-better-auth-svelte": "^0.8.2",
 		"@vllnt/convex-analytics": "^0.1.0-canary.55667b0",
-		"better-auth": "1.5.3",
+		"better-auth": "1.7.5",
 		"botid": "^1.5.11",
 		"browser-image-compression": "^2.0.2",
 		"convex": "^1.45.0",
