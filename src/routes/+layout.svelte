@@ -2,7 +2,11 @@
 	import './layout.css';
 
 	// SVELTEKIT IMPORTS
+	import { dev } from '$app/environment';
 	import { page } from '$app/state';
+
+	// CONFIG
+	import { TRACKING } from '@/shared/config';
 
 	// LIBRARIES
 	import { NuqsAdapter } from 'nuqs-svelte/adapters/svelte-kit';
@@ -21,6 +25,7 @@
 	import Header from '@/components/ui/custom-components/header/header.svelte';
 	import Footer from '@/components/ui/custom-components/footer/footer.svelte';
 	import CartSidebar from '@/components/ui/custom-components/cart/cart-sidebar.svelte';
+	import FacebookPixel from '@/components/ui/custom-components/facebook-pixel/facebook-pixel.svelte';
 	import AuthErrorBanner from '@/features/auth/components/auth-error-banner/auth-error-banner.svelte';
 
 	// TYPES
@@ -121,6 +126,8 @@
 			{/if}
 		</div>
 		<CartSidebar />
+		<!-- Storefront-only conversion tracking; never in dev or on admin pages. -->
+		<FacebookPixel pixelId={TRACKING.FACEBOOK_PIXEL_ID} enabled={!dev && !isAdminRoute} />
 		<Toaster richColors />
 		<AuthErrorBanner />
 	</Tooltip.Provider>

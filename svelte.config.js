@@ -39,7 +39,9 @@ const config = {
 					'https://*.ggpht.com',
 					'https://*.googleusercontent.com',
 					'https://va.vercel-scripts.com',
-					'https://umami-sable-iota.vercel.app'
+					'https://umami-sable-iota.vercel.app',
+					// Meta (Facebook) Pixel — fbevents.js loader
+					'https://connect.facebook.net'
 				],
 				'worker-src': ['self', 'blob:'],
 				'style-src': ['self', 'unsafe-inline', 'https://fonts.googleapis.com'],
@@ -64,7 +66,10 @@ const config = {
 					'https://*.r2.cloudflarestorage.com',
 					'https://*.r2.dev',
 					// Umami analytics
-					'https://umami-sable-iota.vercel.app'
+					'https://umami-sable-iota.vercel.app',
+					// Meta (Facebook) Pixel — config fetch + event beacon
+					'https://connect.facebook.net',
+					'https://www.facebook.com'
 				],
 				'frame-src': ['self', 'https://accounts.google.com', 'https://*.google.com'],
 				'object-src': ['none'],

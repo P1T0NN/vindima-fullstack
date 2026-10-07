@@ -109,6 +109,15 @@ export const ASSETS_DATA = {
 } as const;
 
 /**
+ * Third-party tracking integrations. IDs are public by definition (they ship in
+ * the client bundle). Leave an ID as `''` to disable that integration.
+ */
+export const TRACKING = {
+	/** Meta (Facebook) Pixel — PageView tracked from the root layout. */
+	FACEBOOK_PIXEL_ID: '1650769189778102'
+} as const;
+
+/**
  * Runtime feature flags. Toggle subsystems on/off in one place.
  * Evaluated at runtime in Convex functions and on the client.
  */

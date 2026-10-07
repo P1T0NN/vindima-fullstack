@@ -1,6 +1,7 @@
 <script lang="ts">
 	// CONFIG
 	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
+	import { COMPANY_DATA } from '@/shared/config.js';
 
 	// ASSETS
 	const board = '/assets/opt/board-640w.webp';
@@ -75,23 +76,31 @@
 				</div>
 
 				<h1
-					class="font-display text-4xl leading-[0.96] font-semibold tracking-[0.01em] text-accent uppercase sm:text-5xl lg:text-[68px]"
+					class="font-display text-4xl leading-[0.96] font-semibold tracking-[0.01em] text-accent uppercase sm:text-5xl"
 				>
-					Vino de autor.<br />
-					Charcutería.<br />
-					Experiencias.
+					TODO LO QUE<br />
+					NECESITAS PARA RECIBIR<br />
+					EN CASA.
 				</h1>
 
 				<p class="mt-6.5 mb-9 max-w-105 text-[15px] leading-[1.8] text-muted-foreground">
-					Un Wine Bar en Aguascalientes. Tablas de temporada, tapas y vino orgánico seleccionado
-					para reunir a los tuyos alrededor de la mesa.
+					Prepara tu próxima reunión con vinos, tablas y opciones para compartir. Elige lo que
+					necesitas y haz tu pedido.
 				</p>
 
 				<div class="flex flex-wrap gap-3.5">
-					<Button href={appHref(UNPROTECTED_PAGE_ENDPOINTS.SHOP)} size="lg">Ir a la tienda</Button>
+					<Button href={appHref(UNPROTECTED_PAGE_ENDPOINTS.SHOP)} size="lg">
+						Todo para tu mesa
+					</Button>
 
-					<Button href={appHref(UNPROTECTED_PAGE_ENDPOINTS.MARIDAJES)} variant="outline" size="lg">
-						Ver maridajes
+					<Button
+						href={COMPANY_DATA.WHATSAPP_CONTACT_URL}
+						target="_blank"
+						rel="noopener noreferrer"
+						variant="outline"
+						size="lg"
+					>
+						Pedir por WhatsApp
 					</Button>
 				</div>
 			</div>

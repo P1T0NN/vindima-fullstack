@@ -53,8 +53,8 @@
 			De la cava a tu mesa
 		</h2>
 
-		<p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
-			Toca una categoría para ver el menú completo y hacer tu pedido.
+		<p class="mx-auto mt-4 max-w-lg text-md leading-relaxed text-muted-foreground">
+			Elige lo que necesitas y haz tu pedido
 		</p>
 	</div>
 
