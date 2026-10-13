@@ -40,7 +40,12 @@ type CheckoutSessionResult = ConvexMutationResult<{ url?: string }>;
 /** What the session we are about to build must charge, recomputed from the order's own lines. */
 function expectedSessionTotal(order: Doc<'orders'>): number {
 	const lineTotal = order.lines.reduce((sum, line) => sum + line.unitPriceMinor * line.qty, 0);
-	return lineTotal - order.amounts.welcomeDiscountMinor + order.amounts.shippingMinor;
+	return (
+		lineTotal -
+		order.amounts.welcomeDiscountMinor -
+		(order.amounts.couponDiscountMinor ?? 0) +
+		order.amounts.shippingMinor
+	);
 }
 
 function amountMismatch(orderId: string, expected: number, actual: number): ConvexError<never> {
@@ -186,13 +191,17 @@ export const createCheckoutSession = action({
 				return { success: false, message: 'Este pedido ya no se puede modificar.' };
 			}
 
-			// 3 ── The welcome discount travels as an ad-hoc, single-use coupon created on THIS
-			// account, right now (§2).
-			const welcome = order.amounts.welcomeDiscountMinor;
+			// 3 ── Combine the snapshotted discounts into one single-use Stripe coupon.
+			const discount =
+				order.amounts.welcomeDiscountMinor + (order.amounts.couponDiscountMinor ?? 0);
 			let discounts: StripeCheckoutDiscount[] | undefined;
-			if (welcome > 0) {
+			if (discount > 0) {
 				const couponId = await createOneTimeCoupon(
-					{ amountOff: welcome, currency, name: STRIPE_CONFIG.LABELS.WELCOME_DISCOUNT },
+					{
+						amountOff: discount,
+						currency,
+						name: order.couponCode ?? STRIPE_CONFIG.LABELS.WELCOME_DISCOUNT
+					},
 					`coupon:${order._id}:${attempt}`
 				);
 				discounts = [{ coupon: couponId }];

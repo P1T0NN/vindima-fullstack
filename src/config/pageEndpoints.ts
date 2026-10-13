@@ -11,6 +11,7 @@ export const ADMIN_PAGE_ENDPOINTS = {
 	EDIT_CATEGORY: resolve('/admin/categories/edit-category/:id'),
 	REWARDS: resolve('/admin/rewards'),
 	UPSELLS: resolve('/admin/upsells'),
+	COUPONS: resolve('/admin/coupons'),
 	ORDERS: resolve('/admin/orders'),
 	USERS: resolve('/admin/users'),
 	AVAILABILITY: resolve('/admin/availability'),

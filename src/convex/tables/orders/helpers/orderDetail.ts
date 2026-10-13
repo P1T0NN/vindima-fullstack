@@ -25,6 +25,7 @@ export function orderDetail(order: Doc<'orders'>) {
 		phone: order.phone ?? null,
 		lines: order.lines,
 		amounts: order.amounts,
+		couponCode: order.couponCode ?? null,
 		currency: order.currency,
 		delivery: order.delivery,
 		note: order.note ?? null,

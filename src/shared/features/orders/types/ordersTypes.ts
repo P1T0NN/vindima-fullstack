@@ -57,16 +57,19 @@ export type DashboardPayload = {
 
 /** `calculateOrderPrice`'s verdict — either every line priced, or the refs that failed placement. */
 export type PriceResult =
-	| { ok: false; unavailableRefs: string[] }
+	| { ok: false; unavailableRefs: string[]; message?: string }
 	| {
 			ok: true;
 			lines: PricedLine[];
 			amounts: {
 				subtotalMinor: number;
 				welcomeDiscountMinor: number;
+				couponDiscountMinor: number;
 				shippingMinor: number;
 				totalMinor: number;
 			};
 			currency: string;
 			claimId?: Id<'rewardClaims'>;
+			couponId?: Id<'coupons'>;
+			couponCode?: string;
 	  };

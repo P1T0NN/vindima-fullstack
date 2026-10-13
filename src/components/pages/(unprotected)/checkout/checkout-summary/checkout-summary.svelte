@@ -1,6 +1,7 @@
 <script lang="ts">
 	// LIBRARIES
-	import { useQuery } from 'convex-svelte';
+	import { useQuery, useConvexClient, useAuth } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
 	import { api } from '@/convex/_generated/api';
 
 	// STATE
@@ -9,6 +10,8 @@
 
 	// CONFIG
 	import { CART_CONFIG } from '@/shared/features/cart/config.js';
+	import { COUPONS_CONFIG } from '@/shared/features/coupons/config.js';
+	import { UNPROTECTED_PAGE_ENDPOINTS } from '@/config/pageEndpoints.js';
 
 	// COMPONENTS
 	import { Button } from '@/components/ui/button/index.js';
@@ -18,6 +21,7 @@
 	import CheckoutSummaryUnresolvedError from './checkout-summary-unresolved-error.svelte';
 	import CheckoutSummaryFreeProduct from './checkout-summary-free-product.svelte';
 	import CheckoutSummaryBreakdown from './checkout-summary-breakdown.svelte';
+	import CheckoutCoupon from '@/features/coupons/components/checkout-coupon/checkout-coupon.svelte';
 
 	// UTILS
 	import {
@@ -26,14 +30,19 @@
 	} from '@/shared/features/checkout/utils/checkoutUtils';
 	import { welcomeDiscountMinor } from '@/shared/features/rewards/utils/rewardsUtils';
 	import { formatMoneyMinor } from '@/utils/formatters.js';
+	import { calculateCouponDiscountMinor } from '@/shared/features/coupons/utils/calculateCouponDiscountMinor.js';
+	import { hasErrorMessage } from '@/shared/utils/errorMessage.js';
+	import { getCouponCustomerRef } from '@/features/coupons/utils/getCouponCustomerRef.js';
 
 	// TYPES
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
+	import type { AppliedCoupon } from '@/shared/features/coupons/types/couponTypes.js';
 
 	let {
 		unavailableRefs = [],
 		busy = false,
-		formId
+		formId,
+		email
 	}: {
 		/** Refs the server rejected on the last attempt — greyed out alongside unpriced lines. */
 		unavailableRefs?: string[];
@@ -41,7 +50,33 @@
 		busy?: boolean;
 		/** ID of the form submitted by the summary action. */
 		formId?: string;
+		email: string;
 	} = $props();
+	const client = useConvexClient();
+	const auth = useAuth();
+	let checkingCoupon = $state(false);
+	let applied = $state<AppliedCoupon | null>(null);
+	let validatedFor = $state('');
+
+	export function getCouponCode(): string | undefined {
+		return COUPONS_CONFIG.HAS_COUPONS ? currentCoupon?.code : undefined;
+	}
+
+	async function validateCoupon(code: string): Promise<AppliedCoupon> {
+		try {
+			return await client.query(api.tables.coupons.queries.validateCoupon.validateCoupon, {
+				code,
+				subtotalMinor,
+				email,
+				customerRef: getCouponCustomerRef(),
+				now: Date.now()
+			});
+		} catch (error) {
+			if (error instanceof ConvexError && hasErrorMessage(error.data))
+				throw new Error(error.data.message);
+			throw new Error('No pudimos aplicar el cupón. Inténtalo de nuevo.');
+		}
+	}
 
 	// Everything rendered here is display-only — the server re-prices at placement.
 
@@ -90,18 +125,31 @@
 		if (!offer) return 0;
 		return welcomeDiscountMinor(subtotalMinor, offer.discountPercent, offer.maxDiscountMinorUnits);
 	});
+	const couponContext = $derived(
+		`${subtotalMinor}:${discountMinor}:${email.trim().toLowerCase()}:${auth.isAuthenticated}`
+	);
+	const currentCoupon = $derived(validatedFor === couponContext ? applied : null);
 
 	// Unlike a cart line, an unresolved claim renders nothing rather than a placeholder.
 	const rewardProduct = $derived(activeClaim ? (findProduct(activeClaim.itemRef) ?? null) : null);
+	const couponDiscountMinor = $derived(
+		currentCoupon && COUPONS_CONFIG.HAS_COUPONS
+			? calculateCouponDiscountMinor(subtotalMinor - discountMinor, currentCoupon.percentOff)
+			: 0
+	);
 
 	const shippingMinor = $derived(
-		subtotalMinor > 0 ? shippingFeeMinor('pickup', subtotalMinor - discountMinor) : 0
+		subtotalMinor > 0
+			? shippingFeeMinor('pickup', subtotalMinor - discountMinor - couponDiscountMinor)
+			: 0
 	);
-	const totalMinor = $derived(orderTotalMinor(subtotalMinor, discountMinor, shippingMinor));
+	const totalMinor = $derived(
+		orderTotalMinor(subtotalMinor, discountMinor + couponDiscountMinor, shippingMinor)
+	);
 
 	const money = (minor: number) => formatMoneyMinor(minor, currency);
 
-	const cantSubmit = $derived(busy || loading || subtotalMinor === 0);
+	const cantSubmit = $derived(busy || loading || checkingCoupon || subtotalMinor === 0);
 
 	const submitVerb = 'Continuar al pago';
 	const trustLine = 'Serás redirigido a una página de pago segura.';
@@ -126,9 +174,30 @@
 					{/if}
 				</ul>
 
+				{#if COUPONS_CONFIG.HAS_COUPONS}
+					<CheckoutCoupon
+						{subtotalMinor}
+						{email}
+						authenticated={auth.isAuthenticated}
+						signInHref={UNPROTECTED_PAGE_ENDPOINTS.LOGIN}
+						validate={validateCoupon}
+						disabled={busy}
+						bind:applied={
+							() => currentCoupon,
+							(value) => {
+								applied = value;
+								validatedFor = couponContext;
+							}
+						}
+						bind:checking={checkingCoupon}
+					/>
+				{/if}
+
 				<CheckoutSummaryBreakdown
 					{subtotalMinor}
 					{discountMinor}
+					{couponDiscountMinor}
+					couponCode={currentCoupon?.code}
 					{shippingMinor}
 					{totalMinor}
 					{money}

@@ -57,7 +57,12 @@
 		{/each}
 	</ul>
 
-	<MyOrderCardPriceBreakdown totalMinor={order.amounts.totalMinor} currency={order.currency} />
+	<MyOrderCardPriceBreakdown
+		totalMinor={order.amounts.totalMinor}
+		currency={order.currency}
+		couponCode={order.couponCode}
+		couponDiscountMinor={order.amounts.couponDiscountMinor}
+	/>
 
 	{#if canCancel && !isUnpaid}
 		<div class="flex justify-end border-t border-accent/10 px-5 py-3 sm:px-6">

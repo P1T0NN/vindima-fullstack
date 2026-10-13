@@ -2,8 +2,27 @@
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 
-	let { totalMinor, currency }: { totalMinor: number; currency: string } = $props();
+	let {
+		totalMinor,
+		currency,
+		couponCode,
+		couponDiscountMinor = 0
+	}: {
+		totalMinor: number;
+		currency: string;
+		couponCode?: string;
+		couponDiscountMinor?: number;
+	} = $props();
 </script>
+
+{#if couponDiscountMinor > 0}
+	<div
+		class="flex justify-between gap-3 border-t border-accent/10 px-5 py-3 text-sm text-gold-ink sm:px-6"
+	>
+		<span class="min-w-0 break-words">Cupón {couponCode}</span>
+		<span class="shrink-0 tabular-nums">-{formatMoneyMinor(couponDiscountMinor, currency)}</span>
+	</div>
+{/if}
 
 <!-- The seal. -->
 <div

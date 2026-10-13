@@ -24,6 +24,7 @@ import type { ConvexErrorPayload } from '@/shared/types/types';
  */
 export const markOrderPaid = internalMutation({
 	args: { orderId: v.id('orders'), paymentRef: v.optional(v.string()) },
+	returns: v.null(),
 	handler: async (ctx, args): Promise<null> => {
 		const order = await ctx.db.get(args.orderId);
 		if (!order) {
@@ -62,6 +63,12 @@ export const markOrderPaid = internalMutation({
 					})
 		});
 
+		// Count paid redemptions once; honor the price already accepted by the payment provider.
+		if (order.couponId) {
+			const coupon = await ctx.db.get(order.couponId);
+			if (coupon) await ctx.db.patch(coupon._id, { redemptionCount: coupon.redemptionCount + 1 });
+		}
+
 		// Reward-line inputs for the receipt email (O2), captured across the stamp grant.
 		let rewardStamps: number | undefined;
 		let rewardCompleted: boolean | undefined;
@@ -82,7 +89,10 @@ export const markOrderPaid = internalMutation({
 				{
 					userId,
 					orderId: order._id,
-					subtotalMinorUnits: order.amounts.subtotalMinor - order.amounts.welcomeDiscountMinor
+					subtotalMinorUnits:
+						order.amounts.subtotalMinor -
+						order.amounts.welcomeDiscountMinor -
+						(order.amounts.couponDiscountMinor ?? 0)
 				}
 			);
 

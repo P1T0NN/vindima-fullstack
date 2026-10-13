@@ -16,10 +16,12 @@
 	let {
 		trigger,
 		children,
+		label,
 		class: className
 	}: {
 		trigger?: Snippet<[{ open: () => void }]>;
 		children: Snippet<[{ close: () => void }]>;
+		label?: string;
 		class?: string;
 	} = $props();
 
@@ -46,6 +48,7 @@
 {/if}
 
 <dialog
+	aria-label={label}
 	{@attach captureDialog}
 	oncancel={(e) => e.preventDefault()}
 	class={cn(

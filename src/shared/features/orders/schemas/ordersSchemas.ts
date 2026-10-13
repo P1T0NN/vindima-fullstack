@@ -19,6 +19,7 @@ import { z } from 'zod';
 import { isPickupDate } from '../../checkout/utils/isPickupDate';
 import { isPickupTimeSlot } from '../../checkout/utils/isPickupTimeSlot';
 import { normalizeOrderNumber } from '../utils/orderNumber';
+import { couponCodeSchema } from '../../coupons/schemas/couponSchemas.js';
 
 /** Where/how the customer receives the order (mirrors `orderDeliveryValidator`). */
 export const orderDeliverySchema = z.discriminatedUnion('kind', [
@@ -67,6 +68,8 @@ export const placeOrderSchema = z.object({
 	delivery: orderDeliverySchema,
 	/** Shopper's chosen payment method — the server also checks it's enabled in config. */
 	paymentMethod: z.literal('online'),
+	couponCode: couponCodeSchema.optional(),
+	couponCustomerRef: z.uuid().optional(),
 	note: z.string().optional()
 });
 

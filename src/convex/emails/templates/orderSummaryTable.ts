@@ -66,6 +66,13 @@ export function orderSummaryRows(order: Doc<'orders'>): string {
 					{ muted: true }
 				)
 			: '',
+		(order.amounts.couponDiscountMinor ?? 0) > 0
+			? row(
+					`Cupón ${esc(order.couponCode ?? '')}`,
+					`-${formatMoneyMinor(order.amounts.couponDiscountMinor ?? 0, order.currency)}`,
+					{ muted: true }
+				)
+			: '',
 		order.lines.some((l) => l.isRewardLine)
 			? row('Recompensa', 'Artículo gratis', { muted: true })
 			: '',
@@ -98,6 +105,9 @@ export function orderSummaryText(order: Doc<'orders'>): string {
 		`  Subtotal: ${formatMoneyMinor(order.amounts.subtotalMinor, order.currency)}`,
 		order.amounts.welcomeDiscountMinor > 0
 			? `  Oferta de bienvenida: -${formatMoneyMinor(order.amounts.welcomeDiscountMinor, order.currency)}`
+			: '',
+		(order.amounts.couponDiscountMinor ?? 0) > 0
+			? `  Cupón ${order.couponCode ?? ''}: -${formatMoneyMinor(order.amounts.couponDiscountMinor ?? 0, order.currency)}`
 			: '',
 		`  Envío: ${shippingLabel(order)}`,
 		`  Total: ${formatMoneyMinor(order.amounts.totalMinor, order.currency)}`

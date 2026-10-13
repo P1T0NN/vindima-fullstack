@@ -1,6 +1,7 @@
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
 import type { PlaceOrderWireInput } from '@/shared/features/orders/schemas/ordersSchemas';
+import { normalizeCouponCode } from '@/shared/features/coupons/utils/normalizeCouponCode.js';
 
 type Delivery = Doc<'orders'>['delivery'];
 
@@ -39,7 +40,10 @@ function sameDelivery(a: Delivery, b: Delivery): boolean {
  */
 export function isSameDraftInput(
 	order: Doc<'orders'>,
-	input: Pick<PlaceOrderWireInput, 'contact' | 'delivery' | 'note'>,
+	input: Pick<
+		PlaceOrderWireInput,
+		'contact' | 'delivery' | 'note' | 'couponCode' | 'couponCustomerRef'
+	>,
 	clampedLines: { productRef: string; qty: number }[]
 ): boolean {
 	const orderedLines = order.lines.filter((line) => !line.isRewardLine);
@@ -52,6 +56,8 @@ export function isSameDraftInput(
 	return (
 		order.email === input.contact.email &&
 		order.name === input.contact.name &&
+		normalizeCouponCode(order.couponCode ?? '') === normalizeCouponCode(input.couponCode ?? '') &&
+		(order.userId !== null || sameText(order.couponCustomerRef, input.couponCustomerRef)) &&
 		sameText(order.phone, input.contact.phone) &&
 		sameText(order.note, input.note) &&
 		sameDelivery(order.delivery, input.delivery)

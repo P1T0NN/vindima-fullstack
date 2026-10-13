@@ -372,6 +372,14 @@
 							<span class="tabular-nums">-{money(order.amounts.welcomeDiscountMinor)}</span>
 						</div>
 					{/if}
+					{#if (order.amounts.couponDiscountMinor ?? 0) > 0}
+						<div class="flex justify-between gap-3 text-gold-ink">
+							<span class="min-w-0 break-words">Cupón {order.couponCode}</span>
+							<span class="shrink-0 tabular-nums"
+								>-{money(order.amounts.couponDiscountMinor ?? 0)}</span
+							>
+						</div>
+					{/if}
 					<div class="flex justify-between text-muted-foreground">
 						<span>Envío</span>
 						<span class="tabular-nums">

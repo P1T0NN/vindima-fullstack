@@ -2,12 +2,16 @@
 	let {
 		subtotalMinor,
 		discountMinor,
+		couponDiscountMinor = 0,
+		couponCode,
 		shippingMinor,
 		totalMinor,
 		money
 	}: {
 		subtotalMinor: number;
 		discountMinor: number;
+		couponDiscountMinor?: number;
+		couponCode?: string;
 		shippingMinor: number;
 		totalMinor: number;
 		money: (minor: number) => string;
@@ -24,6 +28,13 @@
 		<div class="flex justify-between text-gold-ink">
 			<span>Descuento por primer pedido</span>
 			<span class="tabular-nums">-{money(discountMinor)}</span>
+		</div>
+	{/if}
+
+	{#if couponDiscountMinor > 0}
+		<div class="flex justify-between gap-3 text-gold-ink">
+			<span class="min-w-0 break-words">Cupón {couponCode}</span>
+			<span class="shrink-0 tabular-nums">-{money(couponDiscountMinor)}</span>
 		</div>
 	{/if}
 

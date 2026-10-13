@@ -15,8 +15,10 @@ import { productVariantsTable } from './tables/productVariants/schemas/productVa
 import { productCategoriesTable } from './tables/productCategories/schemas/productCategoriesSchema';
 import { upsellsTable } from './tables/upsells/schemas/upsellsSchema';
 import { availabilityTable } from './tables/availability/schemas/availabilitySchema';
+import { couponsTable } from './tables/coupons/schemas/couponsSchema';
 
 const schema = defineSchema({
+	coupons: couponsTable,
 	// Users (with `role` and other custom fields) live in the better-auth component;
 	// access via `authComponent.getAuthUser(ctx)`. Foreign-key columns below store the
 	// better-auth user id as a plain string.

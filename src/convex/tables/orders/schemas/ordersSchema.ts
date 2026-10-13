@@ -78,6 +78,11 @@ export const ordersTable = defineTable({
 
 	/** Reward claim consumed by this order, if any (applied on settle, released on cancel). */
 	claimId: v.optional(v.id('rewardClaims')),
+	/** Discount facts survive coupon edits or deletion. */
+	couponId: v.optional(v.id('coupons')),
+	couponCode: v.optional(v.string()),
+	couponEmail: v.optional(v.string()),
+	couponCustomerRef: v.optional(v.string()),
 	/** Provider's payment reference — the Stripe PaymentIntent id, set at settlement. Absent
 	 *  for legacy rows without an online payment. A historical fact, never re-read as a live reference. */
 	paymentRef: v.optional(v.string()),
@@ -110,6 +115,9 @@ export const ordersTable = defineTable({
 	// Customer order tabs: one user's orders narrowed to a status, newest first.
 	.index('by_user_and_status', ['userId', 'status'])
 	.index('by_attempt', ['attemptId'])
+	.index('by_coupon_email_settled', ['couponId', 'couponEmail', 'settledAt'])
+	.index('by_coupon_user_settled', ['couponId', 'userId', 'settledAt'])
+	.index('by_coupon_customer_settled', ['couponId', 'couponCustomerRef', 'settledAt'])
 	.index('by_status', ['status'])
 	// Guest order lookup: the shopper types the number printed on their receipt. Exact-match
 	// only — the email must still match too, so this index is a finder, not an authenticator.

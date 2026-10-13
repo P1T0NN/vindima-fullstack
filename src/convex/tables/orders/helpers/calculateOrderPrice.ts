@@ -13,6 +13,9 @@ import { welcomeDiscountMinor } from '@/shared/features/rewards/utils/rewardsUti
 
 // HELPERS
 import { getWelcomeOfferEligibility } from '@/convex/tables/firstPurchases/helpers/getWelcomeOfferEligibility';
+import { getCouponForCheckout } from '../../coupons/helpers/getCouponForCheckout.js';
+import { ConvexError } from 'convex/values';
+import { hasErrorMessage } from '@/shared/utils/errorMessage.js';
 
 // TYPES
 import type { DeliveryKind } from '@/shared/features/checkout/utils/checkoutUtils';
@@ -45,7 +48,7 @@ function snapshotLineName(product: ResolvedCartProduct): string {
  * 3. Reward claim (auth + feature on): append the claimed item as a $0 line and remember
  *    the claim — validated here, CONSUMED later on payment success (`RewardSystem.md` §6).
  * 4. Welcome discount (auth): recomputed server-side from config + eligibility.
- * 5. Shipping from the post-discount subtotal. 6. Total. All integers.
+ * 5. Coupon on the remaining subtotal. 6. Shipping and total after both discounts. All integers.
  */
 export async function calculateOrderPrice(
 	ctx: MutationCtx,
@@ -53,6 +56,9 @@ export async function calculateOrderPrice(
 		userId: string | null;
 		lines: { productRef: string; qty: number }[];
 		deliveryKind: DeliveryKind;
+		couponCode?: string;
+		couponCustomerRef?: string;
+		email: string;
 	}
 ): Promise<PriceResult> {
 	const unavailableRefs: string[] = [];
@@ -121,14 +127,41 @@ export async function calculateOrderPrice(
 		}
 	}
 
-	const shippingMinor = shippingFeeMinor(input.deliveryKind, subtotalMinor - welcomeDiscount);
-	const totalMinor = orderTotalMinor(subtotalMinor, welcomeDiscount, shippingMinor);
+	let coupon;
+	try {
+		coupon = input.couponCode
+			? await getCouponForCheckout(ctx, {
+					code: input.couponCode,
+					subtotalMinor,
+					discountSubtotalMinor: subtotalMinor - welcomeDiscount,
+					userId: input.userId,
+					customerRef: input.couponCustomerRef,
+					email: input.email,
+					now: Date.now()
+				})
+			: undefined;
+	} catch (error) {
+		if (!(error instanceof ConvexError) || !hasErrorMessage(error.data)) throw error;
+		return { ok: false, unavailableRefs: [], message: error.data.message };
+	}
+	const couponDiscountMinor = coupon?.discountMinor ?? 0;
+	const discountMinor = welcomeDiscount + couponDiscountMinor;
+	const shippingMinor = shippingFeeMinor(input.deliveryKind, subtotalMinor - discountMinor);
+	const totalMinor = orderTotalMinor(subtotalMinor, discountMinor, shippingMinor);
 
 	return {
 		ok: true,
 		lines,
-		amounts: { subtotalMinor, welcomeDiscountMinor: welcomeDiscount, shippingMinor, totalMinor },
+		amounts: {
+			subtotalMinor,
+			welcomeDiscountMinor: welcomeDiscount,
+			couponDiscountMinor,
+			shippingMinor,
+			totalMinor
+		},
 		currency: CART_CONFIG.CURRENCY,
-		claimId
+		claimId,
+		couponId: coupon?.coupon._id,
+		couponCode: coupon?.coupon.code
 	};
 }

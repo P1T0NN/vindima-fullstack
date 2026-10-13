@@ -36,6 +36,7 @@
 	import { hasErrorMessage } from '@/shared/utils/errorMessage';
 	import { appGoto } from '@/utils/app-navigation.js';
 	import { toPlaceOrderArgs } from '@/features/orders/utils/ordersUtils.js';
+	import { getCouponCustomerRef } from '@/features/coupons/utils/getCouponCustomerRef.js';
 	import {
 		readOrCreateAttemptId,
 		clearAttemptId
@@ -46,6 +47,7 @@
 
 	const auth = useAuth();
 	const placeOrder = useMutation(api.tables.orders.mutations.placeOrder.placeOrder);
+	let summary: CheckoutSummary;
 
 	// The idempotency key is read fresh at every submit and PERSISTS across mounts/tabs
 	// (`StripeSystemDesign.md` §5.3): while the order is pending, resubmitting updates that same
@@ -56,7 +58,9 @@
 			values,
 			readOrCreateAttemptId(),
 			cart.lines.map((l) => ({ productRef: l.productRef, qty: l.qty })),
-			{ pickupDate: pickupDate?.toString() ?? '', pickupTime: pickupTime ?? '' }
+			{ pickupDate: pickupDate?.toString() ?? '', pickupTime: pickupTime ?? '' },
+			summary?.getCouponCode(),
+			summary?.getCouponCode() ? getCouponCustomerRef() : undefined
 		);
 
 	const defaultPayment = 'online';
@@ -273,6 +277,12 @@
 	</Form>
 
 	<aside class="mt-6 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1 lg:mt-0">
-		<CheckoutSummary {unavailableRefs} busy={submitting} formId="checkout-form" />
+		<CheckoutSummary
+			bind:this={summary}
+			{unavailableRefs}
+			email={values.email}
+			busy={submitting}
+			formId="checkout-form"
+		/>
 	</aside>
 </div>

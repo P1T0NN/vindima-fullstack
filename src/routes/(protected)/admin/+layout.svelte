@@ -12,6 +12,7 @@
 
 	// CONFIG
 	import { FEATURES } from '@/shared/config.js';
+	import { COUPONS_CONFIG } from '@/shared/features/coupons/config.js';
 
 	let { children } = $props();
 
@@ -46,6 +47,15 @@
 						icon: 'icon-[lucide--gift]'
 					},
 					// Add-to-cart suggestions — hidden when the feature is off.
+					...(COUPONS_CONFIG.HAS_COUPONS
+						? [
+								{
+									name: 'Cupones',
+									url: ADMIN_PAGE_ENDPOINTS.COUPONS,
+									icon: 'icon-[lucide--ticket-percent]'
+								}
+							]
+						: []),
 					...(FEATURES.UPSELLS
 						? [
 								{

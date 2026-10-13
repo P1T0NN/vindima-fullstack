@@ -113,6 +113,12 @@
 						<dd class="tabular-nums">-{money(order.amounts.welcomeDiscountMinor)}</dd>
 					</div>
 				{/if}
+				{#if (order.amounts.couponDiscountMinor ?? 0) > 0}
+					<div class="flex justify-between gap-3 text-muted-foreground">
+						<dt class="min-w-0 break-words">Cupón {order.couponCode}</dt>
+						<dd class="shrink-0 tabular-nums">-{money(order.amounts.couponDiscountMinor ?? 0)}</dd>
+					</div>
+				{/if}
 				<div class="flex justify-between text-muted-foreground">
 					<dt>Envío</dt>
 					<dd class="tabular-nums">{shippingLabel}</dd>

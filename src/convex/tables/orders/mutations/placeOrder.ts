@@ -186,6 +186,22 @@ export const placeOrder = mutation({
 			qty: Math.max(1, Math.min(CART_CONFIG.MAX_QTY_PER_LINE, Math.floor(l.qty)))
 		}));
 
+		const priced = await calculateOrderPrice(ctx, {
+			userId,
+			lines: clampedLines,
+			deliveryKind: args.delivery.kind,
+			couponCode: parsedInput.data.couponCode,
+			couponCustomerRef: parsedInput.data.couponCustomerRef,
+			email: args.contact.email
+		});
+		if (!priced.ok) {
+			return {
+				success: false,
+				message: priced.message ?? 'Algunos artículos ya no están disponibles. Revisa tu pedido.',
+				data: { unavailableRefs: priced.unavailableRefs }
+			};
+		}
+
 		// ── Existing pending draft ────────────────────────────────────────────────────────────
 		if (existing) {
 			// A guest draft whose shopper has since signed in is ADOPTED rather than abandoned:
@@ -196,6 +212,10 @@ export const placeOrder = mutation({
 			if (
 				!adopting &&
 				isSameDraftInput(existing, args, clampedLines) &&
+				existing.couponId === priced.couponId &&
+				existing.amounts.totalMinor === priced.amounts.totalMinor &&
+				existing.amounts.welcomeDiscountMinor === priced.amounts.welcomeDiscountMinor &&
+				(existing.amounts.couponDiscountMinor ?? 0) === priced.amounts.couponDiscountMinor &&
 				(await holdsCurrentClaim(ctx, existing, userId))
 			) {
 				// Pure retry — zero writes, live payment session preserved (§5.3.5).
@@ -215,18 +235,6 @@ export const placeOrder = mutation({
 			}
 
 			// Something changed → re-price and update the SAME order (§5.3.6).
-			const priced = await calculateOrderPrice(ctx, {
-				userId,
-				lines: clampedLines,
-				deliveryKind: args.delivery.kind
-			});
-			if (!priced.ok) {
-				return {
-					success: false,
-					message: 'Algunos artículos ya no están disponibles. Revisa tu pedido.',
-					data: { unavailableRefs: priced.unavailableRefs }
-				};
-			}
 
 			// Any live Stripe session now prices a superseded snapshot: drop it and expire it.
 			// Bumping the attempt counter rotates the idempotency key so the next pay-page visit
@@ -249,6 +257,10 @@ export const placeOrder = mutation({
 				paymentMethod: args.paymentMethod,
 				note: args.note,
 				claimId: priced.claimId,
+				couponId: priced.couponId,
+				couponCode: priced.couponCode,
+				couponEmail: priced.couponId ? args.contact.email.trim().toLowerCase() : undefined,
+				couponCustomerRef: priced.couponId && !userId ? args.couponCustomerRef : undefined,
 				searchText:
 					status === 'draft'
 						? undefined
@@ -293,18 +305,6 @@ export const placeOrder = mutation({
 		}
 
 		// ── Fresh order ───────────────────────────────────────────────────────────────────────
-		const priced = await calculateOrderPrice(ctx, {
-			userId,
-			lines: clampedLines,
-			deliveryKind: args.delivery.kind
-		});
-		if (!priced.ok) {
-			return {
-				success: false,
-				message: 'Algunos artículos ya no están disponibles. Revisa tu pedido.',
-				data: { unavailableRefs: priced.unavailableRefs }
-			};
-		}
 
 		const status = 'draft' as const;
 
@@ -324,7 +324,11 @@ export const placeOrder = mutation({
 			delivery: args.delivery,
 			paymentMethod: args.paymentMethod,
 			note: args.note,
-			claimId: priced.claimId
+			claimId: priced.claimId,
+			couponId: priced.couponId,
+			couponCode: priced.couponCode,
+			couponEmail: priced.couponId ? args.contact.email.trim().toLowerCase() : undefined,
+			couponCustomerRef: priced.couponId && !userId ? args.couponCustomerRef : undefined
 		});
 
 		const number = `ORD-${orderId

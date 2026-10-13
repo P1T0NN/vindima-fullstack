@@ -23,9 +23,10 @@ export const orderAmountsValidator = v.object({
 	subtotalMinor: v.number(),
 	/** First-purchase discount applied, 0 when none. */
 	welcomeDiscountMinor: v.number(),
+	couponDiscountMinor: v.optional(v.number()),
 	/** Shipping fee, 0 for pickup / free-above threshold. */
 	shippingMinor: v.number(),
-	/** subtotal - welcomeDiscount + shipping. The one number charged. */
+	/** subtotal - welcomeDiscount - couponDiscount + shipping. The one number charged. */
 	totalMinor: v.number()
 });
 
@@ -82,6 +83,10 @@ export const orderRowValidator = v.object({
 	paymentMethod: v.optional(orderPaymentMethodValidator),
 	note: v.optional(v.string()),
 	claimId: v.optional(v.id('rewardClaims')),
+	couponId: v.optional(v.id('coupons')),
+	couponCode: v.optional(v.string()),
+	couponEmail: v.optional(v.string()),
+	couponCustomerRef: v.optional(v.string()),
 	paymentRef: v.optional(v.string()),
 	settledAt: v.optional(v.number()),
 	refundedAt: v.optional(v.number()),

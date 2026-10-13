@@ -38,11 +38,15 @@ export function toPlaceOrderArgs(
 	values: PlaceOrderFormInput,
 	attemptId: string,
 	lines: { productRef: string; qty: number }[],
-	pickupSchedule?: { pickupDate: string; pickupTime: string }
+	pickupSchedule?: { pickupDate: string; pickupTime: string },
+	couponCode?: string,
+	couponCustomerRef?: string
 ): PlaceOrderArgs {
 	return {
 		attemptId,
 		lines,
+		couponCode,
+		couponCustomerRef,
 		contact: { name: values.name, email: values.email, phone: values.phone },
 		paymentMethod: values.payment,
 		delivery: {

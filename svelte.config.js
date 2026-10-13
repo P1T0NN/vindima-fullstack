@@ -69,7 +69,10 @@ const config = {
 					'https://umami-sable-iota.vercel.app',
 					// Meta (Facebook) Pixel — config fetch + event beacon
 					'https://connect.facebook.net',
-					'https://www.facebook.com'
+					'https://www.facebook.com',
+					// Conversions API gateway + fallback configured for this site's Pixel in Meta.
+					'https://signals.birch.click',
+					'https://ca-e378c80be3e6414fbf602b3d9bdb79e5.ecs.us-east-2.on.aws'
 				],
 				'frame-src': ['self', 'https://accounts.google.com', 'https://*.google.com'],
 				'object-src': ['none'],

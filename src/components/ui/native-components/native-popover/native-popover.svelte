@@ -14,7 +14,7 @@
 		trigger,
 		children,
 		class: className,
-		align = 'end',
+		align = 'end'
 	}: {
 		id: string;
 		trigger: Snippet;
@@ -25,16 +25,17 @@
 </script>
 
 <button
+	type="button"
 	popovertarget={id}
 	aria-haspopup="menu"
 	style={`anchor-name: --np-${id}`}
-	class="cursor-pointer appearance-none rounded-full p-0 outline-none transition-transform active:scale-95 focus-visible:ring-3 focus-visible:ring-ring/40"
+	class="cursor-pointer appearance-none rounded-full p-0 transition-transform outline-none focus-visible:ring-3 focus-visible:ring-ring/40 active:scale-95"
 >
 	{@render trigger?.()}
 </button>
 
 <div
-	id={id}
+	{id}
 	popover="auto"
 	style={`position-anchor: --np-${id}; position-area: ${align === 'end' ? 'bottom right' : 'bottom left'}`}
 	class={cn(
