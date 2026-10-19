@@ -14,6 +14,7 @@ import { cart } from '@/features/cart/cart.svelte';
 
 // UTILS
 import { matchUpsellRule, visibleUpsellItems } from '@/shared/features/upsells/utils/upsellsUtils';
+import { trackFacebookPixelEvent } from '@/components/ui/custom-components/facebook-pixel/facebookPixel';
 
 // TYPES
 import type {
@@ -79,7 +80,9 @@ class UpsellsState {
 	 * confirmation, no toast on top. No chained dialog.
 	 */
 	addItem(ref: string) {
+		const count = cart.count;
 		cart.add(ref);
+		if (cart.count > count) trackFacebookPixelEvent('AddToCart');
 		this.#closeDialog?.();
 		cart.open();
 	}

@@ -13,6 +13,7 @@
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { cn } from '@/utils/utils.js';
+	import { trackFacebookPixelEvent } from '@/components/ui/custom-components/facebook-pixel/facebookPixel';
 
 	// TYPES
 	import type { ShopProductRow } from '@/shared/features/products/types/productsTypes';
@@ -42,7 +43,9 @@
 	const money = (minor: number) => formatMoneyMinor(minor, CART_CONFIG.CURRENCY);
 
 	function add(product: ShopProductRow, ref: string) {
+		const count = cart.count;
 		cart.add(ref);
+		if (cart.count > count) trackFacebookPixelEvent('AddToCart');
 		// An upsell dialog may intercept here; if it opens, it owns landing the shopper in the
 		// cart on close. Otherwise open the cart now, exactly as before the feature existed.
 		const shown = upsells.maybeShow({ slug: product.slug, category, name: product.name }, ref);

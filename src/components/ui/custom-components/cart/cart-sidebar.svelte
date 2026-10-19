@@ -24,6 +24,7 @@
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
 	import { appGoto } from '@/utils/app-navigation.js';
+	import { trackFacebookPixelEvent } from '@/components/ui/custom-components/facebook-pixel/facebookPixel';
 
 	// TYPES
 	import type { ResolvedCartProduct } from '@/shared/features/cart/cartItems';
@@ -80,6 +81,7 @@
 	const showEmpty = $derived(!cart.loading && cart.lines.length === 0);
 
 	function checkout() {
+		trackFacebookPixelEvent('InitiateCheckout');
 		cart.close();
 		appGoto(UNPROTECTED_PAGE_ENDPOINTS.CHECKOUT);
 	}
