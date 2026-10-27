@@ -8,7 +8,6 @@
 > Backend: Convex. Frontend: Svelte 5 (runes). Auth: better-auth (user ids are plain strings).
 > i18n: paraglide (English key names). Money: integer minor units everywhere, `formatMoneyMinor`.
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex code.**
 > Follow the existing module layout (`src/convex/tables/rewards/` is the reference structure).
 > This spec is the missing consumer of two existing contracts — read them first:
 > `CartSystem.md` (the cart hands its lines to checkout) and `RewardSystem.md` §6 + §15.6

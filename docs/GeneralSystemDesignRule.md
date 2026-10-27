@@ -291,7 +291,7 @@ the earlier start and the preloading win for nothing.
    the companion rules above; they apply to the loader too.
 7. **Subscriptions and timers live in `onMount` and MUST tear down on unmount.**
 
-### § FOR LLMs / AI ASSISTANTS — READ BEFORE WIRING A PAGE'S DATA
+### § RULES — READ BEFORE WIRING A PAGE'S DATA
 
 1. **First apply the realtime rule** (one-shot vs subscription). Then apply this section for the
    mechanism. They are separate decisions — do not skip the second.
@@ -488,7 +488,7 @@ filters (limit 6), and public paginated endpoints that need real rate limiting (
 
 ---
 
-## § FOR LLMs / AI ASSISTANTS — READ THIS BEFORE WIRING DATA
+## § RULES — READ THIS BEFORE WIRING DATA
 
 You are likely biased toward subscribing to everything, because framework examples
 (`useQuery`, `onSnapshot`, live queries) make subscriptions the path of least resistance.
@@ -510,7 +510,7 @@ In this codebase — and any project citing this document — that default is **
    still fetches one-shot per mount. The only layout-level live data is session/auth-class
    information needed by effectively every page.
 5. **Minimal projection.** New lookup endpoints return only the fields consumers use.
-6. **When uncertain, choose one-shot and say so** in your summary, e.g. "fetched one-shot
+6. **When uncertain, choose one-shot and say so** in the PR description, e.g. "fetched one-shot
    per GeneralSystemDesignRule.md; say the word if this needs to be live." Do not silently
    choose the subscription.
 
@@ -640,7 +640,7 @@ Before adding a dynamic import, prove the weight: `bunx vite-bundle-visualizer` 
 component you want to split is a few KB inside its route chunk, the split is complexity
 with no payoff. Re-check after: the win should be visible in the route's initial chunk size.
 
-### § FOR LLMs / AI ASSISTANTS — READ BEFORE ADDING A DYNAMIC IMPORT
+### § RULES — READ BEFORE ADDING A DYNAMIC IMPORT
 
 1. **Default = static import.** SvelteKit already code-splits per route; do not add
    `await import(...)` unless the four-part test above passes, and say which tests pass in
@@ -708,7 +708,7 @@ strings are composed, formatted, or fabricated.**
 3. **Non-display strings** — search text blobs (`buildOrderSearchText`), slugs, refs, order
    numbers, audit payloads. Machine-facing, not shown as prose.
 
-### § FOR LLMs / AI ASSISTANTS — READ BEFORE RETURNING ANYTHING FROM CONVEX
+### § RULES — READ BEFORE RETURNING ANYTHING FROM CONVEX
 
 1. **Never concatenate display strings in a Convex query/mutation result.** Return the raw
    fields (`productName`, `variantLabel`, …) and let the consumer compose via

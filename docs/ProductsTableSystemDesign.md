@@ -12,8 +12,7 @@
 > the `import.meta` bundler failure that forced `productCatalog.ts` to exist). Money:
 > integer minor units everywhere.
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex
-> code.** Follow the existing module layout (`src/convex/tables/rewards/` and
+> Follow the existing module layout (`src/convex/tables/rewards/` and
 > `src/convex/tables/orders/` are the reference structures). Read the consumer contracts
 > first: `CartSystem.md` §5 (resolution contract), `CheckoutPageSystemDesign.md` §5
 > (pricing pipeline), `RewardSystem.md` §6.5 (eligible-item resolution).

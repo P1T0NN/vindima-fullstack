@@ -6,7 +6,6 @@
 > Backend: Convex. Frontend: Svelte 5 (runes). Auth: better-auth component (user ids are plain
 > strings). i18n: paraglide.
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex code.**
 > Follow the existing module layout (`src/convex/tables/rewards/` is the reference structure)
 > and reuse the existing `src/components/ui/sheet/` component for the sidebar.
 

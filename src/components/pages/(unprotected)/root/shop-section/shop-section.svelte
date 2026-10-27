@@ -25,6 +25,7 @@
 		api.tables.productCategories.queries.fetchCategoriesSafe.fetchCategoriesSafe,
 		{}
 	);
+	
 	const categories = $derived((categoriesQuery.data ?? []) as ShopCategoryRow[]);
 
 	const money = (minor: number) => formatMoneyMinor(minor, CART_CONFIG.CURRENCY);

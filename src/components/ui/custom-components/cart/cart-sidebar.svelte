@@ -1,14 +1,10 @@
 <script lang="ts">
-	// SVELTEKIT
 	// LIBRARIES
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '@/convex/_generated/api';
-
-	// STATE
-	import { cart } from '@/features/cart/cart.svelte';
 
 	// CONFIG
 	import { FEATURES } from '@/shared/config';
@@ -20,6 +16,7 @@
 	import { Skeleton } from '@/components/ui/skeleton/index.js';
 	import { Button } from '@/components/ui/button/index.js';
 	import CartLine from './cart-line.svelte';
+	import { cart } from '@/features/cart/cart.svelte';
 
 	// UTILS
 	import { formatMoneyMinor } from '@/utils/formatters.js';
@@ -98,6 +95,7 @@
 			<Sheet.Title>Carrito</Sheet.Title>
 			<Sheet.Description>Contenido actual del carrito.</Sheet.Description>
 		</Sheet.Header>
+
 		<!-- pr-12 keeps the sheet's own "Cerrar" button clear of the title row. -->
 		<div class="border-b border-border p-4 pr-12">
 			<h2 class="text-base font-semibold">
@@ -111,6 +109,7 @@
 				{#each [0, 1] as i (i)}
 					<div class="flex gap-3 py-4">
 						<Skeleton class="size-16 shrink-0 rounded-md" />
+
 						<div class="flex-1 space-y-2 py-1">
 							<Skeleton class="h-4 w-2/3" />
 							<Skeleton class="h-8 w-28" />
@@ -138,10 +137,12 @@
 			<div class="mt-auto flex flex-col gap-3 border-t border-border p-4">
 				<div class="flex items-baseline justify-between">
 					<span class="text-sm font-medium text-muted-foreground">Subtotal</span>
+
 					<span class="font-display text-xl font-semibold text-foreground tabular-nums">
 						{formatMoneyMinor(subtotalMinor, currency)}
 					</span>
 				</div>
+
 				<p class="text-xs text-muted-foreground">
 					El envío y los impuestos se calculan al finalizar la compra.{#if hasUnavailable}&nbsp;Los
 						productos no disponibles no se incluyen en el subtotal.{/if}
@@ -152,6 +153,7 @@
 						>Finalizar compra</Button
 					>
 				{/if}
+
 				<Button
 					variant="outline"
 					size="sm"

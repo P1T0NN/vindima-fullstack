@@ -6,7 +6,6 @@
 > Provider: [Resend](https://resend.com) (already a dependency — `sendVerificationOTP.ts` uses it).
 > Backend: Convex. Money: integer minor units, formatted with the existing money helpers.
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex code.**
 > Read these first — they own the events this spec attaches to:
 > `CheckoutPageSystemDesign.md` §3 + §7 (placement/settlement seams), `RewardSystem.md` §6 + §7
 > (stamps, claims, expiry cron). The chrome already exists:

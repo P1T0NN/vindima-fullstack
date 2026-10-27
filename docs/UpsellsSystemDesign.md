@@ -6,8 +6,7 @@
 > store owner in a dedicated `/admin/upsells` page — rules live in the DB, never in code.**
 > Backend: Convex. Frontend: Svelte 5 (runes). Admin: existing admin area patterns.
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex
-> code, and `docs/GeneralSystemDesignRule.md` before wiring any data read.** Read first:
+> **Read `docs/GeneralSystemDesignRule.md` before wiring any data read.** Read first:
 > `CartSystem.md` (the add-to-cart flow this hooks into; note its §2 explicitly bans
 > upsells *inside the cart sidebar* — this spec honors that by living in a dialog *before*
 > the sidebar), `ProductsTableSystemDesign.md` §4 (product = display unit, variant `ref` =

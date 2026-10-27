@@ -5,7 +5,6 @@
 > customer's choice** from a merchant-configured selection.
 > Backend: Convex. Frontend: Svelte 5. Auth: better-auth component (user ids are plain strings).
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex code.**
 > Follow the existing module layout (`src/convex/tables/auditLog/` is the reference structure)
 > and the feature-flag pattern in `src/convex/projectSettings.ts`.
 
@@ -391,7 +390,7 @@ When cloning this template for a new store:
 > This is an **add-on to the rewards module**, not part of the punch card. It shares the
 > module's folder, config file, and correctness patterns (idempotency keys, OCC, internal-
 > mutation checkout contract) but **never touches the punch-card tables or the §5 invariant**.
-> Implementer: everything in §1–§14 still applies (guidelines file, folder conventions,
+> Implementer: everything in §1–§14 still applies (folder conventions,
 > feature-flag pattern, universal naming — "welcome offer"/"first purchase", never a brand name).
 
 ### 15.1 Why this design (read before coding)

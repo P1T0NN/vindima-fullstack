@@ -7,8 +7,7 @@
 > by slug through a dropdown. Runtime-validated on the server — the DB is the type system.
 > Backend: Convex. Frontend: Svelte 5 (runes). Admin: existing admin area patterns.
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex
-> code.** Follow the existing module layout (`src/convex/tables/products/` is the reference
+> Follow the existing module layout (`src/convex/tables/products/` is the reference
 > structure — this module extends it, it does not replace it). Read
 > `ProductsTableSystemDesign.md` first, especially §4 (schema) and §6 (function surface):
 > this spec deliberately changes as little of it as possible.

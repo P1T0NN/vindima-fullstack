@@ -112,6 +112,7 @@ class UpsellsState {
 		try {
 			const raw = sessionStorage.getItem(SHOWN_KEY);
 			const arr = raw ? (JSON.parse(raw) as string[]) : [];
+			
 			if (!arr.includes(id)) {
 				arr.push(id);
 				sessionStorage.setItem(SHOWN_KEY, JSON.stringify(arr));

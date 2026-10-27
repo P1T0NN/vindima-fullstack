@@ -11,8 +11,7 @@
 > var changes and one dashboard webhook — and then behave _identically_. Every design decision
 > below is downstream of that (§2, the Portability Contract).
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex
-> code**, and `CheckoutPageSystemDesign.md` first — this spec plugs into its seams
+> **Read `CheckoutPageSystemDesign.md` first** — this spec plugs into its seams
 > (`PaymentInstruction`, `markOrderPaid`, the expiry cron). Money paths: no shortcuts, every
 > edge case in §13 is a requirement, not a suggestion.
 

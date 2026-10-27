@@ -24,3 +24,11 @@ vite.config.ts.timestamp-*
 
 # Drizzle
 /drizzle
+
+# AI tooling
+.claude/
+.agents/
+CLAUDE.md
+AGENTS.md
+skills-lock.json
+src/convex/_generated/ai/

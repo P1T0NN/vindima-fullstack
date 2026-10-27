@@ -36,10 +36,6 @@ AnalyticsClient exposes analytics.funnel(ctx, steps, opts) for ordered step conv
 
 Import webDimensions and trackPageview from @vllnt/convex-analytics/web and pass webDimensions to the AnalyticsClient dimensions config. trackPageview builds path, referrer, device, browser, os, country, and UTM props from request headers using the bundled parseUserAgent and geoFromHeaders helpers, then calls track() on the core client.
 
-### how to expose Convex analytics data to Claude or an AI agent via MCP
-
-@vllnt/convex-analytics ships an MCP server with seven tools including track, get_metric, get_top, get_timeseries, get_uniques, detect_anomalies, and query_analytics. Register it with Claude Code using claude mcp add, passing your CONVEX_URL and an ANALYTICS_API_KEY, and the agent can read and write analytics without direct database access.
-
 ## When NOT to use
 
 - When a simpler built-in solution exists for your specific use case

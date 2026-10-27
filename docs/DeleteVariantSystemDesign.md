@@ -8,8 +8,7 @@
 > gated by the O(1) `wasActive` latch, never by scanning orders).
 > Backend: Convex. Frontend: Svelte 5 (runes). Admin: existing edit-product page.
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex
-> code.** Read first: `ProductsTableSystemDesign.md` §3–§6 (ref stability is sacred),
+> Read first: `ProductsTableSystemDesign.md` §3–§6 (ref stability is sacred),
 > `CartSystem.md` §5 / `resolveRefs.ts` (resolution contract), `RewardSystem.md` §6.5 +
 > `rewardsSchema.ts` (claims store `itemRef`), `CheckoutPageSystemDesign.md` §4 (orders
 > snapshot lines at placement).

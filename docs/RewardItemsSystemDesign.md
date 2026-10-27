@@ -7,8 +7,7 @@
 > `STAMPS_PER_REWARD` purchases — same DB-managed philosophy as categories.
 > Backend: Convex. Frontend: Svelte 5 (runes). Admin: existing admin area patterns.
 >
-> **Implementer: read `src/convex/_generated/ai/guidelines.md` before writing any Convex
-> code.** Read first: `RewardSystem.md` (punch-card model, claims), the rewards module
+> Read first: `RewardSystem.md` (punch-card model, claims), the rewards module
 > (`src/convex/tables/rewards/`), `DeleteVariantSystemDesign.md` §4 (this spec SUPERSEDES
 > its gate 2), `ProductCategorySystemDesign.md` (the config→DB pattern this repeats).
 >
