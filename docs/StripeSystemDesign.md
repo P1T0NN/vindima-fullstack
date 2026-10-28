@@ -396,6 +396,11 @@ stripe.checkout.sessions.create(
 ); // §7.3 rotation rule
 ```
 
+Metadata note: the live code builds `metadata` with `buildOrderStripeMetadata(order)` and sends
+the same object on `payment_intent_data.metadata`. Besides `orderId`/`orderNumber` it adds, when
+present, `pickupDate`, `pickupTime`, `customerName`, `customerPhone` and `customerNote` (trimmed,
+each cut to Stripe's 500-char limit). Name and phone are personal data visible in the Stripe account.
+
 Where `adHocCoupon = await stripe.coupons.create({ amount_off: welcome, currency, duration: 'once', max_redemptions: 1 })`
 (one extra API call, only when a welcome discount exists). No `payment_method_types` — the
 account's dashboard decides (§2). Locale: leave Stripe's `auto` default.
