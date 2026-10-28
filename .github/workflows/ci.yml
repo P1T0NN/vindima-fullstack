@@ -2,6 +2,7 @@
 #   - vulnerable dependencies (`bun audit`)
 #   - lint errors (`bun run lint`)
 #   - type errors (`bun run check`)
+#   - failing checks (`tests/*.check.ts`)
 #
 # Add a build/test step here when you wire up either.
 
@@ -50,3 +51,15 @@ jobs:
                   bun-version: latest
             - run: bun install --frozen-lockfile
             - run: bun run check
+
+    test:
+        name: Checks
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+            - run: bun install --frozen-lockfile
+            # Plain-assert scripts; no secrets, no network.
+            - run: for f in tests/*.check.ts; do bun "$f" || exit 1; done
