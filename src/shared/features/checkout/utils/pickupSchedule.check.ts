@@ -69,6 +69,12 @@ try {
 	assert.equal(isPickupDate('2026-09-16'), false);
 	assert.ok(isPickupDate('2026-09-17'));
 	assert.equal(isPickupDate('not-a-date'), false);
+	// Same-day slots at or before the current Mexico City time are no longer bookable.
+	Date.now = () => Date.parse('2026-09-17T18:00:00-06:00');
+	assert.equal(isPickupTimeSlot('14:00', '2026-09-17'), false);
+	assert.equal(isPickupTimeSlot('18:00', '2026-09-17'), false);
+	assert.ok(isPickupTimeSlot('18:30', '2026-09-17'));
+	assert.ok(isPickupTimeSlot('14:00', '2026-09-18'));
 } finally {
 	Date.now = originalNow;
 }

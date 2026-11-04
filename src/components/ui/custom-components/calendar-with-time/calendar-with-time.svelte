@@ -9,7 +9,7 @@
 	import CalendarWithTimeFooter from './calendar-with-time-footer.svelte';
 
 	// UTILS
-	import { getPickupTimeSlots, PICKUP_TIME_ZONE } from '@/shared/features/checkout/config.js';
+	import { getBookablePickupTimeSlots, PICKUP_TIME_ZONE } from '@/shared/features/checkout/config.js';
 	import { formatPickupTime } from '@/shared/features/checkout/utils/formatPickupTime.js';
 	import { isPickupDate } from '@/shared/features/checkout/utils/isPickupDate.js';
 
@@ -30,7 +30,7 @@
 	}: Props = $props();
 
 	const minimumDate = today(PICKUP_TIME_ZONE);
-	const timeSlots = $derived(getPickupTimeSlots(value?.toString() ?? ''));
+	const timeSlots = $derived(getBookablePickupTimeSlots(value?.toString() ?? ''));
 	const blockedSlotCount = $derived(timeSlots.filter((time) => blockedTimes.includes(time)).length);
 	const selectedTimeUnavailable = $derived(
 		selectedTime !== null && !timeSlots.includes(selectedTime)

@@ -1,4 +1,4 @@
-import { parseDate } from '@internationalized/date';
+import { now, parseDate } from '@internationalized/date';
 import { COMPANY_DATA } from '../../config.js';
 
 export const PICKUP_TIME_ZONE = 'America/Mexico_City';
@@ -59,6 +59,15 @@ export function getPickupTimeSlots(date: string): readonly string[] {
 	} catch {
 		return [];
 	}
+}
+
+/** Slots a shopper can still book: on today (Mexico City) only those after the current time. */
+export function getBookablePickupTimeSlots(date: string): readonly string[] {
+	const slots = getPickupTimeSlots(date);
+	const current = now(PICKUP_TIME_ZONE);
+	if (date !== current.toString().slice(0, 10)) return slots;
+	const nowMinutes = current.hour * 60 + current.minute;
+	return slots.filter((slot) => toMinutes(slot) > nowMinutes);
 }
 
 export const PICKUP_OPEN_WEEKDAYS = new Set(
