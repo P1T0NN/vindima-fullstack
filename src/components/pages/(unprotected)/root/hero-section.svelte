@@ -78,9 +78,7 @@
 				<h1
 					class="font-display text-4xl leading-[0.96] font-semibold tracking-[0.01em] text-accent uppercase sm:text-5xl"
 				>
-					TODO LO QUE<br />
-					NECESITAS PARA RECIBIR<br />
-					EN CASA.
+					Todo lo que necesitas para sorprender en tu reunión.
 				</h1>
 
 				<p class="mt-6.5 mb-9 max-w-105 text-[15px] leading-[1.8] text-muted-foreground">

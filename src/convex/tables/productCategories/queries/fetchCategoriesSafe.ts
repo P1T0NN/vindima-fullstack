@@ -2,8 +2,8 @@
  * Public storefront category listing — the query behind the homepage shop section.
  *
  * Public (no auth): categories are public data. Returns the rows directly, NOT a paginated
- * envelope: the section shows at most `SHOP_CONFIG.MAX_ROOT_CATEGORIES` cards in one grid,
- * so there is no second page to ask for. `returns` proves server-side that only the safe
+ * envelope: the section shows every category in one grid (owner-managed, small table).
+ *`returns` proves server-side that only the safe
  * projection leaves the server (see `shopCategoryRow`).
  *
  * Price bounds are DERIVED here rather than stored on the row: a typed-in "from $560" would
@@ -11,8 +11,7 @@
  * answer without reading their own catalog. `null` when a category has no active products —
  * the card then simply shows no price.
  *
- * Cost: every read is indexed and bounded by config, so this can't degrade into a table
- * scan as the catalog grows.
+ * Cost: every read is indexed; per-category product/variant reads are bounded by config.
  */
 
 // LIBRARIES
@@ -21,7 +20,6 @@ import { v } from 'convex/values';
 
 // CONFIG
 import { PAGINATION_DATA } from '@/shared/features/pagination/config';
-import { SHOP_CONFIG } from '@/shared/features/shop/config';
 
 // VALIDATORS
 import { shopCategoryRow } from '../validators/productCategoriesValidators';
@@ -40,7 +38,7 @@ export const fetchCategoriesSafe = query({
 			.query('productCategories')
 			.withIndex('by_sort_order')
 			.order('asc')
-			.take(SHOP_CONFIG.MAX_ROOT_CATEGORIES);
+			.collect();
 
 		return await Promise.all(categories.map((category) => toShopCategoryRow(ctx, category)));
 	}
