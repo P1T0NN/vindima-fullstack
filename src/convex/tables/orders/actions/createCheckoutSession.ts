@@ -28,6 +28,9 @@ import { successPageUrl, checkoutPageUrl } from '../helpers/orderUrls';
 // VALIDATORS
 import { mutationResultWith } from '@/convex/validators/mutationResult';
 
+// HELPERS
+import { buildOrderStripeMetadata } from '../helpers/buildOrderStripeMetadata';
+
 // TYPES
 import type { Doc } from '@/convex/_generated/dataModel';
 import type { ConvexErrorPayload, ConvexMutationResult } from '@/shared/types/types';
@@ -210,11 +213,12 @@ export const createCheckoutSession = action({
 			// 4 ── Create. Everything inline; no account-scoped object is referenced, and
 			// `payment_method_types` is omitted so each store's dashboard decides which methods
 			// (card, wallets, OXXO, SEPA…) appear — code never changes per store (§2).
+			const metadata = buildOrderStripeMetadata(order);
 			const session = await createStripeSession(
 				{
 					mode: 'payment',
 					client_reference_id: order._id,
-					metadata: { orderId: order._id, orderNumber: order.number },
+					metadata,
 					customer_email: order.email,
 					// Pinned per `STRIPE_CONFIG.ACCOUNT_BEHAVIOR` (both off by default) so the same
 					// code charges the same number on ANY Stripe account, rather than inheriting
@@ -245,7 +249,7 @@ export const createCheckoutSession = action({
 							}
 						}
 					],
-					payment_intent_data: { description: order.number },
+					payment_intent_data: { description: order.number, metadata },
 					success_url: successPageUrl(order),
 					cancel_url: checkoutPageUrl(),
 					expires_at: expiresAt
